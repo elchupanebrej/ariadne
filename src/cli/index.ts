@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 import { runEdge } from "./commands/edge.js";
 import { runGate } from "./commands/gate.js";
 import { runInvalidation } from "./commands/invalidate.js";
+import { runInit } from "./commands/init.js";
 import { runNode } from "./commands/node.js";
 import { runStatus, type CliIO } from "./commands/status.js";
+import { runTemplate } from "./commands/template.js";
 
 const VERSION = "0.1.0";
 
@@ -18,6 +20,8 @@ Usage:
   ariadne edge <add|list|remove> ...
   ariadne invalidate <node_id> --by <evidence_id>
   ariadne gate <structural|semantic|epistemic|all> [--strict]
+  ariadne init [--mode auto|standalone|gsd] [--force]
+  ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
 
 Options:
   -h, --help       Show this help
@@ -58,6 +62,8 @@ export async function runCli(
     if (command === "edge") return await runEdge(args.slice(1), io);
     if (command === "invalidate") return await runInvalidation(args.slice(1), io);
     if (command === "gate") return await runGate(args.slice(1), io);
+    if (command === "init") return await runInit(args.slice(1), io);
+    if (command === "template") return runTemplate(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);
