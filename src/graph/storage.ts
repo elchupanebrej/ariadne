@@ -317,7 +317,7 @@ export class GraphStorage {
       }
       events.push(GraphEventSchema.parse(value));
     }
-    if (recoverPartialTail && !hasFinalNewline && lines.length > 0) {
+    if (recoverPartialTail && !hasFinalNewline && lastMeaningfulIndex >= 0) {
       await appendFile(this.graphPath, "\n", "utf8");
     }
     return events;

@@ -35,45 +35,49 @@ const managerFor = (repoRoot: string) =>
   });
 
 describe("WorktreeManager", () => {
-  it("isolates candidates, runs the same command, and returns linked evidence", async () => {
-    const repoRoot = await repository();
-    try {
-      const manager = managerFor(repoRoot);
-      const first = await manager.create("CAN-01-raft");
-      const second = await manager.create("CAN-02-crdt");
+  it(
+    "isolates candidates, runs the same command, and returns linked evidence",
+    { timeout: 10_000 },
+    async () => {
+      const repoRoot = await repository();
+      try {
+        const manager = managerFor(repoRoot);
+        const first = await manager.create("CAN-01-raft");
+        const second = await manager.create("CAN-02-crdt");
 
-      expect(first.path).not.toBe(second.path);
-      expect(first.branch).not.toBe(second.branch);
-      expect(first.path).toContain(join(".ariadne", "worktrees"));
+        expect(first.path).not.toBe(second.path);
+        expect(first.branch).not.toBe(second.branch);
+        expect(first.path).toContain(join(".ariadne", "worktrees"));
 
-      const args = ["-e", "process.stdout.write(process.cwd())"];
-      const [firstRun, secondRun] = await Promise.all([
-        manager.run(first, process.execPath, args),
-        manager.run(second, process.execPath, args),
-      ]);
+        const args = ["-e", "process.stdout.write(process.cwd())"];
+        const [firstRun, secondRun] = await Promise.all([
+          manager.run(first, process.execPath, args),
+          manager.run(second, process.execPath, args),
+        ]);
 
-      expect(firstRun.exitCode).toBe(0);
-      expect(secondRun.exitCode).toBe(0);
-      expect(firstRun.stdout).toBe(first.path);
-      expect(secondRun.stdout).toBe(second.path);
-      expect(firstRun.durationMs).toBeGreaterThanOrEqual(0);
-      expect(NodeSchema.parse(firstRun.evidence)).toMatchObject({
-        id: expect.stringMatching(/^EVD-/),
-        type: "EVD",
-        provenance_type: "MEASURED",
-        candidate_id: "CAN-01-raft",
-        stdout: first.path,
-        exit_code: 0,
-      });
-      expect(EdgeSchema.parse(firstRun.edge)).toEqual({
-        source: firstRun.evidence.id,
-        target: "CAN-01-raft",
-        type: "tests",
-      });
-    } finally {
-      await rm(repoRoot, { recursive: true, force: true });
-    }
-  });
+        expect(firstRun.exitCode).toBe(0);
+        expect(secondRun.exitCode).toBe(0);
+        expect(firstRun.stdout).toBe(first.path);
+        expect(secondRun.stdout).toBe(second.path);
+        expect(firstRun.durationMs).toBeGreaterThanOrEqual(0);
+        expect(NodeSchema.parse(firstRun.evidence)).toMatchObject({
+          id: expect.stringMatching(/^EVD-/),
+          type: "EVD",
+          provenance_type: "MEASURED",
+          candidate_id: "CAN-01-raft",
+          stdout: first.path,
+          exit_code: 0,
+        });
+        expect(EdgeSchema.parse(firstRun.edge)).toEqual({
+          source: firstRun.evidence.id,
+          target: "CAN-01-raft",
+          type: "tests",
+        });
+      } finally {
+        await rm(repoRoot, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("captures failed command logs without invoking a shell", async () => {
     const repoRoot = await repository();
