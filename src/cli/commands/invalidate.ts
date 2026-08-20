@@ -20,28 +20,39 @@ export async function runInvalidation(
 ): Promise<number> {
   const { nodeId, evidenceId } = parseArgs(args);
   const { storage } = await resolveCliWorkspace(io);
-  const graph = await storage.materialize();
-  const target = graph.nodes.find(({ id }) => id === nodeId);
-  if (!target) throw new Error(`Node not found: ${nodeId}`);
-  if (target.type !== "ASM" && target.type !== "HYP") {
-    throw new Error(`Invalidation target ${nodeId} must be ASM or HYP`);
-  }
-  const evidence = graph.nodes.find(({ id }) => id === evidenceId);
-  if (!evidence || evidence.type !== "EVD") {
-    throw new Error(`Evidence ${evidenceId} must be an EVD node`);
-  }
+  const cascade = await storage.transaction((graph) => {
+    const target = graph.nodes.find(({ id }) => id === nodeId);
+    if (!target) throw new Error(`Node not found: ${nodeId}`);
+    if (target.type !== "ASM" && target.type !== "HYP") {
+      throw new Error(`Invalidation target ${nodeId} must be ASM or HYP`);
+    }
+    const evidence = graph.nodes.find(({ id }) => id === evidenceId);
+    if (!evidence || evidence.type !== "EVD") {
+      throw new Error(`Evidence ${evidenceId} must be an EVD node`);
+    }
 
-  const result = propagateInvalidation(graph, nodeId, evidenceId);
-  const beforeById = new Map(graph.nodes.map((node) => [node.id, node]));
-  for (const node of result.graph.nodes) {
-    const before = beforeById.get(node.id);
-    if (before && changed(before, node)) await storage.appendNode(node);
-  }
+    const result = propagateInvalidation(graph, nodeId, evidenceId);
+    const beforeById = new Map(graph.nodes.map((node) => [node.id, node]));
+    const events = result.graph.nodes
+      .filter((node) => {
+        const before = beforeById.get(node.id);
+        return before !== undefined && changed(before, node);
+      })
+      .map((node) => ({ kind: "node" as const, node }));
+    const affectedNodeIds = result.trace
+      .filter(({ status }) => status !== undefined)
+      .map(({ node_id }) => node_id)
+      .sort((left, right) => left.localeCompare(right));
 
-  const affectedNodeIds = result.trace
-    .filter(({ status }) => status !== undefined)
-    .map(({ node_id }) => node_id)
-    .sort((left, right) => left.localeCompare(right));
+    return {
+      result: {
+        affectedNodeIds,
+        trace: result.trace,
+      },
+      events,
+    };
+  });
+  const { affectedNodeIds, trace } = cascade;
   const priorState = (await storage.readState<Record<string, unknown>>()) ?? {};
   await storage.writeState({
     ...priorState,
@@ -60,14 +71,12 @@ export async function runInvalidation(
     },
     (banner) => io.stdout.write(`${banner}\n`),
   );
-  await storage.regenerateIndex();
-
   io.stdout.write(
     `${JSON.stringify({
       falsified_node_id: nodeId,
       evidence_id: evidenceId,
       affected_node_ids: affectedNodeIds,
-      trace: result.trace,
+      trace,
     })}\n`,
   );
   return 0;

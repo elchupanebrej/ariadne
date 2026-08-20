@@ -2,7 +2,7 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { GraphStorage } from "../../src/graph/storage.js";
 
@@ -118,6 +118,53 @@ describe("ariadne invalidate", () => {
       affected_node_ids: ["ASM-1", "CAN-1", "DEC-1"],
     });
     expect(await readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8")).toContain("ASM-1");
+  });
+
+  it("writes the cascade in one transaction and repeats idempotently", async () => {
+    const { cwd, storage } = await workspace();
+    const transaction = vi.spyOn(GraphStorage.prototype, "transaction");
+    try {
+      const first = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
+      expect(first.code).toBe(0);
+      const afterFirst = await storage.readEvents();
+
+      await storage.writeState({});
+      const second = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
+      expect(second.code).toBe(0);
+      expect(second.stdout.text()).not.toContain("ARIADNE OPERATIONAL NOTICE");
+      expect(await storage.readEvents()).toEqual(afterFirst);
+      expect(await storage.readState()).toMatchObject({
+        last_invalidation: {
+          node_id: "ASM-1",
+          evidence_id: "EVD-1",
+          affected_node_ids: ["ASM-1", "CAN-1", "DEC-1"],
+        },
+        active_notices: [expect.stringMatching(/^NOT-/u)],
+      });
+      expect(transaction).toHaveBeenCalledTimes(2);
+    } finally {
+      transaction.mockRestore();
+    }
+  });
+
+  it("serializes concurrent invalidations without duplicating cascade events", async () => {
+    const { cwd, storage } = await workspace();
+    const before = await storage.readEvents();
+
+    const [first, second] = await Promise.all([
+      invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]),
+      invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]),
+    ]);
+
+    expect(first.code).toBe(0);
+    expect(second.code).toBe(0);
+    const after = await storage.readEvents();
+    expect(after).toHaveLength(before.length + 3);
+    expect(after.filter((event) => event.kind === "node")).toHaveLength(8);
+    const state = (await storage.readState<Record<string, unknown>>()) ?? {};
+    expect(state.active_notices).toEqual([
+      expect.stringMatching(/^NOT-/u),
+    ]);
   });
 
   it("rejects missing, wrong-kind, or unlinked evidence without writing", async () => {

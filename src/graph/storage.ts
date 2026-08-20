@@ -250,11 +250,26 @@ export class GraphStorage {
         }
 
         await mkdir(dirname(this.graphPath), { recursive: true });
-        await appendFile(
-          this.graphPath,
-          `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
-          "utf8",
-        );
+        let currentContents = "";
+        try {
+          currentContents = await readFile(this.graphPath, "utf8");
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        }
+        if (currentContents && !currentContents.endsWith("\n")) {
+          currentContents += "\n";
+        }
+        const temporaryPath = `${this.graphPath}.${randomUUID()}.tmp`;
+        try {
+          await writeFile(
+            temporaryPath,
+            `${currentContents}${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
+            "utf8",
+          );
+          await rename(temporaryPath, this.graphPath);
+        } finally {
+          await rm(temporaryPath, { force: true });
+        }
         await this.writeIndexUnlocked(prospective);
         return mutation.result;
       }),
