@@ -22,6 +22,7 @@ export type EpistemicDiagnosticCode =
   | "INSUFFICIENT_EVIDENCE"
   | "MISSING_EVIDENCE_RESULT"
   | "INCOMPLETE_EVIDENCE_RESULT"
+  | "INCOMPATIBLE_EVIDENCE_METHOD"
   | "INVALID_DEPENDENCY_STATUS"
   | "INVALID_DERIVED_PROVENANCE"
   | "INVALID_TRANSITION"
@@ -69,8 +70,15 @@ const rung = (value: unknown): number | undefined => {
   return match ? Number(match[1]) : undefined;
 };
 
-const explicitRung = (node: Node): number | undefined =>
-  rung(node.rung ?? node.evidentiary_rung ?? node.required_rung ?? node.minimum_rung);
+const actualEvidenceRung = (node: Node): number | undefined =>
+  rung(node.rung ?? node.evidentiary_rung);
+
+const requestedMinimumRung = (node: Node): number | undefined => {
+  const requested = [rung(node.minimum_rung), rung(node.required_rung)].filter(
+    (value): value is number => value !== undefined,
+  );
+  return requested.length > 0 ? Math.max(...requested) : undefined;
+};
 
 const claimClass = (value: unknown): ClaimClass | undefined => {
   if (typeof value !== "string") return undefined;
@@ -94,8 +102,58 @@ const claimClass = (value: unknown): ClaimClass | undefined => {
   return aliases[key];
 };
 
-const claimClassOf = (node: Node): string | undefined =>
-  text(node.claim_class, node.claimClass, node.claim_type, node.claimType);
+const claimClassOf = (node: Node, nodes: Map<string, Node>): string | undefined => {
+  const direct = text(node.claim_class, node.claimClass, node.claim_type, node.claimType);
+  if (direct) return direct;
+
+  const claimReference = text(node.claim, node.claim_id, node.claimId);
+  const claim = claimReference ? nodes.get(claimReference) : undefined;
+  return claim?.type === "CLM"
+    ? text(claim.claim_class, claim.claimClass, claim.claim_type, claim.claimType)
+    : undefined;
+};
+
+const methodIncompatibleWithClaim = (claim: ClaimClass, method: string): boolean => {
+  const normalized = method.toLowerCase();
+  if (claim === "Throughput & Latency") {
+    return /unit\s*test|example[- ]based|manual\s+check/u.test(normalized);
+  }
+  if (claim === "Distributed safety") {
+    return /unit\s*test|local\s+sequential|single[- ]node|manual\s+check/u.test(normalized);
+  }
+  if (claim === "Migration safety") {
+    return /unit\s*test|example[- ]based|staging\s+smoke|manual\s+check/u.test(normalized);
+  }
+  return false;
+};
+
+const evidenceResultIssues = (
+  node: Node,
+  options: { requireFalsified?: boolean } = {},
+): string[] => {
+  const issues: string[] = [];
+  if (node.type !== "EVD") issues.push("EVD node");
+
+  const verdict = typeof node.verdict === "string" ? node.verdict.toUpperCase() : undefined;
+  if (!verdict || !["SUPPORTED", "FALSIFIED", "INCONCLUSIVE"].includes(verdict)) {
+    issues.push("verdict (SUPPORTED, FALSIFIED, or INCONCLUSIVE)");
+  } else if (options.requireFalsified && verdict !== "FALSIFIED") {
+    issues.push("verdict FALSIFIED");
+  }
+
+  if (!text(node.method, node.methodology)) issues.push("method");
+  if (actualEvidenceRung(node) === undefined) issues.push("rung");
+  if (!present(node.receipt ?? node.stdout_digest ?? node.telemetry_reference)) {
+    issues.push("receipt");
+  }
+  if (!text(node.environment, node.reproducible_environment, node.environment_ref)) {
+    issues.push("environment");
+  }
+  return issues;
+};
+
+export const validateFalsifyingEvidence = (node: Node): string[] =>
+  evidenceResultIssues(node, { requireFalsified: true });
 
 const critiquePresent = (node: Node): boolean => {
   const value =
@@ -185,6 +243,9 @@ const invalidDependencyStatus = new Set([
   "INVALIDATED",
   "NEEDS_REVIEW",
   "BLOCKED",
+  "RE_OPENED",
+  "STALE",
+  "REQUIRES_REVALUATION",
 ]);
 
 const isDerivedPremise = (provenance: unknown): boolean =>
@@ -227,10 +288,13 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
 
   for (const request of graph.nodes.filter((node) => node.type === "EVDREQ")) {
-    const rawClass = claimClassOf(request);
+    const rawClass = claimClassOf(request, nodes);
     const normalizedClass = claimClass(rawClass);
-    const required = explicitRung(request) ??
-      (normalizedClass ? MINIMUM_EVIDENTIARY_RUNG[normalizedClass] : undefined);
+    const classMinimum = normalizedClass ? MINIMUM_EVIDENTIARY_RUNG[normalizedClass] : undefined;
+    const requestedMinimum = requestedMinimumRung(request);
+    const required = classMinimum === undefined
+      ? requestedMinimum
+      : Math.max(classMinimum, requestedMinimum ?? 0);
     if (required === undefined) {
       diagnostics.push({
         code: "UNKNOWN_CLAIM_CLASS",
@@ -255,7 +319,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
     for (const evidenceId of linkedIds) {
       const result = nodes.get(evidenceId);
       if (!result) continue;
-      const actual = explicitRung(result);
+      const actual = actualEvidenceRung(result);
       if (actual === undefined) {
         diagnostics.push({
           code: "MISSING_EVIDENCE_RUNG",
@@ -278,28 +342,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
         });
       }
 
-      const verdict = typeof result.verdict === "string" ? result.verdict.toUpperCase() : undefined;
-      const method = text(
-        result.method,
-        result.methodology,
-      );
-      const receipt =
-        result.receipt ??
-        result.stdout_digest ??
-        result.telemetry_reference;
-      const environment = text(
-        result.environment,
-        result.reproducible_environment,
-        result.environment_ref,
-      );
-      const missing: string[] = [];
-      if (!verdict || !["SUPPORTED", "FALSIFIED", "INCONCLUSIVE"].includes(verdict)) {
-        missing.push("verdict (SUPPORTED, FALSIFIED, or INCONCLUSIVE)");
-      }
-      if (!method) missing.push("method");
-      if (actual === undefined) missing.push("rung");
-      if (!present(receipt)) missing.push("receipt");
-      if (!environment) missing.push("environment");
+      const missing = evidenceResultIssues(result);
       if (missing.length > 0) {
         diagnostics.push({
           code: "INCOMPLETE_EVIDENCE_RESULT",
@@ -308,6 +351,18 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
           requestId: request.id,
           evidenceId: result.id,
           required,
+        });
+      }
+
+      const method = text(result.method, result.methodology);
+      if (normalizedClass && method && methodIncompatibleWithClaim(normalizedClass, method)) {
+        diagnostics.push({
+          code: "INCOMPATIBLE_EVIDENCE_METHOD",
+          message: `Evidence ${result.id} uses method ${method}, which is incompatible with ${normalizedClass}`,
+          nodeId: result.id,
+          requestId: request.id,
+          evidenceId: result.id,
+          claimClass: rawClass,
         });
       }
     }

@@ -77,6 +77,88 @@ describe("runEpistemicGate", () => {
     expect(result).toEqual({ passed: true, diagnostics: [] });
   });
 
+  it("keeps a request override from lowering the claim-class minimum", () => {
+    const result = runEpistemicGate(
+      graph(
+        [
+          node("EVDREQ-1", "EVDREQ", "PROPOSED", {
+            claim_class: "Throughput & Latency",
+            minimum_rung: 7,
+            required_rung: 2,
+          }),
+          node("EVD-1", "EVD", "MEASURED", {
+            rung: 2,
+            verdict: "SUPPORTED",
+            method: "unit test",
+            receipt: "receipt-1",
+            environment: "ci-node-20",
+          }),
+        ],
+        [{ source: "EVD-1", target: "EVDREQ-1", type: "answers" }],
+      ),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "INSUFFICIENT_EVIDENCE",
+          required: 7,
+          actual: 2,
+        }),
+      ]),
+    );
+  });
+
+  it("does not accept request-only rung fields as evidence and rejects incompatible methods", () => {
+    const result = runEpistemicGate(
+      graph(
+        [
+          node("EVDREQ-1", "EVDREQ", "PROPOSED", {
+            claim_class: "Throughput & Latency",
+          }),
+          node("EVD-1", "EVD", "MEASURED", {
+            minimum_rung: 7,
+            verdict: "SUPPORTED",
+            method: "unit test",
+            receipt: "receipt-1",
+            environment: "ci-node-20",
+          }),
+        ],
+        [{ source: "EVD-1", target: "EVDREQ-1", type: "answers" }],
+      ),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "MISSING_EVIDENCE_RUNG" }),
+        expect.objectContaining({ code: "INCOMPATIBLE_EVIDENCE_METHOD" }),
+      ]),
+    );
+  });
+
+  it("uses a referenced claim class when the request omits one", () => {
+    const result = runEpistemicGate(
+      graph(
+        [
+          node("CLM-1", "CLM", "PROPOSED", { claim_class: "Throughput & Latency" }),
+          node("EVDREQ-1", "EVDREQ", "PROPOSED", { claim: "CLM-1" }),
+          node("EVD-1", "EVD", "MEASURED", {
+            rung: 7,
+            verdict: "SUPPORTED",
+            method: "load benchmark",
+            receipt: "receipt-1",
+            environment: "ci-node-20",
+          }),
+        ],
+        [{ source: "EVD-1", target: "EVDREQ-1", type: "answers" }],
+      ),
+    );
+
+    expect(result).toEqual({ passed: true, diagnostics: [] });
+  });
+
   it("rejects a locked decision that depends on ASSUMED or UNKNOWN provenance", () => {
     const result = runEpistemicGate(
       graph(
@@ -120,5 +202,55 @@ describe("runEpistemicGate", () => {
         expect.objectContaining({ code: "MISSING_ADVERSARIAL_CRITIQUE", nodeId: "CAN-1" }),
       ]),
     );
+  });
+
+  it("blocks dependencies on reopened and stale decisions", () => {
+    const result = runEpistemicGate(
+      graph(
+        [
+          node("DEC-1", "DEC", "DECIDED", {
+            status: "RE-OPENED",
+            adversarial_critique: "Reviewed",
+          }),
+          node("DEC-2", "DEC", "DECIDED", { adversarial_critique: "Reviewed" }),
+        ],
+        [{ source: "DEC-2", target: "DEC-1", type: "depends_on" }],
+      ),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "INVALID_DEPENDENCY_STATUS",
+          dependencyId: "DEC-1",
+        }),
+      ]),
+    );
+  });
+
+  it("requires a parseable deadline and consistent TRANS lifecycle aliases", () => {
+    const transition = {
+      id: "TRANS-1",
+      type: "TRANS",
+      provenance_type: "PROPOSED",
+      statement: "temporary path",
+      target_mechanism_ref: "CAN-1",
+      retirement_predicate: "legacy path is unused",
+      expiration_deadline: "not-a-date",
+      cleanup_verification_test: "npm test -- cleanup",
+      owner: "platform",
+      lifecycle_state: "PROPOSED",
+      transition_lifecycle: "EXPANDED",
+    };
+
+    expect(NodeSchema.safeParse(transition).success).toBe(false);
+    expect(
+      NodeSchema.safeParse({
+        ...transition,
+        expiration_deadline: "2099-01-01",
+        transition_lifecycle: "PROPOSED",
+      }).success,
+    ).toBe(true);
   });
 });

@@ -30,10 +30,15 @@ const INACTIVE_STATUSES = new Set([
   "CLOSED",
   "RETIRED",
   "NEEDS_REVIEW",
+  "RE_OPENED",
+  "STALE",
+  "REQUIRES_REVALUATION",
+  "BLOCKED",
 ]);
 
 const isActive = (node: Node): boolean =>
-  typeof node.status !== "string" || !INACTIVE_STATUSES.has(node.status.toUpperCase());
+  typeof node.status !== "string" ||
+  !INACTIVE_STATUSES.has(node.status.toUpperCase().replaceAll("-", "_"));
 
 const isInvariant = (node: Node): boolean =>
   node.invariant === true ||
@@ -150,7 +155,17 @@ export async function generateHandoff(
       : join(rootDirectory, options.outputPath)
     : join(defaultDirectory, "HANDOFF.md");
 
+  if (!isActive(decision)) {
+    throw new Error(`Cannot hand off decision ${decision.id}: decision is stale or reopened`);
+  }
+
   const basis = basisFor(decisionId, graph);
+  const blockedDependency = basis.find((node) => !isActive(node));
+  if (blockedDependency) {
+    throw new Error(
+      `Cannot hand off decision ${decision.id}: blocking dependency ${blockedDependency.id} is stale or reopened`,
+    );
+  }
   const verifiedFacts = basis.filter(
     (node) => isActive(node) && ["FACT", "MEASURED", "DECIDED"].includes(node.provenance_type),
   );

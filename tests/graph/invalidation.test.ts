@@ -19,7 +19,14 @@ const node = (
 
 const baseGraph = (): InvalidationGraph => ({
   nodes: [
-    node("EVD-1", "EVD", "FACT"),
+    NodeSchema.parse({
+      ...node("EVD-1", "EVD", "FACT"),
+      verdict: "FALSIFIED",
+      method: "load benchmark",
+      rung: 7,
+      receipt: "receipt-1",
+      environment: "ci-node-20",
+    }),
     node("ASM-1", "ASM", "ASSUMED"),
     node("TASK-1", "TASK", "DERIVED"),
     node("CAN-1", "CAN", "PROPOSED"),
@@ -76,6 +83,19 @@ describe("propagateInvalidation", () => {
 
     expect(() => propagateInvalidation(graph, "ASM-1", "EVD-1")).toThrow(
       /MEASURED or FACT/i,
+    );
+  });
+
+  it("rejects incomplete falsifying evidence", () => {
+    const graph = baseGraph();
+    graph.nodes = graph.nodes.map((candidate) =>
+      candidate.id === "EVD-1"
+        ? { ...candidate, receipt: undefined }
+        : candidate,
+    );
+
+    expect(() => propagateInvalidation(graph, "ASM-1", "EVD-1")).toThrow(
+      /receipt/i,
     );
   });
 

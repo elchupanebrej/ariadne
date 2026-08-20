@@ -106,6 +106,43 @@ describe("runSemanticGate", () => {
     );
   });
 
+  it("does not count invalidated candidates toward contradiction diversity", () => {
+    const result = runSemanticGate(
+      graph(
+        [
+          node("CTR-1", "CTR", { status: "ACTIVE" }),
+          node("CAN-1", "CAN", {
+            status: "INVALIDATED",
+            contradiction_ref: "CTR-1",
+            separation_principle: "Space",
+          }),
+          node("CAN-2", "CAN", {
+            status: "INVALIDATED",
+            contradiction_ref: "CTR-1",
+            separation_principle: "Time",
+          }),
+          node("CAN-3", "CAN", {
+            status: "STALE",
+            contradiction_ref: "CTR-1",
+            separation_principle: "State",
+          }),
+        ],
+        [
+          { source: "CAN-1", target: "CTR-1", type: "supports" },
+          { source: "CAN-2", target: "CTR-1", type: "supports" },
+          { source: "CAN-3", target: "CTR-1", type: "supports" },
+        ],
+      ),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "CTR_SEPARATION_DIVERSITY" }),
+      ]),
+    );
+  });
+
   it("uses the Fast depth threshold of one separation principle", () => {
     const result = runSemanticGate({
       depth_mode: "Fast",

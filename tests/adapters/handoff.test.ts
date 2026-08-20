@@ -116,4 +116,27 @@ describe("generateHandoff", () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it("refuses a handoff when its decision depends on a reopened decision", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-handoff-reopened-"));
+    try {
+      await expect(
+        generateHandoff(
+          "DEC-004",
+          graph(
+            [
+              node("DEC-004", "DEC", "DECIDED", "Use the selected mechanism."),
+              node("DEC-005", "DEC", "DECIDED", "The basis was reopened.", {
+                status: "RE-OPENED",
+              }),
+            ],
+            [{ source: "DEC-004", target: "DEC-005", type: "depends_on" }],
+          ),
+          { rootDirectory: root },
+        ),
+      ).rejects.toThrow(/reopened|blocking/i);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });

@@ -5,6 +5,7 @@ import {
   type GraphDiagnostic,
 } from "./integrity.js";
 import type { MaterializedGraph } from "./storage.js";
+import { validateFalsifyingEvidence } from "../gates/epistemic-gate.js";
 
 export type InvalidationGraph = MaterializedGraph;
 
@@ -123,6 +124,12 @@ export function propagateInvalidation(
   }
   if (evidence.provenance_type !== "MEASURED" && evidence.provenance_type !== "FACT") {
     throw new Error("Invalidation evidence must have MEASURED or FACT provenance");
+  }
+  const evidenceIssues = validateFalsifyingEvidence(evidence);
+  if (evidenceIssues.length > 0) {
+    throw new Error(
+      `Invalidation evidence is incomplete: ${evidenceIssues.join(", ")}`,
+    );
   }
 
   const falsifiedNode = graph.nodes.find(({ id }) => id === falsifiedNodeId);

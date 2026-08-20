@@ -86,7 +86,12 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
   .extend({
     target_mechanism_ref: z.string().regex(/^CAN-[0-9A-Za-z_-]+$/),
     retirement_predicate: z.string().min(1),
-    expiration_deadline: z.string().min(1),
+    expiration_deadline: z
+      .string()
+      .min(1)
+      .refine((value) => !Number.isNaN(Date.parse(value)), {
+        message: "expiration_deadline must be a parseable date",
+      }),
     cleanup_verification_test: z.string().min(1),
     owner: z.string().min(1),
     lifecycle_state: TransitionLifecycleSchema.optional(),
@@ -98,16 +103,28 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
     verified: z.boolean().optional(),
   })
   .superRefine((node, context) => {
+    const lifecycleValues = [
+      node.lifecycle_state,
+      node.transition_lifecycle,
+      node.lifecycle,
+    ].filter((value): value is (typeof TRANSITION_LIFECYCLE)[number] => value !== undefined);
+
     if (
-      node.lifecycle_state === undefined &&
-      node.transition_lifecycle === undefined &&
-      node.lifecycle === undefined &&
+      lifecycleValues.length === 0 &&
       !TRANSITION_LIFECYCLE.includes(node.status as (typeof TRANSITION_LIFECYCLE)[number])
     ) {
       context.addIssue({
         code: "custom",
         path: ["lifecycle_state"],
         message: "TRANS nodes must declare one of the six lifecycle states",
+      });
+    }
+
+    if (new Set(lifecycleValues).size > 1) {
+      context.addIssue({
+        code: "custom",
+        path: ["lifecycle_state"],
+        message: "TRANS lifecycle fields must agree when more than one is provided",
       });
     }
   });

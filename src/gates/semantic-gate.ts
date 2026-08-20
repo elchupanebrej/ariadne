@@ -71,8 +71,23 @@ const references = (value: SemanticNode, nodeId: string): boolean =>
   ].some((key) => strings(value[key]).includes(nodeId));
 
 const isActive = (node: SemanticNode): boolean => {
-  const status = typeof node.status === "string" ? node.status.toUpperCase() : "ACTIVE";
-  return !["INVALIDATED", "FALSIFIED", "INACTIVE", "CLOSED", "RESOLVED"].includes(status);
+  const status =
+    typeof node.status === "string"
+      ? node.status.toUpperCase().replaceAll("-", "_")
+      : "ACTIVE";
+  return ![
+    "INVALIDATED",
+    "FALSIFIED",
+    "INACTIVE",
+    "CLOSED",
+    "RESOLVED",
+    "RETIRED",
+    "NEEDS_REVIEW",
+    "RE_OPENED",
+    "STALE",
+    "REQUIRES_REVALUATION",
+    "BLOCKED",
+  ].includes(status);
 };
 
 const linkedToContradiction = (
@@ -181,7 +196,7 @@ export function runSemanticGate(input: unknown): SemanticGateResult {
 
   const diagnostics: SemanticDiagnostic[] = [];
   const requiredPrinciples = depthModeOf(input) === "Fast" ? 1 : 3;
-  const candidates = nodes.filter((node) => node.type === "CAN");
+  const candidates = nodes.filter((node) => node.type === "CAN" && isActive(node));
   const contradictions = nodes.filter((node) => node.type === "CTR" && isActive(node));
   const associationMetadata = hasCandidateAssociation(candidates, contradictions, edges);
 
