@@ -35,8 +35,9 @@ const statusFor = (node: Node, rootId: string): string | undefined => {
     case "CAN":
       return "INVALIDATED";
     case "CLM":
-    case "DEC":
       return "NEEDS_REVIEW";
+    case "DEC":
+      return "RE-OPENED";
     case "TRANS":
       return "BLOCKED";
     default:
@@ -72,7 +73,9 @@ const invalidationMetadata = (
       evidence_id: evidenceId,
       previous_status: node.status,
       status,
-      ...(nodeKind(node) === "DEC" ? { reopened: true } : {}),
+      ...(nodeKind(node) === "DEC"
+        ? { reopened: true, needs_review: true }
+        : {}),
     },
     previous: node.status,
   };
@@ -90,6 +93,8 @@ const reverseTopology = (edges: readonly EpistemicEdge[]) => {
     if (edge.type === "depends_on" || edge.type === "derived_from") {
       add(edge.target, edge.source, edge.type);
     } else if (edge.type === "supports") {
+      add(edge.source, edge.target, edge.type);
+    } else if (edge.type === "invalidates") {
       add(edge.source, edge.target, edge.type);
     }
   }
@@ -144,8 +149,10 @@ export function propagateInvalidation(
   const visited = new Set<string>();
   const trace: InvalidationTraceEntry[] = [];
 
-  while (queue.length > 0) {
-    const current = queue.shift();
+  let queueIndex = 0;
+  while (queueIndex < queue.length) {
+    const current = queue[queueIndex];
+    queueIndex += 1;
     if (!current || visited.has(current.id)) continue;
     visited.add(current.id);
 

@@ -20,6 +20,14 @@ export type EpistemicDiagnosticCode =
   | "UNKNOWN_CLAIM_CLASS"
   | "MISSING_EVIDENCE_RUNG"
   | "INSUFFICIENT_EVIDENCE"
+  | "MISSING_EVIDENCE_RESULT"
+  | "INCOMPLETE_EVIDENCE_RESULT"
+  | "INVALID_DEPENDENCY_STATUS"
+  | "INVALID_DERIVED_PROVENANCE"
+  | "INVALID_TRANSITION"
+  | "EXPIRED_TRANSITION"
+  | "UNVERIFIED_TRANSITION"
+  | "TRANSITION_BLOCKED"
   | "UNRESOLVED_DECISION_DEPENDENCY"
   | "MISSING_ADVERSARIAL_CRITIQUE";
 
@@ -45,6 +53,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const text = (...values: unknown[]): string | undefined =>
   values.find((value): value is string => typeof value === "string" && value.trim() !== "");
+
+const present = (value: unknown): boolean => {
+  if (typeof value === "string") return value.trim() !== "";
+  if (Array.isArray(value)) return value.length > 0;
+  return isRecord(value) && Object.keys(value).length > 0;
+};
 
 const rung = (value: unknown): number | undefined => {
   if (typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 10) {
@@ -166,6 +180,28 @@ const decisionDependencies = (
   return result;
 };
 
+const invalidDependencyStatus = new Set([
+  "FALSIFIED",
+  "INVALIDATED",
+  "NEEDS_REVIEW",
+  "BLOCKED",
+]);
+
+const isDerivedPremise = (provenance: unknown): boolean =>
+  provenance === "FACT" || provenance === "MEASURED" || provenance === "DERIVED";
+
+const TRANSITION_STATES = [
+  "PROPOSED",
+  "EXPANDED",
+  "DUAL_RUNNING",
+  "MIGRATING",
+  "CONTRACTED",
+  "RETIRED",
+] as const;
+
+const transitionState = (node: Node): string | undefined =>
+  text(node.lifecycle_state, node.transition_state, node.status);
+
 export function runEpistemicGate(input: unknown): EpistemicGateResult {
   const validation = validateGraph(input);
   if (!validation.valid) {
@@ -200,7 +236,17 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       continue;
     }
 
-    for (const evidenceId of linkedEvidenceIds(request, evidence, graph.edges)) {
+    const linkedIds = linkedEvidenceIds(request, evidence, graph.edges);
+    if (linkedIds.length === 0) {
+      diagnostics.push({
+        code: "MISSING_EVIDENCE_RESULT",
+        message: `Evidence request ${request.id} has no linked evidence result`,
+        nodeId: request.id,
+        requestId: request.id,
+      });
+    }
+
+    for (const evidenceId of linkedIds) {
       const result = nodes.get(evidenceId);
       if (!result) continue;
       const actual = explicitRung(result);
@@ -225,6 +271,39 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
           actual,
         });
       }
+
+      const verdict = typeof result.verdict === "string" ? result.verdict.toUpperCase() : undefined;
+      const method = text(
+        result.method,
+        result.methodology,
+      );
+      const receipt =
+        result.receipt ??
+        result.stdout_digest ??
+        result.telemetry_reference;
+      const environment = text(
+        result.environment,
+        result.reproducible_environment,
+        result.environment_ref,
+      );
+      const missing: string[] = [];
+      if (!verdict || !["SUPPORTED", "FALSIFIED", "INCONCLUSIVE"].includes(verdict)) {
+        missing.push("verdict (SUPPORTED, FALSIFIED, or INCONCLUSIVE)");
+      }
+      if (!method) missing.push("method");
+      if (actual === undefined) missing.push("rung");
+      if (!present(receipt)) missing.push("receipt");
+      if (!environment) missing.push("environment");
+      if (missing.length > 0) {
+        diagnostics.push({
+          code: "INCOMPLETE_EVIDENCE_RESULT",
+          message: `Evidence ${result.id} is missing ${missing.join(", ")}`,
+          nodeId: result.id,
+          requestId: request.id,
+          evidenceId: result.id,
+          required,
+        });
+      }
     }
   }
 
@@ -238,6 +317,119 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
         message: `${node.id} cannot be locked without a non-empty adversarial critique`,
         nodeId: node.id,
       });
+    }
+  }
+
+  for (const node of graph.nodes.filter((candidate) =>
+    ["CLM", "CAN", "DEC", "TRANS"].includes(candidate.type),
+  )) {
+    for (const dependency of decisionDependencies(node, nodes, graph.edges)) {
+      if (typeof dependency.status !== "string") continue;
+      const status = dependency.status.toUpperCase().replaceAll("-", "_");
+      if (!invalidDependencyStatus.has(status)) continue;
+      diagnostics.push({
+        code: "INVALID_DEPENDENCY_STATUS",
+        message: `${node.id} depends on ${dependency.id} with blocking ${status} status`,
+        nodeId: node.id,
+        dependencyId: dependency.id,
+      });
+    }
+  }
+
+  for (const node of graph.nodes.filter((candidate) => candidate.provenance_type === "DERIVED")) {
+    const dependencies = decisionDependencies(node, nodes, graph.edges);
+    if (dependencies.length === 0) {
+      diagnostics.push({
+        code: "INVALID_DERIVED_PROVENANCE",
+        message: `${node.id} cannot claim DERIVED provenance without antecedent dependencies`,
+        nodeId: node.id,
+      });
+      continue;
+    }
+    for (const dependency of dependencies) {
+      if (isDerivedPremise(dependency.provenance_type)) continue;
+      diagnostics.push({
+        code: "INVALID_DERIVED_PROVENANCE",
+        message: `${node.id} cannot be DERIVED from ${dependency.id} with ${dependency.provenance_type} provenance`,
+        nodeId: node.id,
+        dependencyId: dependency.id,
+      });
+    }
+  }
+
+  for (const transition of graph.nodes.filter((node) => node.type === "TRANS")) {
+    const lifecycle = transitionState(transition);
+    const lifecycleIndex = lifecycle
+      ? TRANSITION_STATES.indexOf(lifecycle as (typeof TRANSITION_STATES)[number])
+      : -1;
+    const targetId = transition.target_mechanism_ref;
+    const target = typeof targetId === "string" ? nodes.get(targetId) : undefined;
+    const missingContract = [
+      ["target_mechanism_ref", targetId],
+      ["retirement_predicate", transition.retirement_predicate],
+      ["expiration_deadline", transition.expiration_deadline],
+      ["cleanup_verification_test", transition.cleanup_verification_test],
+      ["owner", transition.owner],
+    ]
+      .filter(([, value]) => !present(value))
+      .map(([field]) => field);
+
+    if (missingContract.length > 0 || !target || target.type !== "CAN" || lifecycleIndex < 0) {
+      diagnostics.push({
+        code: "INVALID_TRANSITION",
+        message: `${transition.id} has an invalid contract, target candidate, or lifecycle state${missingContract.length > 0 ? ` (missing ${missingContract.join(", ")})` : ""}`,
+        nodeId: transition.id,
+      });
+    }
+
+    const deadline = typeof transition.expiration_deadline === "string"
+      ? Date.parse(transition.expiration_deadline)
+      : Number.NaN;
+    if (Number.isNaN(deadline)) {
+      diagnostics.push({
+        code: "INVALID_TRANSITION",
+        message: `${transition.id} must use a parseable expiration deadline`,
+        nodeId: transition.id,
+      });
+    } else if (lifecycle !== "RETIRED" && deadline <= Date.now()) {
+      diagnostics.push({
+        code: "EXPIRED_TRANSITION",
+        message: `${transition.id} expired at ${transition.expiration_deadline}`,
+        nodeId: transition.id,
+      });
+    }
+
+    if (transition.status?.toUpperCase() === "BLOCKED") {
+      diagnostics.push({
+        code: "TRANSITION_BLOCKED",
+        message: `${transition.id} is blocked and cannot pass the epistemic gate`,
+        nodeId: transition.id,
+      });
+    }
+
+    if (lifecycleIndex > 0) {
+      const receipt =
+        transition.transition_receipt ??
+        transition.verification_receipt ??
+        transition.receipt;
+      if (transition.verified === false || !present(receipt)) {
+        diagnostics.push({
+          code: "UNVERIFIED_TRANSITION",
+          message: `${transition.id} must provide a verification receipt before ${lifecycle}`,
+          nodeId: transition.id,
+        });
+      }
+    }
+
+    if (lifecycle === "RETIRED" && transition.verified !== false) {
+      const cleanupReceipt = transition.cleanup_verification_receipt;
+      if (transition.cleanup_verified !== true && !present(cleanupReceipt)) {
+        diagnostics.push({
+          code: "UNVERIFIED_TRANSITION",
+          message: `${transition.id} cannot be RETIRED without cleanup verification`,
+          nodeId: transition.id,
+        });
+      }
     }
   }
 

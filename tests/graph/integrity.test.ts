@@ -52,6 +52,20 @@ describe("validateGraph", () => {
     );
   });
 
+  it("reports missing node dependency references", () => {
+    const result = validateGraph({
+      nodes: [{ ...node("TASK-1"), dependencies: ["CLM-404"] }],
+      edges: [],
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "MISSING_NODE", nodeId: "CLM-404" }),
+      ]),
+    );
+  });
+
   it.each(["depends_on", "derived_from"] as const)(
     "reports cycles formed by %s edges",
     (type) => {

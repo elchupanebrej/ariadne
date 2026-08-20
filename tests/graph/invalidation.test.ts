@@ -49,7 +49,11 @@ describe("propagateInvalidation", () => {
         }),
         expect.objectContaining({ id: "CAN-1", status: "INVALIDATED" }),
         expect.objectContaining({ id: "CAN-2", status: "INVALIDATED" }),
-        expect.objectContaining({ id: "DEC-1", status: "NEEDS_REVIEW" }),
+        expect.objectContaining({
+          id: "DEC-1",
+          status: "RE-OPENED",
+          invalidation: expect.objectContaining({ needs_review: true }),
+        }),
       ]),
     );
     expect(result.trace.map(({ node_id }) => node_id)).toEqual([

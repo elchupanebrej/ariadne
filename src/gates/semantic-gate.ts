@@ -153,6 +153,16 @@ const hasHardRequirementFailure = (node: SemanticNode): boolean => {
   );
 };
 
+const depthModeOf = (input: unknown): "Fast" | "Standard" | "Deep" => {
+  if (!isRecord(input)) return "Standard";
+  const value = input.depth_mode ?? input.depthMode ?? input.epistemic_mode ?? input.mode;
+  if (typeof value !== "string") return "Standard";
+  const normalized = value.toLowerCase();
+  if (normalized === "fast") return "Fast";
+  if (normalized === "deep") return "Deep";
+  return "Standard";
+};
+
 /** Enforce deterministic contradiction, falsifiability, and hard-requirement rules. */
 export function runSemanticGate(input: unknown): SemanticGateResult {
   const nodes = asNodes(input);
@@ -170,6 +180,7 @@ export function runSemanticGate(input: unknown): SemanticGateResult {
   }
 
   const diagnostics: SemanticDiagnostic[] = [];
+  const requiredPrinciples = depthModeOf(input) === "Fast" ? 1 : 3;
   const candidates = nodes.filter((node) => node.type === "CAN");
   const contradictions = nodes.filter((node) => node.type === "CTR" && isActive(node));
   const associationMetadata = hasCandidateAssociation(candidates, contradictions, edges);
@@ -184,12 +195,12 @@ export function runSemanticGate(input: unknown): SemanticGateResult {
         .map((principle) => principle.toLocaleLowerCase()),
     );
 
-    if (principles.size < 3) {
+    if (principles.size < requiredPrinciples) {
       diagnostics.push({
         code: "CTR_SEPARATION_DIVERSITY",
-        message: `Active contradiction ${contradiction.id} requires at least 3 distinct separation principles`,
+        message: `Active contradiction ${contradiction.id} requires at least ${requiredPrinciples} distinct separation principles`,
         nodeId: contradiction.id,
-        required: 3,
+        required: requiredPrinciples,
         actual: principles.size,
         candidates: relatedCandidates.map((candidate) => candidate.id).sort(),
       });

@@ -28,11 +28,18 @@ describe("provenance lattice", () => {
 
 describe("directed epistemic edges", () => {
   it.each(EDGE_TYPES)("accepts the %s relation", (type) => {
+    const source =
+      type === "falsifies" || type === "tests" ? "EVD-001" :
+      type === "answers" ? "EVD-001" : "TASK-001";
+    const target =
+      type === "falsifies" ? "ASM-001" :
+      type === "tests" ? "CAN-001" :
+      type === "answers" ? "EVDREQ-001" : "TASK-002";
     expect(
       EdgeSchema.safeParse({
-        source: type === "falsifies" ? "EVD-001" : "TASK-001",
+        source,
         type,
-        target: type === "falsifies" ? "ASM-001" : "TASK-002",
+        target,
       }).success,
     ).toBe(true);
   });

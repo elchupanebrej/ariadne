@@ -152,6 +152,17 @@ export function validateGraph(input: unknown): GraphValidationResult {
     }
   }
 
+  for (const node of nodes) {
+    for (const dependency of node.dependencies ?? []) {
+      if (nodeIds.has(dependency)) continue;
+      diagnostics.push({
+        code: "MISSING_NODE",
+        message: `Node dependency ${dependency} referenced by ${node.id} does not exist`,
+        nodeId: dependency,
+      });
+    }
+  }
+
   const adjacency = new Map<string, string[]>();
   for (const edge of edges) {
     if (!isDeductiveEdge(edge) || !nodeIds.has(edge.source) || !nodeIds.has(edge.target)) {

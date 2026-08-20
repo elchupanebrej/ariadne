@@ -11,6 +11,16 @@ const node = (type: NodeType) => ({
   type,
   provenance_type: "PROPOSED",
   statement: "A typed epistemic node",
+  ...(type === "TRANS"
+    ? {
+        target_mechanism_ref: "CAN-001",
+        retirement_predicate: "legacy path is unused",
+        expiration_deadline: "2099-01-01",
+        cleanup_verification_test: "npm test -- cleanup",
+        owner: "platform",
+        lifecycle_state: "PROPOSED",
+      }
+    : {}),
 });
 
 describe("canonical epistemic nodes", () => {
@@ -38,6 +48,17 @@ describe("canonical epistemic nodes", () => {
     ).toBe(false);
     expect(
       NodeSchema.safeParse({ ...node("TASK"), statement: "" }).success,
+    ).toBe(false);
+  });
+
+  it("requires the complete transition decommissioning contract", () => {
+    expect(
+      NodeSchema.safeParse({
+        id: "TRANS-001",
+        type: "TRANS",
+        provenance_type: "PROPOSED",
+        statement: "temporary path",
+      }).success,
     ).toBe(false);
   });
 });

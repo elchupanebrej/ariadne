@@ -33,7 +33,7 @@ export function computeDerivedProvenance(
 
   if (
     provenances.every((provenance) =>
-      ["DERIVED", "MEASURED", "FACT", "DECIDED"].includes(provenance),
+      ["DERIVED", "MEASURED", "FACT"].includes(provenance),
     )
   ) {
     return "DERIVED";

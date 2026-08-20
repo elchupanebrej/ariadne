@@ -62,7 +62,13 @@ describe("runEpistemicGate", () => {
           node("EVDREQ-1", "EVDREQ", "PROPOSED", {
             claim_class: "ThroughputCapacity",
           }),
-          node("EVD-1", "EVD", "MEASURED", { rung: 7 }),
+          node("EVD-1", "EVD", "MEASURED", {
+            rung: 7,
+            verdict: "SUPPORTED",
+            method: "load benchmark",
+            receipt: "receipt-1",
+            environment: "ci-node-20",
+          }),
         ],
         [{ source: "EVD-1", target: "EVDREQ-1", type: "answers" }],
       ),

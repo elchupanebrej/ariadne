@@ -14,11 +14,12 @@ describe("computeDerivedProvenance", () => {
     );
   });
 
-  it("derives only from DERIVED, MEASURED, FACT, and DECIDED premises", () => {
+  it("derives only from DERIVED, MEASURED, and FACT premises", () => {
     expect(computeDerivedProvenance(["DERIVED", "MEASURED", "FACT"])).toBe(
       "DERIVED",
     );
-    expect(computeDerivedProvenance(["DECIDED", "FACT"])).toBe("DERIVED");
+    expect(computeDerivedProvenance(["DECIDED", "FACT"])).toBe("FACT");
+    expect(computeDerivedProvenance(["DECIDED"])).toBe("DECIDED");
   });
 
   it("returns the weakest lower provenance when derivation is not justified", () => {

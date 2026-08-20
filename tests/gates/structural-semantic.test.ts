@@ -106,6 +106,22 @@ describe("runSemanticGate", () => {
     );
   });
 
+  it("uses the Fast depth threshold of one separation principle", () => {
+    const result = runSemanticGate({
+      depth_mode: "Fast",
+      nodes: [
+        node("CTR-1", "CTR", { status: "ACTIVE" }),
+        node("CAN-1", "CAN", {
+          contradiction_ref: "CTR-1",
+          separation_principle: "Time",
+        }),
+      ],
+      edges: [],
+    });
+
+    expect(result).toEqual({ passed: true, diagnostics: [] });
+  });
+
   it("requires falsification conditions for hypotheses", () => {
     const result = runSemanticGate(
       graph([node("HYP-1", "HYP")]),
