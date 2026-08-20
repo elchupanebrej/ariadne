@@ -11,3 +11,4 @@ export type { RunCliOptions } from "./cli/index.js";
 export * from "./graph/integrity.js";
 export * from "./graph/derivation.js";
 export * from "./gates/structural-gate.js";
+export * from "./gates/semantic-gate.js";

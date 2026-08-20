@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
 import { runStructuralGate } from "../../src/gates/structural-gate.js";
+import { runSemanticGate } from "../../src/gates/semantic-gate.js";
 import type { MaterializedGraph } from "../../src/graph/storage.js";
 
-const node = (id: string, type: Node["type"] = "TASK"): Node =>
+const node = (
+  id: string,
+  type: Node["type"] = "TASK",
+  extra: Record<string, unknown> = {},
+): Node =>
   NodeSchema.parse({
     id,
     type,
     provenance_type: "PROPOSED",
     statement: id,
+    ...extra,
   });
 
 const graph = (
@@ -39,6 +45,94 @@ describe("runStructuralGate", () => {
     expect(result.diagnostics).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ code: "MISSING_NODE", nodeId: "HYP-404" }),
+      ]),
+    );
+  });
+});
+
+describe("runSemanticGate", () => {
+  it("passes an active contradiction with three distinct linked principles", () => {
+    const result = runSemanticGate(
+      graph(
+        [
+          node("CTR-1", "CTR", { status: "ACTIVE" }),
+          node("CAN-1", "CAN", {
+            contradiction_ref: "CTR-1",
+            separation_principle: "Space",
+          }),
+          node("CAN-2", "CAN", {
+            contradiction_ref: "CTR-1",
+            separation_principle: "Time",
+          }),
+          node("CAN-3", "CAN", {
+            contradiction_ref: "CTR-1",
+            separation_principle: "State",
+          }),
+          node("HYP-1", "HYP", {
+            falsification_conditions: ["p99 exceeds the limit"],
+          }),
+        ],
+        [
+          { source: "CAN-1", target: "CTR-1", type: "supports" },
+          { source: "CAN-2", target: "CTR-1", type: "supports" },
+          { source: "CAN-3", target: "CTR-1", type: "supports" },
+        ],
+      ),
+    );
+
+    expect(result).toEqual({ passed: true, diagnostics: [] });
+  });
+
+  it("rejects an active contradiction with fewer than three distinct principles", () => {
+    const result = runSemanticGate(
+      graph([
+        node("CTR-1", "CTR", { status: "ACTIVE" }),
+        node("CAN-1", "CAN", {
+          contradiction_ref: "CTR-1",
+          separation_principle: "Space",
+        }),
+        node("CAN-2", "CAN", {
+          contradiction_ref: "CTR-1",
+          separation_principle: "Time",
+        }),
+      ]),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "CTR_SEPARATION_DIVERSITY" }),
+      ]),
+    );
+  });
+
+  it("requires falsification conditions for hypotheses", () => {
+    const result = runSemanticGate(
+      graph([node("HYP-1", "HYP")]),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "HYP_FALSIFICATION_CONDITION" }),
+      ]),
+    );
+  });
+
+  it("does not allow a weighted score to compensate for a hard failure", () => {
+    const result = runSemanticGate(
+      graph([
+        node("CAN-1", "CAN", {
+          hard_requirements: [{ name: "latency", satisfied: false }],
+          weighted_score: 0.99,
+        }),
+      ]),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "HARD_REQUIREMENT_FAILED" }),
       ]),
     );
   });
