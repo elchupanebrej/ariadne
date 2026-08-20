@@ -38,4 +38,9 @@ describe("directed edge endpoint contracts", () => {
   ] as const)("rejects the invalid %s pair", (type, source, target) => {
     expect(valid(type, source, target)).toBe(false);
   });
+
+  it("keeps unresolved premises valid so the epistemic gate can diagnose them", () => {
+    expect(valid("depends_on", "DEC-1", "ASM-1")).toBe(true);
+    expect(valid("depends_on", "DEC-1", "UNK-1")).toBe(true);
+  });
 });

@@ -68,7 +68,7 @@ const EDGE_ENDPOINT_CONTRACTS: Record<EdgeType, EndpointContract> = {
   },
   depends_on: {
     source: [...PROPOSITION_NODE_TYPES, "EVDREQ"],
-    target: PROPOSITION_NODE_TYPES,
+    target: [...PROPOSITION_NODE_TYPES, "UNK"],
   },
   derived_from: {
     source: PROPOSITION_NODE_TYPES,
