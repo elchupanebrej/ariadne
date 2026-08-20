@@ -2,6 +2,7 @@
 import { resolve } from "node:path";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
+import { runNode } from "./commands/node.js";
 import { runStatus, type CliIO } from "./commands/status.js";
 
 const VERSION = "0.1.0";
@@ -46,7 +47,8 @@ export async function runCli(
       io.stdout.write(`${VERSION}\n`);
       return 0;
     }
-    if (command === "status") return runStatus(args.slice(1), io);
+    if (command === "status") return await runStatus(args.slice(1), io);
+    if (command === "node") return await runNode(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);
