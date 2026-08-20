@@ -17,4 +17,5 @@ export * from "./gates/structural-gate.js";
 export * from "./gates/semantic-gate.js";
 export * from "./adapters/gsd/detector.js";
 export * from "./adapters/gsd/projector.js";
+export * from "./adapters/gsd/operational-notice.js";
 export * from "./gates/epistemic-gate.js";
