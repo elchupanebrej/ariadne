@@ -6,3 +6,4 @@ export * from "./core/schemas/envelope.js";
 export * from "./core/schemas/json-schema-export.js";
 export * from "./graph/storage.js";
 export * from "./graph/index-generator.js";
+export * from "./graph/integrity.js";
