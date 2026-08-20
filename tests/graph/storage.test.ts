@@ -101,4 +101,54 @@ describe("GraphStorage", () => {
       await rm(directory, { recursive: true, force: true });
     }
   });
+
+  it("validates prospective references and deductive cycles before writing", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-integrity-"));
+
+    try {
+      const storage = new GraphStorage(directory);
+      await expect(
+        storage.appendEdge({ source: "TASK-1", type: "depends_on", target: "TASK-2" }),
+      ).rejects.toThrow(/missing node/i);
+      expect(await storage.readEvents()).toEqual([]);
+
+      await storage.appendEvents([
+        { kind: "edge", edge: { source: "TASK-1", type: "depends_on", target: "TASK-2" } },
+        { kind: "node", node: node("TASK-1") },
+        { kind: "node", node: node("TASK-2") },
+      ]);
+      const beforeCycle = await storage.readEvents();
+      await expect(
+        storage.appendEvent({
+          kind: "edge",
+          edge: { source: "TASK-2", type: "depends_on", target: "TASK-1" },
+        }),
+      ).rejects.toThrow(/cycle/i);
+      expect(await storage.readEvents()).toEqual(beforeCycle);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("validates state-owned fields while preserving overlay extensions", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-state-"));
+
+    try {
+      const storage = new GraphStorage(directory);
+      await storage.writeState({
+        mode: "gsd",
+        depth_mode: "Deep",
+        frontier: ["CAN-1"],
+        gsd_extension: { phase: "01" },
+      });
+      await expect(storage.readState()).resolves.toMatchObject({
+        gsd_extension: { phase: "01" },
+      });
+      await expect(storage.writeState({ depth_mode: "invalid" })).rejects.toThrow(
+        /STATE/i,
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 });

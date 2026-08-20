@@ -10,6 +10,7 @@ import {
   NodeSchema,
   type Node,
 } from "../core/schemas/nodes.js";
+import { validateGraph } from "./integrity.js";
 
 export type MaterializedGraph = {
   nodes: Node[];
@@ -27,6 +28,35 @@ export const GraphEventSchema = z.discriminatedUnion("kind", [
 
 export type GraphEvent = z.infer<typeof GraphEventSchema>;
 
+const StateIdSchema = z.string().regex(/^[A-Z][A-Z0-9-]*-[0-9A-Za-z_-]+$/u);
+const StateReferenceSchema = z.union([
+  StateIdSchema,
+  z.object({ id: StateIdSchema }).passthrough(),
+]);
+
+/**
+ * STATE.yaml is JSON-compatible by design, with a strict Ariadne-owned core
+ * and passthrough fields for host/GSD overlay metadata.
+ */
+export const StateSchema = z
+  .object({
+    schema_version: z.number().int().positive().optional(),
+    mode: z.enum(["standalone", "gsd"]).optional(),
+    depth_mode: z.enum(["Fast", "Standard", "Deep"]).optional(),
+    active_depth_mode: z.enum(["Fast", "Standard", "Deep"]).optional(),
+    depthMode: z.enum(["Fast", "Standard", "Deep"]).optional(),
+    frontier: z.array(StateReferenceSchema).optional(),
+    active_frontier: z.array(StateReferenceSchema).optional(),
+    open_unknowns: z.array(StateReferenceSchema).optional(),
+    openUnknowns: z.array(StateReferenceSchema).optional(),
+    unknowns: z.array(StateReferenceSchema).optional(),
+    active_notices: z.array(z.string().regex(/^NOT-[0-9A-Za-z_-]+$/u)).optional(),
+    last_invalidation: z.record(z.string(), z.unknown()).optional(),
+  })
+  .passthrough();
+
+export type AriadneState = z.infer<typeof StateSchema>;
+
 // ponytail: process-local per-path queue; use an OS/file lock if multiple processes append concurrently.
 const pathQueues = new Map<string, Promise<void>>();
 
@@ -38,6 +68,30 @@ const enqueue = (path: string, operation: () => Promise<void>): Promise<void> =>
   return current.finally(() => {
     if (pathQueues.get(path) === current) pathQueues.delete(path);
   });
+};
+
+const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
+  `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
+
+const applyEvents = (
+  graph: MaterializedGraph,
+  events: readonly GraphEvent[],
+): MaterializedGraph => {
+  const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
+  const edges = new Map(graph.edges.map((edge) => [edgeKey(edge), edge]));
+
+  for (const event of events) {
+    if (event.kind === "node") nodes.set(event.node.id, event.node);
+    else if (event.tombstone) edges.delete(edgeKey(event.edge));
+    else edges.set(edgeKey(event.edge), event.edge);
+  }
+
+  return {
+    nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
+    edges: [...edges.values()].sort((left, right) =>
+      edgeKey(left).localeCompare(edgeKey(right)),
+    ),
+  };
 };
 
 const compact = (value: string, limit = 100): string => {
@@ -85,7 +139,12 @@ export class GraphStorage {
 
   async readState<T = unknown>(): Promise<T | null> {
     try {
-      return JSON.parse(await readFile(this.statePath, "utf8")) as T;
+      const value: unknown = JSON.parse(await readFile(this.statePath, "utf8"));
+      const parsed = StateSchema.safeParse(value);
+      if (!parsed.success) {
+        throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+      }
+      return parsed.data as T;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
       throw error;
@@ -93,7 +152,9 @@ export class GraphStorage {
   }
 
   async writeState(state: unknown): Promise<void> {
-    const serialized = JSON.stringify(state, null, 2);
+    const parsed = StateSchema.safeParse(state);
+    if (!parsed.success) throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+    const serialized = JSON.stringify(parsed.data, null, 2);
     if (serialized === undefined) throw new TypeError("State must be JSON-serializable");
 
     await enqueue(this.statePath, async () => {
@@ -111,11 +172,25 @@ export class GraphStorage {
   async appendEvents(events: readonly unknown[]): Promise<void> {
     const parsed = events.map((event) => GraphEventSchema.parse(event));
     if (parsed.length === 0) return;
-    const serialized = `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`;
 
     await enqueue(this.graphPath, async () => {
+      const current = await this.materialize();
+      const prospective = applyEvents(current, parsed);
+      const validation = validateGraph(prospective);
+      if (!validation.valid) {
+        throw new Error(
+          `Invalid graph after append: ${validation.diagnostics
+            .map(({ code, message }) => code === "MISSING_NODE" ? `Missing node reference: ${message}` : message)
+            .join("; ")}`,
+        );
+      }
+
       await mkdir(dirname(this.graphPath), { recursive: true });
-      await appendFile(this.graphPath, serialized, "utf8");
+      await appendFile(
+        this.graphPath,
+        `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
+        "utf8",
+      );
       await this.writeIndexUnlocked();
     });
   }
@@ -152,27 +227,7 @@ export class GraphStorage {
   }
 
   async materialize(): Promise<MaterializedGraph> {
-    const nodes = new Map<string, Node>();
-    const edges = new Map<string, EpistemicEdge>();
-
-    for (const event of await this.readEvents()) {
-      if (event.kind === "node") {
-        nodes.set(event.node.id, event.node);
-      } else {
-        const key = `${event.edge.source}\u0000${event.edge.type}\u0000${event.edge.target}`;
-        if (event.tombstone) edges.delete(key);
-        else edges.set(key, event.edge);
-      }
-    }
-
-    return {
-      nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
-      edges: [...edges.values()].sort((left, right) =>
-        `${left.source}\u0000${left.type}\u0000${left.target}`.localeCompare(
-          `${right.source}\u0000${right.type}\u0000${right.target}`,
-        ),
-      ),
-    };
+    return applyEvents({ nodes: [], edges: [] }, await this.readEvents());
   }
 
   async readGraph(): Promise<MaterializedGraph> {

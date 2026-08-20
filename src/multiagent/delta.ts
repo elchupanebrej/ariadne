@@ -1,16 +1,43 @@
 import { z } from "zod";
 import { EdgeSchema } from "../core/schemas/edges.js";
-import { NodeSchema } from "../core/schemas/nodes.js";
+import { NodeIdSchema, NodeSchema, type Node } from "../core/schemas/nodes.js";
 import { validateGraph } from "../graph/integrity.js";
 import {
   GraphStorage,
   type MaterializedGraph,
 } from "../graph/storage.js";
 
+const ExistingNodeMutationSchema = z
+  .object({
+    id: NodeIdSchema.optional(),
+    node_id: NodeIdSchema.optional(),
+    status: z.string().min(1).optional(),
+    invalidation: z.record(z.string(), z.unknown()).optional(),
+    invalidation_metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict()
+  .superRefine((mutation, context) => {
+    if (!mutation.id && !mutation.node_id) {
+      context.addIssue({ code: "custom", path: ["id"], message: "Mutation requires an existing node id" });
+    }
+    if (!mutation.status && !mutation.invalidation && !mutation.invalidation_metadata) {
+      context.addIssue({
+        code: "custom",
+        path: ["status"],
+        message: "Mutation requires status or invalidation metadata",
+      });
+    }
+  });
+
 export const EpistemicDeltaSchema = z
   .object({
     nodes: z.array(NodeSchema),
     edges: z.array(EdgeSchema),
+    mutations: z.array(ExistingNodeMutationSchema).optional(),
+    updates: z.array(ExistingNodeMutationSchema).optional(),
+    node_mutations: z.array(ExistingNodeMutationSchema).optional(),
+    status_mutations: z.array(ExistingNodeMutationSchema).optional(),
+    invalidation_mutations: z.array(ExistingNodeMutationSchema).optional(),
   })
   .strict();
 
@@ -34,6 +61,22 @@ const stableJson = (value: unknown): string => {
 
 const edgeKey = (edge: { source: string; type: string; target: string }): string =>
   `${edge.source}:${edge.type}:${edge.target}`;
+
+const nodeMutationId = (mutation: z.infer<typeof ExistingNodeMutationSchema>): string =>
+  mutation.id ?? mutation.node_id!;
+
+const applyNodeMutation = (
+  node: Node,
+  mutation: z.infer<typeof ExistingNodeMutationSchema>,
+): Node => {
+  const next: Record<string, unknown> = { ...node };
+  if (mutation.status !== undefined) next.status = mutation.status;
+  if (mutation.invalidation !== undefined) next.invalidation = mutation.invalidation;
+  if (mutation.invalidation_metadata !== undefined) {
+    next.invalidation = mutation.invalidation_metadata;
+  }
+  return NodeSchema.parse(next);
+};
 
 const parseBlock = (body: string): EpistemicDelta => {
   let value: unknown;
@@ -86,6 +129,7 @@ export async function mergeDelta(
   if (!currentValidation.valid) throw graphError(current);
 
   const nodes = new Map(current.nodes.map((node) => [node.id, node]));
+  const existingNodeIds = new Set(nodes.keys());
   const edges = new Map(current.edges.map((edge) => [edgeKey(edge), edge]));
   const events: Array<{ kind: "node"; node: (typeof current.nodes)[number] } | {
     kind: "edge";
@@ -109,6 +153,28 @@ export async function mergeDelta(
       nodes.set(node.id, node);
       events.push({ kind: "node", node });
       addUnique(receipt.applied.nodes, node.id);
+    }
+
+    for (const mutation of [
+      ...(delta.mutations ?? []),
+      ...(delta.updates ?? []),
+      ...(delta.node_mutations ?? []),
+      ...(delta.status_mutations ?? []),
+      ...(delta.invalidation_mutations ?? []),
+    ]) {
+      const id = nodeMutationId(mutation);
+      const previous = nodes.get(id);
+      if (!previous || !existingNodeIds.has(id)) {
+        throw new Error(`Cannot mutate missing existing node: ${id}`);
+      }
+      const next = applyNodeMutation(previous, mutation);
+      if (stableJson(previous) === stableJson(next)) {
+        addUnique(receipt.skipped.nodes, id);
+        continue;
+      }
+      nodes.set(id, next);
+      events.push({ kind: "node", node: next });
+      addUnique(receipt.applied.nodes, id);
     }
 
     for (const edge of delta.edges) {

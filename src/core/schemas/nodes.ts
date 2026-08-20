@@ -90,6 +90,8 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
     cleanup_verification_test: z.string().min(1),
     owner: z.string().min(1),
     lifecycle_state: TransitionLifecycleSchema.optional(),
+    transition_lifecycle: TransitionLifecycleSchema.optional(),
+    lifecycle: TransitionLifecycleSchema.optional(),
     transition_receipt: ReceiptSchema.optional(),
     cleanup_verification_receipt: ReceiptSchema.optional(),
     verification_receipt: ReceiptSchema.optional(),
@@ -98,6 +100,8 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
   .superRefine((node, context) => {
     if (
       node.lifecycle_state === undefined &&
+      node.transition_lifecycle === undefined &&
+      node.lifecycle === undefined &&
       !TRANSITION_LIFECYCLE.includes(node.status as (typeof TRANSITION_LIFECYCLE)[number])
     ) {
       context.addIssue({

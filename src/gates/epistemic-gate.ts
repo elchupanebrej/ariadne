@@ -200,7 +200,13 @@ const TRANSITION_STATES = [
 ] as const;
 
 const transitionState = (node: Node): string | undefined =>
-  text(node.lifecycle_state, node.transition_state, node.status);
+  text(
+    node.lifecycle_state,
+    node.transition_lifecycle,
+    node.lifecycle,
+    node.transition_state,
+    node.status,
+  );
 
 export function runEpistemicGate(input: unknown): EpistemicGateResult {
   const validation = validateGraph(input);

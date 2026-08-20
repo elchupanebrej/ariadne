@@ -82,7 +82,7 @@ describe("GSD detector and zero-shadow state", () => {
           "# Phase Context",
           "",
           "## Decisions",
-          "- D-001: Use append-only graph events.",
+          "- D-001: Use append-only graph events via CAN-001, supported by EVD-001.",
           "- D-002 — Keep GSD operational files canonical.",
           "",
           "## Claude's Discretion",
@@ -102,6 +102,12 @@ describe("GSD detector and zero-shadow state", () => {
             id: "DEC-D-001",
             provenance_type: "DECIDED",
             external_ref: "gsd:D-001",
+            selected_candidate_ref: "CAN-001",
+            source_evidence: expect.objectContaining({
+              source_path: expect.stringContaining("CONTEXT.md"),
+              evidence_refs: ["EVD-001"],
+            }),
+            unresolved_risk: "UNRESOLVED",
           }),
           expect.objectContaining({
             id: "DEC-D-002",

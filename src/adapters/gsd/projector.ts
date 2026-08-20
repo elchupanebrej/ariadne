@@ -127,6 +127,13 @@ const cleanDecisionText = (line: string, id: string): string => {
   return afterId.replace(/^\s*(?::|[-–—])?\s*/u, "").trim();
 };
 
+const candidateReference = (statement: string): string | undefined =>
+  statement.match(/\bCAN-[0-9A-Za-z][0-9A-Za-z_-]*\b/u)?.[0];
+
+const evidenceReferences = (statement: string): string[] => [
+  ...new Set(statement.match(/\b(?:EVD|EVDREQ)-[0-9A-Za-z][0-9A-Za-z_-]*\b/gu) ?? []),
+];
+
 const decisionStatements = (markdown: string): Array<{ id: string; statement: string }> => {
   const lines = section(markdown, "Decisions").split(/\r?\n/u);
   const found: Array<{ id: string; statement: string }> = [];
@@ -180,15 +187,28 @@ const decisionNode = (
   statement: string,
   sourcePath: string | undefined,
 ): Node =>
-  NodeSchema.parse({
-    id: `DEC-${id}`,
-    type: "DEC",
-    provenance_type: "DECIDED",
-    statement,
-    status: "LOCKED",
-    external_ref: `gsd:${id}`,
-    ...(sourcePath ? { source_path: sourcePath } : {}),
-  });
+  (() => {
+    const selectedCandidate = candidateReference(statement);
+    const externalCandidate = selectedCandidate ?? `gsd:${id}`;
+    return NodeSchema.parse({
+      id: `DEC-${id}`,
+      type: "DEC",
+      provenance_type: "DECIDED",
+      statement,
+      status: "LOCKED",
+      external_ref: `gsd:${id}`,
+      candidate_ref: externalCandidate,
+      selected_candidate_ref: externalCandidate,
+      external_candidate_ref: externalCandidate,
+      source_evidence: {
+        source_path: sourcePath,
+        external_ref: `gsd:${id}`,
+        evidence_refs: evidenceReferences(statement),
+      },
+      unresolved_risk: "UNRESOLVED",
+      ...(sourcePath ? { source_path: sourcePath } : {}),
+    });
+  })();
 
 const hasAuthorization = (options: DecisionReopenOptions): boolean => {
   const human =

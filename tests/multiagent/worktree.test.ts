@@ -93,6 +93,33 @@ describe("WorktreeManager", () => {
     }
   });
 
+  it("parses TAP receipts and keeps MSI metrics without upgrading the rung", async () => {
+    const repoRoot = await repository();
+    try {
+      const manager = managerFor(repoRoot);
+      const candidate = await manager.create("CAN-01-raft");
+      const result = await manager.run(candidate, process.execPath, [
+        "-e",
+        "process.stdout.write('TAP version 13\\n1..2\\nok 1 - first\\nnot ok 2 - second\\nMSI: 81\\n')",
+      ]);
+
+      expect(result.evidence).toMatchObject({
+        status: "FAILED",
+        verdict: "FALSIFIED",
+        method: "tap-receipt",
+        receipt: {
+          format: "tap",
+          verdict: "FALSIFIED",
+          metrics: { mutation_score_indicator: 81 },
+        },
+      });
+      expect(result.evidence.rung).toBe(3);
+      expect(result.evidence.stdout).toContain("not ok 2");
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
   it("removes only the requested worktree and keeps its branch by default", async () => {
     const repoRoot = await repository();
     try {

@@ -85,10 +85,84 @@ const hasExecutedResult = (artifact: MattArtifact): boolean => {
   );
 };
 
-const isRedCapableResult = (skill: MattSkill, artifact: MattArtifact): boolean =>
-  (skill === "diagnosing-bugs" || skill === "tdd") &&
-  booleanValue(artifact.red_capable, artifact.redCapable, artifact.redCapableTest) === true &&
-  hasExecutedResult(artifact);
+const explicitVerdict = (artifact: MattArtifact): string | undefined =>
+  stringValue(artifact.verdict, artifact.verdict_type, artifact.verdictType);
+
+const canonicalVerdict = (value: string | undefined): "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE" | undefined => {
+  if (!value) return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (/^(?:pass|passed|success|succeeded|supported|verified|true)$/u.test(normalized)) return "SUPPORTED";
+  if (/^(?:fail|failed|failure|falsified|false|error|errored)$/u.test(normalized)) return "FALSIFIED";
+  if (/^(?:inconclusive|unknown|skipped|skip)$/u.test(normalized)) return "INCONCLUSIVE";
+  return undefined;
+};
+
+const evidenceMethod = (artifact: MattArtifact): string | undefined =>
+  stringValue(
+    artifact.method,
+    artifact.test_method,
+    artifact.testMethod,
+    artifact.verification_method,
+    artifact.verificationMethod,
+    artifact.evidence_method,
+  );
+
+const evidentiaryRung = (artifact: MattArtifact): number | undefined => {
+  const raw = artifact.rung ?? artifact.evidentiary_rung ?? artifact.evidentiaryRung;
+  const value =
+    typeof raw === "number"
+      ? raw
+      : typeof raw === "string"
+        ? Number(/\b(?:rung\s*)?(10|[1-9])\b/iu.exec(raw)?.[1])
+        : NaN;
+  return value && Number.isInteger(value) && value >= 1 && value <= 10 ? value : undefined;
+};
+
+const commandOrSource = (artifact: MattArtifact): string | undefined =>
+  stringValue(
+    artifact.test_command,
+    artifact.testCommand,
+    artifact.command,
+    artifact.source,
+    artifact.source_ref,
+    artifact.sourceRef,
+    artifact.source_url,
+    artifact.sourceUrl,
+  );
+
+const resultReceipt = (artifact: MattArtifact): unknown =>
+  artifact.stdout_digest ??
+  artifact.stdoutDigest ??
+  artifact.result_digest ??
+  artifact.resultDigest ??
+  artifact.digest ??
+  artifact.receipt ??
+  artifact.result_receipt ??
+  artifact.resultReceipt;
+
+const hasReceipt = (value: unknown): boolean =>
+  typeof value === "string"
+    ? value.trim().length > 0
+    : isRecord(value)
+      ? Object.keys(value).length > 0
+      : hasValue(value);
+
+const reproducibleEnvironment = (artifact: MattArtifact): string | undefined =>
+  stringValue(
+    artifact.reproducible_environment,
+    artifact.reproducibleEnvironment,
+    artifact.environment,
+    artifact.env,
+  );
+
+const completeExecutedEvidence = (artifact: MattArtifact): boolean =>
+  hasExecutedResult(artifact) &&
+  canonicalVerdict(explicitVerdict(artifact)) !== undefined &&
+  evidenceMethod(artifact) !== undefined &&
+  evidentiaryRung(artifact) !== undefined &&
+  commandOrSource(artifact) !== undefined &&
+  hasReceipt(resultReceipt(artifact)) &&
+  reproducibleEnvironment(artifact) !== undefined;
 
 const statementFor = (artifact: MattArtifact): string | undefined => {
   const direct = stringValue(
@@ -121,6 +195,10 @@ const generatedId = (
     verdict: artifact.verdict,
     test_command: artifact.test_command ?? artifact.command,
     stdout_digest: artifact.stdout_digest,
+    method: artifact.method ?? artifact.verification_method,
+    rung: artifact.rung ?? artifact.evidentiary_rung,
+    environment: artifact.reproducible_environment ?? artifact.environment,
+    receipt: artifact.receipt ?? artifact.result_receipt,
   });
   const digest = createHash("sha256").update(material).digest("hex").slice(0, 12);
   return `${type}-${digest}`;
@@ -144,13 +222,21 @@ export function normalizeMattArtifact(skillName: string, input: unknown): Node {
   const statement = statementFor(artifact);
   if (!statement) throw new Error("Matt artifact requires a non-empty statement");
 
-  const redCapable = isRedCapableResult(skill, artifact);
   const provenance = explicitProvenance(artifact);
-  const type =
-    redCapable || provenance === "MEASURED"
-      ? "EVD"
-      : canonicalType(artifact.node_type ?? artifact.nodeType ?? artifact.kind ?? artifact.type) ??
-        "EVDREQ";
+  const requestedType = canonicalType(
+    artifact.node_type ?? artifact.nodeType ?? artifact.kind ?? artifact.type,
+  );
+  const requestedEvidence =
+    requestedType === "EVD" ||
+    provenance === "MEASURED" ||
+    booleanValue(artifact.red_capable, artifact.redCapable, artifact.redCapableTest) === true;
+  const completeEvidence = completeExecutedEvidence(artifact);
+  if (requestedEvidence && !completeEvidence && stringValue(artifact.id, artifact.node_id, artifact.nodeId)?.startsWith("EVD-")) {
+    throw new Error(
+      "Executed EVD requires an explicit verdict, method, evidentiary rung, command/source, result receipt or digest, and reproducible environment",
+    );
+  }
+  const type = completeEvidence && requestedEvidence ? "EVD" : requestedType === "EVDREQ" || !requestedEvidence ? "EVDREQ" : "EVDREQ";
   const id =
     stringValue(artifact.id, artifact.node_id, artifact.nodeId) ??
     generatedId(type, skill, statement, artifact);
@@ -163,12 +249,17 @@ export function normalizeMattArtifact(skillName: string, input: unknown): Node {
     ...artifact,
     id,
     type,
-    provenance_type: redCapable
-      ? "MEASURED"
-      : provenance ?? (type === "EVDREQ" ? "PROPOSED" : "MEASURED"),
+    provenance_type: type === "EVD" ? "MEASURED" : "PROPOSED",
     statement,
     skill,
   };
+  if (type === "EVD") {
+    node.verdict = canonicalVerdict(explicitVerdict(artifact));
+    node.method = evidenceMethod(artifact);
+    node.rung = evidentiaryRung(artifact);
+    node.receipt = resultReceipt(artifact);
+    node.environment = reproducibleEnvironment(artifact);
+  }
   delete node.node_id;
   delete node.node_type;
   delete node.nodeType;

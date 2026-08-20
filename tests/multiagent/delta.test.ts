@@ -145,4 +145,41 @@ describe("mergeDelta", () => {
       await rm(directory, { recursive: true, force: true });
     }
   });
+
+  it("applies schema-validated status and invalidation mutations idempotently", async () => {
+    const { directory, storage } = await workspace();
+    try {
+      await mergeDelta(
+        storage,
+        block("ariadne-delta", { nodes: [node("TASK-1")], edges: [] }),
+      );
+      const response = block("ariadne-delta", {
+        nodes: [],
+        edges: [],
+        mutations: [
+          {
+            node_id: "TASK-1",
+            status: "INVALIDATED",
+            invalidation: { evidence_id: "EVD-1", reason: "falsified" },
+          },
+        ],
+      });
+
+      await expect(mergeDelta(storage, response)).resolves.toMatchObject({
+        applied: { nodes: ["TASK-1"] },
+      });
+      const before = await storage.readEvents();
+      await expect(mergeDelta(storage, response)).resolves.toMatchObject({
+        skipped: { nodes: ["TASK-1"] },
+      });
+      expect(await storage.readEvents()).toEqual(before);
+      expect((await storage.materialize()).nodes[0]).toMatchObject({
+        id: "TASK-1",
+        status: "INVALIDATED",
+        invalidation: { evidence_id: "EVD-1" },
+      });
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 });

@@ -7,9 +7,9 @@ import { runMattIngest } from "../../src/cli/commands/ingest.js";
 import { NodeSchema } from "../../src/core/schemas/nodes.js";
 
 describe("Matt skill output ingestion", () => {
-  it("normalizes a red-capable diagnosing-bugs result as measured evidence", () => {
+  it("does not promote an incomplete red-capable diagnosing-bugs result", () => {
     const node = normalizeMattArtifact("diagnosing-bugs", {
-      id: "EVD-007",
+      id: "EVDREQ-007",
       statement: "The regression reproduces with the red-capable test.",
       red_capable: true,
       executed: true,
@@ -17,18 +17,13 @@ describe("Matt skill output ingestion", () => {
       result: "failed",
     });
 
-    expect(node).toMatchObject({
-      id: "EVD-007",
-      type: "EVD",
-      provenance_type: "MEASURED",
-      statement: "The regression reproduces with the red-capable test.",
-    });
+    expect(node).toMatchObject({ id: "EVDREQ-007", type: "EVDREQ", provenance_type: "PROPOSED" });
     expect(NodeSchema.safeParse(node).success).toBe(true);
   });
 
-  it("normalizes a red-capable tdd result as measured evidence", () => {
+  it("does not promote a red-capable tdd result without a complete receipt", () => {
     const node = normalizeMattArtifact("tdd", {
-      id: "EVD-008",
+      id: "EVDREQ-008",
       statement: "The new behavior passes the focused test.",
       red_capable: true,
       executed: true,
@@ -36,10 +31,24 @@ describe("Matt skill output ingestion", () => {
       result: "passed",
     });
 
-    expect(node).toMatchObject({
-      type: "EVD",
-      provenance_type: "MEASURED",
+    expect(node).toMatchObject({ type: "EVDREQ", provenance_type: "PROPOSED" });
+  });
+
+  it("promotes only a fully receipted executed result", () => {
+    const node = normalizeMattArtifact("tdd", {
+      id: "EVD-009",
+      statement: "The focused test supports the change.",
+      red_capable: true,
+      executed: true,
+      verdict: "SUPPORTED",
+      method: "vitest",
+      rung: 3,
+      test_command: "npm test -- focused",
+      stdout_digest: "sha256:abc",
+      reproducible_environment: "node-22/linux-x64",
     });
+
+    expect(node).toMatchObject({ type: "EVD", provenance_type: "MEASURED", verdict: "SUPPORTED" });
   });
 
   it("keeps plain text as a proposed evidence request", () => {
@@ -75,7 +84,7 @@ describe("Matt skill output ingestion", () => {
       await writeFile(
         file,
         JSON.stringify({
-          id: "EVD-010",
+          id: "EVDREQ-010",
           statement: "The command helper preserves structured output.",
           red_capable: true,
           executed: true,
@@ -86,9 +95,9 @@ describe("Matt skill output ingestion", () => {
       await expect(
         runMattIngest(["matt", "diagnosing-bugs", file]),
       ).resolves.toMatchObject({
-        id: "EVD-010",
-        type: "EVD",
-        provenance_type: "MEASURED",
+        id: "EVDREQ-010",
+        type: "EVDREQ",
+        provenance_type: "PROPOSED",
       });
     } finally {
       await rm(directory, { recursive: true, force: true });

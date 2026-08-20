@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
@@ -54,6 +55,162 @@ type ProcessResult = {
   exitCode: number | null;
   signal: NodeJS.Signals | null;
   error?: Error;
+};
+
+type ExecutionReceipt = {
+  format: "junit" | "tap" | "json" | "process";
+  verdict: "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE";
+  tests?: { total?: number; passed?: number; failed?: number; skipped?: number };
+  duration_ms?: number;
+  metrics: Record<string, number>;
+};
+
+const numberAttribute = (attributes: string, name: string): number | undefined => {
+  const value = new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, "iu").exec(attributes)?.[1];
+  const parsed = value === undefined ? NaN : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const metricFallback = (text: string): Record<string, number> => {
+  const metrics: Record<string, number> = {};
+  for (const match of text.matchAll(
+    /\b(MSI|mutation[_ ]?score(?:[_ ]?indicator)?|p95|p99|throughput|latency)\s*[:=]\s*([0-9]+(?:\.[0-9]+)?)\s*(%|ms)?/giu,
+  )) {
+    const key = match[1].toLowerCase().replaceAll(" ", "_");
+    metrics[key === "msi" ? "mutation_score_indicator" : key] = Number(match[2]);
+  }
+  const killed = /\b([0-9]+)\s*(?:mutations?\s+)?killed\s*(?:of|\/)\s*([0-9]+)/iu.exec(text);
+  if (killed) {
+    metrics.mutation_score_indicator = (Number(killed[1]) / Number(killed[2])) * 100;
+  }
+  return metrics;
+};
+
+const parseJUnit = (text: string): ExecutionReceipt | undefined => {
+  if (!/<testsuite\b|<testsuites\b/iu.test(text)) return undefined;
+  const suites = [...text.matchAll(/<testsuite\b([^>]*)>/giu)];
+  const testcases = (text.match(/<testcase\b/giu) ?? []).length;
+  const failures =
+    (text.match(/<(?:failure|error)\b/giu) ?? []).length ||
+    suites.reduce(
+      (sum, match) =>
+        sum +
+        (numberAttribute(match[1], "failures") ?? 0) +
+        (numberAttribute(match[1], "errors") ?? 0),
+      0,
+    );
+  const skipped =
+    (text.match(/<skipped\b/giu) ?? []).length ||
+    suites.reduce((sum, match) => sum + (numberAttribute(match[1], "skipped") ?? 0), 0);
+  const total = suites.reduce((sum, match) => sum + (numberAttribute(match[1], "tests") ?? 0), 0) || testcases;
+  const duration = suites.reduce((sum, match) => sum + (numberAttribute(match[1], "time") ?? 0), 0);
+  return {
+    format: "junit",
+    verdict: failures > 0 ? "FALSIFIED" : "SUPPORTED",
+    tests: {
+      total,
+      passed: Math.max(0, total - failures - skipped),
+      failed: failures,
+      skipped,
+    },
+    ...(duration > 0 ? { duration_ms: duration * 1000 } : {}),
+    metrics: metricFallback(text),
+  };
+};
+
+const parseTap = (text: string): ExecutionReceipt | undefined => {
+  const results = [...text.matchAll(/^\s*(not\s+)?ok\b/gimu)];
+  if (results.length === 0 && !/^\s*1\.\.[0-9]+/imu.test(text)) return undefined;
+  const plan = Number(/^\s*1\.\.(\d+)/imu.exec(text)?.[1] ?? results.length);
+  const failed = results.filter((match) => match[1]).length;
+  return {
+    format: "tap",
+    verdict: failed > 0 || (plan > 0 && results.length < plan) ? "FALSIFIED" : "SUPPORTED",
+    tests: {
+      total: plan,
+      passed: results.length - failed,
+      failed,
+    },
+    metrics: metricFallback(text),
+  };
+};
+
+const jsonVerdict = (value: unknown): "SUPPORTED" | "FALSIFIED" | undefined => {
+  if (!value || typeof value !== "object") return undefined;
+  if (Array.isArray(value)) {
+    const verdicts = value.map(jsonVerdict).filter((entry): entry is "SUPPORTED" | "FALSIFIED" => entry !== undefined);
+    return verdicts.includes("FALSIFIED") ? "FALSIFIED" : verdicts.includes("SUPPORTED") ? "SUPPORTED" : undefined;
+  }
+  const record = value as Record<string, unknown>;
+  if (record.failed === true || record.success === false || record.numFailedTests && Number(record.numFailedTests) > 0) return "FALSIFIED";
+  if (record.passed === true || record.success === true || record.numPassedTests && Number(record.numPassedTests) > 0) return "SUPPORTED";
+  const status = [
+    record.status,
+    record.outcome,
+    record.verdict,
+    record.result,
+    record.event,
+    record.action,
+  ]
+    .find((entry): entry is string => typeof entry === "string")
+    ?.toLowerCase() ?? "";
+  if (/fail|error|broken|not ok/iu.test(status)) return "FALSIFIED";
+  if (/pass|success|ok/iu.test(status)) return "SUPPORTED";
+  const nested = Object.values(record)
+    .map(jsonVerdict)
+    .filter((entry): entry is "SUPPORTED" | "FALSIFIED" => entry !== undefined);
+  return nested.includes("FALSIFIED")
+    ? "FALSIFIED"
+    : nested.includes("SUPPORTED")
+      ? "SUPPORTED"
+      : undefined;
+};
+
+const parseJson = (text: string): ExecutionReceipt | undefined => {
+  const trimmed = text.trim();
+  if (!trimmed) return undefined;
+  let value: unknown;
+  try {
+    value = JSON.parse(trimmed);
+  } catch {
+    const records = trimmed.split(/\r?\n/u).filter(Boolean).flatMap((line) => {
+      try {
+        return [JSON.parse(line) as unknown];
+      } catch {
+        return [];
+      }
+    });
+    if (records.length === 0) return undefined;
+    value = records;
+  }
+  const verdict = jsonVerdict(value);
+  if (!verdict) return undefined;
+  return {
+    format: "json",
+    verdict,
+    metrics: metricFallback(text),
+  };
+};
+
+const parseExecutionReceipt = (
+  stdout: string,
+  stderr: string,
+  exitCode: number | null,
+): ExecutionReceipt => {
+  const text = `${stdout}\n${stderr}`;
+  const parsed = parseJUnit(text) ?? parseTap(text) ?? parseJson(stdout);
+  const metrics = { ...metricFallback(text), ...(parsed?.metrics ?? {}) };
+  return parsed
+    ? {
+        ...parsed,
+        verdict: exitCode === 0 ? parsed.verdict : "FALSIFIED",
+        metrics,
+      }
+    : {
+        format: "process",
+        verdict: exitCode === 0 ? "SUPPORTED" : "FALSIFIED",
+        metrics,
+      };
 };
 
 const runProcess = (
@@ -205,18 +362,42 @@ export class WorktreeManager {
     const startedAt = Date.now();
     const result = await runProcess(command, args, worktree.path);
     const durationMs = Math.max(0, Date.now() - startedAt);
+    const receipt = parseExecutionReceipt(result.stdout, result.stderr, result.exitCode);
+    const stdoutDigest = createHash("sha256")
+      .update(`${result.stdout}\n${result.stderr}`)
+      .digest("hex");
+    const testCommand = [command, ...args].join(" ");
     const evidenceId = `EVD-${worktree.candidateId}-${Date.now()}-${++evidenceSequence}`;
     const evidence = NodeSchema.parse({
       id: evidenceId,
       type: "EVD",
       provenance_type: "MEASURED",
       statement: `${command} for ${worktree.candidateId} exited with ${result.exitCode ?? "signal"}`,
-      status: result.exitCode === 0 ? "PASSED" : "FAILED",
+      status:
+        receipt.verdict === "SUPPORTED" && result.exitCode === 0
+          ? "PASSED"
+          : receipt.verdict === "INCONCLUSIVE"
+            ? "INCONCLUSIVE"
+            : "FAILED",
       candidate_id: worktree.candidateId,
       branch: worktree.branch,
       worktree_path: worktree.path,
       command,
       args: [...args],
+      test_command: testCommand,
+      verdict: receipt.verdict,
+      method: `${receipt.format}-receipt`,
+      // A local receipt supports only the example-based execution rung; callers may raise it with stronger evidence.
+      rung: 3,
+      stdout_digest: stdoutDigest,
+      reproducible_environment: `${process.platform}/${process.arch}; ${process.version}`,
+      receipt: {
+        format: receipt.format,
+        verdict: receipt.verdict,
+        ...(receipt.tests ? { tests: receipt.tests } : {}),
+        ...(receipt.duration_ms !== undefined ? { duration_ms: receipt.duration_ms } : {}),
+        metrics: receipt.metrics,
+      },
       stdout: result.stdout,
       stderr: result.stderr,
       exit_code: result.exitCode,

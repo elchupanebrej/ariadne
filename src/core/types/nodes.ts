@@ -102,6 +102,8 @@ export interface TransitionNode extends GenericCanonicalNode<"TRANS"> {
   cleanup_verification_test: string;
   owner: string;
   lifecycle_state?: TransitionLifecycle;
+  transition_lifecycle?: TransitionLifecycle;
+  lifecycle?: TransitionLifecycle;
   transition_receipt?: string | Record<string, unknown>;
   cleanup_verification_receipt?: string | Record<string, unknown>;
   verification_receipt?: string | Record<string, unknown>;

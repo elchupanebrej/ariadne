@@ -49,6 +49,12 @@ describe("ecosystem modes A, B, and C", () => {
         statement: "The red-capable test passed.",
         red_capable: true,
         executed: true,
+        verdict: "SUPPORTED",
+        method: "vitest",
+        rung: 3,
+        test_command: "npm test -- focused",
+        stdout_digest: "sha256:mode-a",
+        reproducible_environment: "node-22/linux-x64",
         result: "passed",
       });
       expect(evidence.type).toBe("EVD");

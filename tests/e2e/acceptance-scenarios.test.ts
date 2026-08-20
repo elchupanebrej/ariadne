@@ -82,6 +82,12 @@ describe("normative acceptance scenarios A-J", () => {
       statement: "The reproducible test fails under the observed regression.",
       red_capable: true,
       executed: true,
+      verdict: "FALSIFIED",
+      method: "vitest",
+      rung: 3,
+      test_command: "npm test -- regression",
+      stdout_digest: "sha256:acceptance-c",
+      reproducible_environment: "node-22/linux-x64",
       result: "failed",
       stdout: "expected 1, received 0",
     });
