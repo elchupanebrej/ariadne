@@ -26,6 +26,7 @@ Usage:
   ariadne verify [--strict]
   ariadne envelope <send|receive|verify> <file>
   ariadne ingest matt <skill> <file>
+  ariadne ingest gsd <path>
   ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>
   ariadne init [--mode auto|standalone|gsd] [--force]
   ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
