@@ -21,6 +21,13 @@ show which relationships are required by behavior and which are accidental.
 6. Remove accidental co-change coupling only when the required behavior and
    ownership remain explicit.
 
+## High-radius contract
+
+For a high or architectural change radius, the dependency artifact MUST
+include a Design Structure Matrix (DSM) covering the coupling classes above.
+Apply Parnas information hiding to assign each volatile decision to one module
+boundary, and record the resulting boundary contract and owner.
+
 ## Coupling classes
 
 | Class | Inspect |
