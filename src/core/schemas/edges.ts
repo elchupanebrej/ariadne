@@ -38,6 +38,76 @@ const sourceType = (id: string): NodeType | undefined =>
 const hasType = (id: string, types: readonly NodeType[]): boolean =>
   types.includes(sourceType(id) as NodeType);
 
+const PROPOSITION_NODE_TYPES: readonly NodeType[] = [
+  "TASK",
+  "FRAME",
+  "OBS",
+  "CLM",
+  "HYP",
+  "CTR",
+  "CAN",
+  "ASM",
+  "TRANS",
+  "DEC",
+];
+const EVIDENCE_NODE_TYPES: readonly NodeType[] = ["EVD", "VAL"];
+
+type EndpointContract = {
+  source: readonly NodeType[];
+  target: readonly NodeType[];
+};
+
+const EDGE_ENDPOINT_CONTRACTS: Record<EdgeType, EndpointContract> = {
+  supports: {
+    source: [...PROPOSITION_NODE_TYPES, ...EVIDENCE_NODE_TYPES],
+    target: PROPOSITION_NODE_TYPES,
+  },
+  contradicts: {
+    source: PROPOSITION_NODE_TYPES,
+    target: PROPOSITION_NODE_TYPES,
+  },
+  depends_on: {
+    source: [...PROPOSITION_NODE_TYPES, "EVDREQ"],
+    target: PROPOSITION_NODE_TYPES,
+  },
+  derived_from: {
+    source: PROPOSITION_NODE_TYPES,
+    target: [...PROPOSITION_NODE_TYPES, ...EVIDENCE_NODE_TYPES],
+  },
+  answers: {
+    source: ["EVD"],
+    target: ["EVDREQ"],
+  },
+  tests: {
+    source: ["EVD", "VAL", "EVDREQ"],
+    target: ["CLM", "HYP", "ASM", "CAN", "CTR", "TRANS", "EVDREQ"],
+  },
+  falsifies: {
+    source: ["EVD", "VAL"],
+    target: ["HYP", "ASM", "CAN"],
+  },
+  invalidates: {
+    source: PROPOSITION_NODE_TYPES,
+    target: ["TASK", "CLM", "HYP", "ASM", "CAN", "TRANS", "DEC"],
+  },
+  satisfies: {
+    source: ["EVD", "VAL", "CLM", "HYP", "CAN", "DEC", "TASK"],
+    target: ["TASK", "FRAME", "CLM", "HYP", "ASM", "CAN", "CTR", "TRANS", "EVDREQ"],
+  },
+  violates: {
+    source: ["EVD", "VAL", "CLM", "HYP", "ASM", "CAN", "DEC", "TASK"],
+    target: ["TASK", "FRAME", "CLM", "HYP", "ASM", "CAN", "CTR", "TRANS", "EVDREQ"],
+  },
+  supersedes: {
+    source: NODE_TYPES,
+    target: NODE_TYPES,
+  },
+  references: {
+    source: NODE_TYPES,
+    target: NODE_TYPES,
+  },
+};
+
 const endpointIssue = (
   context: z.RefinementCtx,
   path: "source" | "target",
@@ -73,49 +143,15 @@ export const EdgeSchema = z
       return;
     }
 
-    switch (type) {
-      case "falsifies":
-        if (!hasType(edge.source, ["EVD", "VAL"])) {
-          endpointIssue(
-            context,
-            "source",
-            "falsifies edges must originate from EVD or VAL nodes",
-          );
-        }
-        if (!hasType(edge.target, ["HYP", "ASM", "CAN"])) {
-          endpointIssue(
-            context,
-            "target",
-            "falsifies edges must target HYP, ASM, or CAN nodes",
-          );
-        }
-        break;
-      case "answers":
-        if (!hasType(edge.source, ["EVD"])) {
-          endpointIssue(context, "source", "answers edges must originate from EVD nodes");
-        }
-        if (!hasType(edge.target, ["EVDREQ"])) {
-          endpointIssue(context, "target", "answers edges must target EVDREQ nodes");
-        }
-        break;
-      case "tests":
-        if (!hasType(edge.source, ["EVD", "VAL", "EVDREQ"])) {
-          endpointIssue(
-            context,
-            "source",
-            "tests edges must originate from EVD, VAL, or EVDREQ nodes",
-          );
-        }
-        if (!hasType(edge.target, ["CLM", "HYP", "ASM", "CAN", "CTR", "TRANS", "EVDREQ"])) {
-          endpointIssue(
-            context,
-            "target",
-            "tests edges must target a proposition, candidate, transition, or evidence request",
-          );
-        }
-        break;
-      default:
-        break;
+    const contract = EDGE_ENDPOINT_CONTRACTS[type];
+    if (!hasType(edge.source, contract.source)) {
+      endpointIssue(context, "source", `${type} edges have an invalid source node type`);
+    }
+    if (!hasType(edge.target, contract.target)) {
+      endpointIssue(context, "target", `${type} edges have an invalid target node type`);
+    }
+    if (type === "supersedes" && sourceType(edge.source) !== sourceType(edge.target)) {
+      endpointIssue(context, "target", "supersedes edges must connect nodes of the same type");
     }
   });
 
