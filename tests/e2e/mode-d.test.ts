@@ -62,7 +62,12 @@ describe("standalone Mode D recovery", () => {
 
     const evidence = addNode(cwd, "EVD", "EVD-1", "Measured falsifying evidence", {
       provenance_type: "FACT",
+      verdict: "FALSIFIED",
+      method: "focused mode-d test",
       rung: 8,
+      receipt: "sha256:mode-d",
+      stdout_digest: "sha256:mode-d-stdout",
+      reproducible_environment: "node-22/linux-x64",
     });
     expect(JSON.parse(evidence.stdout)).toMatchObject({ id: "EVD-1", type: "EVD" });
 

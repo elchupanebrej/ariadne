@@ -21,7 +21,22 @@ const node = (
   id: string,
   type: "EVD" | "ASM" | "TASK" | "CAN" | "DEC",
   provenance_type: "FACT" | "ASSUMED" | "DERIVED" | "PROPOSED" | "DECIDED",
-) => ({ id, type, provenance_type, statement: id });
+) => ({
+  id,
+  type,
+  provenance_type,
+  statement: id,
+  ...(type === "EVD"
+    ? {
+        verdict: "FALSIFIED" as const,
+        method: "focused invalidation test",
+        rung: 3,
+        receipt: "sha256:cli-invalidation",
+        stdout_digest: "sha256:cli-invalidation-stdout",
+        reproducible_environment: "node-22/linux-x64",
+      }
+    : {}),
+});
 
 const workspace = async () => {
   const cwd = await mkdtemp(join(tmpdir(), "ariadne-cli-invalidate-"));
@@ -121,6 +136,24 @@ describe("ariadne invalidate", () => {
     expect(wrongTarget.code).toBe(1);
     expect(wrongTarget.stderr.text()).toContain("ASM or HYP");
 
+    expect(await storage.readEvents()).toEqual(before);
+  });
+
+  it("rejects incomplete falsifying evidence without writing", async () => {
+    const { cwd, storage } = await workspace();
+    await storage.appendNode({
+      id: "EVD-2",
+      type: "EVD",
+      provenance_type: "FACT",
+      statement: "Incomplete evidence",
+    });
+    await storage.appendEdge({ source: "EVD-2", target: "ASM-1", type: "falsifies" });
+    const before = await storage.readEvents();
+
+    const result = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-2"]);
+
+    expect(result.code).toBe(1);
+    expect(result.stderr.text()).toMatch(/incomplete|verdict|method|rung|receipt|environment/i);
     expect(await storage.readEvents()).toEqual(before);
   });
 });

@@ -135,7 +135,18 @@ describe("normative acceptance scenarios A-J", () => {
       const before = await readFile(summaryPath, "utf8");
       const graph: MaterializedGraph = {
         nodes: [
-          { id: "EVD-044", type: "EVD", provenance_type: "MEASURED", statement: "Measured failure." },
+          {
+            id: "EVD-044",
+            type: "EVD",
+            provenance_type: "MEASURED",
+            statement: "Measured failure.",
+            verdict: "FALSIFIED",
+            method: "focused acceptance test",
+            rung: 3,
+            receipt: "sha256:acceptance-e",
+            stdout_digest: "sha256:acceptance-e-stdout",
+            reproducible_environment: "node-22/linux-x64",
+          },
           { id: "ASM-007", type: "ASM", provenance_type: "ASSUMED", statement: "Latency stays bounded." },
           { id: "CAN-002", type: "CAN", provenance_type: "PROPOSED", statement: "Candidate mechanism." },
         ],
