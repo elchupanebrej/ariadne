@@ -4,3 +4,4 @@ export * from "./core/schemas/edges.js";
 export * from "./core/types/provenance.js";
 export * from "./core/schemas/envelope.js";
 export * from "./core/schemas/json-schema-export.js";
+export * from "./graph/storage.js";
