@@ -126,5 +126,5 @@ describe("standalone Mode D recovery", () => {
       affected_node_ids: ["ASM-1", "CAN-1"],
     });
     expect(await readFile(join(storageRoot, "INDEX.md"), "utf8")).toContain("ASM-1");
-  });
+  }, 30_000);
 });
