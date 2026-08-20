@@ -1,4 +1,4 @@
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve, join } from "node:path";
 
 export const GSD_SHADOW_FILES = [
@@ -83,8 +83,24 @@ export function findZeroShadowFiles(
   const environment = environmentFor(rootOrEnvironment, options);
   if (!environment.active) return [];
 
+  const preserved = new Set<string>();
+  try {
+    const manifest = JSON.parse(
+      readFileSync(join(environment.overlayPath, "MIGRATION.json"), "utf8"),
+    ) as { preserved_source_documents?: unknown };
+    if (Array.isArray(manifest.preserved_source_documents)) {
+      for (const name of manifest.preserved_source_documents) {
+        if (typeof name === "string") preserved.add(name);
+      }
+    }
+  } catch {
+    // A migration manifest is optional; normal shadow checks remain strict.
+  }
+
   const candidates = [
-    ...GSD_SHADOW_FILES.map((name) => join(environment.rootPath, name)),
+    ...GSD_SHADOW_FILES
+      .filter((name) => !preserved.has(name))
+      .map((name) => join(environment.rootPath, name)),
     ...GSD_SHADOW_FILES.map((name) => join(environment.rootPath, ".ariadne", name)),
     ...GSD_SHADOW_FILES.map((name) => join(environment.overlayPath, name)),
   ];

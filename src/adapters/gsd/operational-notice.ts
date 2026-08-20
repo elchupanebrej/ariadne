@@ -15,6 +15,15 @@ export const OperationalNoticeSchema = z
     affected_ids: z.array(z.string().regex(new RegExp(`^[A-Z][A-Z0-9-]*-${nodeId}$`))).min(1),
     reason: z.string().min(1),
     message: z.string().min(1),
+    owner: z.string().min(1).default("Ariadne"),
+    next_action: z
+      .string()
+      .min(1)
+      .default("Review the affected nodes and select the next candidate"),
+    revaluation_condition: z
+      .string()
+      .min(1)
+      .default("Re-evaluate when new evidence addresses the falsified premise"),
     created_at: z.string().datetime(),
   })
   .passthrough();
@@ -30,6 +39,11 @@ export type OperationalNoticeInput = {
   affected_ids?: string[];
   reason?: string;
   message?: string;
+  owner?: string;
+  nextAction?: string;
+  next_action?: string;
+  revaluationCondition?: string;
+  revaluation_condition?: string;
   timestamp?: string;
   created_at?: string;
 };
@@ -63,6 +77,9 @@ const normalizeInput = (input: OperationalNoticeInput): {
   evidenceId: string;
   affectedIds: string[];
   reason: string;
+  owner: string;
+  nextAction: string;
+  revaluationCondition: string;
   createdAt: string;
 } => {
   const falsifiedId = input.falsifiedId ?? input.falsified_id;
@@ -89,6 +106,15 @@ const normalizeInput = (input: OperationalNoticeInput): {
       input.reason?.trim() ||
       input.message?.trim() ||
       `Evidence ${evidenceId} falsifies ${falsifiedId}`,
+    owner: input.owner?.trim() || "Ariadne",
+    nextAction:
+      input.nextAction?.trim() ||
+      input.next_action?.trim() ||
+      "Review the affected nodes and select the next candidate",
+    revaluationCondition:
+      input.revaluationCondition?.trim() ||
+      input.revaluation_condition?.trim() ||
+      "Re-evaluate when new evidence addresses the falsified premise",
     createdAt: new Date(createdAt).toISOString(),
   };
 };
@@ -148,6 +174,9 @@ export function renderOperationalNoticeBanner(notice: OperationalNotice): string
     `Evidence: ${notice.evidence_id}`,
     `Affected: ${notice.affected_ids.join(", ")}`,
     `Reason: ${notice.reason}`,
+    `Owner: ${notice.owner}`,
+    `Next action: ${notice.next_action}`,
+    `Revaluation: ${notice.revaluation_condition}`,
   ].join("\n");
 }
 
@@ -183,6 +212,9 @@ export async function emitGsdOperationalNotice(
         affected_ids: normalized.affectedIds,
         reason: normalized.reason,
         message: normalized.reason,
+        owner: normalized.owner,
+        next_action: normalized.nextAction,
+        revaluation_condition: normalized.revaluationCondition,
         created_at: normalized.createdAt,
       });
       await appendFile(noticesPath, `${JSON.stringify(result)}\n`, "utf8");

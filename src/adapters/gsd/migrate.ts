@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 export type StandaloneMigrationReceipt = {
@@ -6,6 +6,7 @@ export type StandaloneMigrationReceipt = {
   planningRoot: string;
   overlayRoot: string;
   copiedDocuments: string[];
+  archivedDocuments: string[];
   mergedFiles: string[];
   preservedDocuments: string[];
 };
@@ -59,6 +60,14 @@ const mergeLineFile = async (source: string, target: string): Promise<boolean> =
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+const MIGRATED_DOCUMENTS = [
+  "PROJECT.md",
+  "REQUIREMENTS.md",
+  "ROADMAP.md",
+  "STATE.md",
+  "CONTEXT.md",
+] as const;
 
 const mergeState = async (source: string, target: string): Promise<boolean> => {
   if (!(await exists(source))) return false;
@@ -121,12 +130,46 @@ export async function migrateStandaloneToGsd(
   await mkdir(overlayRoot, { recursive: true });
 
   const copiedDocuments: string[] = [];
+  const archivedDocuments: string[] = [];
   const preservedDocuments: string[] = [];
-  for (const name of ["PROJECT.md", "REQUIREMENTS.md", "CONTEXT.md"] as const) {
+  for (const name of MIGRATED_DOCUMENTS) {
     const source = await sourceFor(root, name);
     const result = await copyWhenAbsent(source, join(planningRoot, name));
-    if (result === "copied") copiedDocuments.push(name);
+    if (result === "copied") {
+      copiedDocuments.push(name);
+      if (source) {
+        const archivePath = join(overlayRoot, "migration", name);
+        if (!(await exists(archivePath))) {
+          await mkdir(join(overlayRoot, "migration"), { recursive: true });
+          await rename(source, archivePath);
+          archivedDocuments.push(name);
+        }
+      }
+    }
     if (result === "preserved") preservedDocuments.push(name);
+  }
+
+  for (const name of MIGRATED_DOCUMENTS) {
+    if (
+      (await exists(join(overlayRoot, "migration", name))) &&
+      !archivedDocuments.includes(name)
+    ) {
+      archivedDocuments.push(name);
+    }
+  }
+
+  const manifest = JSON.stringify(
+    {
+      schema_version: 1,
+      preserved_source_documents: preservedDocuments,
+      archived_documents: archivedDocuments,
+    },
+    null,
+    2,
+  );
+  const manifestPath = join(overlayRoot, "MIGRATION.json");
+  if (!(await exists(manifestPath)) || (await readFile(manifestPath, "utf8")) !== `${manifest}\n`) {
+    await writeFile(manifestPath, `${manifest}\n`, "utf8");
   }
 
   const standaloneRoot = join(root, ".ariadne");
@@ -146,6 +189,7 @@ export async function migrateStandaloneToGsd(
     planningRoot,
     overlayRoot,
     copiedDocuments,
+    archivedDocuments,
     mergedFiles,
     preservedDocuments,
   };

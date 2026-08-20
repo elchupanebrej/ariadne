@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { NodeSchema, type Node } from "../../core/schemas/nodes.js";
 import {
   detectGsd,
@@ -12,8 +12,11 @@ export type GsdDocuments = {
   project: string;
   requirements: string;
   roadmap: string;
+  state: string;
   phaseContext: string;
   phaseContextPath?: string;
+  statePath: string;
+  activePhase?: string;
 };
 
 export type GsdProjection = {
@@ -21,6 +24,7 @@ export type GsdProjection = {
   nodes: Node[];
   decisions: Node[];
   environment: GsdEnvironment;
+  activePhase?: string;
 };
 
 export type DecisionReopenOptions = {
@@ -86,6 +90,7 @@ const phaseContextCandidates = async (environment: GsdEnvironment): Promise<stri
 const choosePhaseContext = async (
   environment: GsdEnvironment,
   options: ProjectGsdOptions,
+  activePhase?: string,
 ): Promise<string | undefined> => {
   if (options.phaseContextPath) {
     return isAbsolute(options.phaseContextPath)
@@ -94,11 +99,37 @@ const choosePhaseContext = async (
   }
 
   const candidates = await phaseContextCandidates(environment);
-  if (options.phase) {
-    const wanted = options.phase.toLowerCase();
-    return candidates.find((candidate) => candidate.toLowerCase().includes(wanted));
+  const requestedPhase = options.phase ?? activePhase;
+  if (requestedPhase) {
+    const wanted = requestedPhase.toLowerCase().replace(/^phase[-_\s]*/u, "");
+    const wantedNumber = Number.parseInt(wanted, 10);
+    return candidates.find((candidate) => {
+      const phaseDirectory = basename(dirname(candidate)).toLowerCase();
+      if (phaseDirectory === wanted || phaseDirectory.startsWith(`${wanted}-`)) return true;
+      if (phaseDirectory === wanted || phaseDirectory.startsWith(`${wanted}_`)) return true;
+      const phaseNumber = Number.parseInt(phaseDirectory, 10);
+      return Number.isInteger(wantedNumber) && phaseNumber === wantedNumber;
+    });
   }
   return candidates[0];
+};
+
+const activePhaseFromState = (state: string): string | undefined => {
+  const match = state.match(
+    /(?:active|current)\s+phase\s*[:#-]?\s*(?:phase\s*)?([0-9]+(?:[-_][A-Za-z0-9][A-Za-z0-9_-]*)?)/iu,
+  );
+  if (match?.[1]) return match[1];
+
+  const position = state.match(/current\s+position\b([\s\S]{0,400})/iu)?.[1] ?? state;
+  const positionPhase = position.match(
+    /^\s*[-*+]?\s*phase\s*[:#-]\s*(?:phase\s*)?([0-9]+(?:[-_][A-Za-z0-9][A-Za-z0-9_-]*)?)/imu,
+  );
+  if (positionPhase?.[1]) return positionPhase[1];
+
+  const heading = state.match(
+    /^#{1,6}\s+(?:active|current)\s+phase\s*\n+\s*[-*+]?\s*(?:phase\s*)?([0-9]+(?:[-_][A-Za-z0-9][A-Za-z0-9_-]*)?)/imu,
+  );
+  return heading?.[1];
 };
 
 const section = (markdown: string, name: string): string => {
@@ -289,7 +320,10 @@ export async function projectGsd(
   }
   validateReopenRequests(options);
 
-  const phaseContextPath = await choosePhaseContext(environment, options);
+  const statePath = join(environment.planningPath, "STATE.md");
+  const state = await readOptional(statePath);
+  const activePhase = activePhaseFromState(state);
+  const phaseContextPath = await choosePhaseContext(environment, options, activePhase);
   const [project, requirements, roadmap, phaseContext] = await Promise.all([
     readRequired(join(environment.planningPath, "PROJECT.md"), "PROJECT.md"),
     readRequired(join(environment.planningPath, "REQUIREMENTS.md"), "REQUIREMENTS.md"),
@@ -301,13 +335,17 @@ export async function projectGsd(
     project,
     requirements,
     roadmap,
+    state,
     phaseContext,
     ...(phaseContextPath ? { phaseContextPath } : {}),
+    statePath,
+    ...(activePhase ? { activePhase } : {}),
   };
   const sourceNodes = [
     documentNode("FRAME-GSD-PROJECT", "FRAME", project, "gsd:PROJECT"),
     documentNode("TASK-GSD-REQUIREMENTS", "TASK", requirements, "gsd:REQUIREMENTS"),
-    documentNode("STATE-GSD-ROADMAP", "STATE", roadmap, "gsd:ROADMAP"),
+    documentNode("TASK-GSD-ROADMAP", "TASK", roadmap, "gsd:ROADMAP"),
+    documentNode("STATE-GSD-STATE", "STATE", state, "gsd:STATE"),
     ...(phaseContext
       ? [documentNode("FRAME-GSD-PHASE-CONTEXT", "FRAME", phaseContext, "gsd:CONTEXT")]
       : []),
@@ -321,6 +359,7 @@ export async function projectGsd(
     nodes: [...sourceNodes, ...decisions],
     decisions,
     environment,
+    ...(activePhase ? { activePhase } : {}),
   };
 }
 

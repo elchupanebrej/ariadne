@@ -44,6 +44,20 @@ describe("ecosystem modes A, B, and C", () => {
           }),
         ]),
       );
+      const firstEvents = await controller.storage.readEvents();
+      expect(await controller.readGraph()).toEqual(
+        expect.objectContaining({
+          nodes: expect.arrayContaining([
+            expect.objectContaining({ id: "STATE-GSD-STATE", type: "STATE" }),
+            expect.objectContaining({ id: "TASK-GSD-ROADMAP", type: "TASK" }),
+          ]),
+        }),
+      );
+      await controller.projectGsd();
+      expect(await controller.storage.readEvents()).toHaveLength(firstEvents.length);
+      expect(await controller.storage.readState()).toEqual(
+        expect.objectContaining({ mode: "gsd", gsd_projection: expect.any(Object) }),
+      );
 
       const evidence = await controller.ingestMattArtifact("diagnosing-bugs", {
         statement: "The red-capable test passed.",

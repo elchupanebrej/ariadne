@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -12,6 +12,7 @@ import {
   assertDecisionReopenAllowed,
   projectGsd,
 } from "../../src/adapters/gsd/projector.js";
+import { migrateStandaloneToGsd } from "../../src/adapters/gsd/migrate.js";
 import { NodeSchema } from "../../src/core/schemas/nodes.js";
 
 describe("GSD detector and zero-shadow state", () => {
@@ -130,5 +131,62 @@ describe("GSD detector and zero-shadow state", () => {
     expect(() =>
       assertDecisionReopenAllowed("D-001", { falsifyingEvidence: { falsifies: true } }),
     ).not.toThrow();
+  });
+
+  it("projects STATE.md as state and selects its active phase context", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-gsd-state-"));
+    try {
+      const planning = join(root, ".planning");
+      await mkdir(join(planning, "phases", "01-foundation"), { recursive: true });
+      await mkdir(join(planning, "phases", "02-delivery"), { recursive: true });
+      await writeFile(join(planning, "PROJECT.md"), "# Project");
+      await writeFile(join(planning, "REQUIREMENTS.md"), "# Requirements");
+      await writeFile(join(planning, "ROADMAP.md"), "# Roadmap");
+      await writeFile(join(planning, "STATE.md"), "# State\n\nCurrent Phase: 02-delivery\n");
+      await writeFile(
+        join(planning, "phases", "01-foundation", "CONTEXT.md"),
+        "## Decisions\n- D-001: Foundation\n",
+      );
+      await writeFile(
+        join(planning, "phases", "02-delivery", "CONTEXT.md"),
+        "## Decisions\n- D-002: Delivery\n",
+      );
+
+      const projection = await projectGsd(root);
+
+      expect(projection.activePhase).toBe("02-delivery");
+      expect(projection.documents.state).toContain("Current Phase: 02-delivery");
+      expect(projection.documents.phaseContextPath).toContain("02-delivery");
+      expect(projection.nodes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "STATE-GSD-STATE", type: "STATE", external_ref: "gsd:STATE" }),
+          expect.objectContaining({ id: "TASK-GSD-ROADMAP", type: "TASK", external_ref: "gsd:ROADMAP" }),
+          expect.objectContaining({ id: "DEC-D-002" }),
+        ]),
+      );
+      expect(projection.nodes.some((node) => node.id === "STATE-GSD-ROADMAP")).toBe(false);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("archives standalone planning documents without leaving GSD shadows", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-gsd-migration-"));
+    try {
+      for (const name of ["PROJECT.md", "REQUIREMENTS.md", "ROADMAP.md", "STATE.md"]) {
+        await writeFile(join(root, name), `# ${name}\n`);
+      }
+
+      const receipt = await migrateStandaloneToGsd(root);
+
+      expect(receipt.archivedDocuments).toEqual(
+        expect.arrayContaining(["PROJECT.md", "REQUIREMENTS.md", "ROADMAP.md", "STATE.md"]),
+      );
+      expect(await readFile(join(root, ".planning", "ROADMAP.md"), "utf8")).toContain("ROADMAP");
+      expect(await readFile(join(root, ".planning", "STATE.md"), "utf8")).toContain("STATE");
+      expect(() => assertNoShadowState(root)).not.toThrow();
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

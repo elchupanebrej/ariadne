@@ -39,6 +39,9 @@ describe("GSD operational notices", () => {
         falsified_id: "ASM-007",
         evidence_id: "EVD-044",
         affected_ids: ["CAN-002", "DEC-003"],
+        owner: "Ariadne",
+        next_action: expect.any(String),
+        revaluation_condition: expect.any(String),
       });
       expect(banners[0]).toContain("⚠️ ARIADNE OPERATIONAL NOTICE");
       expect(await readFile(summaryPath, "utf8")).toBe(before);

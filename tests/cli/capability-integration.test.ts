@@ -51,6 +51,35 @@ describe("CLI capability integrations", () => {
     expect(existsSync(join(cwd, ".ariadne"))).toBe(false);
   });
 
+  it("resolves the nearest parent workspace and persists normative GSD ingestion", async () => {
+    const root = await workspace();
+    const nested = join(root, "packages", "worker");
+    await mkdir(join(root, ".planning", "phases", "01-foundation"), { recursive: true });
+    await mkdir(nested, { recursive: true });
+    await writeFile(join(root, ".planning", "PROJECT.md"), "# Project");
+    await writeFile(join(root, ".planning", "REQUIREMENTS.md"), "# Requirements");
+    await writeFile(join(root, ".planning", "ROADMAP.md"), "# Roadmap");
+    await writeFile(join(root, ".planning", "STATE.md"), "# State\nCurrent Phase: 01-foundation\n");
+    await writeFile(
+      join(root, ".planning", "phases", "01-foundation", "CONTEXT.md"),
+      "## Decisions\n- D-001: Keep the parent workspace canonical.\n",
+    );
+
+    const result = await invoke(nested, ["ingest", "gsd", "."]);
+
+    expect(result.code).toBe(0);
+    expect(JSON.parse(result.stdout.text())).toMatchObject({ activePhase: "01-foundation" });
+    expect(await new GraphStorage(join(root, ".planning", "ariadne")).materialize()).toEqual(
+      expect.objectContaining({
+        nodes: expect.arrayContaining([
+          expect.objectContaining({ id: "STATE-GSD-STATE" }),
+          expect.objectContaining({ id: "DEC-D-001" }),
+        ]),
+      }),
+    );
+    expect(existsSync(join(nested, ".ariadne"))).toBe(false);
+  });
+
   it("persists invalidation notices in standalone mode and emits the banner", async () => {
     const cwd = await workspace();
     const storage = new GraphStorage(join(cwd, ".ariadne"));
@@ -59,6 +88,11 @@ describe("CLI capability integrations", () => {
       type: "EVD",
       provenance_type: "FACT",
       statement: "Measured falsification",
+      verdict: "FALSIFIED",
+      method: "focused test",
+      rung: 3,
+      receipt: "sha256:capability-standalone",
+      environment: "node-22/linux-x64",
     });
     await storage.appendNode({
       id: "ASM-1",
@@ -88,7 +122,17 @@ describe("CLI capability integrations", () => {
     await writeFile(summary, "# Completed\n");
     const before = await readFile(summary, "utf8");
     const storage = new GraphStorage(join(cwd, ".planning", "ariadne"));
-    await storage.appendNode({ id: "EVD-1", type: "EVD", provenance_type: "FACT", statement: "Evidence" });
+    await storage.appendNode({
+      id: "EVD-1",
+      type: "EVD",
+      provenance_type: "FACT",
+      statement: "Evidence",
+      verdict: "FALSIFIED",
+      method: "focused test",
+      rung: 3,
+      receipt: "sha256:capability-gsd",
+      environment: "node-22/linux-x64",
+    });
     await storage.appendNode({ id: "HYP-1", type: "HYP", provenance_type: "PROPOSED", statement: "Hypothesis" });
     await storage.appendEdge({ source: "EVD-1", type: "falsifies", target: "HYP-1" });
 

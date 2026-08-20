@@ -21,6 +21,12 @@ import {
 
 export type AriadneHarnessControllerOptions = ProviderManagerOptions;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const sameJson = (left: unknown, right: unknown): boolean =>
+  JSON.stringify(left) === JSON.stringify(right);
+
 export class AriadneHarnessController {
   readonly rootDirectory: string;
   readonly capabilities: CapabilityProviderManager;
@@ -47,7 +53,43 @@ export class AriadneHarnessController {
   }
 
   async projectGsd(options: Omit<ProjectGsdOptions, "rootDirectory"> = {}): Promise<GsdProjection> {
-    return projectGsd(this.rootDirectory, options);
+    const projection = await projectGsd(this.rootDirectory, options);
+    const graph = await this.storage.readGraph();
+    const current = new Map(graph.nodes.map((node) => [node.id, node]));
+    const events = projection.nodes
+      .filter((node) => !sameJson(current.get(node.id), node))
+      .map((node) => ({ kind: "node" as const, node }));
+    if (events.length > 0) await this.storage.appendEvents(events);
+
+    const previous = await this.storage.readState<Record<string, unknown>>();
+    const previousFrontier = isRecord(previous) && Array.isArray(previous.frontier)
+      ? previous.frontier
+      : [];
+    const frontier = [
+      ...new Set([
+        ...previousFrontier.filter((id): id is string => typeof id === "string"),
+        ...projection.nodes.map((node) => node.id),
+      ]),
+    ];
+    const nextState = {
+      ...(isRecord(previous) ? previous : {}),
+      schema_version:
+        isRecord(previous) && typeof previous.schema_version === "number"
+          ? previous.schema_version
+          : 1,
+      mode: "gsd",
+      frontier,
+      open_unknowns:
+        isRecord(previous) && Array.isArray(previous.open_unknowns)
+          ? previous.open_unknowns
+          : [],
+      gsd_projection: {
+        state_path: projection.documents.statePath,
+        active_phase: projection.activePhase,
+      },
+    };
+    if (!sameJson(previous, nextState)) await this.storage.writeState(nextState);
+    return projection;
   }
 
   async ingestMattArtifact(skill: MattSkill | string, artifact: unknown): Promise<Node> {
