@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { runEdge } from "./commands/edge.js";
+import { runInvalidation } from "./commands/invalidate.js";
 import { runNode } from "./commands/node.js";
 import { runStatus, type CliIO } from "./commands/status.js";
 
@@ -14,6 +15,7 @@ Usage:
   ariadne status [--json]
   ariadne node <add|get|list|remove> ...
   ariadne edge <add|list|remove> ...
+  ariadne invalidate <node_id> --by <evidence_id>
 
 Options:
   -h, --help       Show this help
@@ -52,6 +54,7 @@ export async function runCli(
     if (command === "status") return await runStatus(args.slice(1), io);
     if (command === "node") return await runNode(args.slice(1), io);
     if (command === "edge") return await runEdge(args.slice(1), io);
+    if (command === "invalidate") return await runInvalidation(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);
