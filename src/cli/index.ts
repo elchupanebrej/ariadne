@@ -5,8 +5,11 @@ import { fileURLToPath } from "node:url";
 import { runEdge } from "./commands/edge.js";
 import { runGate } from "./commands/gate.js";
 import { runInvalidation } from "./commands/invalidate.js";
+import { runIngest } from "./commands/ingest.js";
 import { runInit } from "./commands/init.js";
 import { runNode } from "./commands/node.js";
+import { runEnvelope } from "./commands/envelope.js";
+import { runOperation } from "./commands/op.js";
 import { runStatus, type CliIO } from "./commands/status.js";
 import { runTemplate } from "./commands/template.js";
 
@@ -20,6 +23,10 @@ Usage:
   ariadne edge <add|list|remove> ...
   ariadne invalidate <node_id> --by <evidence_id>
   ariadne gate <structural|semantic|epistemic|all> [--strict]
+  ariadne verify [--strict]
+  ariadne envelope <send|receive|verify> <file>
+  ariadne ingest matt <skill> <file>
+  ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>
   ariadne init [--mode auto|standalone|gsd] [--force]
   ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
 
@@ -62,6 +69,10 @@ export async function runCli(
     if (command === "edge") return await runEdge(args.slice(1), io);
     if (command === "invalidate") return await runInvalidation(args.slice(1), io);
     if (command === "gate") return await runGate(args.slice(1), io);
+    if (command === "verify") return await runGate(["all", ...args.slice(1)], io);
+    if (command === "envelope") return await runEnvelope(args.slice(1), io);
+    if (command === "ingest") return await runIngest(args.slice(1), io);
+    if (command === "op") return runOperation(args.slice(1), io);
     if (command === "init") return await runInit(args.slice(1), io);
     if (command === "template") return runTemplate(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);

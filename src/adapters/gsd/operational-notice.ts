@@ -159,11 +159,10 @@ export async function emitGsdOperationalNotice(
   const options: OperationalNoticeOptions =
     typeof writerOrOptions === "function" ? { writer: writerOrOptions } : writerOrOptions;
   const environment = detectGsd(rootDirectory, options);
-  if (!environment.active) throw new Error("GSD is not active; operational notice requires .planning");
 
   const normalized = normalizeInput(input);
-  const noticesPath = join(environment.overlayPath, "NOTICES.jsonl");
-  const statePath = join(environment.overlayPath, "STATE.yaml");
+  const noticesPath = join(environment.storageRoot, "NOTICES.jsonl");
+  const statePath = join(environment.storageRoot, "STATE.yaml");
   let result: OperationalNotice | undefined;
   let created = false;
 

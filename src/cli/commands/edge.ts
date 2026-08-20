@@ -1,13 +1,12 @@
-import { join } from "node:path";
 import {
   EDGE_TYPES,
   EdgeSchema,
   type EdgeType,
   type EpistemicEdge,
 } from "../../core/schemas/edges.js";
-import { GraphStorage } from "../../graph/storage.js";
 import { validateGraph } from "../../graph/integrity.js";
-import type { CliIO } from "./status.js";
+import { resolveCliWorkspace } from "../workspace.js";
+import type { CliIO } from "../workspace.js";
 
 type Flags = Map<string, string>;
 
@@ -32,7 +31,7 @@ const parseFlags = (
   return { positionals, flags };
 };
 
-const storageFor = (io: CliIO) => new GraphStorage(join(io.cwd, ".ariadne"));
+const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
 
 const parseEdge = (args: readonly string[]): EpistemicEdge => {
   if (args.length !== 3) {
@@ -50,7 +49,7 @@ const edgeKey = (edge: EpistemicEdge): string =>
 
 async function addEdge(args: readonly string[], io: CliIO): Promise<EpistemicEdge> {
   const edge = parseEdge(args);
-  const storage = storageFor(io);
+  const storage = await storageFor(io);
   const graph = await storage.materialize();
   const nodeIds = new Set(graph.nodes.map((node) => node.id));
   if (!nodeIds.has(edge.source)) throw new Error(`Edge source ${edge.source} does not exist`);
@@ -76,7 +75,8 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
   if (relation && !(EDGE_TYPES as readonly string[]).includes(relation)) {
     throw new Error(`Invalid edge relation: ${relation}`);
   }
-  return (await storageFor(io).materialize()).edges.filter(
+  const graph = await (await storageFor(io)).materialize();
+  return graph.edges.filter(
     (edge) =>
       (!from || edge.source === from) &&
       (!to || edge.target === to) &&
@@ -86,7 +86,7 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
 
 async function removeEdge(args: readonly string[], io: CliIO): Promise<EpistemicEdge> {
   const edge = parseEdge(args);
-  const storage = storageFor(io);
+  const storage = await storageFor(io);
   const graph = await storage.materialize();
   if (!graph.edges.some((candidate) => edgeKey(candidate) === edgeKey(edge))) {
     throw new Error(`Edge not found: ${edgeKey(edge)}`);

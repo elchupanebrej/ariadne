@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import {
   NODE_TYPES,
   NodeSchemas,
@@ -9,8 +8,8 @@ import {
   PROVENANCE_TYPES,
   type ProvenanceType,
 } from "../../core/types/nodes.js";
-import { GraphStorage } from "../../graph/storage.js";
-import type { CliIO } from "./status.js";
+import { resolveCliWorkspace } from "../workspace.js";
+import type { CliIO } from "../workspace.js";
 
 type Flags = Map<string, string | true>;
 
@@ -54,7 +53,7 @@ const flagValue = (flags: Flags, name: string): string => {
   return value;
 };
 
-const storageFor = (io: CliIO) => new GraphStorage(join(io.cwd, ".ariadne"));
+const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
 
 async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
@@ -80,21 +79,20 @@ async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
     );
   }
 
-  const storage = storageFor(io);
+  const storage = await storageFor(io);
   const graph = await storage.materialize();
   const existing = graph.nodes.find((node) => node.id === id);
   if (existing && existing.status !== "REMOVED") {
     throw new Error(`Node already exists: ${id}`);
   }
 
-  const schema = NodeSchemas[type];
-  const node = schema.parse({
+  const node = NodeSchemas[type].parse({
     ...payload,
     type,
     id,
     title,
     statement: payload.statement ?? title,
-  });
+  }) as Node;
   await storage.appendNode(node);
   return node;
 }
@@ -104,11 +102,12 @@ async function getNode(args: readonly string[], io: CliIO): Promise<Node> {
   if (positionals.length !== 1 || flags.size > 0) {
     throw new Error("Usage: ariadne node get <id>");
   }
-  const node = (await storageFor(io).materialize()).nodes.find(
+  const graph = await (await storageFor(io)).materialize();
+  const found = graph.nodes.find(
     (candidate) => candidate.id === positionals[0],
   );
-  if (!node) throw new Error(`Node not found: ${positionals[0]}`);
-  return node;
+  if (!found) throw new Error(`Node not found: ${positionals[0]}`);
+  return found;
 }
 
 async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
@@ -123,7 +122,8 @@ async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
     throw new Error(`Unknown provenance: ${provenance}`);
   }
 
-  return (await storageFor(io).materialize()).nodes.filter(
+  const graph = await (await storageFor(io)).materialize();
+  return graph.nodes.filter(
     (node) =>
       node.status !== "REMOVED" &&
       (typeof type !== "string" || node.type === type) &&
@@ -136,7 +136,7 @@ async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
   if (positionals.length !== 1 || flags.size > 0) {
     throw new Error("Usage: ariadne node remove <id>");
   }
-  const storage = storageFor(io);
+  const storage = await storageFor(io);
   const node = (await storage.materialize()).nodes.find(
     (candidate) => candidate.id === positionals[0],
   );

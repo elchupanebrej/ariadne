@@ -1,10 +1,8 @@
-import { join } from "node:path";
 import { propagateInvalidation } from "../../graph/invalidation.js";
-import { GraphStorage } from "../../graph/storage.js";
 import type { Node } from "../../core/schemas/nodes.js";
-import type { CliIO } from "./status.js";
-
-const storageFor = (io: CliIO) => new GraphStorage(join(io.cwd, ".ariadne"));
+import { emitOperationalNotice } from "../../adapters/gsd/operational-notice.js";
+import { resolveCliWorkspace } from "../workspace.js";
+import type { CliIO } from "../workspace.js";
 
 const parseArgs = (args: readonly string[]): { nodeId: string; evidenceId: string } => {
   if (args.length !== 3 || args[1] !== "--by" || !args[0] || !args[2]) {
@@ -21,7 +19,7 @@ export async function runInvalidation(
   io: CliIO,
 ): Promise<number> {
   const { nodeId, evidenceId } = parseArgs(args);
-  const storage = storageFor(io);
+  const { storage } = await resolveCliWorkspace(io);
   const graph = await storage.materialize();
   const target = graph.nodes.find(({ id }) => id === nodeId);
   if (!target) throw new Error(`Node not found: ${nodeId}`);
@@ -53,6 +51,15 @@ export async function runInvalidation(
       affected_node_ids: affectedNodeIds,
     },
   });
+  await emitOperationalNotice(
+    io.cwd,
+    {
+      falsifiedId: nodeId,
+      evidenceId,
+      affectedIds: affectedNodeIds,
+    },
+    (banner) => io.stderr.write(`${banner}\n`),
+  );
   await storage.regenerateIndex();
 
   io.stdout.write(

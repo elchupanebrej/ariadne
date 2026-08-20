@@ -1,12 +1,8 @@
-import type { Writable } from "node:stream";
-import { join } from "node:path";
-import { GraphStorage, type MaterializedGraph } from "../../graph/storage.js";
+import type { MaterializedGraph } from "../../graph/storage.js";
+import { resolveCliWorkspace } from "../workspace.js";
+import type { CliIO } from "../workspace.js";
 
-export type CliIO = {
-  cwd: string;
-  stdout: Writable;
-  stderr: Writable;
-};
+export type { CliIO } from "../workspace.js";
 
 type State = Record<string, unknown>;
 
@@ -102,7 +98,7 @@ export async function runStatus(args: readonly string[], io: CliIO): Promise<num
     throw new Error("Usage: ariadne status [--json]");
   }
 
-  const storage = new GraphStorage(join(io.cwd, ".ariadne"));
+  const { storage } = await resolveCliWorkspace(io);
   const report = buildStatusReport(
     await storage.readState<State>(),
     await storage.materialize(),

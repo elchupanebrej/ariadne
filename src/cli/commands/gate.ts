@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import {
   runEpistemicGate,
   type EpistemicDiagnostic,
@@ -11,9 +10,10 @@ import {
   runStructuralGate,
   type StructuralGateResult,
 } from "../../gates/structural-gate.js";
-import { GraphStorage, type MaterializedGraph } from "../../graph/storage.js";
+import type { MaterializedGraph } from "../../graph/storage.js";
 import type { GraphDiagnostic } from "../../graph/integrity.js";
-import type { CliIO } from "./status.js";
+import { resolveCliWorkspace } from "../workspace.js";
+import type { CliIO } from "../workspace.js";
 
 export type GateName = "structural" | "semantic" | "epistemic";
 export type GateCommand = GateName | "all";
@@ -106,7 +106,8 @@ const parse = (args: readonly string[]): { gate: GateCommand; strict: boolean } 
 
 export async function runGate(args: readonly string[], io: CliIO): Promise<number> {
   const { gate, strict } = parse(args);
-  const graph = await new GraphStorage(join(io.cwd, ".ariadne")).materialize();
+  const { storage } = await resolveCliWorkspace(io);
+  const graph = await storage.materialize();
   const names = gate === "all" ? ORDER : [gate];
   const results = names.map((name) => runOne(name, graph));
   const diagnostics = results.flatMap((result) => result.diagnostics);
