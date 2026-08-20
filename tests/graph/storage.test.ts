@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -97,6 +97,58 @@ describe("GraphStorage", () => {
       expect((await readFile(join(directory, "GRAPH.jsonl"), "utf8"))
         .trim()
         .split("\n")).toHaveLength(20);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes read-check-append transactions across storage instances", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-transaction-"));
+
+    try {
+      const first = new GraphStorage(directory);
+      const second = new GraphStorage(directory);
+      const results = await Promise.all([
+        first.transaction(async (graph) => {
+          expect(graph.nodes).toHaveLength(0);
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          return {
+            result: "first",
+            events: [{ kind: "node", node: node("TASK-001") }],
+          };
+        }),
+        second.transaction((graph) => ({
+          result: graph.nodes.map(({ id }) => id),
+          events: [{ kind: "node", node: node("TASK-002") }],
+        })),
+      ]);
+
+      expect(results).toEqual(["first", ["TASK-001"]]);
+      expect((await second.materialize()).nodes.map(({ id }) => id)).toEqual([
+        "TASK-001",
+        "TASK-002",
+      ]);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("recovers an incomplete final JSONL record", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-recovery-"));
+
+    try {
+      const event = { kind: "node", node: node("TASK-001") };
+      await writeFile(
+        join(directory, "GRAPH.jsonl"),
+        `${JSON.stringify(event)}\n{"kind":"node","node":{"id":"TASK-002"`,
+        "utf8",
+      );
+      const storage = new GraphStorage(directory);
+
+      expect(await storage.materialize()).toEqual({ nodes: [node("TASK-001")], edges: [] });
+      expect(await readFile(join(directory, "GRAPH.jsonl"), "utf8")).toBe(
+        `${JSON.stringify(event)}\n`,
+      );
     } finally {
       await rm(directory, { recursive: true, force: true });
     }

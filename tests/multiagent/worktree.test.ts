@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EdgeSchema } from "../../src/core/schemas/edges.js";
 import { NodeSchema } from "../../src/core/schemas/nodes.js";
+import { GraphStorage } from "../../src/graph/storage.js";
 import {
   WorktreeManager,
 } from "../../src/multiagent/worktree-manager.js";
@@ -88,6 +89,86 @@ describe("WorktreeManager", () => {
       expect(result.exitCode).toBe(3);
       expect(result.stderr).toBe("shell ; must stay an argument");
       expect(result.evidence.status).toBe("FAILED");
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("terminates commands that exceed the configured timeout", async () => {
+    const repoRoot = await repository();
+    try {
+      const manager = managerFor(repoRoot);
+      const candidate = await manager.create("CAN-01-timeout");
+      const result = await manager.run(
+        candidate,
+        process.execPath,
+        ["-e", "setTimeout(() => {}, 10000)"],
+        { timeoutMs: 50 },
+      );
+
+      expect(result.timedOut).toBe(true);
+      expect(result.aborted).toBe(false);
+      expect(result.exitCode).toBeNull();
+      expect(result.evidence).toMatchObject({ timed_out: true, aborted: false });
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("requires a candidate path to be an actual registered worktree", async () => {
+    const repoRoot = await repository();
+    try {
+      const manager = managerFor(repoRoot);
+      const path = join(repoRoot, ".ariadne", "worktrees", "CAN-plain");
+      await mkdir(path, { recursive: true });
+
+      await expect(manager.run("CAN-plain", process.execPath, [])).rejects.toThrow(
+        /registered worktree/i,
+      );
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("does not start or continue an invalidated candidate", async () => {
+    const repoRoot = await repository();
+    try {
+      const storage = new GraphStorage(join(repoRoot, ".ariadne"));
+      const manager = new WorktreeManager({
+        repoRoot,
+        worktreeRoot: join(repoRoot, ".ariadne", "worktrees"),
+        depthMode: "Deep",
+        storage,
+      });
+      const candidate = await manager.create("CAN-01-abort");
+      await storage.appendNode({
+        id: candidate.candidateId,
+        type: "CAN",
+        provenance_type: "PROPOSED",
+        statement: "candidate",
+        status: "ACTIVE",
+      });
+      const invalidation = new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          void storage
+            .appendNode({
+              id: candidate.candidateId,
+              type: "CAN",
+              provenance_type: "PROPOSED",
+              statement: "candidate",
+              status: "INVALIDATED",
+            })
+            .then(() => resolve())
+            .catch(reject);
+        }, 100);
+      });
+
+      await expect(
+        manager.run(candidate, process.execPath, ["-e", "setTimeout(() => {}, 10000)"], {
+          timeoutMs: 5_000,
+        }),
+      ).rejects.toThrow(/invalidated/i);
+      await invalidation;
     } finally {
       await rm(repoRoot, { recursive: true, force: true });
     }

@@ -1,14 +1,17 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
+import { mkdir, realpath } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import type { EpistemicEdge } from "../core/schemas/edges.js";
 import { EdgeSchema } from "../core/schemas/edges.js";
 import type { Node } from "../core/schemas/nodes.js";
 import { NodeSchema } from "../core/schemas/nodes.js";
+import type { GraphStorage } from "../graph/storage.js";
 
 const CANDIDATE_ID = /^CAN-[0-9A-Za-z_-]+$/;
+const DEFAULT_TIMEOUT_MS = 120_000;
+const TERMINATION_GRACE_MS = 1_000;
 
 export type WorktreeManagerOptions = {
   repoRoot?: string;
@@ -17,6 +20,8 @@ export type WorktreeManagerOptions = {
   depthMode?: string;
   depth?: string;
   mode?: string;
+  storage?: GraphStorage;
+  timeoutMs?: number;
 };
 
 export type CandidateWorktree = {
@@ -33,6 +38,11 @@ export type WorktreeCleanupOptions = {
   force?: boolean;
 };
 
+export type WorktreeRunOptions = {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+};
+
 export type WorktreeExecution = {
   candidateId: string;
   worktree: CandidateWorktree;
@@ -43,6 +53,8 @@ export type WorktreeExecution = {
   exitCode: number | null;
   signal: NodeJS.Signals | null;
   durationMs: number;
+  timedOut: boolean;
+  aborted: boolean;
   evidence: Node;
   /** Alias kept beside evidence for callers that treat this as an artifact. */
   node: Node;
@@ -54,7 +66,14 @@ type ProcessResult = {
   stderr: string;
   exitCode: number | null;
   signal: NodeJS.Signals | null;
+  timedOut: boolean;
+  aborted: boolean;
   error?: Error;
+};
+
+type ProcessOptions = {
+  timeoutMs: number;
+  signal?: AbortSignal;
 };
 
 type ExecutionReceipt = {
@@ -217,8 +236,20 @@ const runProcess = (
   command: string,
   args: readonly string[],
   cwd: string,
+  options: ProcessOptions,
 ): Promise<ProcessResult> =>
   new Promise((resolveResult) => {
+    if (options.signal?.aborted) {
+      resolveResult({
+        stdout: "",
+        stderr: "",
+        exitCode: null,
+        signal: "SIGTERM",
+        timedOut: false,
+        aborted: true,
+      });
+      return;
+    }
     const child = spawn(command, [...args], {
       cwd,
       shell: false,
@@ -226,6 +257,48 @@ const runProcess = (
     });
     let stdout = "";
     let stderr = "";
+    let timedOut = false;
+    let aborted = false;
+    let settled = false;
+    let spawnError: Error | undefined;
+    let terminationTimer: NodeJS.Timeout | undefined;
+    const timeoutTimer = setTimeout(() => {
+      timedOut = true;
+      terminate();
+    }, options.timeoutMs);
+
+    const onAbort = (): void => {
+      aborted = true;
+      terminate();
+    };
+
+    const cleanup = (): void => {
+      clearTimeout(timeoutTimer);
+      if (terminationTimer) clearTimeout(terminationTimer);
+      options.signal?.removeEventListener("abort", onAbort);
+    };
+
+    const finish = (exitCode: number | null, signal: NodeJS.Signals | null): void => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolveResult({
+        stdout,
+        stderr,
+        exitCode,
+        signal,
+        timedOut,
+        aborted,
+        ...(spawnError ? { error: spawnError } : {}),
+      });
+    };
+
+    const terminate = (): void => {
+      if (!child.killed) child.kill("SIGTERM");
+      terminationTimer = setTimeout(() => {
+        if (!settled) child.kill("SIGKILL");
+      }, TERMINATION_GRACE_MS);
+    };
 
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
@@ -236,17 +309,14 @@ const runProcess = (
       stderr += chunk;
     });
     child.once("error", (error) => {
-      resolveResult({
-        stdout,
-        stderr,
-        exitCode: null,
-        signal: null,
-        error,
-      });
+      spawnError = error;
+      if (child.pid === undefined) finish(null, null);
     });
     child.once("close", (exitCode, signal) => {
-      resolveResult({ stdout, stderr, exitCode, signal });
+      finish(exitCode, signal);
     });
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+    if (options.signal?.aborted) onAbort();
   });
 
 const gitFailure = (args: readonly string[], result: ProcessResult): Error =>
@@ -266,11 +336,33 @@ const assertCandidateId = (candidateId: string): void => {
   }
 };
 
+type WorktreeRecord = {
+  path: string;
+  branch?: string;
+};
+
+const parseWorktreeList = (output: string): WorktreeRecord[] => {
+  const records: WorktreeRecord[] = [];
+  let current: WorktreeRecord | undefined;
+  for (const line of output.split(/\r?\n/u)) {
+    if (line.startsWith("worktree ")) {
+      if (current) records.push(current);
+      current = { path: line.slice("worktree ".length) };
+    } else if (current && line.startsWith("branch ")) {
+      current.branch = line.slice("branch ".length);
+    }
+  }
+  if (current) records.push(current);
+  return records;
+};
+
 let evidenceSequence = 0;
 
 export class WorktreeManager {
   readonly repoRoot: string;
   readonly worktreeRoot: string;
+  readonly storage?: GraphStorage;
+  readonly timeoutMs: number;
 
   constructor(options: WorktreeManagerOptions) {
     const repoRoot = options.repoRoot ?? options.repositoryRoot;
@@ -285,6 +377,11 @@ export class WorktreeManager {
     this.worktreeRoot = resolve(
       options.worktreeRoot ?? join(this.repoRoot, ".ariadne", "worktrees"),
     );
+    this.storage = options.storage;
+    this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    if (!Number.isFinite(this.timeoutMs) || this.timeoutMs <= 0) {
+      throw new Error("Worktree command timeout must be a positive number");
+    }
     this.assertDeepStandalone();
   }
 
@@ -325,8 +422,39 @@ export class WorktreeManager {
     }
   }
 
+  private async assertRegisteredWorktree(worktree: CandidateWorktree): Promise<void> {
+    const actualPath = resolve(await realpath(worktree.path));
+    if (actualPath !== resolve(worktree.path)) {
+      throw new Error(`Worktree path resolves outside its configured candidate path: ${worktree.path}`);
+    }
+    const result = await this.git(["worktree", "list", "--porcelain"]);
+    const registered = parseWorktreeList(result.stdout).find(
+      (entry) =>
+        resolve(entry.path) === actualPath &&
+        entry.branch === `refs/heads/${worktree.branch}`,
+    );
+    if (!registered) {
+      throw new Error(`Candidate path is not a registered worktree: ${worktree.path}`);
+    }
+  }
+
+  private async candidateInvalidated(candidateId: string): Promise<boolean> {
+    if (!this.storage) return false;
+    const node = (await this.storage.materialize()).nodes.find(({ id }) => id === candidateId);
+    const status = typeof node?.status === "string" ? node.status.toUpperCase() : "";
+    const metadata = node as Record<string, unknown> | undefined;
+    return (
+      status === "INVALIDATED" ||
+      status === "FALSIFIED" ||
+      status === "ABORTED" ||
+      metadata?.invalidation !== undefined
+    );
+  }
+
   private async git(args: readonly string[]): Promise<ProcessResult> {
-    const result = await runProcess("git", args, this.repoRoot);
+    const result = await runProcess("git", args, this.repoRoot, {
+      timeoutMs: this.timeoutMs,
+    });
     if (result.error || result.exitCode !== 0) throw gitFailure(args, result);
     return result;
   }
@@ -351,6 +479,7 @@ export class WorktreeManager {
     candidate: CandidateWorktree | string,
     command: string,
     args: readonly string[] = [],
+    options: WorktreeRunOptions = {},
   ): Promise<WorktreeExecution> {
     this.assertDeepStandalone();
     const worktree = this.resolveWorktree(candidate);
@@ -358,11 +487,70 @@ export class WorktreeManager {
     if (!existsSync(worktree.path)) {
       throw new Error(`Worktree does not exist: ${worktree.path}`);
     }
+    await this.assertRegisteredWorktree(worktree);
+    if (await this.candidateInvalidated(worktree.candidateId)) {
+      throw new Error(`Candidate ${worktree.candidateId} is invalidated and cannot run`);
+    }
+
+    const timeoutMs = options.timeoutMs ?? this.timeoutMs;
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new Error("Worktree command timeout must be a positive number");
+    }
+    const abortController = new AbortController();
+    const abortFromCaller = (): void => {
+      abortController.abort(options.signal?.reason);
+    };
+    options.signal?.addEventListener("abort", abortFromCaller, { once: true });
+    if (options.signal?.aborted) abortFromCaller();
+    let invalidated = false;
+    let statusUnavailable = false;
+    let checkingStatus = false;
+    const checkStatus = async (): Promise<void> => {
+      if (checkingStatus || abortController.signal.aborted) return;
+      checkingStatus = true;
+      try {
+        if (await this.candidateInvalidated(worktree.candidateId)) {
+          invalidated = true;
+          abortController.abort("candidate-invalidated");
+        }
+      } catch {
+        statusUnavailable = true;
+        abortController.abort("candidate-status-unavailable");
+      } finally {
+        checkingStatus = false;
+      }
+    };
+    await checkStatus();
+    if (invalidated) {
+      options.signal?.removeEventListener("abort", abortFromCaller);
+      throw new Error(`Candidate ${worktree.candidateId} is invalidated and cannot run`);
+    }
+    const statusTimer = this.storage ? setInterval(() => void checkStatus(), 50) : undefined;
 
     const startedAt = Date.now();
-    const result = await runProcess(command, args, worktree.path);
+    let result: ProcessResult;
+    try {
+      result = await runProcess(command, args, worktree.path, {
+        timeoutMs,
+        signal: abortController.signal,
+      });
+    } finally {
+      if (statusTimer) clearInterval(statusTimer);
+      options.signal?.removeEventListener("abort", abortFromCaller);
+    }
+    await checkStatus();
+    if (invalidated) {
+      throw new Error(`Candidate ${worktree.candidateId} was invalidated during execution`);
+    }
+    if (statusUnavailable) {
+      throw new Error(`Candidate ${worktree.candidateId} status could not be verified`);
+    }
     const durationMs = Math.max(0, Date.now() - startedAt);
-    const receipt = parseExecutionReceipt(result.stdout, result.stderr, result.exitCode);
+    const receipt = parseExecutionReceipt(
+      result.stdout,
+      result.stderr,
+      result.timedOut || result.aborted ? null : result.exitCode,
+    );
     const stdoutDigest = createHash("sha256")
       .update(`${result.stdout}\n${result.stderr}`)
       .digest("hex");
@@ -403,6 +591,8 @@ export class WorktreeManager {
       exit_code: result.exitCode,
       signal: result.signal,
       duration_ms: durationMs,
+      timed_out: result.timedOut,
+      aborted: result.aborted,
     });
     const edge = EdgeSchema.parse({
       source: evidence.id,
@@ -420,6 +610,8 @@ export class WorktreeManager {
       exitCode: result.exitCode,
       signal: result.signal,
       durationMs,
+      timedOut: result.timedOut,
+      aborted: result.aborted,
       evidence,
       node: evidence,
       edge,

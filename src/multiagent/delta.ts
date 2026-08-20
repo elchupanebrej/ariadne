@@ -124,77 +124,77 @@ export async function mergeDelta(
   response: string,
 ): Promise<DeltaMergeReceipt> {
   const deltas = extractDeltaBlocks(response);
-  const current = await storage.materialize();
-  const currentValidation = validateGraph(current);
-  if (!currentValidation.valid) throw graphError(current);
+  return storage.transaction((current) => {
+    const currentValidation = validateGraph(current);
+    if (!currentValidation.valid) throw graphError(current);
 
-  const nodes = new Map(current.nodes.map((node) => [node.id, node]));
-  const existingNodeIds = new Set(nodes.keys());
-  const edges = new Map(current.edges.map((edge) => [edgeKey(edge), edge]));
-  const events: Array<{ kind: "node"; node: (typeof current.nodes)[number] } | {
-    kind: "edge";
-    edge: (typeof current.edges)[number];
-  }> = [];
-  const receipt: DeltaMergeReceipt = {
-    applied: { nodes: [], edges: [] },
-    skipped: { nodes: [], edges: [] },
-  };
+    const nodes = new Map(current.nodes.map((node) => [node.id, node]));
+    const existingNodeIds = new Set(nodes.keys());
+    const edges = new Map(current.edges.map((edge) => [edgeKey(edge), edge]));
+    const events: Array<
+      | { kind: "node"; node: (typeof current.nodes)[number] }
+      | { kind: "edge"; edge: (typeof current.edges)[number] }
+    > = [];
+    const receipt: DeltaMergeReceipt = {
+      applied: { nodes: [], edges: [] },
+      skipped: { nodes: [], edges: [] },
+    };
 
-  for (const delta of deltas) {
-    for (const node of delta.nodes) {
-      const previous = nodes.get(node.id);
-      if (previous) {
-        if (stableJson(previous) !== stableJson(node)) {
-          throw new Error(`Conflicting node ID: ${node.id}`);
+    for (const delta of deltas) {
+      for (const node of delta.nodes) {
+        const previous = nodes.get(node.id);
+        if (previous) {
+          if (stableJson(previous) !== stableJson(node)) {
+            throw new Error(`Conflicting node ID: ${node.id}`);
+          }
+          addUnique(receipt.skipped.nodes, node.id);
+          continue;
         }
-        addUnique(receipt.skipped.nodes, node.id);
-        continue;
+        nodes.set(node.id, node);
+        events.push({ kind: "node", node });
+        addUnique(receipt.applied.nodes, node.id);
       }
-      nodes.set(node.id, node);
-      events.push({ kind: "node", node });
-      addUnique(receipt.applied.nodes, node.id);
+
+      for (const mutation of [
+        ...(delta.mutations ?? []),
+        ...(delta.updates ?? []),
+        ...(delta.node_mutations ?? []),
+        ...(delta.status_mutations ?? []),
+        ...(delta.invalidation_mutations ?? []),
+      ]) {
+        const id = nodeMutationId(mutation);
+        const previous = nodes.get(id);
+        if (!previous || !existingNodeIds.has(id)) {
+          throw new Error(`Cannot mutate missing existing node: ${id}`);
+        }
+        const next = applyNodeMutation(previous, mutation);
+        if (stableJson(previous) === stableJson(next)) {
+          addUnique(receipt.skipped.nodes, id);
+          continue;
+        }
+        nodes.set(id, next);
+        events.push({ kind: "node", node: next });
+        addUnique(receipt.applied.nodes, id);
+      }
+
+      for (const edge of delta.edges) {
+        const key = edgeKey(edge);
+        if (edges.has(key)) {
+          addUnique(receipt.skipped.edges, key);
+          continue;
+        }
+        edges.set(key, edge);
+        events.push({ kind: "edge", edge });
+        addUnique(receipt.applied.edges, key);
+      }
     }
 
-    for (const mutation of [
-      ...(delta.mutations ?? []),
-      ...(delta.updates ?? []),
-      ...(delta.node_mutations ?? []),
-      ...(delta.status_mutations ?? []),
-      ...(delta.invalidation_mutations ?? []),
-    ]) {
-      const id = nodeMutationId(mutation);
-      const previous = nodes.get(id);
-      if (!previous || !existingNodeIds.has(id)) {
-        throw new Error(`Cannot mutate missing existing node: ${id}`);
-      }
-      const next = applyNodeMutation(previous, mutation);
-      if (stableJson(previous) === stableJson(next)) {
-        addUnique(receipt.skipped.nodes, id);
-        continue;
-      }
-      nodes.set(id, next);
-      events.push({ kind: "node", node: next });
-      addUnique(receipt.applied.nodes, id);
-    }
+    const merged: MaterializedGraph = {
+      nodes: [...nodes.values()],
+      edges: [...edges.values()],
+    };
+    if (!validateGraph(merged).valid) throw graphError(merged);
 
-    for (const edge of delta.edges) {
-      const key = edgeKey(edge);
-      if (edges.has(key)) {
-        addUnique(receipt.skipped.edges, key);
-        continue;
-      }
-      edges.set(key, edge);
-      events.push({ kind: "edge", edge });
-      addUnique(receipt.applied.edges, key);
-    }
-  }
-
-  const merged: MaterializedGraph = {
-    nodes: [...nodes.values()],
-    edges: [...edges.values()],
-  };
-  if (!validateGraph(merged).valid) throw graphError(merged);
-
-  await storage.appendEvents(events);
-  return receipt;
+    return { result: receipt, events };
+  });
 }

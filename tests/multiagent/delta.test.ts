@@ -81,6 +81,30 @@ describe("mergeDelta", () => {
     }
   });
 
+  it("rejects concurrent conflicting merges and keeps identical merges idempotent", async () => {
+    const { directory, storage } = await workspace();
+    try {
+      const response = block("ariadne-delta", {
+        nodes: [node("TASK-1")],
+        edges: [],
+      });
+      const otherStorage = new GraphStorage(directory);
+      const receipts = await Promise.all([
+        mergeDelta(storage, response),
+        mergeDelta(otherStorage, response),
+      ]);
+
+      expect(receipts.map(({ applied }) => applied.nodes)).toEqual([
+        ["TASK-1"],
+        [],
+      ]);
+      expect(receipts[1].skipped.nodes).toEqual(["TASK-1"]);
+      expect(await otherStorage.readEvents()).toHaveLength(1);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("rejects conflicting IDs and invalid graphs without changing files", async () => {
     const { directory, storage } = await workspace();
     try {

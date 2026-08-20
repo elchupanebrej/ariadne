@@ -1,4 +1,13 @@
-import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import {
+  appendFile,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  truncate,
+  writeFile,
+} from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import { z } from "zod";
@@ -57,10 +66,10 @@ export const StateSchema = z
 
 export type AriadneState = z.infer<typeof StateSchema>;
 
-// ponytail: process-local per-path queue; use an OS/file lock if multiple processes append concurrently.
-const pathQueues = new Map<string, Promise<void>>();
+// The queue handles same-process callers; the directory lock below covers other processes.
+const pathQueues = new Map<string, Promise<unknown>>();
 
-const enqueue = (path: string, operation: () => Promise<void>): Promise<void> => {
+const enqueue = <T>(path: string, operation: () => Promise<T>): Promise<T> => {
   const previous = pathQueues.get(path) ?? Promise.resolve();
   const current = previous.catch(() => undefined).then(operation);
   pathQueues.set(path, current);
@@ -68,6 +77,45 @@ const enqueue = (path: string, operation: () => Promise<void>): Promise<void> =>
   return current.finally(() => {
     if (pathQueues.get(path) === current) pathQueues.delete(path);
   });
+};
+
+const LOCK_WAIT_MS = 10;
+const LOCK_STALE_MS = 5 * 60_000;
+
+const sleep = (milliseconds: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+const withFileLock = async <T>(
+  lockPath: string,
+  operation: () => Promise<T>,
+): Promise<T> => {
+  await mkdir(dirname(lockPath), { recursive: true });
+  const startedAt = Date.now();
+  while (true) {
+    try {
+      await mkdir(lockPath);
+      await writeFile(join(lockPath, "owner"), `${process.pid}\n`, "utf8");
+      break;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      try {
+        const age = Date.now() - (await stat(lockPath)).mtimeMs;
+        if (age > LOCK_STALE_MS) await rm(lockPath, { recursive: true, force: true });
+      } catch (statError) {
+        if ((statError as NodeJS.ErrnoException).code !== "ENOENT") throw statError;
+      }
+      if (Date.now() - startedAt > LOCK_STALE_MS) {
+        throw new Error(`Timed out waiting for storage lock: ${lockPath}`);
+      }
+      await sleep(LOCK_WAIT_MS);
+    }
+  }
+
+  try {
+    return await operation();
+  } finally {
+    await rm(lockPath, { recursive: true, force: true });
+  }
 };
 
 const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
@@ -129,26 +177,34 @@ export class GraphStorage {
   readonly statePath: string;
   readonly graphPath: string;
   readonly indexPath: string;
+  readonly graphLockPath: string;
+  readonly stateLockPath: string;
 
   constructor(rootDirectory = ".ariadne") {
     this.rootDirectory = rootDirectory;
     this.statePath = join(rootDirectory, "STATE.yaml");
     this.graphPath = join(rootDirectory, "GRAPH.jsonl");
     this.indexPath = join(rootDirectory, "INDEX.md");
+    this.graphLockPath = `${this.graphPath}.lock`;
+    this.stateLockPath = `${this.statePath}.lock`;
   }
 
   async readState<T = unknown>(): Promise<T | null> {
-    try {
-      const value: unknown = JSON.parse(await readFile(this.statePath, "utf8"));
-      const parsed = StateSchema.safeParse(value);
-      if (!parsed.success) {
-        throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
-      }
-      return parsed.data as T;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-      throw error;
-    }
+    return enqueue(this.statePath, () =>
+      withFileLock(this.stateLockPath, async () => {
+        try {
+          const value: unknown = JSON.parse(await readFile(this.statePath, "utf8"));
+          const parsed = StateSchema.safeParse(value);
+          if (!parsed.success) {
+            throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+          }
+          return parsed.data as T;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+          throw error;
+        }
+      }),
+    );
   }
 
   async writeState(state: unknown): Promise<void> {
@@ -157,12 +213,52 @@ export class GraphStorage {
     const serialized = JSON.stringify(parsed.data, null, 2);
     if (serialized === undefined) throw new TypeError("State must be JSON-serializable");
 
-    await enqueue(this.statePath, async () => {
-      await mkdir(dirname(this.statePath), { recursive: true });
-      const temporaryPath = `${this.statePath}.${randomUUID()}.tmp`;
-      await writeFile(temporaryPath, `${serialized}\n`, "utf8");
-      await rename(temporaryPath, this.statePath);
-    });
+    await enqueue(this.statePath, () =>
+      withFileLock(this.stateLockPath, async () => {
+        await mkdir(dirname(this.statePath), { recursive: true });
+        const temporaryPath = `${this.statePath}.${randomUUID()}.tmp`;
+        await writeFile(temporaryPath, `${serialized}\n`, "utf8");
+        await rename(temporaryPath, this.statePath);
+      }),
+    );
+  }
+
+  async transaction<T>(
+    mutate: (
+      graph: MaterializedGraph,
+    ) =>
+      | { result: T; events: readonly unknown[] }
+      | Promise<{ result: T; events: readonly unknown[] }>,
+  ): Promise<T> {
+    return enqueue(this.graphPath, () =>
+      withFileLock(this.graphLockPath, async () => {
+        const current = applyEvents({ nodes: [], edges: [] }, await this.readEventsUnlocked(true));
+        const mutation = await mutate(current);
+        const parsed = mutation.events.map((event) => GraphEventSchema.parse(event));
+        if (parsed.length === 0) return mutation.result;
+
+        const prospective = applyEvents(current, parsed);
+        const validation = validateGraph(prospective);
+        if (!validation.valid) {
+          throw new Error(
+            `Invalid graph after append: ${validation.diagnostics
+              .map(({ code, message }) =>
+                code === "MISSING_NODE" ? `Missing node reference: ${message}` : message,
+              )
+              .join("; ")}`,
+          );
+        }
+
+        await mkdir(dirname(this.graphPath), { recursive: true });
+        await appendFile(
+          this.graphPath,
+          `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
+          "utf8",
+        );
+        await this.writeIndexUnlocked(prospective);
+        return mutation.result;
+      }),
+    );
   }
 
   async appendEvent(event: unknown): Promise<void> {
@@ -170,29 +266,7 @@ export class GraphStorage {
   }
 
   async appendEvents(events: readonly unknown[]): Promise<void> {
-    const parsed = events.map((event) => GraphEventSchema.parse(event));
-    if (parsed.length === 0) return;
-
-    await enqueue(this.graphPath, async () => {
-      const current = await this.materialize();
-      const prospective = applyEvents(current, parsed);
-      const validation = validateGraph(prospective);
-      if (!validation.valid) {
-        throw new Error(
-          `Invalid graph after append: ${validation.diagnostics
-            .map(({ code, message }) => code === "MISSING_NODE" ? `Missing node reference: ${message}` : message)
-            .join("; ")}`,
-        );
-      }
-
-      await mkdir(dirname(this.graphPath), { recursive: true });
-      await appendFile(
-        this.graphPath,
-        `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
-        "utf8",
-      );
-      await this.writeIndexUnlocked();
-    });
+    await this.transaction(() => ({ result: undefined, events }));
   }
 
   async appendNode(node: unknown): Promise<void> {
@@ -211,7 +285,7 @@ export class GraphStorage {
     });
   }
 
-  async readEvents(): Promise<GraphEvent[]> {
+  private async readEventsUnlocked(recoverPartialTail: boolean): Promise<GraphEvent[]> {
     let contents: string;
     try {
       contents = await readFile(this.graphPath, "utf8");
@@ -220,10 +294,39 @@ export class GraphStorage {
       throw error;
     }
 
-    return contents
-      .split("\n")
-      .filter((line) => line.trim().length > 0)
-      .map((line) => GraphEventSchema.parse(JSON.parse(line)));
+    const hasFinalNewline = contents.endsWith("\n");
+    const lines = contents.split("\n");
+    if (hasFinalNewline) lines.pop();
+    const events: GraphEvent[] = [];
+    const lastMeaningfulIndex = lines.reduce(
+      (last, line, index) => (line.trim() ? index : last),
+      -1,
+    );
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index];
+      if (!line || !line.trim()) continue;
+      let value: unknown;
+      try {
+        value = JSON.parse(line);
+      } catch (error) {
+        const isPartialTail = index === lastMeaningfulIndex;
+        if (!recoverPartialTail || !isPartialTail) throw error;
+        const offset = Buffer.byteLength(lines.slice(0, index).join("\n"));
+        await truncate(this.graphPath, offset === 0 ? 0 : offset + 1);
+        return events;
+      }
+      events.push(GraphEventSchema.parse(value));
+    }
+    if (recoverPartialTail && !hasFinalNewline && lines.length > 0) {
+      await appendFile(this.graphPath, "\n", "utf8");
+    }
+    return events;
+  }
+
+  async readEvents(): Promise<GraphEvent[]> {
+    return enqueue(this.graphPath, () =>
+      withFileLock(this.graphLockPath, () => this.readEventsUnlocked(true)),
+    );
   }
 
   async materialize(): Promise<MaterializedGraph> {
@@ -235,12 +338,18 @@ export class GraphStorage {
   }
 
   async regenerateIndex(): Promise<void> {
-    await enqueue(this.indexPath, () => this.writeIndexUnlocked());
+    await enqueue(this.graphPath, () =>
+      withFileLock(this.graphLockPath, () => this.writeIndexUnlocked()),
+    );
   }
 
-  private async writeIndexUnlocked(): Promise<void> {
+  private async writeIndexUnlocked(graph?: MaterializedGraph): Promise<void> {
     await mkdir(dirname(this.indexPath), { recursive: true });
-    await writeFile(this.indexPath, renderIndex(await this.materialize()), "utf8");
+    await writeFile(
+      this.indexPath,
+      renderIndex(graph ?? applyEvents({ nodes: [], edges: [] }, await this.readEventsUnlocked(true))),
+      "utf8",
+    );
   }
 }
 
