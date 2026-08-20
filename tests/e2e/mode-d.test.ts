@@ -31,6 +31,8 @@ const expectSuccess = (result: ProcessResult): ProcessResult => {
   return result;
 };
 
+const parseLastJson = (output: string) => JSON.parse(output.trim().split("\n").at(-1) ?? "");
+
 const addNode = (
   cwd: string,
   type: string,
@@ -78,22 +80,25 @@ describe("standalone Mode D recovery", () => {
     expectSuccess(invoke(cwd, ["edge", "add", "CAN-1", "depends_on", "ASM-1"]));
 
     const invalidated = expectSuccess(invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]));
-    expect(JSON.parse(invalidated.stdout)).toMatchObject({
+    expect(invalidated.stdout).toContain("ARIADNE OPERATIONAL NOTICE");
+    expect(parseLastJson(invalidated.stdout)).toMatchObject({
       falsified_node_id: "ASM-1",
       evidence_id: "EVD-1",
       affected_node_ids: ["ASM-1", "CAN-1"],
     });
 
-    const gates = expectSuccess(invoke(cwd, ["gate", "all"]));
+    const gates = invoke(cwd, ["gate", "all"]);
+    expect(gates.status).toBe(1);
+    expect(gates.stderr).toBe("");
     const gateReceipt = JSON.parse(gates.stdout) as {
       passed: boolean;
       results: Array<{ gate: string; passed: boolean }>;
     };
-    expect(gateReceipt.passed).toBe(true);
+    expect(gateReceipt.passed).toBe(false);
     expect(gateReceipt.results).toEqual([
       expect.objectContaining({ gate: "structural", passed: true }),
       expect.objectContaining({ gate: "semantic", passed: true }),
-      expect.objectContaining({ gate: "epistemic", passed: true }),
+      expect.objectContaining({ gate: "epistemic", passed: false }),
     ]);
 
     const status = expectSuccess(invoke(cwd, ["status", "--json"]));

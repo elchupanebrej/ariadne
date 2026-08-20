@@ -52,6 +52,13 @@ const invoke = (cwd: string, args: string[]) => {
   }));
 };
 
+const parseReceipt = (output: string) =>
+  JSON.parse(output.trim().split("\n").at(-1) ?? "") as {
+    falsified_node_id: string;
+    evidence_id: string;
+    affected_node_ids: string[];
+  };
+
 describe("ariadne invalidate", () => {
   it("persists the deterministic cascade, state receipt, and index", async () => {
     const { cwd, storage } = await workspace();
@@ -59,11 +66,8 @@ describe("ariadne invalidate", () => {
     const result = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
 
     expect(result.code).toBe(0);
-    const output = JSON.parse(result.stdout.text()) as {
-      falsified_node_id: string;
-      evidence_id: string;
-      affected_node_ids: string[];
-    };
+    expect(result.stdout.text()).toContain("ARIADNE OPERATIONAL NOTICE");
+    const output = parseReceipt(result.stdout.text());
     expect(output).toMatchObject({ falsified_node_id: "ASM-1", evidence_id: "EVD-1" });
     expect(output.affected_node_ids).toEqual(["ASM-1", "CAN-1", "DEC-1"]);
 
@@ -72,7 +76,11 @@ describe("ariadne invalidate", () => {
       expect.arrayContaining([
         expect.objectContaining({ id: "ASM-1", status: "FALSIFIED" }),
         expect.objectContaining({ id: "CAN-1", status: "INVALIDATED" }),
-        expect.objectContaining({ id: "DEC-1", status: "NEEDS_REVIEW" }),
+        expect.objectContaining({
+          id: "DEC-1",
+          status: "RE-OPENED",
+          invalidation: expect.objectContaining({ needs_review: true }),
+        }),
       ]),
     );
     expect((await storage.readEvents()).length).toBeGreaterThan(before.length);

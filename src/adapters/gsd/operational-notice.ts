@@ -167,7 +167,7 @@ export async function emitGsdOperationalNotice(
   let created = false;
 
   await enqueue(noticesPath, async () => {
-    await mkdir(environment.overlayPath, { recursive: true });
+    await mkdir(environment.storageRoot, { recursive: true });
     const notices = await readNotices(noticesPath);
     result = notices.find(
       (notice) =>

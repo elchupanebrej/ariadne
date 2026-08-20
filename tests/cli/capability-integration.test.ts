@@ -71,13 +71,14 @@ describe("CLI capability integrations", () => {
     const result = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
 
     expect(result.code).toBe(0);
-    expect(result.stderr.text()).toContain("ARIADNE OPERATIONAL NOTICE");
+    expect(result.stdout.text()).toContain("ARIADNE OPERATIONAL NOTICE");
     expect(await readFile(join(cwd, ".ariadne", "NOTICES.jsonl"), "utf8")).toContain(
       '"falsified_id":"ASM-1"',
     );
     expect(JSON.parse(await readFile(join(cwd, ".ariadne", "STATE.yaml"), "utf8"))).toMatchObject({
       active_notices: ["NOT-001"],
     });
+    expect(existsSync(join(cwd, ".planning"))).toBe(false);
   });
 
   it("persists GSD invalidation notices without changing SUMMARY.md or creating a shadow", async () => {
@@ -94,7 +95,7 @@ describe("CLI capability integrations", () => {
     const result = await invoke(cwd, ["invalidate", "HYP-1", "--by", "EVD-1"]);
 
     expect(result.code).toBe(0);
-    expect(result.stderr.text()).toContain("ARIADNE OPERATIONAL NOTICE");
+    expect(result.stdout.text()).toContain("ARIADNE OPERATIONAL NOTICE");
     expect(await readFile(summary, "utf8")).toBe(before);
     expect(await readFile(join(cwd, ".planning", "ariadne", "NOTICES.jsonl"), "utf8")).toContain(
       '"falsified_id":"HYP-1"',

@@ -58,7 +58,7 @@ export async function runInvalidation(
       evidenceId,
       affectedIds: affectedNodeIds,
     },
-    (banner) => io.stderr.write(`${banner}\n`),
+    (banner) => io.stdout.write(`${banner}\n`),
   );
   await storage.regenerateIndex();
 
