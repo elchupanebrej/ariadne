@@ -24,3 +24,4 @@ export * from "./adapters/gsd/projector.js";
 export * from "./adapters/gsd/operational-notice.js";
 export * from "./adapters/handoff/generator.js";
 export * from "./gates/epistemic-gate.js";
+export * from "./multiagent/worktree-manager.js";
