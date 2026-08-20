@@ -105,13 +105,17 @@ export class GraphStorage {
   }
 
   async appendEvent(event: unknown): Promise<void> {
-    const parsed = GraphEventSchema.parse(event);
-    const serialized = `${JSON.stringify(parsed)}\n`;
+    await this.appendEvents([event]);
+  }
+
+  async appendEvents(events: readonly unknown[]): Promise<void> {
+    const parsed = events.map((event) => GraphEventSchema.parse(event));
+    if (parsed.length === 0) return;
+    const serialized = `${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`;
 
     await enqueue(this.graphPath, async () => {
       await mkdir(dirname(this.graphPath), { recursive: true });
       await appendFile(this.graphPath, serialized, "utf8");
-      // ponytail: regenerate per event; add a batch append API if write volume matters.
       await this.writeIndexUnlocked();
     });
   }

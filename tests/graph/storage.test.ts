@@ -12,6 +12,33 @@ const node = (id: string) => ({
 });
 
 describe("GraphStorage", () => {
+  it("appends a validated batch and regenerates the index once", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-batch-"));
+
+    try {
+      const storage = new GraphStorage(directory);
+      await storage.appendEvents([
+        { kind: "node", node: node("TASK-001") },
+        { kind: "node", node: node("TASK-002") },
+        {
+          kind: "edge",
+          edge: {
+            source: "TASK-002",
+            type: "depends_on",
+            target: "TASK-001",
+          },
+        },
+      ]);
+
+      expect(await storage.readEvents()).toHaveLength(3);
+      expect(await readFile(join(directory, "INDEX.md"), "utf8")).toContain(
+        "TASK-002",
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("recovers state and materialized graph after a restart", async () => {
     const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-"));
 
