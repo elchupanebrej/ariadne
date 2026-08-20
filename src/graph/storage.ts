@@ -18,7 +18,11 @@ export type MaterializedGraph = {
 
 export const GraphEventSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("node"), node: NodeSchema }),
-  z.object({ kind: z.literal("edge"), edge: EdgeSchema }),
+  z.object({
+    kind: z.literal("edge"),
+    edge: EdgeSchema,
+    tombstone: z.literal(true).optional(),
+  }),
 ]);
 
 export type GraphEvent = z.infer<typeof GraphEventSchema>;
@@ -120,6 +124,14 @@ export class GraphStorage {
     await this.appendEvent({ kind: "edge", edge: EdgeSchema.parse(edge) });
   }
 
+  async appendEdgeTombstone(edge: unknown): Promise<void> {
+    await this.appendEvent({
+      kind: "edge",
+      edge: EdgeSchema.parse(edge),
+      tombstone: true,
+    });
+  }
+
   async readEvents(): Promise<GraphEvent[]> {
     let contents: string;
     try {
@@ -144,7 +156,8 @@ export class GraphStorage {
         nodes.set(event.node.id, event.node);
       } else {
         const key = `${event.edge.source}\u0000${event.edge.type}\u0000${event.edge.target}`;
-        edges.set(key, event.edge);
+        if (event.tombstone) edges.delete(key);
+        else edges.set(key, event.edge);
       }
     }
 
