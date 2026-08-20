@@ -13,3 +13,4 @@ export * from "./graph/derivation.js";
 export * from "./graph/invalidation.js";
 export * from "./gates/structural-gate.js";
 export * from "./gates/semantic-gate.js";
+export * from "./adapters/gsd/detector.js";
