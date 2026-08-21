@@ -11,6 +11,7 @@ const ExistingNodeMutationSchema = z
   .object({
     id: NodeIdSchema.optional(),
     node_id: NodeIdSchema.optional(),
+    expected_status: z.string().min(1).nullable(),
     status: z.string().min(1).optional(),
     invalidation: z.record(z.string(), z.unknown()).optional(),
     invalidation_metadata: z.record(z.string(), z.unknown()).optional(),
@@ -171,6 +172,19 @@ export async function mergeDelta(
         if (stableJson(previous) === stableJson(next)) {
           addUnique(receipt.skipped.nodes, id);
           continue;
+        }
+        const actualStatus = previous.status ?? null;
+        if (actualStatus !== mutation.expected_status) {
+          throw new Error(
+            `Mutation conflict for ${id}: expected status ${String(mutation.expected_status)}, actual ${String(actualStatus)}`,
+          );
+        }
+        if (
+          previous.type === "DEC" &&
+          mutation.status !== undefined &&
+          mutation.status !== previous.status
+        ) {
+          throw new Error(`DEC status transition requires authorization: ${id}`);
         }
         nodes.set(id, next);
         events.push({ kind: "node", node: next });

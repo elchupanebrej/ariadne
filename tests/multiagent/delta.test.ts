@@ -183,6 +183,7 @@ describe("mergeDelta", () => {
         mutations: [
           {
             node_id: "TASK-1",
+            expected_status: null,
             status: "INVALIDATED",
             invalidation: { evidence_id: "EVD-1", reason: "falsified" },
           },
@@ -202,6 +203,80 @@ describe("mergeDelta", () => {
         status: "INVALIDATED",
         invalidation: { evidence_id: "EVD-1" },
       });
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a stale status precondition without changing the graph", async () => {
+    const { directory, storage } = await workspace();
+    try {
+      await mergeDelta(
+        storage,
+        block("ariadne-delta", {
+          nodes: [{ ...node("TASK-1"), status: "READY" }],
+          edges: [],
+        }),
+      );
+      const before = await storage.readEvents();
+
+      await expect(
+        mergeDelta(
+          storage,
+          block("ariadne-delta", {
+            nodes: [],
+            edges: [],
+            mutations: [
+              {
+                node_id: "TASK-1",
+                expected_status: null,
+                status: "INVALIDATED",
+              },
+            ],
+          }),
+        ),
+      ).rejects.toThrow(/mutation conflict|expected status/i);
+      expect(await storage.readEvents()).toEqual(before);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects DEC status transitions without authorization", async () => {
+    const { directory, storage } = await workspace();
+    try {
+      await mergeDelta(
+        storage,
+        block("ariadne-delta", {
+          nodes: [
+            {
+              id: "DEC-1",
+              type: "DEC",
+              provenance_type: "DECIDED",
+              statement: "DEC-1",
+              status: "DECIDED",
+            },
+          ],
+          edges: [],
+        }),
+      );
+
+      await expect(
+        mergeDelta(
+          storage,
+          block("ariadne-delta", {
+            nodes: [],
+            edges: [],
+            mutations: [
+              {
+                node_id: "DEC-1",
+                expected_status: "DECIDED",
+                status: "RE-OPENED",
+              },
+            ],
+          }),
+        ),
+      ).rejects.toThrow(/DEC status transition|authorization/i);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }

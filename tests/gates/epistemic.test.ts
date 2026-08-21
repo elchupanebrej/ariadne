@@ -253,4 +253,75 @@ describe("runEpistemicGate", () => {
       }).success,
     ).toBe(true);
   });
+
+  it.each([
+    "INVALIDATED",
+    "FALSIFIED",
+    "STALE",
+    "RE-OPENED",
+    "RE_OPENED",
+    "REQUIRES_REVALUATION",
+    "BLOCKED",
+    "NEEDS_REVIEW",
+  ])("blocks a TRANS with hard status %s", (status) => {
+    const result = runEpistemicGate(
+      graph([
+        node("CAN-1", "CAN", "PROPOSED"),
+        node("TRANS-1", "TRANS", "PROPOSED", {
+          status,
+          target_mechanism_ref: "CAN-1",
+          retirement_predicate: "legacy path is unused",
+          expiration_deadline: "2099-01-01",
+          cleanup_verification_test: "npm test -- cleanup",
+          owner: "platform",
+          lifecycle_state: "PROPOSED",
+        }),
+      ]),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "TRANSITION_BLOCKED",
+          nodeId: "TRANS-1",
+        }),
+      ]),
+    );
+  });
+
+  it.each([
+    "INVALIDATED",
+    "FALSIFIED",
+    "STALE",
+    "RE-OPENED",
+    "RE_OPENED",
+    "REQUIRES_REVALUATION",
+    "BLOCKED",
+    "NEEDS_REVIEW",
+  ])("blocks a TRANS targeting a hard-status CAN %s", (status) => {
+    const result = runEpistemicGate(
+      graph([
+        node("CAN-1", "CAN", "PROPOSED", { status }),
+        node("TRANS-1", "TRANS", "PROPOSED", {
+          target_mechanism_ref: "CAN-1",
+          retirement_predicate: "legacy path is unused",
+          expiration_deadline: "2099-01-01",
+          cleanup_verification_test: "npm test -- cleanup",
+          owner: "platform",
+          lifecycle_state: "PROPOSED",
+        }),
+      ]),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "INVALID_TRANSITION",
+          nodeId: "TRANS-1",
+        }),
+      ]),
+    );
+  });
 });

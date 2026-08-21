@@ -260,6 +260,19 @@ const TRANSITION_STATES = [
   "RETIRED",
 ] as const;
 
+const HARD_TRANSITION_STATUSES = new Set([
+  "INVALIDATED",
+  "FALSIFIED",
+  "STALE",
+  "RE_OPENED",
+  "REQUIRES_REVALUATION",
+  "BLOCKED",
+  "NEEDS_REVIEW",
+]);
+
+const normalizedStatus = (value: unknown): string | undefined =>
+  typeof value === "string" ? value.toUpperCase().replaceAll("-", "_") : undefined;
+
 const transitionState = (node: Node): string | undefined =>
   text(
     node.lifecycle_state,
@@ -425,6 +438,11 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       : -1;
     const targetId = transition.target_mechanism_ref;
     const target = typeof targetId === "string" ? nodes.get(targetId) : undefined;
+    const targetStatus = normalizedStatus(target?.status);
+    const targetBlocked =
+      target?.type === "CAN" &&
+      targetStatus !== undefined &&
+      HARD_TRANSITION_STATUSES.has(targetStatus);
     const missingContract = [
       ["target_mechanism_ref", targetId],
       ["retirement_predicate", transition.retirement_predicate],
@@ -435,7 +453,13 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       .filter(([, value]) => !present(value))
       .map(([field]) => field);
 
-    if (missingContract.length > 0 || !target || target.type !== "CAN" || lifecycleIndex < 0) {
+    if (
+      missingContract.length > 0 ||
+      !target ||
+      target.type !== "CAN" ||
+      targetBlocked ||
+      lifecycleIndex < 0
+    ) {
       diagnostics.push({
         code: "INVALID_TRANSITION",
         message: `${transition.id} has an invalid contract, target candidate, or lifecycle state${missingContract.length > 0 ? ` (missing ${missingContract.join(", ")})` : ""}`,
@@ -460,10 +484,11 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       });
     }
 
-    if (transition.status?.toUpperCase() === "BLOCKED") {
+    const transitionStatus = normalizedStatus(transition.status);
+    if (transitionStatus && HARD_TRANSITION_STATUSES.has(transitionStatus)) {
       diagnostics.push({
         code: "TRANSITION_BLOCKED",
-        message: `${transition.id} is blocked and cannot pass the epistemic gate`,
+        message: `${transition.id} has blocking ${transitionStatus} status and cannot pass the epistemic gate`,
         nodeId: transition.id,
       });
     }
