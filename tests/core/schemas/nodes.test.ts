@@ -51,6 +51,18 @@ describe("canonical epistemic nodes", () => {
     ).toBe(false);
   });
 
+  it("accepts canonical rung strings and rejects decorated rung spoofing", () => {
+    const evidence = node("EVD");
+    expect(NodeSchema.safeParse({ ...evidence, rung: 7 }).success).toBe(true);
+    expect(NodeSchema.safeParse({ ...evidence, rung: "rung 7" }).success).toBe(true);
+    for (const rung of ["7", "not rung 10", "rung 7 verified", "verified rung 7", "rung 11"]) {
+      expect(NodeSchema.safeParse({ ...evidence, rung }).success).toBe(false);
+    }
+    expect(
+      NodeSchema.safeParse({ ...evidence, evidentiary_rung: "not rung 10" }).success,
+    ).toBe(false);
+  });
+
   it("requires the complete transition decommissioning contract", () => {
     expect(
       NodeSchema.safeParse({

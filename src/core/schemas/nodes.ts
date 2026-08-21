@@ -53,7 +53,7 @@ export const DynamicsNodeSchema = createNodeSchema("DYN");
 export const ValueSelectionNodeSchema = createNodeSchema("VAL-SELECT");
 const RungSchema = z.union([
   z.number().int().min(1).max(10),
-  z.string().regex(/\b(?:rung\s*)?(?:10|[1-9])\b/i),
+  z.string().regex(/^rung\s+(?:10|[1-9])$/iu),
 ]);
 const ReceiptSchema = z.union([
   z.string().min(1),
@@ -75,6 +75,7 @@ export const EvidenceNodeSchema = createNodeSchema("EVD").extend({
   method: z.string().min(1).optional(),
   methodology: z.string().min(1).optional(),
   rung: RungSchema.optional(),
+  evidentiary_rung: RungSchema.optional(),
   receipt: ReceiptSchema.optional(),
   environment: z.string().min(1).optional(),
   reproducible_environment: z.string().min(1).optional(),

@@ -88,6 +88,42 @@ describe("GSD operational notices", () => {
     }
   });
 
+  it("serializes concurrent pairs and recovers an incomplete final record", async () => {
+    const { root } = await createGsdRoot();
+    try {
+      const [first, second] = await Promise.all([
+        emitGsdOperationalNotice(root, {
+          falsifiedId: "ASM-001",
+          evidenceId: "EVD-001",
+          affectedIds: ["CAN-001"],
+        }),
+        emitGsdOperationalNotice(root, {
+          falsifiedId: "HYP-002",
+          evidenceId: "EVD-002",
+          affectedIds: ["CAN-002"],
+        }),
+      ]);
+      expect(new Set([first.id, second.id])).toEqual(new Set(["NOT-001", "NOT-002"]));
+
+      const noticesPath = join(root, ".planning", "ariadne", "NOTICES.jsonl");
+      const contents = await readFile(noticesPath, "utf8");
+      await writeFile(noticesPath, `${contents}{"kind":"operational_notice"`, "utf8");
+
+      const recovered = await emitGsdOperationalNotice(root, {
+        falsifiedId: "ASM-003",
+        evidenceId: "EVD-003",
+        affectedIds: ["CAN-003"],
+      });
+      expect(recovered.id).toBe("NOT-003");
+      expect((await readFile(noticesPath, "utf8")).trim().split("\n")).toHaveLength(3);
+      expect(JSON.parse(await readFile(join(root, ".planning", "ariadne", "STATE.yaml"), "utf8"))).toMatchObject({
+        active_notices: ["NOT-001", "NOT-002", "NOT-003"],
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("rejects non-falsification IDs instead of writing an operational record", async () => {
     const { root } = await createGsdRoot();
     try {
