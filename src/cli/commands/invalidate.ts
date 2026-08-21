@@ -19,7 +19,7 @@ export async function runInvalidation(
   io: CliIO,
 ): Promise<number> {
   const { nodeId, evidenceId } = parseArgs(args);
-  const { storage } = await resolveCliWorkspace(io);
+  const { environment, storage } = await resolveCliWorkspace(io);
   const cascade = await storage.transaction((graph) => {
     const target = graph.nodes.find(({ id }) => id === nodeId);
     if (!target) throw new Error(`Node not found: ${nodeId}`);
@@ -63,7 +63,7 @@ export async function runInvalidation(
     },
   });
   await emitOperationalNotice(
-    io.cwd,
+    environment.rootPath,
     {
       falsifiedId: nodeId,
       evidenceId,

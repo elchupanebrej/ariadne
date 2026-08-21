@@ -5,6 +5,7 @@ import {
   type MattSkill,
 } from "../adapters/matt/ingest.js";
 import {
+  canReopenDecision,
   projectGsd,
   type GsdProjection,
   type ProjectGsdOptions,
@@ -26,6 +27,18 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const sameJson = (left: unknown, right: unknown): boolean =>
   JSON.stringify(left) === JSON.stringify(right);
+
+const BLOCKING_DECISION_STATUSES = new Set([
+  "RE_OPENED",
+  "INVALIDATED",
+  "STALE",
+  "REQUIRES_REVALUATION",
+]);
+
+const isBlockingDecision = (node: Node): boolean =>
+  node.type === "DEC" &&
+  typeof node.status === "string" &&
+  BLOCKING_DECISION_STATUSES.has(node.status.toUpperCase().replaceAll("-", "_"));
 
 export class AriadneHarnessController {
   readonly rootDirectory: string;
@@ -56,7 +69,20 @@ export class AriadneHarnessController {
     const projection = await projectGsd(this.rootDirectory, options);
     const graph = await this.storage.readGraph();
     const current = new Map(graph.nodes.map((node) => [node.id, node]));
-    const events = projection.nodes
+    const preserveBlockingDecisions = !canReopenDecision(options);
+    const projectedNodes = projection.nodes.map((node) => {
+      const existing = current.get(node.id);
+      return preserveBlockingDecisions && existing && isBlockingDecision(existing)
+        ? existing
+        : node;
+    });
+    const projectedById = new Map(projectedNodes.map((node) => [node.id, node]));
+    const persistedProjection: GsdProjection = {
+      ...projection,
+      nodes: projectedNodes,
+      decisions: projection.decisions.map((decision) => projectedById.get(decision.id) ?? decision),
+    };
+    const events = persistedProjection.nodes
       .filter((node) => !sameJson(current.get(node.id), node))
       .map((node) => ({ kind: "node" as const, node }));
     if (events.length > 0) await this.storage.appendEvents(events);
@@ -68,7 +94,7 @@ export class AriadneHarnessController {
     const frontier = [
       ...new Set([
         ...previousFrontier.filter((id): id is string => typeof id === "string"),
-        ...projection.nodes.map((node) => node.id),
+        ...persistedProjection.nodes.map((node) => node.id),
       ]),
     ];
     const nextState = {
@@ -85,11 +111,11 @@ export class AriadneHarnessController {
           : [],
       gsd_projection: {
         state_path: projection.documents.statePath,
-        active_phase: projection.activePhase,
+        active_phase: persistedProjection.activePhase,
       },
     };
     if (!sameJson(previous, nextState)) await this.storage.writeState(nextState);
-    return projection;
+    return persistedProjection;
   }
 
   async ingestMattArtifact(skill: MattSkill | string, artifact: unknown): Promise<Node> {

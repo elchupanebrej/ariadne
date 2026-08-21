@@ -44,6 +44,36 @@ describe("ecosystem modes A, B, and C", () => {
           }),
         ]),
       );
+      const projectedDecision = (await controller.readGraph()).nodes.find(
+        (node) => node.id === "DEC-D-001",
+      );
+      expect(projectedDecision).toBeDefined();
+      await controller.storage.appendNode({
+        ...projectedDecision,
+        status: "RE-OPENED",
+        invalidation: {
+          evidence_id: "EVD-REOPEN-1",
+          previous_status: "LOCKED",
+          status: "RE-OPENED",
+          needs_review: true,
+        },
+      });
+      const beforeReprojection = await controller.storage.readEvents();
+      const reprojected = await controller.projectGsd();
+      const persistedDecision = (await controller.readGraph()).nodes.find(
+        (node) => node.id === "DEC-D-001",
+      );
+      expect(reprojected.decisions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "DEC-D-001", status: "RE-OPENED" }),
+        ]),
+      );
+      expect(persistedDecision).toMatchObject({
+        id: "DEC-D-001",
+        status: "RE-OPENED",
+        invalidation: expect.objectContaining({ needs_review: true }),
+      });
+      expect(await controller.storage.readEvents()).toHaveLength(beforeReprojection.length);
       const firstEvents = await controller.storage.readEvents();
       expect(await controller.readGraph()).toEqual(
         expect.objectContaining({

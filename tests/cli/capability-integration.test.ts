@@ -147,6 +147,34 @@ describe("CLI capability integrations", () => {
     expect(existsSync(join(cwd, ".ariadne"))).toBe(false);
   });
 
+  it("writes nested-cwd invalidation notices to the resolved GSD overlay", async () => {
+    const root = await workspace();
+    const nested = join(root, "packages", "worker");
+    await mkdir(nested, { recursive: true });
+    const storage = new GraphStorage(join(root, ".planning", "ariadne"));
+    await storage.appendNode({
+      id: "EVD-1",
+      type: "EVD",
+      provenance_type: "FACT",
+      statement: "Evidence",
+      verdict: "FALSIFIED",
+      method: "focused test",
+      rung: 3,
+      receipt: "sha256:nested-gsd",
+      environment: "node-22/linux-x64",
+    });
+    await storage.appendNode({ id: "HYP-1", type: "HYP", provenance_type: "PROPOSED", statement: "Hypothesis" });
+    await storage.appendEdge({ source: "EVD-1", type: "falsifies", target: "HYP-1" });
+
+    const result = await invoke(nested, ["invalidate", "HYP-1", "--by", "EVD-1"]);
+
+    expect(result.code).toBe(0);
+    expect(await readFile(join(root, ".planning", "ariadne", "NOTICES.jsonl"), "utf8")).toContain(
+      '"falsified_id":"HYP-1"',
+    );
+    expect(existsSync(join(nested, ".ariadne"))).toBe(false);
+  });
+
   it("persists Matt ingestion through the GSD overlay", async () => {
     const cwd = await workspace();
     await mkdir(join(cwd, ".planning"));
