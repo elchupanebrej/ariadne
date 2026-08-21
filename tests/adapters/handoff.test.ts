@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
 import type { MaterializedGraph } from "../../src/graph/storage.js";
-import { generateHandoff } from "../../src/adapters/handoff/generator.js";
+import { generateGrillSubstrate, generateHandoff } from "../../src/adapters/handoff/generator.js";
 
 const node = (
   id: string,
@@ -135,6 +135,44 @@ describe("generateHandoff", () => {
           { rootDirectory: root },
         ),
       ).rejects.toThrow(/reopened|blocking/i);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("generateGrillSubstrate", () => {
+  it("writes a linked pre-decision substrate without requiring DEC", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-grill-substrate-"));
+    try {
+      await mkdir(join(root, ".ariadne"), { recursive: true });
+      await Promise.all([
+        writeFile(join(root, ".ariadne", "GRAPH.jsonl"), "", "utf8"),
+        writeFile(join(root, ".ariadne", "INDEX.md"), "# Index\n", "utf8"),
+        writeFile(join(root, ".ariadne", "STATE.yaml"), "{}\n", "utf8"),
+      ]);
+      const result = await generateGrillSubstrate(
+        graph([
+          node("FRAME-001", "FRAME", "PROPOSED", "The trigger remains uncertain."),
+          node("UNK-001", "UNK", "UNKNOWN", "What is the minimum trigger?"),
+          node("ASM-001", "ASM", "ASSUMED", "The user can inspect local files."),
+          node("CTR-001", "CTR", "PROPOSED", "Recall conflicts with context load."),
+          node("EVD-001", "EVD", "FACT", "The repository has a graph index."),
+          node("CAN-001", "CAN", "PROPOSED", "Use a dedicated preflight."),
+        ], []),
+        { rootDirectory: root },
+      );
+
+      expect(result.artifactPath).toBe(join(root, ".ariadne", "GRILL-SUBSTRATE.md"));
+      expect(result.content).toContain("[UNK-001](<");
+      expect(result.content).toContain("GRAPH.jsonl");
+      expect(result.content).toContain("What is the minimum trigger?");
+      expect(result.content).toContain("## Assumptions");
+      expect(result.content).toContain("## Contradictions");
+      expect(result.content).toContain("## Evidence and requests");
+      expect(result.content).toContain("➡️ Recommended answer:");
+      expect(result.content).not.toContain("Decision:");
+      expect(await readFile(result.artifactPath, "utf8")).toBe(result.content);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

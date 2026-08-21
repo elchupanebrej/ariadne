@@ -81,7 +81,7 @@ describe("ariadne status", () => {
 
     expect(code).toBe(0);
     expect(status.depth_mode).toBe("Deep");
-    expect(status.frontier).toEqual(["CAN-1"]);
+    expect(status.frontier).toEqual(["CAN-1", "UNK-1"]);
     expect(status.open_unknowns).toEqual(["UNK-1"]);
     expect(status.graph_health.healthy).toBe(true);
     expect(stderr.text()).toBe("");

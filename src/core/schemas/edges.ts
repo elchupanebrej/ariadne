@@ -49,6 +49,8 @@ const PROPOSITION_NODE_TYPES: readonly NodeType[] = [
   "ASM",
   "TRANS",
   "DEC",
+  "TRF",
+  "VAL-SELECT",
 ];
 const EVIDENCE_NODE_TYPES: readonly NodeType[] = ["EVD", "VAL"];
 

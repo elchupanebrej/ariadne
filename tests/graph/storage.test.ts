@@ -56,7 +56,8 @@ describe("GraphStorage", () => {
       const restarted = new GraphStorage(directory);
       expect(await restarted.readState()).toEqual({
         depth_mode: "Standard",
-        frontier: ["TASK-001"],
+        frontier: ["TASK-001", "TASK-002"],
+        open_unknowns: [],
       });
       expect(await restarted.materialize()).toEqual({
         nodes: [node("TASK-001"), node("TASK-002")],

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import type { EpistemicEdge } from "../../core/schemas/edges.js";
 import type { Node } from "../../core/schemas/nodes.js";
@@ -21,6 +21,11 @@ export type HandoffArtifact = {
   artifactPath: string;
   content: string;
   recommendedCommand: HandoffRecommendation;
+};
+
+export type GrillSubstrateArtifact = {
+  artifactPath: string;
+  content: string;
 };
 
 const INACTIVE_STATUSES = new Set([
@@ -134,6 +139,105 @@ const renderSection = (title: string, nodes: Node[]): string => {
   return [`## ${title}`, "", ...(rows.length > 0 ? rows : ["- None"]), ""].join("\n");
 };
 
+const defaultArtifactDirectory = (rootDirectory: string): string => {
+  const environment = detectGsd(rootDirectory);
+  return environment.active ? environment.overlayPath : join(rootDirectory, ".ariadne");
+};
+
+const markdownLink = (label: string, target: string): string =>
+  `[${label}](<${target}>)`;
+
+const existingPath = async (path: string): Promise<boolean> => {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Persist the uncertainty substrate needed before grilling. It intentionally
+ * accepts an open graph and does not require a DEC node.
+ */
+export async function generateGrillSubstrate(
+  graph: MaterializedGraph,
+  options: HandoffOptions = {},
+): Promise<GrillSubstrateArtifact> {
+  const rootDirectory = resolve(
+    options.rootDirectory ?? options.root ?? options.workspaceRoot ?? process.cwd(),
+  );
+  const defaultDirectory = defaultArtifactDirectory(rootDirectory);
+  const artifactPath = options.outputPath
+    ? isAbsolute(options.outputPath)
+      ? options.outputPath
+      : join(rootDirectory, options.outputPath)
+    : join(defaultDirectory, "GRILL-SUBSTRATE.md");
+  const activeNodes = graph.nodes.filter(isActive).sort((left, right) =>
+    left.id.localeCompare(right.id),
+  );
+  const sourceFiles = [
+    join(defaultDirectory, "GRAPH.jsonl"),
+    join(defaultDirectory, "INDEX.md"),
+    join(defaultDirectory, "STATE.yaml"),
+  ];
+  const sourceLinks = (await Promise.all(sourceFiles.map(existingPath)))
+    .map((exists, index) => (exists ? markdownLink(sourceFiles[index].split(/[\\/]/u).pop()!, sourceFiles[index]) : null))
+    .filter((link): link is string => link !== null);
+  const cardLink = (node: Node): string => markdownLink(node.id, artifactPath);
+  const frontierNodes = activeNodes.filter((node) => node.type === "UNK");
+  const recommendation =
+    activeNodes.find((node) => node.type === "VAL-SELECT") ??
+    activeNodes.find((node) => node.type === "DEC");
+  const renderLinkedSection = (title: string, nodes: Node[]): string => {
+    const rows = nodes.map((node) => `- ${cardLink(node)} [${node.provenance_type}] ${compact(node.statement)}`);
+    return [`## ${title}`, "", ...(rows.length > 0 ? rows : ["- None"]), ""].join("\n");
+  };
+
+  const content = [
+    "# Ariadne Grill Substrate",
+    "",
+    "This artifact is the pre-decision epistemic substrate for a grill.",
+    "The graph may still contain unresolved unknowns; no decision is required.",
+    "",
+    renderLinkedSection(
+      "Facts and observations",
+      activeNodes.filter((node) => ["FACT", "MEASURED", "DECIDED"].includes(node.provenance_type)),
+    ),
+    renderLinkedSection("Frames", activeNodes.filter((node) => node.type === "FRAME")),
+    renderLinkedSection("Invariants", activeNodes.filter(isInvariant)),
+    renderLinkedSection("Assumptions", activeNodes.filter((node) => node.type === "ASM")),
+    renderLinkedSection("Contradictions", activeNodes.filter((node) => node.type === "CTR")),
+    renderLinkedSection(
+      "Evidence and requests",
+      activeNodes.filter((node) => ["EVD", "EVDREQ", "VAL"].includes(node.type)),
+    ),
+    renderLinkedSection("Open unknowns", frontierNodes),
+    renderLinkedSection("Candidates and hypotheses", activeNodes.filter((node) => ["CAN", "HYP"].includes(node.type))),
+    "## Frontier questions",
+    "",
+    ...(frontierNodes.length > 0
+      ? frontierNodes.map(
+          (node) =>
+            `- ${cardLink(node)} ❓ ${compact(node.statement)}\n  ➡️ Recommended answer: ${
+              recommendation
+                ? `${cardLink(recommendation)} — ${compact(recommendation.statement)}`
+                : "Keep this unresolved until discriminating evidence is available."
+            }`,
+        )
+      : ["- None"]),
+    "",
+    "## Source artifacts",
+    "",
+    ...(sourceLinks.length > 0 ? sourceLinks.map((link) => `- ${link}`) : ["- None persisted yet"]),
+    "",
+  ].join("\n");
+
+  await mkdir(dirname(artifactPath), { recursive: true });
+  await writeFile(artifactPath, content, "utf8");
+  return { artifactPath, content };
+}
+
 export async function generateHandoff(
   decisionId: string,
   graph: MaterializedGraph,
@@ -147,8 +251,7 @@ export async function generateHandoff(
   const rootDirectory = resolve(
     options.rootDirectory ?? options.root ?? options.workspaceRoot ?? process.cwd(),
   );
-  const environment = detectGsd(rootDirectory);
-  const defaultDirectory = environment.active ? environment.overlayPath : join(rootDirectory, ".ariadne");
+  const defaultDirectory = defaultArtifactDirectory(rootDirectory);
   const artifactPath = options.outputPath
     ? isAbsolute(options.outputPath)
       ? options.outputPath

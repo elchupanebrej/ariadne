@@ -10,6 +10,8 @@ describe("directed edge endpoint contracts", () => {
     ["contradicts", "HYP-1", "ASM-1"],
     ["depends_on", "CAN-1", "ASM-1"],
     ["derived_from", "CLM-1", "OBS-1"],
+    ["depends_on", "VAL-SELECT-1", "UNK-1"],
+    ["derived_from", "TRF-1", "EVD-1"],
     ["falsifies", "EVD-1", "ASM-1"],
     ["invalidates", "ASM-1", "CAN-1"],
     ["satisfies", "CAN-1", "CLM-1"],

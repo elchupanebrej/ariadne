@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "mode": "standalone",
+  "depth_mode": "Standard",
+  "frontier": [
+    "UNK-uncertainty-trigger-boundary",
+    "UNK-grill-handoff-shape",
+    "UNK-auto-handoff-policy",
+    "CAN-root-uncertainty-preflight",
+    "CAN-root-uncertainty-vocabulary",
+    "VAL-SELECT-uncertainty-ingress",
+    "DEC-uncertainty-interaction-contract",
+    "DEC-artifact-links-target-files",
+    "OBS-ariadne-tooling-failures"
+  ],
+  "open_unknowns": [
+    "UNK-uncertainty-trigger-boundary",
+    "UNK-grill-handoff-shape",
+    "UNK-auto-handoff-policy"
+  ]
+}

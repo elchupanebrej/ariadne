@@ -1,5 +1,6 @@
 import {
   appendFile,
+  access,
   mkdir,
   readFile,
   rename,
@@ -147,6 +148,26 @@ const compact = (value: string, limit = 100): string => {
   return oneLine.length > limit ? `${oneLine.slice(0, limit - 1)}…` : oneLine;
 };
 
+const ACTIVE_FRONTIER_STATUSES = new Set(["INVALIDATED", "REMOVED"]);
+
+const stateForGraph = (
+  state: Record<string, unknown>,
+  graph: MaterializedGraph,
+): Record<string, unknown> => {
+  const activeNodes = graph.nodes.filter(
+    (node) => !ACTIVE_FRONTIER_STATUSES.has(node.status ?? ""),
+  );
+  const frontier = activeNodes.map((node) => node.id);
+  const openUnknowns = activeNodes
+    .filter((node) => node.type === "UNK" && node.status !== "RESOLVED")
+    .map((node) => node.id);
+  const next: Record<string, unknown> = { ...state, frontier, open_unknowns: openUnknowns };
+  if ("active_frontier" in state) next.active_frontier = frontier;
+  if ("openUnknowns" in state) next.openUnknowns = openUnknowns;
+  if ("unknowns" in state) next.unknowns = openUnknowns;
+  return next;
+};
+
 export function renderIndex(graph: MaterializedGraph): string {
   const nodes = [...graph.nodes].sort((left, right) => left.id.localeCompare(right.id));
   const active = nodes.filter((node) => node.status !== "INVALIDATED");
@@ -271,7 +292,45 @@ export class GraphStorage {
           await rm(temporaryPath, { force: true });
         }
         await this.writeIndexUnlocked(prospective);
+        if (parsed.some((event) => event.kind === "node")) {
+          await this.syncStateWithGraph(prospective);
+        }
         return mutation.result;
+      }),
+    );
+  }
+
+  private async syncStateWithGraph(graph: MaterializedGraph): Promise<void> {
+    try {
+      await access(this.statePath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+      throw error;
+    }
+    await enqueue(this.statePath, () =>
+      withFileLock(this.stateLockPath, async () => {
+        let value: unknown;
+        try {
+          value = JSON.parse(await readFile(this.statePath, "utf8"));
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+          throw error;
+        }
+        const parsed = StateSchema.safeParse(value);
+        if (!parsed.success) throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+        const serialized = JSON.stringify(
+          stateForGraph(parsed.data as Record<string, unknown>, graph),
+          null,
+          2,
+        );
+        const temporaryPath = `${this.statePath}.${randomUUID()}.tmp`;
+        await mkdir(dirname(this.statePath), { recursive: true });
+        try {
+          await writeFile(temporaryPath, `${serialized}\n`, "utf8");
+          await rename(temporaryPath, this.statePath);
+        } finally {
+          await rm(temporaryPath, { force: true });
+        }
       }),
     );
   }
