@@ -3,19 +3,33 @@
   "mode": "standalone",
   "depth_mode": "Standard",
   "frontier": [
-    "UNK-uncertainty-trigger-boundary",
-    "UNK-grill-handoff-shape",
-    "UNK-auto-handoff-policy",
+    "ASM-matt-ownership-boundary",
+    "CAN-cross-skill-wrapper",
     "CAN-root-uncertainty-preflight",
     "CAN-root-uncertainty-vocabulary",
-    "VAL-SELECT-uncertainty-ingress",
-    "DEC-uncertainty-interaction-contract",
+    "CTR-recall-vs-context-load",
     "DEC-artifact-links-target-files",
-    "OBS-ariadne-tooling-failures"
+    "DEC-semantic-gate-preflight-contract",
+    "DEC-uncertainty-interaction-contract",
+    "EVD-static-uncertainty-coverage",
+    "EVDREQ-static-uncertainty-coverage",
+    "FRAME-semantic-gate-preflight-diagnostics",
+    "FRAME-uncertainty-substrate",
+    "HYP-missing-epistemic-handoff",
+    "HYP-narrow-root-trigger",
+    "OBS-ariadne-flow-missed",
+    "OBS-ariadne-tooling-failures",
+    "TRF-uncertainty-first-ingress",
+    "UNK-auto-handoff-policy",
+    "UNK-grill-handoff-shape",
+    "UNK-semantic-preflight-placement",
+    "UNK-semantic-principle-contract",
+    "UNK-uncertainty-trigger-boundary",
+    "VAL-SELECT-uncertainty-ingress"
   ],
   "open_unknowns": [
-    "UNK-uncertainty-trigger-boundary",
+    "UNK-auto-handoff-policy",
     "UNK-grill-handoff-shape",
-    "UNK-auto-handoff-policy"
+    "UNK-uncertainty-trigger-boundary"
   ]
 }

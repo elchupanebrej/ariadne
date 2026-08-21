@@ -2,6 +2,8 @@ import type { Node } from "../core/schemas/nodes.js";
 
 export type SemanticDiagnosticCode =
   | "INVALID_GRAPH"
+  | "CTR_SEPARATION_PREFLIGHT"
+  | "CTR_CANDIDATE_CARDINALITY"
   | "CTR_SEPARATION_DIVERSITY"
   | "HYP_FALSIFICATION_CONDITION"
   | "HARD_REQUIREMENT_FAILED";
@@ -13,6 +15,12 @@ export type SemanticDiagnostic = {
   required?: number;
   actual?: number;
   candidates?: string[];
+  requiredCandidates?: number;
+  actualCandidates?: number;
+  coveredPrinciples?: string[];
+  uncoveredPrinciples?: string[];
+  additionalCandidatesNeeded?: number;
+  additionalPrinciplesNeeded?: number;
 };
 
 export type SemanticGateResult = {
@@ -26,6 +34,13 @@ type SemanticEdge = {
   target: string;
   type?: string;
 };
+
+const CANONICAL_SEPARATION_PRINCIPLES = [
+  "Time",
+  "State/Data",
+  "Operating Condition",
+  "System Boundary",
+] as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -118,6 +133,16 @@ const hasCandidateAssociation = (
     candidates.some((candidate) => linkedToContradiction(candidate, contradiction, edges)),
   );
 
+const relatedCandidatesFor = (
+  candidates: SemanticNode[],
+  contradictions: SemanticNode[],
+  contradiction: SemanticNode,
+  edges: SemanticEdge[],
+): SemanticNode[] =>
+  hasCandidateAssociation(candidates, contradictions, edges)
+    ? candidates.filter((candidate) => linkedToContradiction(candidate, contradiction, edges))
+    : candidates;
+
 const separationPrinciples = (candidate: SemanticNode): string[] =>
   ["separation_principle", "separation_principles", "separationPrinciple"].flatMap((key) =>
     strings(candidate[key]),
@@ -178,6 +203,83 @@ const depthModeOf = (input: unknown): "Fast" | "Standard" | "Deep" => {
   return "Standard";
 };
 
+const semanticContextFor = (input: unknown, nodes: SemanticNode[]) => ({
+  requiredCandidates: depthModeOf(input) === "Fast" ? 1 : 3,
+  candidates: nodes.filter((node) => node.type === "CAN" && isActive(node)),
+  contradictions: nodes.filter((node) => node.type === "CTR" && isActive(node)),
+});
+
+const contradictionBreadthFor = (
+  candidates: SemanticNode[],
+  contradictions: SemanticNode[],
+  contradiction: SemanticNode,
+  edges: SemanticEdge[],
+) => {
+  const relatedCandidates = relatedCandidatesFor(
+    candidates,
+    contradictions,
+    contradiction,
+    edges,
+  );
+  const principles = [
+    ...new Set(
+      relatedCandidates
+        .flatMap(separationPrinciples)
+        .map((principle) => principle.toLocaleLowerCase()),
+    ),
+  ].sort();
+
+  return { relatedCandidates, principles };
+};
+
+/** Explain missing contradiction breadth without changing the graph or gate result. */
+export function runSemanticPreflight(input: unknown): SemanticDiagnostic[] {
+  const nodes = asNodes(input);
+  const edges = asEdges(input);
+  if (!nodes || !edges) return [];
+
+  const { requiredCandidates, candidates, contradictions } = semanticContextFor(input, nodes);
+
+  return contradictions.flatMap((contradiction) => {
+    const { relatedCandidates, principles } = contradictionBreadthFor(
+      candidates,
+      contradictions,
+      contradiction,
+      edges,
+    );
+    if (
+      principles.length >= requiredCandidates &&
+      relatedCandidates.length >= requiredCandidates
+    ) {
+      return [];
+    }
+
+    const uncoveredPrinciples = CANONICAL_SEPARATION_PRINCIPLES.filter(
+      (principle) => !principles.includes(principle.toLocaleLowerCase()),
+    );
+
+    return [
+      {
+        code: "CTR_SEPARATION_PREFLIGHT",
+        message:
+          `Active contradiction ${contradiction.id} needs at least ${requiredCandidates} ` +
+          `structurally distinct candidate mechanisms across separation principles; ` +
+          `found ${relatedCandidates.length} candidate(s) covering ${principles.length}.`,
+        nodeId: contradiction.id,
+        required: requiredCandidates,
+        actual: principles.length,
+        candidates: relatedCandidates.map((candidate) => candidate.id).sort(),
+        requiredCandidates,
+        actualCandidates: relatedCandidates.length,
+        coveredPrinciples: principles,
+        uncoveredPrinciples,
+        additionalCandidatesNeeded: Math.max(0, requiredCandidates - relatedCandidates.length),
+        additionalPrinciplesNeeded: Math.max(0, requiredCandidates - principles.length),
+      },
+    ];
+  });
+}
+
 /** Enforce deterministic contradiction, falsifiability, and hard-requirement rules. */
 export function runSemanticGate(input: unknown): SemanticGateResult {
   const nodes = asNodes(input);
@@ -195,28 +297,34 @@ export function runSemanticGate(input: unknown): SemanticGateResult {
   }
 
   const diagnostics: SemanticDiagnostic[] = [];
-  const requiredPrinciples = depthModeOf(input) === "Fast" ? 1 : 3;
-  const candidates = nodes.filter((node) => node.type === "CAN" && isActive(node));
-  const contradictions = nodes.filter((node) => node.type === "CTR" && isActive(node));
-  const associationMetadata = hasCandidateAssociation(candidates, contradictions, edges);
+  const { requiredCandidates, candidates, contradictions } = semanticContextFor(input, nodes);
 
   for (const contradiction of contradictions) {
-    const relatedCandidates = associationMetadata
-      ? candidates.filter((candidate) => linkedToContradiction(candidate, contradiction, edges))
-      : candidates;
-    const principles = new Set(
-      relatedCandidates
-        .flatMap(separationPrinciples)
-        .map((principle) => principle.toLocaleLowerCase()),
+    const { relatedCandidates, principles } = contradictionBreadthFor(
+      candidates,
+      contradictions,
+      contradiction,
+      edges,
     );
 
-    if (principles.size < requiredPrinciples) {
+    if (relatedCandidates.length < requiredCandidates) {
+      diagnostics.push({
+        code: "CTR_CANDIDATE_CARDINALITY",
+        message: `Active contradiction ${contradiction.id} requires at least ${requiredCandidates} structurally distinct candidate mechanisms`,
+        nodeId: contradiction.id,
+        required: requiredCandidates,
+        actual: relatedCandidates.length,
+        candidates: relatedCandidates.map((candidate) => candidate.id).sort(),
+      });
+    }
+
+    if (principles.length < requiredCandidates) {
       diagnostics.push({
         code: "CTR_SEPARATION_DIVERSITY",
-        message: `Active contradiction ${contradiction.id} requires at least ${requiredPrinciples} distinct separation principles`,
+        message: `Active contradiction ${contradiction.id} requires at least ${requiredCandidates} distinct separation principles`,
         nodeId: contradiction.id,
-        required: requiredPrinciples,
-        actual: principles.size,
+        required: requiredCandidates,
+        actual: principles.length,
         candidates: relatedCandidates.map((candidate) => candidate.id).sort(),
       });
     }

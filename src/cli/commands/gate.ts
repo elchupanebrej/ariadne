@@ -4,6 +4,7 @@ import {
 } from "../../gates/epistemic-gate.js";
 import {
   runSemanticGate,
+  runSemanticPreflight,
   type SemanticDiagnostic,
 } from "../../gates/semantic-gate.js";
 import {
@@ -51,6 +52,10 @@ const remediation: Record<string, string> = {
   CYCLE: "Replace the deductive cycle with an acyclic derivation.",
   CTR_SEPARATION_DIVERSITY:
     "Add three candidate mechanisms across distinct separation principles.",
+  CTR_SEPARATION_PREFLIGHT:
+    "Add candidates across the uncovered separation principles; the strict semantic gate remains authoritative.",
+  CTR_CANDIDATE_CARDINALITY:
+    "Add the missing structurally distinct candidate mechanisms before retrying.",
   HYP_FALSIFICATION_CONDITION: "Add an explicit falsification condition to the hypothesis.",
   HARD_REQUIREMENT_FAILED: "Remove the failed candidate before preference scoring.",
   UNKNOWN_CLAIM_CLASS: "Declare a supported claim class or minimum evidentiary rung.",
@@ -73,7 +78,11 @@ const withHints = (
     remediation: hintFor(diagnostic.code),
   }));
 
-const runOne = (gate: GateName, graph: MaterializedGraph): GateResult => {
+const runOne = (
+  gate: GateName,
+  graph: MaterializedGraph,
+  preflightDiagnostics: SemanticDiagnostic[] = [],
+): GateResult => {
   let result: StructuralGateResult | { passed: boolean; diagnostics: SemanticDiagnostic[] } | { passed: boolean; diagnostics: EpistemicDiagnostic[] };
   switch (gate) {
     case "structural":
@@ -89,7 +98,10 @@ const runOne = (gate: GateName, graph: MaterializedGraph): GateResult => {
   return {
     gate,
     passed: result.passed,
-    diagnostics: withHints(gate, result.diagnostics),
+    diagnostics: [
+      ...withHints(gate, preflightDiagnostics),
+      ...withHints(gate, result.diagnostics),
+    ],
   };
 };
 
@@ -109,7 +121,10 @@ export async function runGate(args: readonly string[], io: CliIO): Promise<numbe
   const { storage } = await resolveCliWorkspace(io);
   const graph = await storage.materialize();
   const names = gate === "all" ? ORDER : [gate];
-  const results = names.map((name) => runOne(name, graph));
+  const semanticPreflight = names.includes("semantic") ? runSemanticPreflight(graph) : [];
+  const results = names.map((name) =>
+    runOne(name, graph, name === "semantic" ? semanticPreflight : []),
+  );
   const diagnostics = results.flatMap((result) => result.diagnostics);
   const receipt: GateReceipt = {
     gate,

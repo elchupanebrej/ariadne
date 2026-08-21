@@ -76,6 +76,113 @@ describe("ariadne gate", () => {
     ]);
   });
 
+  it("preflights candidate breadth without mutating the partial graph", async () => {
+    const cwd = await workspace();
+    const storage = new GraphStorage(join(cwd, ".ariadne"));
+    await storage.appendNode({
+      id: "CTR-1",
+      type: "CTR",
+      provenance_type: "PROPOSED",
+      statement: "An active contradiction",
+      status: "ACTIVE",
+    });
+
+    const partial = await storage.materialize();
+    const incomplete = await invoke(cwd, ["gate", "semantic"]);
+    const incompleteReceipt = JSON.parse(incomplete.stdout.text()) as {
+      diagnostics: Array<{
+        code: string;
+        requiredCandidates?: number;
+        actualCandidates?: number;
+        coveredPrinciples?: string[];
+        uncoveredPrinciples?: string[];
+      }>;
+    };
+    const codes = incompleteReceipt.diagnostics.map((diagnostic) => diagnostic.code);
+    expect(incomplete.code).toBe(1);
+    expect(codes.indexOf("CTR_SEPARATION_PREFLIGHT")).toBeLessThan(
+      codes.indexOf("CTR_SEPARATION_DIVERSITY"),
+    );
+    expect(incompleteReceipt.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "CTR_SEPARATION_PREFLIGHT",
+          requiredCandidates: 3,
+          actualCandidates: 0,
+          coveredPrinciples: [],
+          uncoveredPrinciples: expect.arrayContaining([
+            "Operating Condition",
+            "State/Data",
+            "System Boundary",
+            "Time",
+          ]),
+        }),
+      ]),
+    );
+    expect(await storage.materialize()).toEqual(partial);
+
+    await storage.appendNode({
+      id: "CAN-1",
+      type: "CAN",
+      provenance_type: "PROPOSED",
+      statement: "CAN-1",
+      contradiction_ref: "CTR-1",
+      separation_principle: ["operating condition", "time", "system boundary"],
+    });
+
+    const oneCandidate = await invoke(cwd, ["gate", "semantic"]);
+    const oneCandidateReceipt = JSON.parse(oneCandidate.stdout.text()) as {
+      diagnostics: Array<{
+        code: string;
+        requiredCandidates?: number;
+        actualCandidates?: number;
+        additionalCandidatesNeeded?: number;
+        coveredPrinciples?: string[];
+      }>;
+    };
+    expect(oneCandidate.code).toBe(1);
+    expect(oneCandidateReceipt.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "CTR_SEPARATION_PREFLIGHT",
+          requiredCandidates: 3,
+          actualCandidates: 1,
+          additionalCandidatesNeeded: 2,
+          coveredPrinciples: expect.arrayContaining([
+            "operating condition",
+            "system boundary",
+            "time",
+          ]),
+        }),
+        expect.objectContaining({
+          code: "CTR_CANDIDATE_CARDINALITY",
+        }),
+      ]),
+    );
+
+    for (const [id, separationPrinciple] of [
+      ["CAN-2", "state/data"],
+      ["CAN-3", "system boundary"],
+    ]) {
+      await storage.appendNode({
+        id,
+        type: "CAN",
+        provenance_type: "PROPOSED",
+        statement: id,
+        contradiction_ref: "CTR-1",
+        separation_principle: separationPrinciple,
+      });
+    }
+
+    const complete = await invoke(cwd, ["gate", "semantic"]);
+    expect(complete.code).toBe(0);
+    expect(JSON.parse(complete.stdout.text())).toMatchObject({
+      passed: true,
+      diagnostics: [],
+      results: [{ gate: "semantic", passed: true, diagnostics: [] }],
+    });
+  });
+
   it("runs all gates in deterministic order and rejects an invalid command", async () => {
     const cwd = await workspace();
     const storage = new GraphStorage(join(cwd, ".ariadne"));
