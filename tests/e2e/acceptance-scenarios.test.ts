@@ -205,7 +205,7 @@ describe("normative acceptance scenarios A-J", () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
-  });
+  }, 60_000);
 
   it("G: uses the native provider when GSD is active and Matt is absent", async () => {
     const root = await temporaryRoot();

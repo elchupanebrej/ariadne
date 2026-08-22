@@ -1,6 +1,6 @@
 # Ariadne Software Reasoning Layer
 
-Ariadne is a software reasoning harness and epistemic layer that models engineering uncertainty, causal hypotheses, contradictions, and systematic inventive transformations for autonomous agents and software engineers.
+Ariadne is a software reasoning skill, CLI, and epistemic layer that models engineering uncertainty, causal hypotheses, contradictions, and systematic inventive transformations for autonomous agents and software engineers.
 
 ## Language
 
@@ -25,6 +25,62 @@ _Avoid_: Cascade failure, ripple delete, cache purge
 **Epistemic Overlay**:
 A typed metadata graph attached to tasks and plans that tracks claims, hypotheses, evidence, and invalidation rules without taking over task management.
 _Avoid_: State machine, ticket wrapper, meta-plan
+
+**Methodological Guide**:
+A normative guide that connects rationale, executable rules, a learning path, verification, and lifecycle governance for one method.
+_Avoid_: Skill, harness, documentation bundle
+
+**Method Contract**:
+The compact, versioned, executable source of normative method rules referenced by the methodological guide, teaching skills, and orchestration harness.
+_Avoid_: Book, runtime code, copied skill instructions
+
+**Teaching Skill**:
+An agent instruction entry point that reloads a method's triggers, rules, worked example, and artifact contract for a fresh session.
+_Avoid_: Methodological guide, orchestration harness, runtime
+
+**Orchestration Harness**:
+A host-neutral operational boundary that lets a fresh session continue from repository-visible owner receipts while leaving workflow semantics, epistemic state, human decisions, and host permissions with their existing owners. A dedicated runtime is only one candidate implementation.
+_Avoid_: Ariadne, teaching skill, methodology, wrapper, necessarily a separate process
+
+**Orchestration Kernel**:
+The optional, deletable executable component that atomically persists pointer-only Orchestration Attempts when a thinner host path cannot satisfy the Orchestration Harness contract.
+_Avoid_: Standalone runtime service, AriadneHarnessController, mandatory product
+
+**Clean-Session Run**:
+An evaluation attempt started without prior author or session context, using only declared pinned inputs and whitelisted capabilities recorded in an auditable input manifest.
+_Avoid_: Fresh-agent test, blank session, clean slate
+
+**Tested Release Bundle**:
+An immutable, non-normative compatibility snapshot that pins one owner-published version and digest for every required component together with the evidence that the combination passed.
+_Avoid_: Release train, source of truth, compatibility range, latest version
+
+**Change Impact Receipt**:
+An owner-issued statement of which published surface changed, which consumers are affected, and which new-version or compatibility evidence each affected owner must return before bundle publication.
+_Avoid_: Changelog, global rebuild request, inferred dependency update
+
+**Orchestration Attempt**:
+The harness-owned lifecycle record for one pinned continuation, containing only generic status, version pins, cursors, counters, and owner pointers.
+_Avoid_: Workflow, agent session, task, transaction
+
+**Dispatch Intent**:
+The durable orchestration event recorded before one owner operation is invoked, binding the attempt revision, opaque step, inputs, authorization, idempotency key, and replay budget.
+_Avoid_: Tool call, permission grant, completed effect
+
+**Owner Effect Receipt**:
+An owner-issued pointer that authoritatively classifies an invoked operation as committed, no-effect, or ambiguous without copying owner state into the harness.
+_Avoid_: Harness inference, rollback record, success log
+
+**Replay Declaration**:
+An owner-issued, operation-specific statement permitting another dispatch under a stable idempotency key, finite budget, and deadline.
+_Avoid_: Automatic retry policy, generic idempotency flag
+
+**Pending Action**:
+A pointer-only statement of the authority, evidence, action, and resume predicate required before a waiting orchestration attempt may advance.
+_Avoid_: Human answer, escalation workflow, harness-owned approval
+
+**Staged Self-Application**:
+A versioned bootstrap in which methodology authoring creates harness authoring, harness authoring specifies the runtime, and the runtime reapplies the method to itself before a fixed-point check.
+_Avoid_: Mutual runtime recursion, circular validation, self-proof
 
 **Decision-Significant Unknown**:
 An unverified fact or missing measurement whose empirical outcome can alter the choice of candidate mechanism or invalidate an entire architectural path.

@@ -1,4 +1,4 @@
-import type { MaterializedGraph } from "../../graph/storage.js";
+import { isFrontierNode, type MaterializedGraph } from "../../graph/storage.js";
 import { resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
@@ -49,25 +49,27 @@ export function buildStatusReport(
   state: State | null,
   graph: MaterializedGraph,
 ): StatusReport {
-  const activeNodes = graph.nodes.filter(
-    (node) => node.status !== "INVALIDATED" && node.status !== "REMOVED",
-  );
+  const frontierNodes = graph.nodes.filter(isFrontierNode);
+  const frontierNodeIds = new Set(frontierNodes.map((node) => node.id));
+  const configuredFrontier = configuredIds(state ?? {}, ["frontier", "active_frontier"]);
   const frontier =
-    configuredIds(state ?? {}, ["frontier", "active_frontier"]).length > 0
-      ? configuredIds(state ?? {}, ["frontier", "active_frontier"])
-      : activeNodes.map((node) => node.id);
+    configuredFrontier.length > 0
+      ? configuredFrontier.filter((id) => frontierNodeIds.has(id))
+      : frontierNodes.map((node) => node.id);
+
+  const openUnknownNodeIds = new Set(
+    frontierNodes.filter((node) => node.type === "UNK").map((node) => node.id),
+  );
+  const configuredUnknowns = configuredIds(state ?? {}, [
+    "open_unknowns",
+    "openUnknowns",
+    "unknowns",
+  ]);
   const openUnknowns =
-    configuredIds(state ?? {}, ["open_unknowns", "openUnknowns", "unknowns"]).length > 0
-      ? configuredIds(state ?? {}, ["open_unknowns", "openUnknowns", "unknowns"])
-      : graph.nodes
-          .filter(
-            (node) =>
-              node.type === "UNK" &&
-              node.status !== "RESOLVED" &&
-              node.status !== "INVALIDATED" &&
-              node.status !== "REMOVED",
-          )
-          .map((node) => node.id);
+    configuredUnknowns.length > 0
+      ? configuredUnknowns.filter((id) => openUnknownNodeIds.has(id))
+      : [...openUnknownNodeIds];
+
   const ids = new Set(graph.nodes.map((node) => node.id));
   const invalidReferences = graph.edges.filter(
     (edge) => !ids.has(edge.source) || !ids.has(edge.target),

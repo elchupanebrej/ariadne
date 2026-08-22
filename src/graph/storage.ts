@@ -20,6 +20,7 @@ import {
   NodeSchema,
   type Node,
 } from "../core/schemas/nodes.js";
+import type { ProvenanceType } from "../core/types/nodes.js";
 import { validateGraph } from "./integrity.js";
 
 export type MaterializedGraph = {
@@ -148,18 +149,40 @@ const compact = (value: string, limit = 100): string => {
   return oneLine.length > limit ? `${oneLine.slice(0, limit - 1)}…` : oneLine;
 };
 
-const ACTIVE_FRONTIER_STATUSES = new Set(["INVALIDATED", "REMOVED"]);
+export const TERMINAL_NODE_STATUSES = new Set([
+  "RESOLVED",
+  "REJECTED",
+  "INVALIDATED",
+  "REMOVED",
+  "DECIDED",
+]);
+
+export const isTerminalNode = (
+  node: { provenance_type: ProvenanceType; status?: string; tombstone?: boolean },
+): boolean => {
+  if (node.tombstone) return true;
+  if (node.provenance_type === "DECIDED") return true;
+  if (
+    typeof node.status === "string" &&
+    TERMINAL_NODE_STATUSES.has(node.status.toUpperCase().replaceAll("-", "_"))
+  ) {
+    return true;
+  }
+  return false;
+};
+
+export const isFrontierNode = (
+  node: { provenance_type: ProvenanceType; status?: string; tombstone?: boolean },
+): boolean => !isTerminalNode(node);
 
 const stateForGraph = (
   state: Record<string, unknown>,
   graph: MaterializedGraph,
 ): Record<string, unknown> => {
-  const activeNodes = graph.nodes.filter(
-    (node) => !ACTIVE_FRONTIER_STATUSES.has(node.status ?? ""),
-  );
-  const frontier = activeNodes.map((node) => node.id);
-  const openUnknowns = activeNodes
-    .filter((node) => node.type === "UNK" && node.status !== "RESOLVED")
+  const frontierNodes = graph.nodes.filter(isFrontierNode);
+  const frontier = frontierNodes.map((node) => node.id);
+  const openUnknowns = frontierNodes
+    .filter((node) => node.type === "UNK")
     .map((node) => node.id);
   const next: Record<string, unknown> = { ...state, frontier, open_unknowns: openUnknowns };
   if ("active_frontier" in state) next.active_frontier = frontier;
@@ -170,18 +193,24 @@ const stateForGraph = (
 
 export function renderIndex(graph: MaterializedGraph): string {
   const nodes = [...graph.nodes].sort((left, right) => left.id.localeCompare(right.id));
-  const active = nodes.filter((node) => node.status !== "INVALIDATED");
+  const frontierNodes = nodes.filter(isFrontierNode);
+  const activeNodes = nodes.filter(
+    (node) => node.status !== "INVALIDATED" && node.status !== "REMOVED",
+  );
   const unknowns = nodes.filter((node) => node.type === "UNK");
   const candidates = nodes.filter((node) => node.type === "CAN");
-  const rows = active.slice(0, 25).map(
+  const limit = 25;
+  const renderedFrontier = frontierNodes.slice(0, limit);
+  const omitted = frontierNodes.length - renderedFrontier.length;
+  const rows = renderedFrontier.map(
     (node) =>
       `| ${node.id} | ${node.provenance_type} | ${node.status ?? "ACTIVE"} | ${compact(node.statement)} |`,
   );
 
-  return [
+  const lines = [
     "# Ariadne Epistemic Index",
     "",
-    `Nodes: ${nodes.length} · Edges: ${graph.edges.length} · Active: ${active.length}`,
+    `Nodes: ${nodes.length} · Edges: ${graph.edges.length} · Active: ${activeNodes.length}`,
     `Unknowns: ${unknowns.length} · Candidates: ${candidates.length}`,
     "",
     "## Frontier",
@@ -190,7 +219,13 @@ export function renderIndex(graph: MaterializedGraph): string {
     "| --- | --- | --- | --- |",
     ...(rows.length > 0 ? rows : ["| — | — | — | No active nodes |"]),
     "",
-  ].join("\n");
+  ];
+
+  if (omitted > 0) {
+    lines.push(`*Omitted ${omitted} additional frontier nodes for compactness.*`, "");
+  }
+
+  return lines.join("\n");
 }
 
 export class GraphStorage {

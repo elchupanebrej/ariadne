@@ -8,6 +8,10 @@
 
 ## Abstract
 
+At 09:42 a payment API times out after committing a charge. The client retries, a second worker cannot see the first worker's result, and the customer is charged twice. A human engineer proposes a larger connection pool because the dashboard shows saturation. An AI agent proposes a generic idempotency middleware because duplicate-payment fixes in its training data look similar. The pool increases database contention; the middleware deduplicates requests in one process but not across regions. Both responses are locally plausible, and both preserve the mechanism that caused the incident: ambiguous commit ownership across a retry boundary.
+
+This document begins with failures like this because a formal model is useful only after the reader can name the observable behavior it must explain. Each operation therefore follows the same order: **concrete failure → intuitive human reaction → intuitive AI-agent reaction → consequences → correction → mathematical model → executable evidence**.
+
 Software engineering possesses many strong schools of thought: architectural design, domain-driven design, test-driven development, refactoring, clean architecture, site reliability engineering, threat modeling, distributed systems theory, performance engineering, TRIZ (Theory of Inventive Problem Solving), and systems thinking. Each school illuminates a specific part of the work well, but none serves as a universal algorithm for solving every engineering problem or navigating complex uncertainty.
 
 At the core of this treatise lie the **nine operations of systematic inventive thinking**. They unify recurring forms of cognitive and structural work found across TRIZ, systems thinking, theory of constraints, axiomatic design, and formal software methods. In software engineering, these operations are applied to program functions, state ownership, data schemas, communication contracts, dependencies, subsystem boundaries, computational resources, operations, and the safe evolution of running distributed systems.
@@ -28,21 +32,25 @@ The distinctive feature of software engineering is that most hypotheses can be t
 
 Therefore, the ultimate output of engineering thought here is not a narrative or a collection of design patterns, but the unbroken epistemic chain:
 
-> **problem model → hypothesis → transformation → executable check → empirical evidence → justified decision.**
+> **observed failure → divergent human/AI diagnosis → problem model → hypothesis → transformation → executable check → empirical evidence → justified decision.**
 
 ------------------------------------------------------------------------
 
 ## How to Read This Document
 
-- **For System Architects & Tech Leads**: Begin with Part 1 (Epistemic Foundations), deep-dive into Part 2 (Operations 1, 4, 6, 7, 8), and apply the Transition Architecture principles in Operation 9.
+- **For every reader**: Begin with Part 0, then enter the operation matching the failure in front of you. Read Part 1 after the operational problem is concrete; it supplies the shared formal model rather than requiring theory as an entry fee.
+- **For System Architects & Tech Leads**: Deep-dive into Part 2 (Operations 1, 4, 6, 7, 8), then use Part 1 to unify their formal foundations and apply the Transition Architecture principles in Operation 9.
 - **For Backend & Distributed Systems Engineers**: Focus on Operation 2 (Contradictions & Bottlenecks), Operation 3 (Transformations & Trimming), Operation 7 (Dynamics, Queues & Metastable Failures), and Part 3 (Software Contradictions Taxonomy & Effects Database).
 - **For SRE & Quality Engineers**: Focus on Operation 2 (Causal Graphs), Operation 5 (Empirical Spikes & Observability), Operation 9 (The 10-Rung Evidentiary Ladder & Expand/Contract), and Appendix 2 (Practice Matrix).
 - **For AI Agent Designers & Tool Builders**: Part 4 (The Unified Development Reasoning Cycle), Part 5 (Working Artifacts `FRAME-`, `HYP-`, `CAN-`, `VAL-`, `TRANS-`, `DEC-`), and Appendix 5 (12 Rules for the Developer Agent) are essential: an agent must receive structured problem state representations, typed epistemic envelopes, and deterministic stop conditions.
+
+Every formal term is paired with an **engineering reading**. The formal statement preserves precision; the engineering reading names the log line, metric, architectural choice, or failure mode that would make the term observable. If a symbol cannot be connected to such evidence, it is not yet an engineering claim.
 
 ------------------------------------------------------------------------
 
 # Table of Contents
 
+- [Part 0. Failure Atlas: Enter Through the Incident](#part-0-failure-atlas-enter-through-the-incident)
 - [Part 1. Why Software Engineering Needs a Shared Foundation](#part-1-why-software-engineering-needs-a-shared-foundation)
   - [1. The Problem of Multiple Engineering Schools](#1-the-problem-of-multiple-engineering-schools)
     - [1.1. The Same Operation Receives Different Names](#11-the-same-operation-receives-different-names)
@@ -111,6 +119,26 @@ Therefore, the ultimate output of engineering thought here is not a narrative or
 - [Appendix 5. Rules for the Developer Agent](#appendix-5-rules-for-the-developer-agent)
 - [Conclusion](#conclusion)
 - [Master Academic Bibliography](#master-academic-bibliography)
+
+------------------------------------------------------------------------
+
+# Part 0. Failure Atlas: Enter Through the Incident
+
+The nine operations are not nine chapters to apply mechanically. They are nine corrections for nine recognizable failure patterns. The same production symptom can mislead a person and an AI agent for different reasons: a person is constrained by local incentives, ownership, memory, and prior investment; an AI agent is constrained by incomplete context, pattern completion, tool affordances, and unverified confidence. A shared correction must address both mechanisms rather than treating “human error” and “model error” as interchangeable.
+
+| Operation | Concrete failure and consequence | Human's intuitive error | AI agent's intuitive error | Why the causes differ | Required correction | Formal term → engineering reading |
+|---|---|---|---|---|---|---|
+| 1. Frame | “Add Redis” becomes the task; stale authorization survives cache invalidation and grants access after revocation. | Anchors on the sponsor's proposed tool and avoids reopening scope. | Treats the noun in the prompt as an implementation instruction and generates cache code. | The human protects commitment and schedule; the agent follows lexical salience and familiar templates. | Restate actual versus required behavior, invariants, conditions, and boundary before naming a mechanism. | **Framing uncertainty** → the team cannot write a technology-neutral failing acceptance check. |
+| 2. Diagnose | More replicas reduce throughput because all contend on one serialized ledger lock. | Optimizes the hottest visible component or blames the last change. | Correlates CPU, latency, and errors, then selects the most common diagnosis. | The human sees a local operational slice; the agent mistakes co-occurrence in context or training data for causality. | Build competing causal hypotheses and run a differentiating intervention. | **Causal hypothesis** → a mechanism whose removal changes the incident signature; **constraint** → the resource that caps end-to-end throughput. |
+| 3. Transform | A new queue and service hide latency but add duplicate delivery, lag, and another on-call surface. | Adds capacity or components because addition is organizationally legible. | Emits a fashionable reference architecture assembled from common components. | The human is rewarded for visible delivery; the agent is biased toward compositional completion. | Try deletion, delegation, localization, or reordering before adding a mechanism. | **Transformation operator** → a concrete topology edit with preserved invariants. |
+| 4. Explore | Five “alternatives” are the same HTTP service/database/cache topology with different vendors; the shared flaw survives selection. | Anchors on team skills and sunk cost. | Produces near-duplicate candidates from the same high-probability pattern. | The human narrows by feasibility and politics; the agent narrows by sampling probability. | Separate decision dimensions and retain candidates with genuinely different operating principles. | **Morphological space** → the cross-product of independently choosable architecture decisions. |
+| 5. Learn | A six-week migration begins on the assumption that a database feature supports the required isolation mode; it does not. | Trusts institutional memory or vendor claims to avoid delaying delivery. | States a plausible capability without inspecting the repository, version, docs, or runtime. | The human discounts search cost under schedule pressure; the agent fills missing facts with fluent priors. | Name the decision-significant unknown and run the cheapest test able to reverse the decision. | **Expected value of information** → rework avoided by a probe minus the probe's cost. |
+| 6. Arrange | Changing tax rules requires UI, checkout, notifications, schema, and deployment changes; a one-day rule change becomes a release train. | Accepts shared models because coordination is familiar. | Adds interfaces or services while preserving shared data and synchronized releases. | The human normalizes organizational coupling; the agent mistakes more boundaries for weaker coupling. | Map co-change, data, runtime, and ownership dependencies; cut only accidental edges. | **Change radius** → the set of artifacts and teams forced to move by one requirement change. |
+| 7. Model dynamics | A retry policy converts a 30-second database slowdown into a 40-minute outage after the database recovers. | Reasons from steady-state averages and a clean up/down model. | Simulates the happy path once and omits queues, delay, adaptation, and feedback. | The human has bounded incident visibility; the agent defaults to atemporal code semantics unless dynamics are supplied. | Model stocks, rates, delays, feedback, saturation, and recovery phases; verify under load. | **Metastability** → traffic generated by the degraded system keeps it degraded after the original trigger disappears. |
+| 8. Select | A high-scoring platform wins a weighted matrix despite violating data-residency law; migration later stops. | Adjusts weights to justify a preferred option or consensus. | Calculates precise-looking scores from invented or incomparable inputs. | The human rationalizes preference; the agent optimizes completion and numerical surface form. | Reject invariant violations first; compare surviving candidates on evidence, Pareto dominance, and lifecycle cost. | **Non-compensatory constraint** → one failed condition disqualifies a candidate regardless of other benefits. |
+| 9. Verify and transition | Unit tests pass, but a big-bang column rename breaks old binaries still serving traffic and corrupts rollback. | Equates code correctness with deployability and underfunds temporary migration work. | Declares success after static inspection or a narrow test command. | The human optimizes target-state cleanliness; the agent sees the checked-out tree, not the mixed-version production transition. | Match tests to claims; use expand/contract, shadowing, canaries, invariant gates, and rehearsed rollback. | **Transition architecture** → temporary dual-compatible machinery that makes every rollout phase safe and reversible. |
+
+The table is a router, not the model. Once the failure pattern is recognized, the corresponding operation introduces only the formalism needed to explain, falsify, and correct it.
 
 ------------------------------------------------------------------------
 
@@ -1876,6 +1904,25 @@ When engineering reasoning adheres to these three levels—operating systematica
 
 ## Operation 1. Frame and Model the Software Problem
 
+### Failure First: The Cache That Preserved Revoked Access
+
+A team receives the request “add Redis so authorization checks are faster.” It implements a five-minute cache for permission decisions. At 14:03 an administrator revokes a compromised account; at 14:04 the cached positive decision still authorizes a funds transfer. The code satisfies the requested implementation and violates the actual safety requirement.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Accept “add Redis” as settled scope and tune TTL after the incident. | Authority anchoring, delivery pressure, and sunk commitment make reopening the problem socially costly. | A shorter TTL reduces but does not eliminate the stale-authorization window; the safety invariant remains undefined. | Ask what observable behavior must change, under which revocation conditions, and what staleness is legally or operationally tolerable. |
+| AI agent | Infer a cache-aside task from the tool name and generate a generic wrapper with invalidation hooks. | Prompt nouns and common code patterns dominate when repository state and business invariants are absent. | The implementation looks complete while missing cross-region invalidation, failure semantics, and the distinction between cacheable identity data and non-cacheable authorization decisions. | Refuse to select a carrier until current behavior, required behavior, invariants, boundary, and evidence source are represented in `FRAME-*`. |
+
+The correction is shared, but the control differs: humans need a review ritual that permits reframing a sponsor's proposed solution; agents need an input contract and gate that prevents implementation while framing fields are unresolved.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Framing uncertainty, \$U_{\text{frame}}\$ | Uncertainty about required behavior, invariant boundaries, conditions, or success criteria. | The team cannot write a tool-neutral failing scenario such as “a revoked grant is rejected globally within 250 ms”; conflicting tickets and acceptance tests are the evidence. |
+| Behavioral delta, \$\Delta B = B_{\text{required}} - B_{\text{actual}}\$ | Difference between observed and required behavior under specified conditions. | Today a revoked principal succeeds for up to five minutes; required behavior is rejection within 250 ms. That measurable gap, not “missing Redis,” is the problem. |
+| Transitive invalidation | Invalidity propagates from a false upstream premise to dependent claims and artifacts. | If “five minutes of stale authorization is safe” is false, the cache design, tests, capacity plan, and rollout decision depending on it must all be reopened. |
+
 ## The Epistemic Primacy of Problem Framing
 
 In the lifecycle of software reasoning, **Operation 1: Frame and Model the Software Problem** constitutes the foundational epistemic gate. Every downstream failure in architecture, implementation, or verification can be traced to a defect in framing: attempting to optimize an irrelevant metric, automating a flawed assumption, solving an accidental symptom rather than an essential constraint, or prematurely coupling a business requirement to a transient infrastructure technology.
@@ -2881,6 +2928,26 @@ mindmap
 
 ## Operation 2. Find the Constraint, Cause, or Contradiction
 
+### Failure First: Replicas That Made the Ledger Slower
+
+At peak traffic, ledger throughput plateaus at 2,400 writes/s and p99 latency climbs from 40 ms to 1.8 s. The team doubles workers from 16 to 32. Throughput falls to 1,900 writes/s because every worker spends more time contending on the same account-level lock; retry volume then doubles the offered load.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Add workers or tune the component with the most visible CPU and latency. | Dashboards, ownership boundaries, and the last successful scaling playbook focus attention on local symptoms. | More concurrency increases lock wait and coherency cost, so the “fix” moves the system into retrograde scaling. | State competing mechanisms—CPU saturation, lock serialization, database I/O, retry amplification—and run an intervention that distinguishes them. |
+| AI agent | Read correlated metrics and recommend autoscaling, indexing, or a rewrite based on the most familiar incident pattern. | Language models complete from statistical association; telemetry without topology, timing, and interventions does not establish causality. | A plausible remediation is produced without a falsifiable mechanism and may amplify the incident. | Require each `HYP-*` to predict a distinct trace or benchmark signature and pair it with an `EVDREQ-*` capable of disproving it. |
+
+Humans usually over-trust the slice of the system they can see; agents over-trust the pattern most compatible with the supplied text. Give humans cross-boundary evidence and give agents explicit alternative hypotheses plus intervention results.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Causal hypothesis, \$HYP\$ | A proposed mechanism that entails observable consequences under intervention. | “The account lock serializes writes” predicts that throughput is insensitive to more workers but improves when contention is partitioned; a load test supplies the evidence. |
+| Binding constraint | The element whose capacity limits end-to-end throughput at the current operating point. | The lock's service rate caps ledger commits; optimizing JSON serialization elsewhere changes CPU charts but not completed writes/s. |
+| Technical contradiction, \$TC\$ | Improving one parameter worsens another under the current mechanism. | More workers improve available parallelism but worsen lock contention. The incident is the trade-off made visible. |
+| Physical contradiction, \$PC\$ | One parameter must take incompatible values under different conditions. | Concurrency must be high across independent accounts and effectively one within a single account's ordered ledger. The architecture must separate those conditions. |
+
 ## 1. Main Question & Epistemic Purpose
 
 ### Main Question
@@ -3611,6 +3678,26 @@ flowchart TD
 ------------------------------------------------------------------------
 
 ## Operation 3. Transform the Existing Software System
+
+### Failure First: The Queue That Turned Latency into Data Loss Risk
+
+A synchronous telemetry writer misses its latency SLO during bursts. The intuitive redesign inserts a broker, a consumer service, a schema registry, and a retry topic. Request latency improves, but duplicate delivery corrupts counters, lag hides freshness failures, and three new stateful systems enter the on-call rotation. The original need was only to absorb a bounded ten-second burst.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Add a durable queue because asynchronous architecture is a familiar, reviewable project. | Visible component delivery receives credit; deletion, delegation, or a smaller boundary change looks less substantial. | Operational surface and mutable state grow faster than useful capability. | Try operators in order: remove, delegate to an existing carrier, localize, reorder, and only then add a new mechanism. |
+| AI agent | Assemble a canonical event-driven architecture from broker, consumer, DLQ, schema, and observability templates. | Compositional patterns are easy to generate and appear robust even when their preconditions are unknown. | The generated architecture imports failure modes the requirement never demanded. | Force every proposed component to name the required function it carries and compare it with a transformation that adds no component. |
+
+The human correction is an incentives and review problem; the agent correction is a search-order constraint. Both must preserve invariants while minimizing new code, state, coordination, and operators.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Transformation operator, \$\tau\$ | A topology, ownership, timing, quantity, or mechanism change applied to the current system. | Replace the remote synchronous write with an existing database's bounded staging table; the diff in carriers and failure modes is the transformation. |
+| Function carrier | The component or platform mechanism responsible for a required function. | If the broker is removed, the database or caller must absorb buffering, durability, or backpressure; an ownership map shows where the function went. |
+| Trimming | Elimination of a component with its function removed, delegated, or performed by the object itself. | Deleting a pass-through ingestion service is valid only if validation and partition routing are demonstrably carried elsewhere. |
+| Ideality | Useful effects relative to harmful effects and lifecycle cost. | A ten-second database-backed buffer may deliver the same burst tolerance with fewer pages, upgrades, schemas, and replay hazards than a broker platform. |
 
 ## Main Question
 
@@ -4422,6 +4509,26 @@ Before advancing to [Operation 4 (Explore the Space of Architectures)](#operatio
 ------------------------------------------------------------------------
 
 ## Operation 4. Explore the Space of Architectures and Implementations
+
+### Failure First: Five Candidates with One Shared Failure
+
+A team must prevent overselling inventory across three regions. Its design review compares five candidates: three cloud databases, two cache products, and several RPC libraries. Every candidate still performs a synchronous global availability check before checkout. During a network partition all five must either exceed the latency SLO or reject healthy regional orders; vendor diversity has not created mechanism diversity.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Restrict alternatives to technologies the team already operates and call vendor choice architectural exploration. | Skills, procurement, sunk cost, and political feasibility collapse the search space before it is modeled. | Selection optimizes familiarity inside one flawed operating principle. | Separate state authority, allocation, coordination, consistency, and failure-mode decisions before attaching products to them. |
+| AI agent | Produce several polished architectures that vary names but preserve the dominant retrieved pattern. | High-probability sampling yields surface variety more readily than structural novelty. | All candidates fail the same invariant under the same partition. | Require candidate distance across independent dimensions and reject alternatives differing only by vendor, language, or syntax. |
+
+Humans prematurely prune by organizational feasibility; agents prematurely converge by probability. Humans need a protected divergence step, while agents need explicit dimensions, forbidden near-duplicates, and invariant-based pruning.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Morphological space, \$\mathcal{S}=D_1\times\cdots\times D_n\$ | Cartesian product of independently variable design dimensions. | Combine “global vs. regional authority,” “reservation vs. escrow,” and “sync vs. async reconciliation”; rows in `SPACE-*` make unexplored combinations visible. |
+| Orthogonality | Variation in one decision dimension does not merely rename or duplicate another. | Changing PostgreSQL to another SQL vendor is not orthogonal to global synchronous coordination; changing authority to regional quotas is. |
+| Candidate mechanism, \$CAN\$ | A coherent selection of dimension values with a causal account of how it preserves invariants. | “Regional escrow quotas with asynchronous rebalance” is a mechanism; “use Vendor X” is not until authority and failure behavior are specified. |
+| Constraint pruning | Removal of combinations that violate hard invariants or internal compatibility. | A design that can oversell beyond the bounded loss limit is removed before cost scoring, regardless of its latency. |
 
 ## 1. Main Question & Epistemic Purpose
 
@@ -5618,6 +5725,26 @@ graph TD
 
 ## Operation 5. Expand Knowledge and Obtain Missing Evidence
 
+### Failure First: The Migration Built on a Capability That Wasn't There
+
+A proposed multi-region migration assumes the deployed database version supports non-blocking index creation with the required uniqueness semantics. Six weeks into implementation, a staging rehearsal shows that the actual version locks writes during validation and cannot meet the zero-downtime invariant. One version check and a ten-minute rehearsal would have invalidated the plan before work began.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Trust memory, an internal slide, or a vendor presentation and postpone the risky rehearsal. | Schedule pressure makes information gathering look like delay; admitting uncertainty can carry social cost. | An unverified fact becomes an architectural foundation and multiplies rework. | Record the exact version- and workload-specific unknown, its decision impact, and the cheapest decisive probe. |
+| AI agent | State that the database “supports online migration” and cite generic behavior without inspecting version, configuration, schema, or runtime. | Missing facts are silently completed from broad training priors; fluency masks provenance gaps. | The plan is syntactically credible and operationally impossible. | Tag the claim as unknown until grounded in repository state, primary documentation, or an executable experiment; propagate falsification to dependent candidates. |
+
+The human failure is often a search-cost and status calculation; the agent failure is unmarked probabilistic completion. The controls therefore differ: make uncertainty safe and budgeted for people, and make provenance plus tool evidence mandatory for agents.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Decision-significant unknown, \$UNK\$ | Missing information whose possible values can change the preferred action. | Whether the deployed database can build the index without a blocking validation phase determines whether the candidate survives. |
+| Evidence request, \$EVDREQ\$ | A bounded procedure and expected observation designed to resolve or discriminate a claim. | “Clone the production schema on version 15.4, run the index build under 2k writes/s, and record lock waits and p99.” |
+| Expected value of information, \$EVOI\$ | Expected decision loss avoided by evidence minus the cost of obtaining it. | A ten-minute rehearsal is valuable when it can prevent a six-week dead-end; reading unrelated migration articles is not. |
+| Transitive invalidation | Falsification of a premise invalidates dependent hypotheses, candidates, and decisions. | The unsupported online-build premise reopens the migration architecture and every rollout estimate derived from it. |
+
 ## 1. Epistemic Primacy of Knowledge Expansion
 
 In the Ariadne Software Reasoning Layer, **Operation 5: Expand Knowledge and Obtain Missing Evidence** serves as the empirical truth-engine of technical reasoning. In any non-trivial software engineering endeavor, the primary failure mode of architectural design and defect resolution is not a failure of logical deduction, but a failure of **epistemic grounding**—making high-impact, irreversible commitments based on unverified assumptions, marketing claims, stale mental models, or unexamined legacy codebases.
@@ -6800,6 +6927,26 @@ mindmap
 
 ## Operation 6. Arrange Dependencies and Change Boundaries
 
+### Failure First: The One-Day Tax Rule That Required Five Teams
+
+A statutory tax rule changes for one jurisdiction. Implementing it requires edits to checkout UI validation, order calculation, invoice rendering, notification templates, a shared database table, and five deployment pipelines. The code is split into services, yet the rule has a change radius larger than the monolith it replaced.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Add another service or coordination meeting while keeping the shared schema and release sequence. | Existing ownership and communication paths feel immutable; organizational coupling is normalized as domain necessity. | Process boundaries multiply while semantic and data coupling remain, increasing lead time and failure surface. | Trace the requirement to its enforcing mechanisms and move volatile policy behind one stable contract and data owner. |
+| AI agent | Introduce interfaces, adapters, events, or dependency inversion mechanically. | Structural vocabulary is easy to reproduce without examining co-change history, data authority, runtime ordering, or deployment coupling. | More abstractions disguise rather than reduce the forced change set. | Measure actual dependency edges and change radius; accept an abstraction only when a named independent change no longer propagates across it. |
+
+Humans tend to preserve social topology; agents tend to mistake visible indirection for independence. Humans need authority to realign ownership, while agents need repository, schema, runtime, and history grounding before proposing a seam.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Essential coupling | Dependency required by a domain invariant. | Settlement must know the authorized amount; removing that information changes the business rule. The contract should expose only that necessity. |
+| Accidental coupling | Dependency introduced by a replaceable implementation or coordination choice. | Notifications read tax fields from checkout's table and therefore require synchronized schema releases; no domain invariant requires the shared table. |
+| Change radius, \$R(M)\$ | Transitive set of artifacts, services, schemas, pipelines, and owners affected by changing mechanism \$M\$. | Git history and deployment records show that one tax-rule edit consistently touches twelve modules and five teams. |
+| Design Structure Matrix | Matrix representation of dependency edges used to expose cycles and clusters. | A dense cyclic block predicts synchronized releases and tells the architect where a boundary claim is false. |
+
 ## Epistemic Purpose & Main Question
 
 ### The Epistemic Role of Dependency Arrangement
@@ -7932,6 +8079,26 @@ graph TD
 ------------------------------------------------------------------------
 
 ## Operation 7. Understand System Behavior Over Time and Under Load
+
+### Failure First: The Retry Policy That Outlived the Outage
+
+A database slows for 30 seconds. Each timed-out request retries three times with synchronized exponential backoff, filling the worker queue and connection pool. The database recovers, but accumulated requests and retries keep utilization above saturation for another 40 minutes. The system is technically healthy and operationally unable to recover.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Increase timeout, retry count, or instance count based on steady-state averages. | Dashboards compress time and teams reason from familiar up/down component states rather than feedback and accumulation. | Longer-held resources and more retries increase the stock of unfinished work and deepen the recovery trap. | Model arrival, service, retry, abandonment, and drain rates across trigger, degradation, recovery, and warm-up phases. |
+| AI agent | Verify that each request path terminates and conclude the retry logic is safe. | Static code context exposes branches but not workload distributions, synchronized clients, queue limits, or delayed feedback unless explicitly supplied. | Locally correct retry code creates a globally unstable control loop. | Require a `DYN-*` model and a load/fault experiment that observes queue depth, offered load, useful throughput, and recovery time. |
+
+Humans miss dynamics because operational evidence is fragmented over time; agents miss dynamics because execution context is absent from the text. Improve temporal observability for people and provide explicit workload models plus executable simulation for agents.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Utilization, \$\rho=\lambda/\mu\$ | Ratio of arrival rate to service capacity. | When incoming and retried requests exceed completed requests, queue depth rises; latency explosion near \$\rho=1\$ appears before CPU necessarily reaches 100%. |
+| Stock-and-flow balance, \$dS/dt=\text{inflow}-\text{outflow}\$ | Evolution of accumulated work or resources over time. | \$S\$ is queued requests; even after the database recovers, the queue grows while retries plus new traffic exceed drain capacity. |
+| Reinforcing feedback loop | A change produces effects that amplify the original change. | Slow responses cause retries; retries add load; added load causes slower responses. Trace counters should show retry traffic rising with latency. |
+| Metastability | A self-sustaining degraded state that persists after the initiating disturbance ends. | Database latency returns to normal but useful throughput does not because the retry/queue state keeps the service saturated. |
 
 ## Epistemic Purpose & Main Question
 
@@ -9079,6 +9246,26 @@ graph TD
 
 ## Operation 8. Determine Engineering Value and Select
 
+### Failure First: The Winning Score That Violated the Law
+
+Three storage candidates are scored from one to five across cost, speed, familiarity, features, and compliance. A globally replicated managed service wins 4.6 versus 4.1. It also stores personal data outside the permitted jurisdiction. The weighted sum has allowed optional benefits to compensate numerically for a non-negotiable legal constraint.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Tune weights until the preferred or politically feasible platform wins. | Sunk cost, vendor relationships, consensus pressure, and ownership shape supposedly neutral scores. | The matrix launders preference into pseudo-objectivity and hides disqualifying facts. | Separate invariant gates from preferences, record evidence and uncertainty, then compare only viable candidates on lifecycle effects. |
+| AI agent | Generate exact scores, totals, and rankings from qualitative prose or missing measurements. | Numerical completion looks rigorous even when scales are incomparable and inputs are invented. | Precision increases confidence without increasing truth; the selected candidate may be infeasible. | Mark unknown values, prohibit compensation across hard constraints, and route decision-changing gaps back to Operation 5. |
+
+Humans use numbers to rationalize; agents use numbers to complete. Human governance must expose preference ownership, while agent governance must reject unsupported quantities and preserve `UNKNOWN` rather than fabricate a score.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Non-compensatory constraint | A criterion whose violation disqualifies a candidate regardless of performance elsewhere. | Data residency failure cannot be offset by lower latency or cost; compliance evidence is a pass/fail gate. |
+| Pareto dominance | Candidate \$A\$ is no worse on every relevant dimension and strictly better on at least one. | If one option costs less, fails less, and is equally fast, the dominated option needs no weighted-score debate. |
+| Engineering ideality | Ratio of useful function to harmful effects plus lifecycle cost. | Count not only request throughput, but pages, mutable state, migration work, lock-in, cognitive load, and retirement cost. |
+| Expected value of information | Value of resolving uncertainty before committing. | If two viable candidates exchange rank depending on an unknown write-amplification rate, benchmark that rate before selection. |
+
 ## Epistemic Purpose & Main Question
 
 ### The Epistemic Role of Value Determination and Selection
@@ -10000,6 +10187,26 @@ graph TD
 ------------------------------------------------------------------------
 
 ## Operation 9. Verify the Solution by Execution and Safely Execute the Transition
+
+### Failure First: The Correct Schema That Broke the Rollout
+
+A team renames `customer_id` to `account_id`. The new code and schema pass every unit and integration test in an isolated environment. During rolling deployment, old binaries still query `customer_id`; error rates spike. Rolling back code fails because new writes exist only in `account_id`. The target state was correct, but no safe state transition existed.
+
+| Perspective | Intuitive but wrong response | Why this actor makes the error | Consequence | Required correction |
+|---|---|---|---|---|
+| Human engineer | Treat passing tests and an approved target diagram as deployment readiness; perform a one-step migration. | Project planning rewards permanent architecture and treats temporary compatibility machinery as waste. | Mixed-version traffic breaks, rollback loses data, and the only recovery path is manual repair under outage pressure. | Design expand/contract phases, dual compatibility, parity checks, cutover gates, and decommissioning before rollout. |
+| AI agent | Run the nearest test suite, report success, and omit production version coexistence and state evolution. | The checked-out tree is visible; deployment topology, old binaries, live data, traffic, and rollback authority often are not. | Static correctness is mistaken for operational proof. | Match each claim to an evidence rung and require a `TRANS-*` artifact whenever persistent state or public contracts change. |
+
+Humans underfund transition code because it is temporary; agents overlook it because it is outside the repository snapshot. Budget temporary architecture explicitly for people and expose deployment/state context plus hard completion gates to agents.
+
+#### Formal Concept → Engineering Meaning
+
+| Formal concept | Precise role | Engineering reading and observable evidence |
+|---|---|---|
+| Severe falsifying test | Test with high probability of failing when the claim is false. | A mixed-version rehearsal with old and new binaries is severe for compatibility; a new-version unit test is not. |
+| Target architecture, \$\mathcal{A}_{\text{target}}\$ | Desired steady-state system after migration. | Only `account_id` remains and all callers use it. This diagram says nothing about how running old callers survive the move. |
+| Transition architecture, \$\mathcal{A}_{\text{trans}}\$ | Temporary system that preserves invariants between current and target states. | Both columns coexist, writes remain compatible, backfill and parity checks run, traffic cuts over gradually, and the old path remains recoverable. |
+| Rollback invariant, \$I_{\text{rev}}(k)\$ | Property that guarantees safe reversal at transition phase \$k\$. | At every phase, all committed writes can still be read by the rollback version without loss or manual reconstruction. |
 
 ## Epistemic Purpose & Main Question
 
@@ -16460,73 +16667,109 @@ For autonomous developer agents, the matrix functions as an automated dynamic pr
 
 The explicit, auditable representation of whether an engineering claim, decision, or architectural model is justified by empirical evidence, logical deduction, or unverified working assumptions. Distinguishes verified knowledge from speculative belief.
 
+**Engineering reading:** On an incident board, “the timeout began after deploy X” is not allowed to look identical to “deploy X caused the timeout”; provenance labels and linked traces expose the difference.
+
 ### 2. Engineering Uncertainty
 
 A measurable state of incomplete, contradictory, or unproven information regarding system behavior, requirements, or architecture that introduces risk and requires explicit causal hypotheses or empirical experiments to resolve.
+
+**Engineering reading:** If the team cannot say whether duplicate charges originate before or after the commit boundary, that gap is an actionable unknown, not a reason to guess a fix.
 
 ### 3. Causal Hypothesis (`HYP-`)
 
 A testable, falsifiable proposition explaining the underlying physical, algorithmic, or structural mechanism responsible for an observed symptom, defect, or performance regression.
 
+**Engineering reading:** “A serialized account lock caps throughput” becomes engineering only when a contention trace or partitioning experiment can make the claim fail.
+
 ### 4. Contradiction (`CTR-`)
 
 An engineering trade-off where improving one required system parameter or quality attribute under the current design degrades another (System Contradiction), or where a single parameter must exhibit opposing characteristics under different conditions (Physical/Operational Contradiction).
+
+**Engineering reading:** Increasing concurrency improves independent-account throughput but worsens same-account ordering contention; the architecture must separate those operating conditions rather than average them.
 
 ### 5. Reasoning Operation
 
 One of the nine formal cognitive and structural transformations of an engineering problem model derived from systematic inventive thinking and formal software methods (Frame, Diagnose, Transform, Explore, Knowledge, Dependencies, Dynamics, Value, Verify).
 
+**Engineering reading:** It is the next kind of work needed to reduce the present uncertainty—for example, run a causal probe instead of producing another architecture when the incident mechanism is still unknown.
+
 ### 6. Candidate Mechanism (`CAN-`)
 
 A structurally distinct, concrete solution variant that implements a required system function using a specific computational algorithm, state ownership model, data representation, or architectural boundary.
+
+**Engineering reading:** “Regional escrow quotas with asynchronous rebalance” is a candidate because it names authority and failure behavior; “use another database vendor” is usually only a product substitution.
 
 ### 7. Decision-Significant Unknown (`UNK-`)
 
 An unverified fact, missing measurement, or empirical unknown whose resolution has the power to directly alter the choice of candidate mechanism or invalidate an architectural path.
 
+**Engineering reading:** Whether the deployed database version locks writes during index validation is decision-significant if a zero-downtime migration depends on the answer.
+
 ### 8. Falsification
 
 The empirical process or test outcome that definitively disproves a causal hypothesis, invalidates an architectural assumption, or demonstrates that a candidate mechanism violates a non-negotiable invariant.
+
+**Engineering reading:** A mixed-version rehearsal that makes old binaries fail against the expanded schema falsifies the claim that the rollout is backward-compatible.
 
 ### 9. Transitive Invalidation
 
 The automatic propagation of invalidation down the epistemic dependency graph when a foundational assumption (`ASM-*`) or causal hypothesis (`HYP-*`) is falsified, immediately flagging all dependent candidates, decisions, and ADRs as ungrounded.
 
+**Engineering reading:** When the assumed non-blocking migration capability is absent, the rollout plan, capacity estimate, selected candidate, and ADR that depend on it all return to review.
+
 ### 10. Epistemic Overlay
 
 A lightweight, typed metadata layer attached to engineering tasks, pull requests, and architecture plans that records claims, evidence requirements, and validation statuses without modifying host project management systems.
+
+**Engineering reading:** The pull request still lives in the existing workflow, but each important statement carries “measured,” “assumed,” or “unknown” plus a link to its check.
 
 ### 11. Degradation by Capability
 
 The formal operational capability of the reasoning layer to function gracefully across four distinct tooling environments (Mode A: Full Tooling, Mode B: GSD Only, Mode C: Skills Only, Mode D: Standalone) using available host primitives rather than halting.
 
+**Engineering reading:** If telemetry access is unavailable, the process narrows its claim and records the missing runtime check instead of inventing a production observation or stopping all work.
+
 ### 12. Evidence Request (`EVDREQ-`)
 
 A concrete, executable specification of an automated test, benchmark, repository inspection, or runtime telemetry query required to prove or falsify a specific engineering claim.
+
+**Engineering reading:** “Run 2,000 writes/s against the production schema clone and reject the candidate if lock wait exceeds 100 ms” is an evidence request; “investigate performance” is not.
 
 ### 13. Evidence Result (`EVD-`)
 
 The empirical artifact, quantitative measurement, execution trace, or test verdict produced by executing an Evidence Request.
 
+**Engineering reading:** The benchmark log, trace ID, schema diff, or failing property-test seed is the result; a summary that says “looks good” is not.
+
 ### 14. Transition System / Architecture (`TRANS-`)
 
 The temporary, backward-compatible software mechanisms (dual-writing interceptors, feature flags, expand/contract schemas, canary proxies) designed specifically to migrate a running system safely from state \$S_0\$ to state \$S\_{\text{target}}\$ with zero downtime and instant rollback capability.
+
+**Engineering reading:** During a column rename, both names coexist, reads and writes remain compatible, parity is measured, and either binary version can serve traffic until cutover is proven safe.
 
 ### 15. Adversarial Critique
 
 A structured evaluation method where an engineer or agent assumes the role of an adversary to actively discover hidden mutable states, operational failure modes, shifted complexity, weakened invariants, or unverified assumptions in a proposed design.
 
+**Engineering reading:** Before approval, a reviewer tries to make the “safe” cache serve revoked authorization, make the backfill starve live traffic, or make rollback read an incompatible write.
+
 ### 16. Two-Stage Routing
 
 A token-efficient knowledge discovery architecture where a compact root index dynamically detects the active engineering operation and loads only the specific specialized rules and domain knowledge packs required for that step.
+
+**Engineering reading:** A retry storm routes first to dynamics and SRE rules; it does not load migration, UI, and domain-modeling material that cannot change the diagnosis.
 
 ### 17. GSD Adapter
 
 The integration module that detects host project planning structures (e.g., `.planning/`), projecting task requirements and milestone phases into the Ariadne epistemic overlay without creating conflicting source-of-truth state.
 
+**Engineering reading:** Existing phase files remain authoritative while Ariadne records which requirement, hypothesis, and evidence each phase depends on; no second backlog is created.
+
 ### 18. Matt Module Ingestion
 
 The automated normalization of external engineering skill artifacts (reproduction scripts, interface designs, test logs) into typed Ariadne evidence nodes (`EVD-*`).
+
+**Engineering reading:** A bug reproducer becomes a linked evidence result with command, environment, and verdict rather than an unstructured attachment that later agents cannot evaluate.
 
 ### 19. Separation Principles
 
@@ -16537,37 +16780,55 @@ The four inventive principles adapted from TRIZ to software engineering:
 3.  *Separation by Operating Condition/Mode*: Parameter \$X\$ applies under High Load, and non-\$X\$ under Low Load.
 4.  *Separation Across System Boundaries*: Parameter \$X\$ is enforced at the Edge, and non-\$X\$ in Core Compute.
 
+**Engineering reading:** Keep strict coordination inside one account but allow parallelism across accounts; the lock-contention trace should change without weakening ordering.
+
 ### 20. Downstream Handoff
 
 The deterministic transition of validated decisions (`DEC-*`), verified code, and epistemic state into downstream delivery workflows (e.g., pull requests, release pipelines, or spec-driven execution).
+
+**Engineering reading:** The receiving implementer gets the chosen decision, rejected alternatives, open unknowns, test commands, and rollback boundary—not merely a prose conclusion.
 
 ### 21. Invariant
 
 A non-negotiable formal property that must remain true across all valid states and executions of the software system (e.g., "Account balances must never be negative").
 
+**Engineering reading:** It is a property whose single counterexample rejects the candidate, such as one generated event sequence producing a negative settled balance.
+
 ### 22. Change Radius
 
 The quantified set of files, modules, database schemas, configuration files, and network contracts that must be modified to satisfy a single change in requirements.
+
+**Engineering reading:** A tax-rule change touching twelve modules, three schemas, and five pipelines has a large change radius even if the deployment diagram shows many “independent” services.
 
 ### 23. Blast Radius
 
 The total scope of services, data stores, API endpoints, and end-users impacted when a specific software component or infrastructure node suffers a complete failure.
 
+**Engineering reading:** Disable the component in a fault test and count which user journeys, tenants, and data paths degrade; that observed set is the blast radius.
+
 ### 24. Ideality (Software TRIZ)
 
 The ratio of total delivered functional value to the sum of operational harms, infrastructure costs, and cognitive maintenance overhead: \$\$I = \frac{\sum \text{Useful Capabilities}}{\sum \text{Harms} + \sum \text{Costs} + \sum \text{Cognitive Overhead}}\$\$
+
+**Engineering reading:** A mechanism is less ideal when the same SLO requires more state, pages, upgrades, migration work, and specialist knowledge, even if its benchmark is faster.
 
 ### 25. Morphological Space
 
 The multidimensional combinatorial solution space constructed by defining orthogonal architectural decision axes (\$D_1, D_2, \dots, D_k\$) and evaluating their cross-product configurations.
 
+**Engineering reading:** A `SPACE-*` table makes it visible that the team varied database vendors but never varied state authority, reconciliation timing, or failure policy.
+
 ### 26. Accidental Coupling
 
 Coupling between software components that arises from shared implementation artifacts, copy-pasted data models, or generic utility libraries rather than genuine business domain relationships.
 
+**Engineering reading:** Billing and notifications require synchronized deployment because they import the same generated persistence model, not because the domain requires atomic change.
+
 ### 27. Essential Coupling
 
 Inherent, unavoidable dependencies dictated by the fundamental nature of the business domain or mathematical logic.
+
+**Engineering reading:** Settlement must receive the authorized amount and currency; a smaller contract may express the dependency, but architecture cannot honestly erase it.
 
 ### 28. Provenance Type
 
@@ -16581,30 +16842,44 @@ The explicit epistemic classification assigned to any claim:
 - `UNKNOWN`: Missing information requiring investigation.
 - `DECIDED`: Formally locked architectural decision.
 
+**Engineering reading:** A claim without a source is visibly `ASSUMED` or `UNKNOWN`; it cannot silently acquire the authority of a measured production fact.
+
 ### 29. Epistemic Risk Governance
 
 The economic principle governing the depth of analytical and empirical rigor applied to a task based on the product of defect probability, failure blast radius, and rollback irreversibility.
+
+**Engineering reading:** A reversible CSS change may need one browser check; a ledger migration needs replay, load, mixed-version, and rollback evidence because failure is costly and hard to undo.
 
 ### 30. Two-Way Door vs. One-Way Door Decision
 
 - *Two-Way Door (Type 2)*: A reversible decision with low blast radius that can be rolled back quickly at near-zero cost.
 - *One-Way Door (Type 1)*: An irreversible or highly expensive decision (e.g., public API contract, distributed consensus model, multi-terabyte database schema change) requiring deep epistemic verification before execution.
 
+**Engineering reading:** If a feature flag restores the old behavior without data repair, decide quickly; if clients or stored data make reversal expensive, demand stronger evidence first.
+
 ### 31. Dark Launch / Shadow Traffic
 
 A verification technique where real production traffic is mirrored to a new candidate system in the background, executing the new code path without returning its responses to end-users to measure real-world performance and error rates safely.
+
+**Engineering reading:** The candidate processes copied requests, its outputs and latency are diffed against authority, and side effects are disabled so users cannot observe the trial.
 
 ### 32. Rollback Invariant
 
 The formal guarantee that a deployment can be completely reverted to its prior stable state at any point during rollout without data corruption, schema incompatibility, or service downtime.
 
+**Engineering reading:** After every rollout phase, run the old binary against newly written data; failure means rollback exists only on the runbook, not in the system.
+
 ### 33. Transition Shim
 
 A temporary architectural adapter, proxy, or dual-write interceptor deployed specifically to facilitate zero-downtime migration, tracked with an explicit expiration date and decommissioning criteria.
 
+**Engineering reading:** A dual-write adapter remains only until backfill, parity, cutover, and rollback windows close; an owner and removal gate keep it from becoming permanent architecture.
+
 ### 34. Blast Radius Containment
 
 Architectural isolation mechanisms (bulkheading, rate limiting, circuit breakers, sandboxing) that prevent a localized failure from propagating across system boundaries.
+
+**Engineering reading:** Fault injection into one tenant or dependency should leave unrelated traffic within its SLO; the observed degradation boundary proves whether containment exists.
 
 ------------------------------------------------------------------------
 

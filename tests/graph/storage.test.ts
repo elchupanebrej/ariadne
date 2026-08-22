@@ -204,4 +204,65 @@ describe("GraphStorage", () => {
       await rm(directory, { recursive: true, force: true });
     }
   });
+
+  it("excludes terminal nodes and decided decisions from state frontier and index", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-terminal-"));
+
+    try {
+      const storage = new GraphStorage(directory);
+      await storage.writeState({ depth_mode: "Standard", frontier: [] });
+      await storage.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "TASK-open",
+            type: "TASK" as const,
+            provenance_type: "FACT" as const,
+            statement: "Open unresolved task",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            id: "UNK-resolved",
+            type: "UNK" as const,
+            provenance_type: "UNKNOWN" as const,
+            status: "RESOLVED",
+            statement: "Resolved unknown",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            id: "CAN-rejected",
+            type: "CAN" as const,
+            provenance_type: "PROPOSED" as const,
+            status: "REJECTED",
+            statement: "Rejected candidate",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            id: "DEC-decided",
+            type: "DEC" as const,
+            provenance_type: "DECIDED" as const,
+            statement: "Decided decision",
+          },
+        },
+      ]);
+
+      const state = await storage.readState<{ frontier: string[]; open_unknowns: string[] }>();
+      expect(state?.frontier).toEqual(["TASK-open"]);
+      expect(state?.open_unknowns).toEqual([]);
+
+      const indexContent = await readFile(join(directory, "INDEX.md"), "utf8");
+      expect(indexContent).toContain("TASK-open");
+      expect(indexContent).not.toContain("UNK-resolved");
+      expect(indexContent).not.toContain("CAN-rejected");
+      expect(indexContent).not.toContain("DEC-decided");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
 });
