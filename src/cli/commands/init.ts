@@ -6,6 +6,7 @@ import {
   type GsdEnvironment,
 } from "../../adapters/gsd/detector.js";
 import { GraphStorage } from "../../graph/storage.js";
+import { hasHelp } from "../workspace.js";
 import type { CliIO } from "./status.js";
 
 export type InitMode = "auto" | "standalone" | "gsd";
@@ -29,6 +30,8 @@ const exists = async (path: string): Promise<boolean> => {
   }
 };
 
+const INIT_USAGE = "Usage: ariadne init [--mode auto|standalone|gsd] [--force]\n";
+
 const parse = (args: readonly string[]): { mode: InitMode; force: boolean } => {
   let mode: InitMode = "auto";
   let modeSet = false;
@@ -36,21 +39,21 @@ const parse = (args: readonly string[]): { mode: InitMode; force: boolean } => {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === "--force") {
-      if (force) throw new Error("Usage: ariadne init [--mode auto|standalone|gsd] [--force]");
+      if (force) throw new Error(INIT_USAGE.trim());
       force = true;
       continue;
     }
     if (arg === "--mode" || arg.startsWith("--mode=")) {
-      if (modeSet) throw new Error("Usage: ariadne init [--mode auto|standalone|gsd] [--force]");
+      if (modeSet) throw new Error(INIT_USAGE.trim());
       const value = arg === "--mode" ? args[++index] : arg.slice("--mode=".length);
       if (value !== "auto" && value !== "standalone" && value !== "gsd") {
-        throw new Error("Usage: ariadne init [--mode auto|standalone|gsd] [--force]");
+        throw new Error(INIT_USAGE.trim());
       }
       mode = value;
       modeSet = true;
       continue;
     }
-    throw new Error("Usage: ariadne init [--mode auto|standalone|gsd] [--force]");
+    throw new Error(INIT_USAGE.trim());
   }
   return { mode, force };
 };
@@ -62,6 +65,10 @@ const environmentFor = (root: string, mode: InitMode): GsdEnvironment => {
 };
 
 export async function runInit(args: readonly string[], io: CliIO): Promise<number> {
+  if (hasHelp(args, ["--mode"])) {
+    io.stdout.write(INIT_USAGE);
+    return 0;
+  }
   const { mode, force } = parse(args);
   const environment = environmentFor(io.cwd, mode);
   if (environment.active) assertNoShadowState(environment);

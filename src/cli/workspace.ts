@@ -15,6 +15,20 @@ export type CliWorkspace = {
   storage: GraphStorage;
 };
 
+export const hasHelp = (
+  args: readonly string[],
+  valueFlags: readonly string[] = [],
+): boolean => {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "-h" || arg === "--help") return true;
+    if (valueFlags.includes(arg)) {
+      index += 1;
+    }
+  }
+  return false;
+};
+
 const isDirectory = (path: string): boolean => {
   try {
     return statSync(path).isDirectory();

@@ -5,7 +5,7 @@ import {
   type EpistemicEdge,
 } from "../../core/schemas/edges.js";
 import { validateGraph } from "../../graph/integrity.js";
-import { resolveCliWorkspace } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
 type Flags = Map<string, string>;
@@ -95,21 +95,43 @@ async function removeEdge(args: readonly string[], io: CliIO): Promise<Epistemic
   return edge;
 }
 
+const EDGE_USAGE = "Usage: ariadne edge <add|list|remove> ...\n";
+const EDGE_ADD_USAGE = "Usage: ariadne edge add <from_id> <relation> <to_id>\n";
+const EDGE_LIST_USAGE = "Usage: ariadne edge list [--from] [--to] [--relation]\n";
+const EDGE_REMOVE_USAGE = "Usage: ariadne edge remove <from_id> <relation> <to_id>\n";
+
 export async function runEdge(args: readonly string[], io: CliIO): Promise<number> {
   const command = args[0];
+  if (command === "-h" || command === "--help") {
+    io.stdout.write(EDGE_USAGE);
+    return 0;
+  }
+  const rest = args.slice(1);
   let result: EpistemicEdge | EpistemicEdge[];
   switch (command) {
     case "add":
-      result = await addEdge(args.slice(1), io);
+      if (hasHelp(rest)) {
+        io.stdout.write(EDGE_ADD_USAGE);
+        return 0;
+      }
+      result = await addEdge(rest, io);
       break;
     case "list":
-      result = await listEdges(args.slice(1), io);
+      if (hasHelp(rest, ["--from", "--to", "--relation"])) {
+        io.stdout.write(EDGE_LIST_USAGE);
+        return 0;
+      }
+      result = await listEdges(rest, io);
       break;
     case "remove":
-      result = await removeEdge(args.slice(1), io);
+      if (hasHelp(rest)) {
+        io.stdout.write(EDGE_REMOVE_USAGE);
+        return 0;
+      }
+      result = await removeEdge(rest, io);
       break;
     default:
-      throw new Error("Usage: ariadne edge <add|list|remove> ...");
+      throw new Error(EDGE_USAGE.trim());
   }
   io.stdout.write(`${JSON.stringify(result)}\n`);
   return 0;

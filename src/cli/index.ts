@@ -10,8 +10,9 @@ import { runInit } from "./commands/init.js";
 import { runNode } from "./commands/node.js";
 import { runEnvelope } from "./commands/envelope.js";
 import { runOperation } from "./commands/op.js";
-import { runStatus, type CliIO } from "./commands/status.js";
+import { runStatus } from "./commands/status.js";
 import { runTemplate } from "./commands/template.js";
+import { hasHelp, type CliIO } from "./workspace.js";
 
 const VERSION = "0.1.0";
 
@@ -70,7 +71,13 @@ export async function runCli(
     if (command === "edge") return await runEdge(args.slice(1), io);
     if (command === "invalidate") return await runInvalidation(args.slice(1), io);
     if (command === "gate") return await runGate(args.slice(1), io);
-    if (command === "verify") return await runGate(["all", ...args.slice(1)], io);
+    if (command === "verify") {
+      if (hasHelp(args.slice(1))) {
+        io.stdout.write("Usage: ariadne verify [--strict]\n");
+        return 0;
+      }
+      return await runGate(["all", ...args.slice(1)], io);
+    }
     if (command === "envelope") return await runEnvelope(args.slice(1), io);
     if (command === "ingest") return await runIngest(args.slice(1), io);
     if (command === "op") return runOperation(args.slice(1), io);

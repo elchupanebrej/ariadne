@@ -1,4 +1,4 @@
-import type { CliIO } from "./status.js";
+import { hasHelp, type CliIO } from "../workspace.js";
 
 export type TemplateType = "FRAME" | "DIAG" | "LEAN-TASK" | "TRANS";
 
@@ -102,14 +102,20 @@ const TEMPLATES: Record<TemplateType, string> = {
 `,
 };
 
+const TEMPLATE_USAGE = "Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>\n";
+
 const parse = (args: readonly string[]): TemplateType => {
-  if (args.length !== 1) throw new Error("Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>");
+  if (args.length !== 1) throw new Error(TEMPLATE_USAGE.trim());
   const type = args[0].toUpperCase() as TemplateType;
   if (!(type in TEMPLATES)) throw new Error(`Unknown template: ${args[0]}`);
   return type;
 };
 
 export function runTemplate(args: readonly string[], io: CliIO): number {
+  if (hasHelp(args)) {
+    io.stdout.write(TEMPLATE_USAGE);
+    return 0;
+  }
   io.stdout.write(TEMPLATES[parse(args)]);
   return 0;
 }

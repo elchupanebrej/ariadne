@@ -8,7 +8,7 @@ import {
   PROVENANCE_TYPES,
   type ProvenanceType,
 } from "../../core/types/nodes.js";
-import { resolveCliWorkspace } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
 type Flags = Map<string, string | true>;
@@ -203,26 +203,58 @@ async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
   });
 }
 
+const NODE_USAGE = "Usage: ariadne node <add|get|list|remove|update> ...\n";
+const NODE_ADD_USAGE = "Usage: ariadne node add <type> <id> --title <title> --payload <json>\n";
+const NODE_GET_USAGE = "Usage: ariadne node get <id>\n";
+const NODE_LIST_USAGE = "Usage: ariadne node list [--type] [--provenance]\n";
+const NODE_REMOVE_USAGE = "Usage: ariadne node remove <id>\n";
+const NODE_UPDATE_USAGE = "Usage: ariadne node update <id> [--title <title>] --payload <json>\n";
+
 export async function runNode(args: readonly string[], io: CliIO): Promise<number> {
   const subcommand = args[0];
-  if (!subcommand) throw new Error("Usage: ariadne node <add|get|list|remove|update> ...");
+  if (subcommand === "-h" || subcommand === "--help") {
+    io.stdout.write(NODE_USAGE);
+    return 0;
+  }
+  if (!subcommand) throw new Error(NODE_USAGE.trim());
 
+  const rest = args.slice(1);
   let result: Node | Node[];
   switch (subcommand) {
     case "add":
-      result = await addNode(args.slice(1), io);
+      if (hasHelp(rest, ["--title", "--payload"])) {
+        io.stdout.write(NODE_ADD_USAGE);
+        return 0;
+      }
+      result = await addNode(rest, io);
       break;
     case "get":
-      result = await getNode(args.slice(1), io);
+      if (hasHelp(rest)) {
+        io.stdout.write(NODE_GET_USAGE);
+        return 0;
+      }
+      result = await getNode(rest, io);
       break;
     case "list":
-      result = await listNodes(args.slice(1), io);
+      if (hasHelp(rest, ["--type", "--provenance"])) {
+        io.stdout.write(NODE_LIST_USAGE);
+        return 0;
+      }
+      result = await listNodes(rest, io);
       break;
     case "remove":
-      result = await removeNode(args.slice(1), io);
+      if (hasHelp(rest)) {
+        io.stdout.write(NODE_REMOVE_USAGE);
+        return 0;
+      }
+      result = await removeNode(rest, io);
       break;
     case "update":
-      result = await updateNode(args.slice(1), io);
+      if (hasHelp(rest, ["--title", "--payload"])) {
+        io.stdout.write(NODE_UPDATE_USAGE);
+        return 0;
+      }
+      result = await updateNode(rest, io);
       break;
     default:
       throw new Error(`Unknown node command: ${subcommand}`);

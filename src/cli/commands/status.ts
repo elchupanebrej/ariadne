@@ -1,5 +1,5 @@
 import { isFrontierNode, type MaterializedGraph } from "../../graph/storage.js";
-import { resolveCliWorkspace } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
 export type { CliIO } from "../workspace.js";
@@ -93,11 +93,17 @@ export function buildStatusReport(
   };
 }
 
+const STATUS_USAGE = "Usage: ariadne status [--json]\n";
+
 export async function runStatus(args: readonly string[], io: CliIO): Promise<number> {
+  if (hasHelp(args)) {
+    io.stdout.write(STATUS_USAGE);
+    return 0;
+  }
   const json = args.includes("--json");
   const unexpected = args.filter((arg) => arg !== "--json");
   if (unexpected.length > 0) {
-    throw new Error("Usage: ariadne status [--json]");
+    throw new Error(STATUS_USAGE.trim());
   }
 
   const { storage } = await resolveCliWorkspace(io);
