@@ -53,6 +53,21 @@ const flagValue = (flags: Flags, name: string): string => {
   return value;
 };
 
+const parsePayload = (flags: Flags): Record<string, unknown> => {
+  const payloadText = flagValue(flags, "payload");
+  try {
+    const parsed: unknown = JSON.parse(payloadText);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("payload must be a JSON object");
+    }
+    return parsed as Record<string, unknown>;
+  } catch (error) {
+    throw new Error(
+      `Invalid --payload JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+};
+
 const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
 
 async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
@@ -65,19 +80,7 @@ async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const [type, id] = positionals;
   if (!isNodeType(type)) throw new Error(`Unknown node type: ${type}`);
   const title = flagValue(flags, "title");
-  const payloadText = flagValue(flags, "payload");
-  let payload: Record<string, unknown>;
-  try {
-    const parsed: unknown = JSON.parse(payloadText);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("payload must be a JSON object");
-    }
-    payload = parsed as Record<string, unknown>;
-  } catch (error) {
-    throw new Error(
-      `Invalid --payload JSON: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
+  const payload = parsePayload(flags);
 
   const storage = await storageFor(io);
   const graph = await storage.materialize();
@@ -147,9 +150,62 @@ async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
   return tombstone;
 }
 
+async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
+  const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
+  if (positionals.length !== 1) {
+    throw new Error(
+      "Usage: ariadne node update <id> [--title <title>] --payload <json>",
+    );
+  }
+  const [id] = positionals;
+  const payload = parsePayload(flags);
+
+  const title = flags.get("title");
+  if (typeof title === "string" && title.trim() === "") {
+    throw new Error("Missing required option: --title");
+  }
+
+  const storage = await storageFor(io);
+  return await storage.transaction((graph) => {
+    const existing = graph.nodes.find((node) => node.id === id);
+    if (!existing || existing.status === "REMOVED") {
+      throw new Error(`Node not found: ${id}`);
+    }
+
+    if (payload.id !== undefined && payload.id !== id) {
+      throw new Error(`Cannot change node id: ${String(payload.id)}`);
+    }
+    if (payload.type !== undefined && payload.type !== existing.type) {
+      throw new Error(`Cannot change node type: ${String(payload.type)}`);
+    }
+
+    const type = existing.type;
+    const titleToUse = typeof title === "string" ? title : (payload.title as string | undefined) ?? existing.title;
+
+    const merged = {
+      ...existing,
+      ...payload,
+      id,
+      type,
+      ...(titleToUse !== undefined ? { title: titleToUse } : {}),
+    };
+
+    const schema = NodeSchemas[type];
+    if (!schema) {
+      throw new Error(`Unknown node type schema: ${type}`);
+    }
+
+    const updatedNode = schema.parse(merged) as Node;
+    return {
+      result: updatedNode,
+      events: [{ kind: "node", node: updatedNode }],
+    };
+  });
+}
+
 export async function runNode(args: readonly string[], io: CliIO): Promise<number> {
   const subcommand = args[0];
-  if (!subcommand) throw new Error("Usage: ariadne node <add|get|list|remove> ...");
+  if (!subcommand) throw new Error("Usage: ariadne node <add|get|list|remove|update> ...");
 
   let result: Node | Node[];
   switch (subcommand) {
@@ -164,6 +220,9 @@ export async function runNode(args: readonly string[], io: CliIO): Promise<numbe
       break;
     case "remove":
       result = await removeNode(args.slice(1), io);
+      break;
+    case "update":
+      result = await updateNode(args.slice(1), io);
       break;
     default:
       throw new Error(`Unknown node command: ${subcommand}`);

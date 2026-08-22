@@ -135,4 +135,121 @@ describe("ariadne node", () => {
     expect(stderr.text()).toContain("Error:");
     expect(existsSync(join(cwd, ".ariadne", "GRAPH.jsonl"))).toBe(false);
   });
+
+  it("atomically updates an existing node without appending a REMOVED event", async () => {
+    const cwd = workspace();
+    await addAssumption(cwd, "ASM-1");
+
+    const stdout = capture();
+    const stderr = capture();
+    const code = await runCli(
+      [
+        "node",
+        "update",
+        "ASM-1",
+        "--title",
+        "Updated capacity",
+        "--payload",
+        JSON.stringify({
+          provenance_type: "ASSUMED",
+          statement: "The service capacity has been verified under stress",
+        }),
+      ],
+      { cwd, stdout: stdout.stream, stderr: stderr.stream },
+    );
+
+    expect(code).toBe(0);
+    expect(JSON.parse(stdout.text())).toMatchObject({
+      id: "ASM-1",
+      type: "ASM",
+      title: "Updated capacity",
+      statement: "The service capacity has been verified under stress",
+      provenance_type: "ASSUMED",
+    });
+
+    const storage = new GraphStorage(join(cwd, ".ariadne"));
+    const events = await storage.readEvents();
+    expect(events).toHaveLength(2);
+    expect(events[0]).toMatchObject({ kind: "node", node: { id: "ASM-1", title: "Check capacity" } });
+    expect(events[1]).toMatchObject({ kind: "node", node: { id: "ASM-1", title: "Updated capacity" } });
+    expect(events.some((e) => "node" in e && e.node.status === "REMOVED")).toBe(false);
+
+    const get = capture();
+    expect(await runCli(["node", "get", "ASM-1"], { cwd, stdout: get.stream, stderr: capture().stream })).toBe(0);
+    expect(JSON.parse(get.text())).toMatchObject({
+      id: "ASM-1",
+      title: "Updated capacity",
+      statement: "The service capacity has been verified under stress",
+    });
+
+    await expect(readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8")).resolves.toContain(
+      "The service capacity has been verified under stress",
+    );
+  });
+
+  it("rejects invalid node updates without mutating events, index, or state", async () => {
+    const cwd = workspace();
+    await addAssumption(cwd, "ASM-1");
+
+    const storage = new GraphStorage(join(cwd, ".ariadne"));
+    const initialEvents = await storage.readEvents();
+    const initialIndex = await readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8");
+
+    // 1. Non-existent node
+    const notFoundErr = capture();
+    expect(
+      await runCli(
+        ["node", "update", "ASM-999", "--payload", JSON.stringify({ provenance_type: "ASSUMED", statement: "x" })],
+        { cwd, stdout: capture().stream, stderr: notFoundErr.stream },
+      ),
+    ).toBe(1);
+    expect(notFoundErr.text()).toContain("Node not found: ASM-999");
+
+    // 2. Invalid JSON
+    const invalidJsonErr = capture();
+    expect(
+      await runCli(
+        ["node", "update", "ASM-1", "--payload", "{bad json"],
+        { cwd, stdout: capture().stream, stderr: invalidJsonErr.stream },
+      ),
+    ).toBe(1);
+    expect(invalidJsonErr.text()).toContain("Invalid --payload JSON");
+
+    // 3. Schema violation (invalid provenance type)
+    const schemaErr = capture();
+    expect(
+      await runCli(
+        ["node", "update", "ASM-1", "--payload", JSON.stringify({ provenance_type: "INVALID_PROV" })],
+        { cwd, stdout: capture().stream, stderr: schemaErr.stream },
+      ),
+    ).toBe(1);
+    expect(schemaErr.text()).toContain("Error:");
+
+    // 4. Attempted id change
+    const idChangeErr = capture();
+    expect(
+      await runCli(
+        ["node", "update", "ASM-1", "--payload", JSON.stringify({ id: "ASM-2", provenance_type: "ASSUMED" })],
+        { cwd, stdout: capture().stream, stderr: idChangeErr.stream },
+      ),
+    ).toBe(1);
+    expect(idChangeErr.text()).toContain("Cannot change node id");
+
+    // 5. Attempted type change
+    const typeChangeErr = capture();
+    expect(
+      await runCli(
+        ["node", "update", "ASM-1", "--payload", JSON.stringify({ type: "CAN", provenance_type: "PROPOSED" })],
+        { cwd, stdout: capture().stream, stderr: typeChangeErr.stream },
+      ),
+    ).toBe(1);
+    expect(typeChangeErr.text()).toContain("Cannot change node type");
+
+    // Verify storage remained completely unmodified
+    const eventsAfter = await storage.readEvents();
+    expect(eventsAfter).toEqual(initialEvents);
+    const indexAfter = await readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8");
+    expect(indexAfter).toBe(initialIndex);
+  });
 });
+
