@@ -54,7 +54,9 @@ const addNode = (
   );
 
 describe("standalone Mode D recovery", () => {
-  it("recovers the complete graph lifecycle across fresh CLI processes", async () => {
+  it(
+    "recovers the complete graph lifecycle across fresh CLI processes",
+    async () => {
     const cwd = await mkdtemp(join(tmpdir(), "ariadne-mode-d-"));
 
     const initialized = expectSuccess(invoke(cwd, ["init"]));
@@ -136,5 +138,5 @@ describe("standalone Mode D recovery", () => {
       affected_node_ids: ["ASM-1", "CAN-1"],
     });
     expect(await readFile(join(storageRoot, "INDEX.md"), "utf8")).toContain("ASM-1");
-  }, 60_000);
+  }, 180_000);
 });

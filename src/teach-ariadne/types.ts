@@ -1,4 +1,5 @@
 import type { MaterializedGraph } from "../graph/storage.js";
+import type { Node } from "../core/schemas/nodes.js";
 
 export type TeachingPhase =
   | "not_started"
@@ -19,6 +20,7 @@ export type TeachingStatus = "learning" | "independent" | "rejected";
 export interface FadedCaseSolution {
   mechanism: string;
   claimLevel: string;
+  rejectedCandidates?: string[];
 }
 
 export interface DeclaredInputItem {
@@ -46,6 +48,31 @@ export interface CompletionResult {
   blockers: string[];
 }
 
+export type TeachingFaultType =
+  | "invalid_artifact"
+  | "evidence_mismatch"
+  | "owner_boundary";
+
+export interface TeachingFault {
+  type: TeachingFaultType;
+  targetId?: string;
+  details: string;
+  timestamp: string;
+  resolved: boolean;
+}
+
+export interface RepairResult {
+  recovered: boolean;
+  preservedArtifacts: string[];
+  message: string;
+}
+
+export interface OwnerBoundaryRepairResult {
+  recovered: boolean;
+  isolatedPath: string;
+  message: string;
+}
+
 export interface AriadneTeachingState {
   phase: TeachingPhase;
   status: TeachingStatus;
@@ -61,10 +88,14 @@ export interface AriadneTeachingState {
   selfExplanationAnswers?: SelfExplanationAnswers;
   fadedCaseCompleted: boolean;
   transferRouteCompleted: boolean;
+  transferRoute?: string[];
   bulkLoadedRules: boolean;
   copiedMethodContractProse: boolean;
   isolatedGraphPath: string;
   lastMessage: string;
+  faults: TeachingFault[];
+  interventions: string[];
+  prohibitedInputsDetected: string[];
 }
 
 export interface ParserCheckResult {
@@ -76,4 +107,45 @@ export interface ParserCheckResult {
     error?: string;
     passed: boolean;
   }>;
+}
+
+export interface AriadneRunReceipt {
+  id: string;
+  type: string;
+  rung: number;
+  method: string;
+  environment: string;
+  verdict: string;
+  digest: string;
+}
+
+export interface AriadneRunReport {
+  taskId: string;
+  status: TeachingStatus;
+  declaredInputs: DeclaredInputItem[];
+  prohibitedInputs: string[];
+  interventions: string[];
+  routeChoices: string[];
+  artifacts: string[];
+  receipts: AriadneRunReceipt[];
+}
+
+export type ClaimStatus = "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE";
+
+export interface AriadneClaimEvaluation {
+  claim: string;
+  status: ClaimStatus;
+  evidence: string;
+  justification: string;
+  details?: Record<string, unknown>;
+}
+
+export interface AriadneClaimsReport {
+  overallPassed: boolean;
+  claims: {
+    recall: AriadneClaimEvaluation;
+    faded_performance: AriadneClaimEvaluation;
+    structural_transfer: AriadneClaimEvaluation;
+    targeted_recovery: AriadneClaimEvaluation;
+  };
 }
