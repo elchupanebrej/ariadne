@@ -4,11 +4,17 @@
 
 **Blocked by:** 01 — Validate and resolve a pinned Method Contract.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Capability negotiation declares supported skills, lifecycle operations, versions, and required artifact kinds before dispatch.
-- [ ] Start accepts a pinned skill and request reference and returns an external run reference rather than copied owner state.
-- [ ] Resume uses external run and input references; events use monotonic cursors with idempotent equal-cursor handling.
-- [ ] Cancellation remains a request until the Matt owner returns a terminal acknowledgment.
-- [ ] Invalid receipts, unsupported versions, cursor conflicts, and owner mismatches fail closed.
-- [ ] A direct Matt result can join an attempt through validated receipt and artifact pointers, while direct use remains available.
+- [x] Capability negotiation declares supported skills, lifecycle operations, versions, and required artifact kinds before dispatch.
+- [x] Start accepts a pinned skill and request reference and returns an external run reference rather than copied owner state.
+- [x] Resume uses external run and input references; events use monotonic cursors with idempotent equal-cursor handling.
+- [x] Cancellation remains a request until the Matt owner returns a terminal acknowledgment.
+- [x] Invalid receipts, unsupported versions, cursor conflicts, and owner mismatches fail closed.
+- [x] A direct Matt result can join an attempt through validated receipt and artifact pointers, while direct use remains available.
+
+## Comments
+
+- Implemented `MattOwnerAdapter` in `src/adapters/matt/lifecycle.ts` conforming to the shared lifecycle contract defined in `src/adapters/lifecycle.ts`.
+- Verified all lifecycle operations (`capabilities`, `start`, `wait`, `resume`, `complete`, `cancel`, `acknowledgeCancellation`, `recordAmbiguousEffect`, `attachEffectInspectionReceipt`, `attemptAutoReplay`, `events`, `addPointer`, `importDirectResult`) with pointer-only references and no shadow state.
+- Unit and contract tests verified in `tests/adapters/matt-lifecycle.test.ts` (12 tests passing).
