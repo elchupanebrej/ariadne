@@ -1,4 +1,5 @@
 import {
+  canonicalEdgeRelation,
   EDGE_TYPES,
   EdgeSchema,
   type EdgeType,
@@ -38,10 +39,13 @@ const parseEdge = (args: readonly string[]): EpistemicEdge => {
     throw new Error("Usage: ariadne edge add <from_id> <relation> <to_id>");
   }
   const [source, relation, target] = args;
-  if (!(EDGE_TYPES as readonly string[]).includes(relation)) {
+  // Canonical relation semantics: formatting aliases are accepted and
+  // persisted as their equivalent canonical relation; anything else fails.
+  const canonical = canonicalEdgeRelation(relation);
+  if (!canonical) {
     throw new Error(`Invalid edge relation: ${relation}`);
   }
-  return EdgeSchema.parse({ source, type: relation as EdgeType, target });
+  return EdgeSchema.parse({ source, type: canonical, target });
 };
 
 const edgeKey = (edge: EpistemicEdge): string =>
@@ -72,7 +76,8 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
   const from = flags.get("from");
   const to = flags.get("to");
   const relation = flags.get("relation");
-  if (relation && !(EDGE_TYPES as readonly string[]).includes(relation)) {
+  const canonicalRelation = relation ? canonicalEdgeRelation(relation) : undefined;
+  if (relation && !canonicalRelation) {
     throw new Error(`Invalid edge relation: ${relation}`);
   }
   const graph = await (await storageFor(io)).materialize();
@@ -80,7 +85,7 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
     (edge) =>
       (!from || edge.source === from) &&
       (!to || edge.target === to) &&
-      (!relation || edge.type === relation),
+      (!canonicalRelation || edge.type === canonicalRelation),
   );
 }
 

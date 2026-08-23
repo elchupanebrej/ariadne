@@ -336,22 +336,17 @@ export class GraphStorage {
   }
 
   private async syncStateWithGraph(graph: MaterializedGraph): Promise<void> {
+    let existing: unknown = {};
     try {
-      await access(this.statePath);
+      existing = JSON.parse(await readFile(this.statePath, "utf8"));
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
-      throw error;
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      // Fresh workspace: create the state file so frontier and open-unknown
+      // state exist for the next session instead of silently skipping.
     }
     await enqueue(this.statePath, () =>
       withFileLock(this.stateLockPath, async () => {
-        let value: unknown;
-        try {
-          value = JSON.parse(await readFile(this.statePath, "utf8"));
-        } catch (error) {
-          if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
-          throw error;
-        }
-        const parsed = StateSchema.safeParse(value);
+        const parsed = StateSchema.safeParse(existing);
         if (!parsed.success) throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
         const serialized = JSON.stringify(
           stateForGraph(parsed.data as Record<string, unknown>, graph),

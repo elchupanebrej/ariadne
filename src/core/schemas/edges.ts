@@ -26,6 +26,22 @@ export const EdgeTypeSchema = z.enum(EDGE_TYPES);
 export const EdgeRelationSchema = EdgeTypeSchema;
 export const ProvenanceSchema = z.enum(PROVENANCE_TYPES);
 
+// Formatting variants that are semantically identical to their canonical
+// relation. Anything not listed here is rejected rather than silently
+// downgraded.
+const EDGE_RELATION_ALIASES: Readonly<Record<string, EdgeType>> = {
+  "depends-on": "depends_on",
+  dependsOn: "depends_on",
+  "derived-from": "derived_from",
+  derivedFrom: "derived_from",
+};
+
+export function canonicalEdgeRelation(raw: string): EdgeType | undefined {
+  const key = raw.trim();
+  if ((EDGE_TYPES as readonly string[]).includes(key)) return key as EdgeType;
+  return EDGE_RELATION_ALIASES[key] ?? EDGE_RELATION_ALIASES[key.toLowerCase()];
+}
+
 type Edge = {
   source: string;
   target: string;

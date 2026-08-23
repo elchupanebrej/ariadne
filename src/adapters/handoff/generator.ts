@@ -134,8 +134,16 @@ const highRadius = (decision: Node, options: HandoffOptions): boolean => {
   return decision.architectural === true || decision.architectural_decision === true;
 };
 
-const renderSection = (title: string, nodes: Node[]): string => {
-  const rows = nodes.map((node) => `- ${node.id} [${node.provenance_type}] ${compact(node.statement)}`);
+const renderSection = (
+  title: string,
+  nodes: Node[],
+  graphFile?: string,
+): string => {
+  const rows = nodes.map((node) =>
+    `- ${
+      graphFile ? markdownLink(node.id, graphFile) : node.id
+    } [${node.provenance_type}] ${compact(node.statement)}`,
+  );
   return [`## ${title}`, "", ...(rows.length > 0 ? rows : ["- None"]), ""].join("\n");
 };
 
@@ -184,7 +192,10 @@ export async function generateGrillSubstrate(
   const sourceLinks = (await Promise.all(sourceFiles.map(existingPath)))
     .map((exists, index) => (exists ? markdownLink(sourceFiles[index].split(/[\\/]/u).pop()!, sourceFiles[index]) : null))
     .filter((link): link is string => link !== null);
-  const cardLink = (node: Node): string => markdownLink(node.id, artifactPath);
+  const cardLink = (node: Node): string =>
+    // Rule 05 discipline: hrefs target the real persisted graph file, never
+    // the substrate itself and never invented per-card paths.
+    markdownLink(node.id, join(defaultDirectory, "GRAPH.jsonl"));
   const frontierNodes = activeNodes.filter((node) => node.type === "UNK");
   const recommendation =
     activeNodes.find((node) => node.type === "VAL-SELECT") ??
@@ -290,8 +301,8 @@ export async function generateHandoff(
     "",
     compact(decision.statement),
     "",
-    renderSection("Verified facts", verifiedFacts),
-    renderSection("Active invariants", activeInvariants),
+    renderSection("Verified facts", verifiedFacts, join(defaultDirectory, "GRAPH.jsonl")),
+    renderSection("Active invariants", activeInvariants, join(defaultDirectory, "GRAPH.jsonl")),
     "## ADR references",
     "",
     ...(adrRefs.length > 0 ? adrRefs.map((reference) => `- ${reference}`) : ["- None"]),
