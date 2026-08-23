@@ -33,3 +33,4 @@ export * from "./multiagent/worktree-manager.js";
 export * from "./method-contract/index.js";
 export * from "./teach-ariadne/index.js";
 export * from "./teach-methodology/index.js";
+export * from "./teach-harness/index.js";
