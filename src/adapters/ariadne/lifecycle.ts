@@ -46,7 +46,6 @@ export interface AriadneStartRequest {
   contextPointers?: string[];
   authorityRef?: string;
   deadline?: string;
-  depth?: number;
 }
 
 export interface AriadneCompletePayload {
@@ -250,9 +249,7 @@ export class AriadneOwnerAdapter
     if (options.deadline) record.deadline = options.deadline;
     if (options.reason) record.reason = options.reason;
 
-    if (receiptRef && !record.pointers.includes(receiptRef)) {
-      record.pointers.push(receiptRef);
-    }
+    if (receiptRef) this.addUnique(record.pointers, receiptRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -287,12 +284,8 @@ export class AriadneOwnerAdapter
     record.status = "running";
     record.pendingAction = undefined;
     record.resumePredicate = undefined;
-    if (!record.pointers.includes(inputRef)) {
-      record.pointers.push(inputRef);
-    }
-    if (receiptRef && !record.pointers.includes(receiptRef)) {
-      record.pointers.push(receiptRef);
-    }
+    this.addUnique(record.pointers, inputRef);
+    if (receiptRef) this.addUnique(record.pointers, receiptRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -325,14 +318,13 @@ export class AriadneOwnerAdapter
 
     if (graphRevisionRef) {
       assertOwnerScheme(graphRevisionRef, "ariadne", "graphRevisionRef");
-      if (!record.pointers.includes(graphRevisionRef))
-        record.pointers.push(graphRevisionRef);
+      this.addUnique(record.pointers, graphRevisionRef);
     }
     if (artifactRef) {
       assertValidPointer(artifactRef, "artifactRef");
-      if (!record.pointers.includes(artifactRef)) record.pointers.push(artifactRef);
+      this.addUnique(record.pointers, artifactRef);
     }
-    if (!record.pointers.includes(receiptRef)) record.pointers.push(receiptRef);
+    this.addUnique(record.pointers, receiptRef);
 
     record.status = status;
     record.step = "graph mutation complete";
@@ -360,7 +352,7 @@ export class AriadneOwnerAdapter
     record.status = "waiting";
     record.pendingAction = `ariadne://pending/cancel-${Date.now()}`;
     record.reason = "cancellation_requested";
-    if (!record.pointers.includes(reasonRef)) record.pointers.push(reasonRef);
+    this.addUnique(record.pointers, reasonRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -391,9 +383,7 @@ export class AriadneOwnerAdapter
     record.status = "canceled";
     record.pendingAction = undefined;
     record.reason = "canceled";
-    if (!record.pointers.includes(cancelReceiptRef)) {
-      record.pointers.push(cancelReceiptRef);
-    }
+    this.addUnique(record.pointers, cancelReceiptRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -418,7 +408,7 @@ export class AriadneOwnerAdapter
     record.status = "waiting";
     record.pendingAction = `owner://pending/inspect-effect-${Date.now()}`;
     record.reason = "ambiguous_effect";
-    if (!record.pointers.includes(effectRef)) record.pointers.push(effectRef);
+    this.addUnique(record.pointers, effectRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -455,9 +445,7 @@ export class AriadneOwnerAdapter
     record.status =
       record.cancellationState === "requested" ? "waiting" : "running";
     record.reason = undefined;
-    if (!record.pointers.includes(inspectionReceiptRef)) {
-      record.pointers.push(inspectionReceiptRef);
-    }
+    this.addUnique(record.pointers, inspectionReceiptRef);
     record.eventCursor += 1;
 
     record.events.push({
@@ -501,9 +489,7 @@ export class AriadneOwnerAdapter
   ): Promise<LifecycleOutcome> {
     const record = this.requireRun(externalRunRef);
     assertValidPointer(pointer, "pointer");
-    if (!record.pointers.includes(pointer)) {
-      record.pointers.push(pointer);
-    }
+    this.addUnique(record.pointers, pointer);
     return this.outcomeFor(record);
   }
 
@@ -544,6 +530,10 @@ export class AriadneOwnerAdapter
       throw new Error(`Run not found: ${runRef}`);
     }
     return run;
+  }
+
+  private addUnique(list: string[], ptr: string): void {
+    if (!list.includes(ptr)) list.push(ptr);
   }
 
   private outcomeFor(record: RunRecord): LifecycleOutcome {

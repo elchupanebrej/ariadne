@@ -4,10 +4,12 @@ import {
   type AriadneStartRequest,
 } from "../../src/adapters/ariadne/lifecycle.js";
 
+const makeAdapter = () => new AriadneOwnerAdapter({ version: "1.0.0" });
+
 describe("10 — Ariadne owner lifecycle contract", () => {
   describe("1. Capability negotiation", () => {
     it("declares supported operations, artifact kinds, and versions", () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const caps = adapter.capabilities();
 
       expect(caps.adapterId).toBe("adapter://ariadne");
@@ -35,7 +37,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("rejects dispatch for an unsupported Ariadne operation before execution", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const outcome = await adapter.start("harness://request/req-a01", {
         operation: "magic-unknown-op" as any,
         contractRef: "contract://method@sha256:m1",
@@ -54,7 +56,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
 
   describe("2. Start, resume, cancel, and events exchange only pointers", () => {
     it("starts a preflight operation returning an external run reference", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const outcome = await adapter.start("harness://request/req-a02", {
         operation: "preflight",
         contractRef: "contract://method@sha256:m1",
@@ -80,7 +82,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("resumes with input reference and emits monotonic events", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a03", {
         operation: "ingest",
         contractRef: "contract://method@sha256:m1",
@@ -115,7 +117,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("cancels an Ariadne run with pending-action until terminal receipt", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a04", {
         operation: "preflight",
         contractRef: "contract://method@sha256:m1",
@@ -147,7 +149,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("emits monotonic events with idempotent equal-cursor replay and rejects gaps", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a05", {
         operation: "gate",
         contractRef: "contract://method@sha256:m1",
@@ -174,7 +176,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
 
   describe("3. Only Ariadne validates and applies graph mutations", () => {
     it("completes an ingest with Ariadne-owned receipt and graph revision pointer", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a06", {
         operation: "ingest",
         contractRef: "contract://method@sha256:m1",
@@ -204,7 +206,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("fails closed before graph mutation when receipt is missing", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a07", {
         operation: "ingest",
         contractRef: "contract://method@sha256:m1",
@@ -226,7 +228,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
 
   describe("4. Fail-closed on invalid operations, pins, receipts, cursors, or owner bindings", () => {
     it("rejects shadow state injection (non-pointer raw data)", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a08", {
         operation: "preflight",
         contractRef: "contract://method@sha256:m1",
@@ -241,7 +243,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("rejects non-ariadne-scheme receipts for Ariadne-owned operations", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a09", {
         operation: "gate",
         contractRef: "contract://method@sha256:m1",
@@ -259,7 +261,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("rejects automatic replay of an ambiguous effect", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const startOutcome = await adapter.start("harness://request/req-a10", {
         operation: "invalidation",
         contractRef: "contract://method@sha256:m1",
@@ -279,7 +281,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
 
   describe("5. Direct Ariadne result import", () => {
     it("imports a directly executed Ariadne result via validated receipt and graph pointers", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const outcome = await adapter.importDirectResult({
         directReceiptRef: "ariadne://receipt/direct-1",
         graphRevisionRef: "ariadne://graph/rev-g1",
@@ -298,7 +300,7 @@ describe("10 — Ariadne owner lifecycle contract", () => {
     });
 
     it("rejects direct import with missing or invalid receipt", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       await expect(
         adapter.importDirectResult({
           directReceiptRef: "",
@@ -313,14 +315,14 @@ describe("10 — Ariadne owner lifecycle contract", () => {
 
   describe("6. Owner-neutral integration stays separate from Ariadne's controller", () => {
     it("adapter does not expose or modify any Ariadne graph store or controller state", () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       expect((adapter as any).graphStore).toBeUndefined();
       expect((adapter as any).epistemicOverlay).toBeUndefined();
       expect((adapter as any).controller).toBeUndefined();
     });
 
     it("allows direct Ariadne use to remain valid without interception", async () => {
-      const adapter = new AriadneOwnerAdapter({ version: "1.0.0" });
+      const adapter = makeAdapter();
       const outcome = await adapter.importDirectResult({
         directReceiptRef: "ariadne://receipt/standalone-1",
         graphRevisionRef: "ariadne://graph/rev-g-standalone",
