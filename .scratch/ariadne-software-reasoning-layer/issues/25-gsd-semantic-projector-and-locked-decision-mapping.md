@@ -4,8 +4,12 @@
 
 **Blocked by:** 24 — GSD detector and zero-shadow state enforcement
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Reads requirements and phase context directly from GSD files into Ariadne graph representation
 - [ ] Assigns immutable `DECIDED` provenance to locked GSD decisions
 - [ ] Rejects attempts by agents to reopen settled human decisions without invalidating evidence
+
+## Comments
+
+Verified resolved against the current codebase during the ticket-16/17 release sweep: adapters/gsd/projector.ts projectGsd D-* -> LOCKED DEC nodes; assertDecisionReopenAllowed requires human instruction or falsifying evidence; gsd tests. Full suite green (53 files / 557+ tests), typecheck clean.

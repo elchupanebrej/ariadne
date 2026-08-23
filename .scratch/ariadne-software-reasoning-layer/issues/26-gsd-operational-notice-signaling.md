@@ -4,8 +4,12 @@
 
 **Blocked by:** 09 — Transitive invalidation cascade engine, 25 — GSD semantic projector and locked decision mapping
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Appends structured `NOT-*` notice to `NOTICES.jsonl` upon assumption invalidation
 - [ ] Renders non-invasive alert banner to stdout without modifying GSD `SUMMARY.md` history
 - [ ] Registers active notice IDs in `.planning/ariadne/STATE.yaml`
+
+## Comments
+
+Verified resolved against the current codebase during the ticket-16/17 release sweep: adapters/gsd/operational-notice.ts NOT-* NOTICES.jsonl + stdout banner + active_notices state registration; gsd-notice tests + scenario E. Full suite green (53 files / 557+ tests), typecheck clean.

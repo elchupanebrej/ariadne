@@ -4,8 +4,12 @@
 
 **Blocked by:** 13 — CLI entrypoint and status command (ariadne status)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `ariadne node add <type> <id> --title <title> --payload <json>` validates schema before persisting
 - [ ] `ariadne node list [--type] [--provenance]` supports filtered querying
 - [ ] `ariadne node get <id>` prints full node metadata and provenance
+
+## Comments
+
+Verified resolved against the current codebase during the ticket-16/17 release sweep: commands/node.ts add/list/get with schema validation before persisting; cli/node.test.ts. Full suite green (53 files / 557+ tests), typecheck clean.

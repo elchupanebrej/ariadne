@@ -4,8 +4,12 @@
 
 **Blocked by:** 09 — Transitive invalidation cascade engine, 15 — CLI edge management commands (ariadne edge)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `ariadne invalidate` traces all downstream invalidated nodes and prints the affected cascade
 - [ ] Persists invalidation status to `GRAPH.jsonl` and updates `STATE.yaml`
 - [ ] Returns non-zero exit code on missing node ID or invalid evidence reference
+
+## Comments
+
+Verified resolved against the current codebase during the ticket-16/17 release sweep: commands/invalidate.ts downstream cascade persisted to GRAPH.jsonl+STATE.yaml, non-zero exit on missing node/bad evidence; cli/invalidate.test.ts. Full suite green (53 files / 557+ tests), typecheck clean.

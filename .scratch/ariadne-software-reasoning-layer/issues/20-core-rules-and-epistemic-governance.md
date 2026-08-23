@@ -4,8 +4,12 @@
 
 **Blocked by:** 19 — Root skill and two-stage rule router (.agents/skills/ariadne/)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `rules/00-core.md`, `rules/evidence.md`, `rules/invalidation.md`, `rules/roles.md`, `rules/depth-modes.md`, and `rules/agent-rules.md` authored
 - [ ] Strict ASD-STE100 technical English and RFC 2119 keyword semantics verified
 - [ ] Contains clear preconditions, execution rules, and handoff contracts for each governance domain
+
+## Comments
+
+Verified resolved against the current codebase during the ticket-16/17 release sweep: rules/{00-core,evidence,invalidation,roles,depth-modes,agent-rules}.md with RFC2119 MUST semantics; system-rules + governance-rules tests. Full suite green (53 files / 557+ tests), typecheck clean.
