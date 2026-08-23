@@ -137,7 +137,7 @@ export function createDefaultGuideProject(): GuideProject {
             rationale_ref:
               "docs/designing_methodological_guides.md#epistemology",
             provenance: "repository verification policy",
-            confidence: "high",
+            epistemic_status: "verified",
           },
           {
             id: "CLAIM-advisory-check",
@@ -152,7 +152,7 @@ export function createDefaultGuideProject(): GuideProject {
             rationale_ref:
               "docs/designing_methodological_guides.md#epistemology",
             provenance: "security vulnerability management policy",
-            confidence: "high",
+            epistemic_status: "verified",
           },
           {
             id: "CLAIM-license-boundary",
@@ -166,7 +166,7 @@ export function createDefaultGuideProject(): GuideProject {
             rationale_ref:
               "docs/designing_methodological_guides.md#epistemology",
             provenance: "open source compliance policy",
-            confidence: "high",
+            epistemic_status: "verified",
           },
         ],
       },

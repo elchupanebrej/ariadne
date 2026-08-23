@@ -61,7 +61,7 @@ export interface A2RationaleClaim {
   countercondition: string;
   rationale_ref: string;
   provenance?: string;
-  confidence?: string;
+  epistemic_status?: string;
 }
 
 export interface A2RationaleRegister {

@@ -21,7 +21,7 @@ import {
 const ARTIFACT_REASONS: Record<string, string> = {
   A0: "Concise current map for the dependency-change review guide",
   A1: "The guide is organization-normative and needs explicit scope and success measures",
-  A2: "Security, license, and test recommendations have different sources and confidence",
+  A2: "Security, license, and test recommendations have different sources and epistemic basis",
   A3: "Reviewer, maintainer, security, and legal roles have different authority",
   A4: "Advisory, license, lockfile, verification, recovery, and escalation branches are observable",
   A5: "A novice must move from one worked review to independent and transfer performance",
