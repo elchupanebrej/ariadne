@@ -4,6 +4,9 @@
 > round runner digests its bytes and the ticket-15 diff widened the thin-path
 > module list to include the self-application runner; no kernel component was
 > introduced by that amendment.
+> Addendum (ticket 16): the thin-path module list additionally includes the
+> release-bundle registry (non-normative compatibility snapshots). Still no
+> kernel component.
 
 **Rule applied (non-compensatory):** retain no Orchestration Kernel if the thin path supports every hard continuation invariant; implement the smallest co-located kernel only for specifically falsified invariants. Verdicts are never averaged: one falsified invariant would force the retention branch.
 
