@@ -18,10 +18,11 @@ const walk = async (dir: string): Promise<string[]> => {
 };
 
 describe("no Orchestration Kernel is retained", () => {
-  it("keeps src/harness limited to the thin attempt module and the pre-existing controller", async () => {
+  it("keeps src/harness limited to thin-path modules: attempt, controller, self-application", async () => {
     expect((await readdir(harnessRoot)).sort()).toEqual([
       "attempt.ts",
       "controller.ts",
+      "self-application.ts",
     ]);
   });
 

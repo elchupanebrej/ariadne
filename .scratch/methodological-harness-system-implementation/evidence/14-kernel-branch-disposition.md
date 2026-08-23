@@ -1,5 +1,10 @@
 # Kernel Branch Disposition — Ticket 14
 
+> Addendum (ticket 15): this file is now a pinned bootstrap input. Ticket 15's
+> round runner digests its bytes and the ticket-15 diff widened the thin-path
+> module list to include the self-application runner; no kernel component was
+> introduced by that amendment.
+
 **Rule applied (non-compensatory):** retain no Orchestration Kernel if the thin path supports every hard continuation invariant; implement the smallest co-located kernel only for specifically falsified invariants. Verdicts are never averaged: one falsified invariant would force the retention branch.
 
 ## Disposition table
@@ -23,7 +28,7 @@
 
 The result is protected by an executable absence check, `tests/harness/no-kernel.test.ts`, which asserts:
 
-- `src/harness/` contains only the thin attempt module and the pre-existing controller;
+- `src/harness/` contains only thin-path modules — the attempt module, the pre-existing controller, and (added by ticket 15) the immutable staged-self-application round runner; no kernel component;
 - no exported kernel symbol exists anywhere under `src/`;
 - the attempt module's import surface is pinned to a fixed allowlist (Node file/path builtins plus the shared pointer-validation helpers) — no network, IPC, worker, lock, queue, database, scheduler, or migration facilities can enter;
 - runtime dependencies remain `{ zod }` (key-set check; version bumps are not infrastructure);
