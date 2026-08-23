@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export type LifecycleStatus =
   | "created"
   | "running"
@@ -30,6 +32,10 @@ export interface LifecycleOutcome {
   receiptRef?: string;
   artifactRef?: string;
   diagnosticRef?: string;
+  authorityRef?: string;
+  resumePredicate?: string;
+  deadline?: string;
+  reason?: string;
   error?: string;
 }
 
@@ -88,16 +94,38 @@ export const VALID_POINTER_SCHEMES = new Set([
   "owner",
 ]);
 
-export function isValidPointer(pointer: string): boolean {
-  if (typeof pointer !== "string" || !pointer.trim()) return false;
+export function parsePointerScheme(pointer: string): string | undefined {
+  if (typeof pointer !== "string" || !pointer.trim()) return undefined;
   const match = /^([a-z0-9_-]+):\/\/(.+)$/iu.exec(pointer.trim());
-  if (!match) return false;
-  const scheme = match[1].toLowerCase();
-  return VALID_POINTER_SCHEMES.has(scheme);
+  return match ? match[1].toLowerCase() : undefined;
+}
+
+export function isValidPointer(pointer: string): boolean {
+  const scheme = parsePointerScheme(pointer);
+  return scheme !== undefined && VALID_POINTER_SCHEMES.has(scheme);
 }
 
 export function assertValidPointer(pointer: string, context = "pointer"): void {
   if (!isValidPointer(pointer)) {
     throw new Error(`Invalid ${context} scheme or format: ${pointer}`);
   }
+}
+
+export function assertOwnerScheme(
+  pointer: string,
+  expectedSchemes: string | string[],
+  context = "pointer",
+): void {
+  assertValidPointer(pointer, context);
+  const scheme = parsePointerScheme(pointer);
+  const allowed = Array.isArray(expectedSchemes) ? expectedSchemes : [expectedSchemes];
+  if (!scheme || !allowed.includes(scheme)) {
+    throw new Error(
+      `Owner mismatch for ${context}: expected [${allowed.join(", ")}], received scheme '${scheme}' in ${pointer}`,
+    );
+  }
+}
+
+export function sha256Digest(content: string): string {
+  return createHash("sha256").update(content).digest("hex");
 }

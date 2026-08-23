@@ -8,13 +8,16 @@ import {
   type LifecycleOutcome,
   type LifecycleStatus,
   type OwnerAdapter,
+  assertOwnerScheme,
   assertValidPointer,
   isValidPointer,
+  sha256Digest,
 } from "../lifecycle.js";
 
 export interface MattAdapterOptions {
   version?: string;
   adapterId?: string;
+  adapterDigest?: string;
 }
 
 export interface MattStartRequest {
@@ -25,6 +28,8 @@ export interface MattStartRequest {
   requiredArtifactKinds: string[];
   contextPointers?: string[];
   idempotencyKey?: string;
+  authorityRef?: string;
+  deadline?: string;
 }
 
 export interface MattCompletePayload {
@@ -60,18 +65,24 @@ interface RunRecord {
   pendingAction?: string;
   pointers: string[];
   events: LifecycleEvent[];
+  authorityRef?: string;
+  resumePredicate?: string;
+  deadline?: string;
+  reason?: string;
   error?: string;
 }
 
 export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattCompletePayload> {
   readonly version: string;
   readonly adapterId: string;
+  readonly adapterDigest: string;
   private runs = new Map<string, RunRecord>();
   private runCounter = 0;
 
   constructor(options: MattAdapterOptions = {}) {
     this.version = options.version ?? "1.0.0";
     this.adapterId = options.adapterId ?? "adapter://matt";
+    this.adapterDigest = options.adapterDigest ?? sha256Digest(`matt-adapter-${this.version}`).slice(0, 16);
   }
 
   capabilities(): AdapterCapabilities {
@@ -91,19 +102,30 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     requestRef: string,
     requestPayload?: MattStartRequest,
   ): Promise<LifecycleOutcome> {
+    assertValidPointer(requestRef, "requestRef");
+
     if (!requestPayload) {
       return {
         status: "failed",
         effectState: "none",
         cancellationState: "none",
         eventCursor: 0,
-        pointers: [],
+        pointers: [requestRef],
         error: "Missing start request payload",
+        reason: "missing_request_payload",
       };
     }
 
-    const { skill, contractRef, workspaceRef, interactionMode, requiredArtifactKinds, contextPointers } =
-      requestPayload;
+    const {
+      skill,
+      contractRef,
+      workspaceRef,
+      interactionMode,
+      requiredArtifactKinds,
+      contextPointers,
+      authorityRef,
+      deadline,
+    } = requestPayload;
 
     if (!MATT_SKILLS.includes(skill)) {
       const diagDigest = createHash("sha256").update(String(skill)).digest("hex").slice(0, 8);
@@ -116,12 +138,14 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
         diagnosticRef,
         pointers: [diagnosticRef],
         error: `Unsupported skill: ${skill}`,
+        reason: "unsupported_skill",
       };
     }
 
     // Validate pointers
-    if (contractRef) assertValidPointer(contractRef, "contractRef");
-    if (workspaceRef) assertValidPointer(workspaceRef, "workspaceRef");
+    if (contractRef) assertOwnerScheme(contractRef, "contract", "contractRef");
+    if (workspaceRef) assertOwnerScheme(workspaceRef, "workspace", "workspaceRef");
+    if (authorityRef) assertValidPointer(authorityRef, "authorityRef");
     if (contextPointers) {
       for (const ptr of contextPointers) {
         assertValidPointer(ptr, "contextPointer");
@@ -130,11 +154,12 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
 
     this.runCounter += 1;
     const runRef = `host://run/matt-${Date.now()}-${this.runCounter}`;
-    const adapterRef = `${this.adapterId}@sha256:${this.version}`;
+    const adapterRef = `${this.adapterId}@sha256:${this.adapterDigest}`;
 
     const pointers: string[] = [adapterRef];
     if (contractRef) pointers.push(contractRef);
     if (workspaceRef) pointers.push(workspaceRef);
+    if (authorityRef) pointers.push(authorityRef);
     if (contextPointers) pointers.push(...contextPointers);
     pointers.push(runRef);
 
@@ -159,6 +184,8 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
       step: "Matt skill",
       pointers,
       events: [initialEvent],
+      authorityRef,
+      deadline,
     };
 
     this.runs.set(runRef, record);
@@ -170,16 +197,23 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     runRef: string,
     pendingActionRef: string,
     receiptRef?: string,
+    options: { authorityRef?: string; resumePredicate?: string; deadline?: string; reason?: string } = {},
   ): Promise<LifecycleOutcome> {
     const record = this.requireRun(runRef);
     if (record.status !== "running") {
       throw new Error(`Cannot wait run in status ${record.status}`);
     }
-    assertValidPointer(pendingActionRef, "pendingActionRef");
-    if (receiptRef) assertValidPointer(receiptRef, "receiptRef");
+    assertOwnerScheme(pendingActionRef, ["host", "owner"], "pendingActionRef");
+    if (receiptRef) assertOwnerScheme(receiptRef, ["matt", "host", "owner"], "receiptRef");
+    if (options.authorityRef) assertValidPointer(options.authorityRef, "authorityRef");
 
     record.status = "waiting";
     record.pendingAction = pendingActionRef;
+    if (options.authorityRef) record.authorityRef = options.authorityRef;
+    if (options.resumePredicate) record.resumePredicate = options.resumePredicate;
+    if (options.deadline) record.deadline = options.deadline;
+    if (options.reason) record.reason = options.reason;
+
     if (receiptRef && !record.pointers.includes(receiptRef)) {
       record.pointers.push(receiptRef);
     }
@@ -191,6 +225,7 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
       runRef,
       kind: "pending_action_set",
       pointer: pendingActionRef,
+      reason: options.reason,
     });
 
     return this.outcomeFor(record);
@@ -205,11 +240,12 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     if (record.status !== "waiting") {
       throw new Error(`Cannot resume run in status ${record.status}`);
     }
-    assertValidPointer(inputRef, "inputRef");
-    if (receiptRef) assertValidPointer(receiptRef, "receiptRef");
+    assertOwnerScheme(inputRef, ["human", "host", "file", "matt", "owner"], "inputRef");
+    if (receiptRef) assertOwnerScheme(receiptRef, ["matt", "host", "owner"], "receiptRef");
 
     record.status = "running";
     record.pendingAction = undefined;
+    record.resumePredicate = undefined;
     if (!record.pointers.includes(inputRef)) {
       record.pointers.push(inputRef);
     }
@@ -239,10 +275,13 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     if (!receiptRef || !isValidPointer(receiptRef)) {
       record.status = "failed";
       record.error = "Ariadne rejected a missing or invalid Matt evidence receipt";
+      record.reason = "invalid_receipt";
       return this.outcomeFor(record);
     }
 
-    assertValidPointer(artifactRef, "artifactRef");
+    assertOwnerScheme(receiptRef, ["matt", "host", "owner"], "receiptRef");
+    assertOwnerScheme(artifactRef, "file", "artifactRef");
+
     if (!record.pointers.includes(receiptRef)) record.pointers.push(receiptRef);
     if (!record.pointers.includes(artifactRef)) record.pointers.push(artifactRef);
 
@@ -266,11 +305,12 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     reasonRef: string,
   ): Promise<LifecycleOutcome> {
     const record = this.requireRun(externalRunRef);
-    assertValidPointer(reasonRef, "reasonRef");
+    assertOwnerScheme(reasonRef, ["harness", "host", "owner"], "reasonRef");
 
     record.cancellationState = "requested";
     record.status = "waiting";
     record.pendingAction = `host://pending/cancel-${Date.now()}`;
+    record.reason = "cancellation_requested";
     if (!record.pointers.includes(reasonRef)) record.pointers.push(reasonRef);
     record.eventCursor += 1;
 
@@ -296,11 +336,12 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     if (record.effectState === "ambiguous") {
       throw new Error("Owner inspection is required before terminal cancellation");
     }
-    assertValidPointer(cancelReceiptRef, "cancelReceiptRef");
+    assertOwnerScheme(cancelReceiptRef, ["host", "owner"], "cancelReceiptRef");
 
     record.cancellationState = "acknowledged";
     record.status = "canceled";
     record.pendingAction = undefined;
+    record.reason = "canceled";
     if (!record.pointers.includes(cancelReceiptRef)) {
       record.pointers.push(cancelReceiptRef);
     }
@@ -322,11 +363,12 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     effectRef: string,
   ): Promise<LifecycleOutcome> {
     const record = this.requireRun(externalRunRef);
-    assertValidPointer(effectRef, "effectRef");
+    assertOwnerScheme(effectRef, "owner", "effectRef");
 
     record.effectState = "ambiguous";
     record.status = "waiting";
     record.pendingAction = `owner://pending/inspect-effect-${Date.now()}`;
+    record.reason = "ambiguous_effect";
     if (!record.pointers.includes(effectRef)) record.pointers.push(effectRef);
     record.eventCursor += 1;
 
@@ -350,12 +392,13 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     if (record.effectState !== "ambiguous") {
       throw new Error(`No ambiguous effect to inspect for run ${externalRunRef}`);
     }
-    assertValidPointer(inspectionReceiptRef, "inspectionReceiptRef");
+    assertOwnerScheme(inspectionReceiptRef, ["owner", "matt", "host"], "inspectionReceiptRef");
 
     record.effectState = committed ? "committed" : "no_effect";
     record.pendingAction =
       record.cancellationState === "requested" ? `host://pending/cancel-${Date.now()}` : undefined;
     record.status = record.cancellationState === "requested" ? "waiting" : "running";
+    record.reason = undefined;
     if (!record.pointers.includes(inspectionReceiptRef)) {
       record.pointers.push(inspectionReceiptRef);
     }
@@ -378,6 +421,7 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     record.status = "failed";
     record.pendingAction = undefined;
     record.error = "an ambiguous effect was automatically replayed without owner replay declaration";
+    record.reason = "unauthorized_replay";
     return this.outcomeFor(record);
   }
 
@@ -410,10 +454,11 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
     if (!directReceiptRef || !isValidPointer(directReceiptRef)) {
       throw new Error("Missing or invalid direct receipt pointer");
     }
-    assertValidPointer(artifactRef, "artifactRef");
-    if (adapterRef) assertValidPointer(adapterRef, "adapterRef");
-    if (workspaceRef) assertValidPointer(workspaceRef, "workspaceRef");
-    if (contractRef) assertValidPointer(contractRef, "contractRef");
+    assertOwnerScheme(directReceiptRef, ["matt", "host", "owner"], "directReceiptRef");
+    assertOwnerScheme(artifactRef, "file", "artifactRef");
+    if (adapterRef) assertOwnerScheme(adapterRef, "adapter", "adapterRef");
+    if (workspaceRef) assertOwnerScheme(workspaceRef, "workspace", "workspaceRef");
+    if (contractRef) assertOwnerScheme(contractRef, "contract", "contractRef");
 
     const pointers: string[] = [directReceiptRef, artifactRef];
     if (adapterRef) pointers.push(adapterRef);
@@ -450,6 +495,10 @@ export class MattOwnerAdapter implements OwnerAdapter<MattStartRequest, MattComp
       step: record.step,
       pendingAction: record.pendingAction,
       pointers: [...record.pointers],
+      authorityRef: record.authorityRef,
+      resumePredicate: record.resumePredicate,
+      deadline: record.deadline,
+      reason: record.reason,
       error: record.error,
     };
   }
