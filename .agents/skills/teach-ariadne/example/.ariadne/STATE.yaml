@@ -1,0 +1,7 @@
+schema_version: 1
+mode: ariadne
+frontier:
+  - DEC-config-line-parser
+open_unknowns: []
+active_frame: FRAME-config-line-parser
+accepted_decision: DEC-config-line-parser

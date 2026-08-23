@@ -1,0 +1,18 @@
+{"id":"FRAME-config-line-parser","type":"FRAME","provenance_type":"FACT","statement":"Parse KEY=VALUE config lines: split on first '=', retain subsequent '=', reject empty key or missing delimiter, add no dependency unless required.","title":"Config line parser behavior","status":"ACCEPTED"}
+{"id":"SPACE-config-line-parser","type":"SPACE","provenance_type":"PROPOSED","statement":"Explore stdlib first-delimiter parsing, JSON input representation, and environment boundary mechanisms.","title":"Config parser mechanism space","status":"ACCEPTED"}
+{"id":"CAN-first-delimiter-stdlib","type":"CAN","provenance_type":"PROPOSED","statement":"Use native String.indexOf and String.slice inside the parser function boundary without dependencies.","title":"Standard library first delimiter parsing","status":"PROPOSED"}
+{"id":"CAN-json-input","type":"CAN","provenance_type":"PROPOSED","statement":"Change input specification to standard JSON format instead of KEY=VALUE lines.","title":"JSON representation change","status":"PROPOSED"}
+{"id":"CAN-environment-boundary","type":"CAN","provenance_type":"PROPOSED","statement":"Delegate config parsing to process environment variable input boundaries.","title":"Environment input boundary delegation","status":"PROPOSED"}
+{"id":"VAL-SELECT-config-line-parser","type":"VAL-SELECT","provenance_type":"DECIDED","statement":"Hard filter: JSON breaks format compatibility; env boundary changes interface ownership. CAN-first-delimiter-stdlib selected provisionally.","title":"Candidate evaluation and hard requirement filtering","status":"ACCEPTED","adversarial_critique":"JSON breaks compatibility with existing KEY=VALUE contract; environment boundary alters ownership model.","selected":"CAN-first-delimiter-stdlib","rejected":["CAN-json-input","CAN-environment-boundary"]}
+{"id":"EVDREQ-config-line-parser-r3","type":"EVDREQ","provenance_type":"PROPOSED","statement":"Require Rung 3 Algorithmic logic assertion check covering 4 deterministic test cases.","title":"Algorithmic validation for config line parser","status":"PROPOSED","required_rung":3,"candidate":"CAN-first-delimiter-stdlib"}
+{"id":"EVD-config-line-parser-r3","type":"EVD","provenance_type":"MEASURED","statement":"Node assertion check passed all 4 deterministic parser cases at Rung 3.","title":"Rung 3 Algorithmic logic assertion receipt","status":"ACCEPTED","verdict":"SUPPORTED","method":"assertion_test","rung":3,"environment":"node-runtime","receipt":"sha256:4073099cd9d9d96dcb4f5e5bf937007e197be88fc26cc2b443d28fb5e526be27"}
+{"id":"DEC-config-line-parser","type":"DEC","provenance_type":"DECIDED","statement":"Lock CAN-first-delimiter-stdlib based on verified Rung 3 algorithmic evidence receipt EVD-config-line-parser-r3.","title":"Lock stdlib first-delimiter config line parser","status":"ACCEPTED","dependencies":["EVD-config-line-parser-r3"],"selected":"CAN-first-delimiter-stdlib"}
+{"source":"SPACE-config-line-parser","target":"FRAME-config-line-parser","type":"depends_on"}
+{"source":"CAN-first-delimiter-stdlib","target":"SPACE-config-line-parser","type":"derived_from"}
+{"source":"CAN-json-input","target":"SPACE-config-line-parser","type":"derived_from"}
+{"source":"CAN-environment-boundary","target":"SPACE-config-line-parser","type":"derived_from"}
+{"source":"VAL-SELECT-config-line-parser","target":"CAN-first-delimiter-stdlib","type":"depends_on"}
+{"source":"EVDREQ-config-line-parser-r3","target":"CAN-first-delimiter-stdlib","type":"tests"}
+{"source":"EVD-config-line-parser-r3","target":"EVDREQ-config-line-parser-r3","type":"answers"}
+{"source":"DEC-config-line-parser","target":"FRAME-config-line-parser","type":"satisfies"}
+{"source":"DEC-config-line-parser","target":"EVD-config-line-parser-r3","type":"depends_on"}

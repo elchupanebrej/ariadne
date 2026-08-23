@@ -299,6 +299,42 @@ function extractMarkdownAnchors(content: string): Set<string> {
   return anchors;
 }
 
+const guideAnchorCache = new Map<string, Set<string>>();
+
+/**
+ * Extract anchor IDs and headers from markdown content.
+ */
+function getMarkdownAnchors(targetDoc: string, options: ValidateMethodContractOptions): Set<string> | null {
+  if (guideAnchorCache.has(targetDoc)) {
+    return guideAnchorCache.get(targetDoc)!;
+  }
+
+  let docContent: string | null = null;
+  if (options.guideContentResolver) {
+    docContent = options.guideContentResolver(targetDoc);
+  } else if (existsSync(targetDoc)) {
+    try {
+      docContent = readFileSync(targetDoc, "utf-8");
+    } catch {
+      docContent = null;
+    }
+  } else if (existsSync(resolve(process.cwd(), targetDoc))) {
+    try {
+      docContent = readFileSync(resolve(process.cwd(), targetDoc), "utf-8");
+    } catch {
+      docContent = null;
+    }
+  }
+
+  if (docContent === null) {
+    return null;
+  }
+
+  const anchors = extractMarkdownAnchors(docContent);
+  guideAnchorCache.set(targetDoc, anchors);
+  return anchors;
+}
+
 /**
  * Validate that all rationale references resolve to existing anchors/documents.
  */
@@ -337,24 +373,8 @@ export function validateRationaleReferences(
       targetDoc = trimmed;
     }
 
-    let docContent: string | null = null;
-    if (options.guideContentResolver) {
-      docContent = options.guideContentResolver(targetDoc);
-    } else if (existsSync(targetDoc)) {
-      try {
-        docContent = readFileSync(targetDoc, "utf-8");
-      } catch {
-        docContent = null;
-      }
-    } else if (existsSync(resolve(process.cwd(), targetDoc))) {
-      try {
-        docContent = readFileSync(resolve(process.cwd(), targetDoc), "utf-8");
-      } catch {
-        docContent = null;
-      }
-    }
-
-    if (docContent === null) {
+    const anchors = getMarkdownAnchors(targetDoc, options);
+    if (anchors === null) {
       diagnostics.push({
         path,
         message: `Unresolved rationale reference: guide document "${targetDoc}" not found`,
@@ -363,8 +383,7 @@ export function validateRationaleReferences(
     }
 
     if (anchor) {
-      const availableAnchors = extractMarkdownAnchors(docContent);
-      if (!availableAnchors.has(anchor.toLowerCase())) {
+      if (!anchors.has(anchor.toLowerCase())) {
         diagnostics.push({
           path,
           message: `Unresolved rationale reference: anchor "#${anchor}" not found in "${targetDoc}"`,

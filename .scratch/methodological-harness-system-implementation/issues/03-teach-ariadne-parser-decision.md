@@ -4,11 +4,22 @@
 
 **Blocked by:** 01 — Validate and resolve a pinned Method Contract.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A Clean-Session Run starts with the parser task and records every declared input in an auditable manifest.
-- [ ] The lesson loads the router, uncertainty rule, selected operation rules, graph mutation contract, and relevant evidence rule only when triggered.
-- [ ] A proposed package remains a Candidate Mechanism, and three structurally distinct candidates are hard-filtered before selection.
-- [ ] Executable parser checks emit the matched Evidence Result before the decision is locked.
-- [ ] Lesson mutations are isolated from the live Epistemic Overlay and invalid lesson artifacts are rejected.
-- [ ] Self-explanation occurs only after the runnable check passes and cites live Ariadne and Method Contract sources.
+- [x] A Clean-Session Run starts with the parser task and records every declared input in an auditable manifest.
+- [x] The lesson loads the router, uncertainty rule, selected operation rules, graph mutation contract, and relevant evidence rule only when triggered.
+- [x] A proposed package remains a Candidate Mechanism, and three structurally distinct candidates are hard-filtered before selection.
+- [x] Executable parser checks emit the matched Evidence Result before the decision is locked.
+- [x] Lesson mutations are isolated from the live Epistemic Overlay and invalid lesson artifacts are rejected.
+- [x] Self-explanation occurs only after the runnable check passes and cites live Ariadne and Method Contract sources.
+
+## Comments
+
+- Built Ariadne Teaching Skill at `.agents/skills/teach-ariadne/` and engine in `src/teach-ariadne/`.
+- Implemented task-first progressive loader with declared input manifest, prohibiting bulk preloading or copied Method Contract prose.
+- Implemented 3-candidate exploration and hard requirement filtering (rejecting JSON representation change and environment boundary delegation).
+- Implemented runnable parser checks in `example/check.mjs` (covering 4 deterministic cases) emitting Rung 3 `EVD-config-line-parser-r3` before locking `DEC-config-line-parser`.
+- Isolated example graph under `example/.ariadne/` with valid schema/epistemic nodes.
+- Enforced self-explanation gating (only runnable check completion unlocks 4 why-question validations), followed by faded practice and transfer checks.
+- Full verification passed: 37 test files, 380 tests.
+

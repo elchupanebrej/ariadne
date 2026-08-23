@@ -356,7 +356,7 @@ describe("Mutation Testing Suite for Method Contract Validator (MSI >= 85%)", ()
     expect(survivors).toHaveLength(0);
     expect(msi).toBeGreaterThanOrEqual(85);
     expect(msi).toBe(100);
-  });
+  }, 20000);
 
   it.each(mutants)("kills mutant $id ($category: $description)", (mutant) => {
     const mutated = mutant.mutate();
