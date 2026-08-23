@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway Matt and Ariadne adapter-contract prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #202a35; background: #f3f6f8; }
+  body { max-width: 1100px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .3rem; }
+  h2 { margin-top: 0; }
+  .note { max-width: 92ch; color: #596675; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d4dce4; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f6f8fa; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #7b8999; border-radius: 8px; background: #edf2f6; cursor: pointer; }
+  button:hover { background: #dfe8f0; }
+  button:disabled { cursor: default; opacity: .45; }
+  .tabs button[aria-selected="true"] { color: white; background: #305f79; }
+  .ok { color: #16713b; }
+  .bad { color: #a33128; }
+  .warn { color: #8b5c08; }
+  code { overflow-wrap: anywhere; }
+  ul { margin: .35rem 0; padding-left: 1.2rem; }
+</style>
+
+<h1>PROTOTYPE — Matt and Ariadne adapter contracts</h1>
+<p class="note">Question: can one pointer-only lifecycle surface coordinate Matt Pocock Skills and Ariadne across invocation, waiting, resumption, cancellation, evidence handoff, and failure while Matt retains workflow meaning, Ariadne retains epistemic meaning, the host retains execution, and direct use remains valid?</p>
+
+<section class="panel">
+  <h2>Contract under test</h2>
+  <div class="grid">
+    <div class="card"><strong>Shared adapter surface</strong><code>capabilities()</code><br><code>start(request_ref)</code><br><code>resume(external_run_ref, input_ref)</code><br><code>cancel(external_run_ref, reason_ref)</code><br><code>events(external_run_ref, cursor)</code></div>
+    <div class="card"><strong>Matt request</strong>skill/version reference, interaction mode, workspace/context pointers, required artifact kinds; the host executes it.</div>
+    <div class="card"><strong>Ariadne request</strong>operation/version reference, graph/workspace pointers, input references, depth; Ariadne validates and mutates its graph.</div>
+    <div class="card"><strong>Adapter outcome</strong>status, effect state, event cursor, and owner-issued receipt, artifact, pending-action, diagnostic, and trace pointers.</div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Current attempt</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="reset">Reset</button>
+  <button data-action="start">Start coordinated attempt</button>
+  <button data-action="ariadne-preflight">Complete Ariadne preflight</button>
+  <button data-action="matt-start">Invoke Matt skill</button>
+  <button data-action="matt-wait">Wait for human</button>
+  <button data-action="matt-resume">Resume with human input</button>
+  <button data-action="matt-complete">Complete Matt skill</button>
+  <button data-action="ariadne-ingest">Hand evidence to Ariadne</button>
+  <button data-action="gate">Run contract gate</button>
+  <button data-action="direct-matt">Import direct Matt use</button>
+  <button data-action="cancel">Request cancellation</button>
+  <button data-action="cancel-ack">Receive cancellation receipt</button>
+  <button data-action="ambiguous-effect">Lose process after an effect</button>
+  <button data-action="inspect-effect">Attach owner inspection receipt</button>
+  <button data-action="auto-replay">Automatically replay effect</button>
+  <button data-action="invalid-receipt">Return invalid Matt receipt</button>
+  <button data-action="unsupported">Use unsupported capability</button>
+  <button data-action="shadow-state">Copy owner semantic state</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const AdapterPrototype = (() => {
+  const initial = () => ({
+    status: "created",
+    step: "none",
+    owner: "harness",
+    directUse: false,
+    pinsValid: true,
+    pointers: [],
+    pendingAction: "none",
+    effect: "none",
+    cancellation: "none",
+    eventCursor: 0,
+    shadowState: false,
+    protocolError: "none",
+    verdict: "untested",
+    last: "No adapter call has been made."
+  });
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const has = (state, prefix) => state.pointers.some(pointer => pointer.startsWith(prefix));
+  const add = (state, ...pointers) => state.pointers.push(...pointers.filter(pointer => !state.pointers.includes(pointer)));
+  const invalid = state => [
+    !state.pinsValid && "a source or adapter pin does not match",
+    state.shadowState && "the harness copied owner semantic state",
+    state.effect === "ambiguous" && "an external effect still needs owner inspection",
+    state.protocolError !== "none" && state.protocolError,
+    state.pendingAction !== "none" && "a human or owner action is still pending",
+    state.cancellation === "requested" && "cancellation lacks a terminal owner receipt",
+    state.status === "running" && "an owner operation is still running",
+    state.status === "created" && "no owner operation or direct-use receipt was supplied"
+  ].filter(Boolean);
+
+  const advance = (state, action) => {
+    const next = copy(state);
+    const stop = message => { next.last = `Stopped: ${message}.`; return next; };
+    const event = () => { next.eventCursor += 1; };
+    switch (action) {
+      case "reset": return initial();
+      case "start":
+        if (next.status !== "created") return stop("an attempt already exists");
+        next.status = "running";
+        next.step = "ariadne preflight";
+        next.owner = "ariadne";
+        add(next, "contract://method@sha256:m1", "adapter://ariadne@sha256:a1", "workspace://repo@rev:w1");
+        event();
+        next.last = "The harness pinned inputs and asked the Ariadne owner adapter to run uncertainty preflight; no graph payload was copied.";
+        return next;
+      case "ariadne-preflight":
+        if (next.step !== "ariadne preflight" || next.status !== "running") return stop("Ariadne preflight is not active");
+        add(next, "ariadne://receipt/preflight-1", "file://.scratch/substrate.md@sha256:s1");
+        next.step = "ready for Matt";
+        next.owner = "harness";
+        event();
+        next.last = "Ariadne returned a receipt and substrate pointer; Ariadne remains sole graph writer.";
+        return next;
+      case "matt-start":
+        if (next.step !== "ready for Matt") return stop("a validated preflight pointer is required");
+        next.step = "Matt skill";
+        next.owner = "matt via host";
+        add(next, "adapter://matt@sha256:matt1", "host://run/matt-1");
+        event();
+        next.last = "The Matt adapter identified the skill and context references; the host started the model/tool session.";
+        return next;
+      case "matt-wait":
+        if (next.step !== "Matt skill" || next.status !== "running") return stop("no Matt skill is running");
+        next.status = "waiting";
+        next.pendingAction = "host://pending/human-1";
+        add(next, "matt://receipt/waiting-1");
+        event();
+        next.last = "The host retained the human prompt; the harness retained only its pending-action pointer.";
+        return next;
+      case "matt-resume":
+        if (next.status !== "waiting" || next.pendingAction === "none") return stop("no human action is pending");
+        next.status = "running";
+        next.pendingAction = "none";
+        add(next, "human://answer/1", "matt://receipt/resumed-1");
+        event();
+        next.last = "The host resolved the pending action and resumed the same external run; the harness did not store the answer body.";
+        return next;
+      case "matt-complete":
+        if (next.step !== "Matt skill" || next.status !== "running") return stop("no Matt skill can complete");
+        next.step = "ready for Ariadne";
+        next.owner = "harness";
+        add(next, "matt://receipt/succeeded-1", "file://matt/evidence.json@sha256:e1");
+        event();
+        next.last = "Matt supplied a schema-valid result and artifact pointer; workflow prose remains Matt-owned.";
+        return next;
+      case "direct-matt":
+        if (next.status !== "created") return stop("direct-use import starts a new attempt");
+        next.status = "running";
+        next.step = "ready for Ariadne";
+        next.owner = "harness";
+        next.directUse = true;
+        add(next, "matt://receipt/direct-1", "file://matt/direct-evidence.json@sha256:d1", "adapter://matt@sha256:matt1", "workspace://repo@rev:w1");
+        event();
+        next.last = "A directly invoked Matt skill entered orchestration later through pinned owner pointers; no interception or retroactive workflow ownership was required.";
+        return next;
+      case "ariadne-ingest":
+        if (next.step !== "ready for Ariadne") return stop("no Matt artifact is ready for handoff");
+        if (!has(next, "matt://receipt/") || !next.pointers.some(pointer => pointer.includes("evidence.json@sha256:"))) {
+          next.status = "failed";
+          next.protocolError = "Ariadne rejected a missing or invalid Matt evidence receipt";
+          next.last = "Ariadne failed closed before graph mutation.";
+          return next;
+        }
+        next.owner = "ariadne";
+        next.step = "Ariadne ingest";
+        add(next, "ariadne://receipt/ingest-1", "ariadne://graph/rev-g2");
+        next.status = "succeeded";
+        event();
+        next.last = "Ariadne normalized the eligible artifact through its existing ingest boundary and returned graph-revision pointers.";
+        return next;
+      case "cancel":
+        if (next.status !== "running") return stop("only running owner work can receive cancellation intent");
+        next.cancellation = "requested";
+        next.status = "waiting";
+        next.pendingAction = "host://pending/cancel-1";
+        add(next, "harness://cancel-intent/1");
+        event();
+        next.last = "The harness forwarded cancellation intent. It did not claim that the host process stopped or undo any owner effect.";
+        return next;
+      case "cancel-ack":
+        if (next.cancellation !== "requested") return stop("no cancellation is pending");
+        if (next.effect === "ambiguous") return stop("owner inspection is required before terminal cancellation");
+        next.cancellation = "acknowledged";
+        next.pendingAction = "none";
+        next.status = "canceled";
+        add(next, "host://receipt/canceled-1");
+        event();
+        next.last = "The host issued the terminal cancellation receipt; no compensation was inferred.";
+        return next;
+      case "ambiguous-effect":
+        if (next.status !== "running") return stop("an active owner operation is required");
+        next.effect = "ambiguous";
+        next.status = "waiting";
+        next.pendingAction = "owner://pending/inspect-effect-1";
+        add(next, "owner://effect/ambiguous-1");
+        event();
+        next.last = "Process loss occurred after an external effect but before its receipt; retries stopped.";
+        return next;
+      case "inspect-effect":
+        if (next.effect !== "ambiguous") return stop("no ambiguous effect needs inspection");
+        next.effect = "committed";
+        next.pendingAction = next.cancellation === "requested" ? "host://pending/cancel-1" : "none";
+        next.status = next.cancellation === "requested" ? "waiting" : "running";
+        add(next, "owner://receipt/effect-committed-1");
+        event();
+        next.last = "The owner resolved effect ambiguity by receipt; the harness still did not replay or compensate it.";
+        return next;
+      case "auto-replay":
+        next.protocolError = "an ambiguous effect was automatically replayed";
+        next.effect = "duplicated";
+        next.status = "failed";
+        next.pendingAction = "none";
+        next.last = "The adapter violated the replay contract.";
+        return next;
+      case "invalid-receipt":
+        if (next.step !== "Matt skill") return stop("no Matt result is active");
+        next.step = "ready for Ariadne";
+        next.owner = "harness";
+        add(next, "file://matt/evidence.json@sha256:bad");
+        next.last = "Matt returned an artifact pointer without an owner receipt.";
+        return next;
+      case "unsupported":
+        next.status = "failed";
+        next.protocolError = "the requested owner operation is unsupported by the pinned adapter capability snapshot";
+        add(next, "adapter://diagnostic/unsupported-1");
+        next.last = "The adapter failed before owner execution and provided a diagnostic pointer.";
+        return next;
+      case "shadow-state":
+        next.shadowState = true;
+        next.last = "The harness copied Matt ticket meaning and Ariadne node payloads into its attempt record.";
+        return next;
+      case "gate": {
+        const blockers = invalid(next);
+        const terminal = ["succeeded", "canceled"].includes(next.status);
+        next.verdict = blockers.length || !terminal ? "rejected" : "passed";
+        next.last = next.verdict === "passed"
+          ? `Contract passed with terminal owner status ${next.status} and pointer-only state.`
+          : `Contract rejected: ${[...blockers, ...(!terminal && !blockers.length ? ["no valid terminal owner outcome exists"] : [])].join("; ")}.`;
+        return next;
+      }
+      default: return stop(`unknown action ${action}`);
+    }
+  };
+
+  const happy = ["start", "ariadne-preflight", "matt-start", "matt-complete", "ariadne-ingest", "gate"];
+  const hitl = ["start", "ariadne-preflight", "matt-start", "matt-wait", "matt-resume", "matt-complete", "ariadne-ingest", "gate"];
+  const direct = ["direct-matt", "ariadne-ingest", "gate"];
+  const canceled = ["start", "ariadne-preflight", "matt-start", "cancel", "cancel-ack", "gate"];
+  const inspectCancel = ["start", "ariadne-preflight", "matt-start", "ambiguous-effect", "inspect-effect", "cancel", "cancel-ack", "gate"];
+  const selfCheck = () => {
+    const run = actions => actions.reduce(advance, initial());
+    const passing = [happy, hitl, direct, canceled, inspectCancel].map(run);
+    const invalidReceipt = run(["start", "ariadne-preflight", "matt-start", "invalid-receipt", "ariadne-ingest", "gate"]);
+    const unsupported = run(["unsupported", "gate"]);
+    const replay = run(["start", "ariadne-preflight", "matt-start", "ambiguous-effect", "auto-replay", "gate"]);
+    const shadow = run([...happy.slice(0, -1), "shadow-state", "gate"]);
+    if (passing.some(state => state.verdict !== "passed") || [invalidReceipt, unsupported, replay, shadow].some(state => state.verdict !== "rejected")) throw new Error("adapter contract invariant failed");
+    return "9 deterministic paths passed";
+  };
+
+  return { advance, happy, hitl, direct, canceled, inspectCancel, initial, invalid, selfCheck };
+})();
+</script>
+
+<script>
+const scenarios = [
+  { name: "Coordinated happy path", note: "Ariadne prepares the substrate, Matt produces a receipted artifact, and Ariadne alone mutates the graph.", actions: AdapterPrototype.happy },
+  { name: "HITL wait and resume", note: "The human prompt and answer stay with the host; the harness persists only resolvable pending-action and receipt pointers.", actions: AdapterPrototype.hitl },
+  { name: "Direct Matt use", note: "A directly invoked Matt skill joins later through a pinned receipt and artifact pointer; the harness never intercepts direct use.", actions: AdapterPrototype.direct },
+  { name: "Cancellation handshake", note: "Cancellation intent is not terminal until the host adapter returns a cancellation receipt.", actions: AdapterPrototype.canceled },
+  { name: "Inspected effect then cancel", note: "An ambiguous external effect is inspected by its owner before cancellation can become terminal.", actions: AdapterPrototype.inspectCancel },
+  { name: "Invalid Matt receipt", note: "An artifact without an owner receipt cannot be promoted through the Ariadne handoff.", actions: ["start", "ariadne-preflight", "matt-start", "invalid-receipt", "ariadne-ingest", "gate"] },
+  { name: "Unsupported capability", note: "Capability mismatch fails before execution and returns a diagnostic pointer.", actions: ["unsupported", "gate"] },
+  { name: "Ambiguous auto-replay", note: "Replaying an effect whose completion is unknown violates the adapter contract.", actions: ["start", "ariadne-preflight", "matt-start", "ambiguous-effect", "auto-replay", "gate"] },
+  { name: "Shadow semantic state", note: "Copying Matt workflow meaning or Ariadne graph payloads into the harness creates a second owner and is rejected.", actions: [...AdapterPrototype.happy.slice(0, -1), "shadow-state", "gate"] }
+];
+
+let state = AdapterPrototype.initial();
+let selectedScenario = 0;
+let scenarioStep = 0;
+const selfCheck = AdapterPrototype.selfCheck();
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+
+function render() {
+  const blockers = AdapterPrototype.invalid(state);
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>Lifecycle</strong>Status: <span class="${state.verdict === "passed" ? "ok" : state.verdict === "rejected" ? "bad" : "warn"}">${esc(state.status)}</span><br>Step: ${esc(state.step)}<br>Owner: ${esc(state.owner)}<br>Verdict: ${esc(state.verdict)}</div>
+      <div class="card"><strong>Boundary state</strong>Direct use: ${state.directUse ? "yes" : "no"}<br>Pending: <code>${esc(state.pendingAction)}</code><br>Effect: ${esc(state.effect)}<br>Cancellation: ${esc(state.cancellation)}<br>Cursor: ${state.eventCursor}</div>
+      <div class="card"><strong>Stored references</strong>${state.pointers.length ? state.pointers.map(pointer => `<code>${esc(pointer)}</code>`).join("<br>") : "none"}</div>
+      <div class="card"><strong>Contract blockers</strong>${blockers.length ? `<ul>${blockers.map(blocker => `<li>${esc(blocker)}</li>`).join("")}</ul>` : '<span class="ok">none</span>'}</div>
+    </div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>
+    <p><strong>Prototype self-check:</strong> <span class="ok">${esc(selfCheck)}</span></p>`;
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = AdapterPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = AdapterPrototype.initial();
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `<p>${esc(scenario.note)}</p>${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(action.replaceAll("-", " "))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = AdapterPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+render();
+</script>
+</html>

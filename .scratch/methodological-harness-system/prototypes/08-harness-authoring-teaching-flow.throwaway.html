@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway harness-authoring teaching-flow prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #222a35; background: #f4f6f8; }
+  body { max-width: 1120px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .35rem; }
+  h2 { margin-top: 0; }
+  .note { max-width: 90ch; color: #5c6674; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d6dce3; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f7f9fb; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #7f8ca0; border-radius: 8px; background: #edf2f7; cursor: pointer; }
+  button:hover { background: #e0e8f1; }
+  button:disabled { cursor: default; opacity: .5; }
+  .tabs button[aria-selected="true"] { color: white; background: #395b80; }
+  .ok { color: #176b39; }
+  .bad { color: #a13227; }
+  .warn { color: #8a5b08; }
+  code { overflow-wrap: anywhere; }
+  ul { margin: .35rem 0; padding-left: 1.25rem; }
+</style>
+
+<h1>PROTOTYPE — Harness authoring teaching flow</h1>
+<p class="note">Question: can one failure-driven, source-pinned lesson teach a fresh session to test the thin baseline, place each responsibility with its existing owner, add only triggered harness mechanisms, recover safely, validate lifecycle outcomes, and preserve an acyclic staged self-application route?</p>
+
+<section class="panel">
+  <h2>Current attempt</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="reset">Reset</button>
+  <button data-action="task">Start cross-session review task</button>
+  <button data-action="small-task">Start single-session read-only task</button>
+  <button data-action="pin">Pin method and research sources</button>
+  <button data-action="requirements">Write outcome tests first</button>
+  <button data-action="owners">Place responsibilities</button>
+  <button data-action="baseline">Run the thin baseline</button>
+  <button data-action="select">Select the smallest candidate</button>
+  <button data-action="triggers">Apply observed mechanism triggers</button>
+  <button data-action="contract">Write the artifact contract</button>
+  <button data-action="inject">Inject an ambiguous side effect</button>
+  <button data-action="recover">Resolve without replay</button>
+  <button data-action="evaluate">Run lifecycle fixtures</button>
+  <button data-action="lifecycle">Record pins and deletion rule</button>
+  <button data-action="explain">Answer why prompts</button>
+  <button data-action="fade">Complete faded case</button>
+  <button data-action="transfer">Route self-application transfer</button>
+  <button data-action="gate">Attempt completion</button>
+  <button data-action="shadow">Copy owner state into the harness</button>
+  <button data-action="replay">Automatically replay the ambiguous effect</button>
+  <button data-action="drift">Discard a source pin</button>
+  <button data-action="recurse">Invoke the active builder at runtime</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const HarnessTeachingPrototype = (() => {
+  const kernelFeatures = [
+    "content-addressed context manifest",
+    "repository-visible attempt cursor",
+    "closed artifact and receipt gates",
+    "host capability adapter",
+    "pending approval pointer",
+    "idempotency and replay declaration",
+    "normalized lifecycle and trace correlation",
+    "version and digest pin gate"
+  ];
+
+  const initial = () => ({
+    phase: "not started",
+    taskClass: "none",
+    pins: false,
+    requirements: [],
+    ownersPlaced: false,
+    baselineTested: false,
+    baselineFailures: [],
+    candidate: "unselected",
+    features: [],
+    artifactContract: false,
+    ambiguousEffect: false,
+    recoveryPracticed: false,
+    evaluated: false,
+    lifecycle: false,
+    selfExplanation: false,
+    fadedCase: false,
+    transferCase: false,
+    shadowState: false,
+    duplicateEffect: false,
+    pinDrift: false,
+    runtimeRecursion: false,
+    status: "learning",
+    last: "No harness-authoring task has been presented."
+  });
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const requiresKernel = state => state.baselineFailures.length > 0;
+  const blockers = state => [
+    state.taskClass === "none" && "the meaningful harness task was not attempted",
+    !state.pins && "guide, Method Contract, teaching-skill, and research digests are not pinned",
+    !state.requirements.length && "observable outcome and failure tests are missing",
+    !state.ownersPlaced && "owner boundaries are missing",
+    !state.baselineTested && "the thin baseline was not tested",
+    state.candidate === "unselected" && "no candidate verdict exists",
+    requiresKernel(state) && state.features.length !== kernelFeatures.length && "one or more observed kernel triggers are unsatisfied",
+    !requiresKernel(state) && state.features.length > 0 && "unneeded kernel mechanisms survived trimming",
+    !state.artifactContract && "the pointer-only artifact contract is missing",
+    requiresKernel(state) && !state.recoveryPracticed && "ambiguous-effect recovery was not practiced",
+    !state.evaluated && "lifecycle fixtures were not evaluated",
+    !state.lifecycle && "version, review, and deletion triggers are missing",
+    !state.selfExplanation && "self-explanation prompts are unanswered",
+    !state.fadedCase && "the faded case is unfinished",
+    !state.transferCase && "the staged self-application transfer is unfinished",
+    state.shadowState && "the harness copied owner state",
+    state.duplicateEffect && "an ambiguous side effect was automatically replayed",
+    state.pinDrift && "derived state no longer matches the pinned sources",
+    state.runtimeRecursion && "the runtime invokes its active builder"
+  ].filter(Boolean);
+
+  const advance = (state, action) => {
+    const next = copy(state);
+    const stop = message => { next.last = `Stopped: ${message}.`; return next; };
+    switch (action) {
+      case "reset": return initial();
+      case "task":
+        next.taskClass = "cross-session";
+        next.phase = "meaningful task";
+        next.last = "Design the smallest harness that resumes a dependency-review method after process loss, preserves an approval wait, and never duplicates an ambiguous publication effect.";
+        return next;
+      case "small-task":
+        next.taskClass = "single-session";
+        next.phase = "meaningful task";
+        next.last = "Design support for one read-only, single-session contract validation with no pause, external effect, or host variation.";
+        return next;
+      case "pin":
+        if (next.taskClass === "none") return stop("start with a harness task");
+        next.pins = true;
+        next.phase = "sources pinned";
+        next.last = "Pinned G_n, M_n, MA_n, the harness research snapshot, workspace revision, and host capability record by version and digest.";
+        return next;
+      case "requirements":
+        if (!next.pins) return stop("pin the normative and research sources first");
+        next.requirements = next.taskClass === "cross-session"
+          ? ["cold start", "mid-run resume", "approval preservation", "no ambiguous replay", "artifact rejection", "pin rejection", "trace correlation"]
+          : ["contract validation"];
+        next.phase = "outcome tests";
+        next.last = "Defined repository-observable pass and fail outcomes before choosing a runtime shape.";
+        return next;
+      case "owners":
+        if (!next.requirements.length) return stop("define outcome tests before placing mechanisms");
+        next.ownersPlaced = true;
+        next.phase = "ownership boundary";
+        next.last = "Method owns rules; Ariadne owns epistemic state; tracker owns work; host owns model, tools, sandbox, approvals, and native traces; harness may own only attempt pointers and generic gates.";
+        return next;
+      case "baseline":
+        if (!next.ownersPlaced) return stop("place owner boundaries before testing candidates");
+        next.baselineTested = true;
+        next.baselineFailures = next.taskClass === "cross-session" ? ["mid-run resume", "ambiguous side effect"] : [];
+        next.phase = "baseline measured";
+        next.last = next.baselineFailures.length
+          ? "The thin package passed cold loading but could not enforce reset continuity or resolve an ambiguous side effect without hidden human memory."
+          : "The thin package satisfied the only required read-only contract check; a kernel has no remaining job.";
+        return next;
+      case "select":
+        if (!next.baselineTested) return stop("test the thin baseline before selecting a candidate");
+        next.candidate = requiresKernel(next) ? "minimal neutral kernel" : "thin baseline";
+        next.phase = "candidate selected";
+        next.last = requiresKernel(next)
+          ? "Selected the minimal neutral kernel; the host-specific plugin failed the host-neutral requirement and the reference-only package failed resume and replay requirements."
+          : "Selected the thin baseline and deleted the proposed kernel because no required behavior remained.";
+        return next;
+      case "triggers":
+        if (next.candidate === "unselected") return stop("select a candidate after the baseline result");
+        next.features = requiresKernel(next) ? [...kernelFeatures] : [];
+        next.phase = "triggered mechanisms";
+        next.last = requiresKernel(next)
+          ? "Added one mechanism for each observed continuation, artifact, host, approval, replay, trace, and pin requirement."
+          : "No runtime mechanism fired; the lesson records the trimmed baseline verdict.";
+        return next;
+      case "contract":
+        if (next.candidate === "unselected") return stop("select the smallest candidate first");
+        if (requiresKernel(next) && next.features.length !== kernelFeatures.length) return stop("apply the observed mechanism triggers first");
+        next.artifactContract = true;
+        next.phase = "artifact contract";
+        next.last = "Defined source pins, ordered context pointers, attempt cursor, artifact envelopes, pending-action references, normalized events, owner receipts, and completion predicates without copied owner payloads.";
+        return next;
+      case "inject":
+        if (!next.artifactContract || !requiresKernel(next)) return stop("the cross-session kernel contract must exist before failure injection");
+        next.ambiguousEffect = true;
+        next.phase = "waiting for inspection";
+        next.last = "Process loss followed dependency-review publication but preceded its receipt; the attempt remains waiting and records an ambiguous-effect pointer.";
+        return next;
+      case "recover":
+        if (!next.ambiguousEffect) return stop("recovery requires an observed ambiguous effect");
+        next.ambiguousEffect = false;
+        next.recoveryPracticed = true;
+        next.phase = "recovered";
+        next.last = "The owner inspected the external effect, attached its receipt, and resumed without automatic replay.";
+        return next;
+      case "evaluate":
+        if (!next.artifactContract) return stop("write the artifact contract before evaluating it");
+        if (requiresKernel(next) && !next.recoveryPracticed) return stop("practice ambiguous-effect recovery before the evaluation pass");
+        next.evaluated = true;
+        next.phase = "evaluated";
+        next.last = requiresKernel(next)
+          ? "Cold start, mid-run reset, approval reset, ambiguous effect, corrupt artifact, pin drift, and adapter conformance fixtures produced the expected repository outcomes."
+          : "The read-only baseline passed its contract fixture and the proposed kernel remained absent.";
+        return next;
+      case "lifecycle":
+        if (!next.evaluated) return stop("evaluate repository outcomes before locking lifecycle guidance");
+        next.lifecycle = true;
+        next.phase = "lifecycle recorded";
+        next.last = "Recorded owner, pins, review triggers, feedback, compatibility, retirement, and the rule to inline or delete the kernel when the thin baseline satisfies all hard invariants.";
+        return next;
+      case "explain":
+        if (!next.lifecycle) return stop("complete the worked design before self-explanation");
+        next.selfExplanation = true;
+        next.phase = "explained";
+        next.last = "Explained every ownership boundary, trigger, stop, retry decision, trace field, and why the baseline result controls whether a kernel exists.";
+        return next;
+      case "fade":
+        if (!next.selfExplanation) return stop("explain the complete example before fading support");
+        next.fadedCase = true;
+        next.phase = "faded practice";
+        next.last = "Completed a partially supplied issue-triage harness design with the owner map, candidate verdict, recovery policy, and lifecycle decision withheld.";
+        return next;
+      case "transfer":
+        if (!next.fadedCase) return stop("complete the faded case first");
+        next.transferCase = true;
+        next.phase = "staged transfer";
+        next.last = "Routed HA_n to build OH_n, then OH_n to two isolated applications of M_n; the active skill and harness never invoke or rewrite their builders.";
+        return next;
+      case "shadow":
+        next.shadowState = true;
+        next.last = "Copied Ariadne claims, tracker status, and host approval state into the harness ledger.";
+        return next;
+      case "replay":
+        next.duplicateEffect = true;
+        next.ambiguousEffect = false;
+        next.last = "Automatically retried publication without an owner replay declaration or inspection receipt.";
+        return next;
+      case "drift":
+        next.pinDrift = true;
+        next.pins = false;
+        next.last = "Removed the Method Contract digest while retaining derived run and artifact records.";
+        return next;
+      case "recurse":
+        next.runtimeRecursion = true;
+        next.last = "Configured OH_n to invoke HA_n during its own active self-application round.";
+        return next;
+      case "gate": {
+        const reasons = blockers(next);
+        next.status = reasons.length ? "rejected" : next.candidate === "thin baseline" ? "trimmed" : "independent";
+        next.phase = reasons.length ? "blocked" : "complete";
+        next.last = reasons.length
+          ? `Completion rejected: ${reasons.join("; ")}.`
+          : next.candidate === "thin baseline"
+            ? "Completion passed with no new kernel: the baseline satisfies every hard requirement."
+            : "Completion passed: one minimal owner-safe harness design, recovered failure, lifecycle evaluation, faded case, and acyclic transfer.";
+        return next;
+      }
+      default: return stop(`unknown action ${action}`);
+    }
+  };
+
+  const fullActions = ["task", "pin", "requirements", "owners", "baseline", "select", "triggers", "contract", "inject", "recover", "evaluate", "lifecycle", "explain", "fade", "transfer"];
+  const thinActions = ["small-task", "pin", "requirements", "owners", "baseline", "select", "triggers", "contract", "evaluate", "lifecycle", "explain", "fade", "transfer"];
+  const selfCheck = () => {
+    const run = actions => actions.reduce(advance, initial());
+    const complete = advance(run(fullActions), "gate");
+    const thin = advance(run(thinActions), "gate");
+    const shadow = advance(run([...fullActions, "shadow"]), "gate");
+    const replay = advance(run([...fullActions.slice(0, 9), "replay", ...fullActions.slice(10)]), "gate");
+    const drift = advance(run([...fullActions, "drift"]), "gate");
+    const recursive = advance(run([...fullActions, "recurse"]), "gate");
+    if (complete.status !== "independent" || thin.status !== "trimmed" || [shadow, replay, drift, recursive].some(state => state.status !== "rejected")) throw new Error("harness-authoring teaching invariant failed");
+    return "6 deterministic paths passed";
+  };
+
+  return { advance, blockers, initial, selfCheck, fullActions, thinActions };
+})();
+</script>
+
+<script>
+const scenarios = [
+  {
+    name: "Complete recovered path",
+    note: "A cross-session dependency-review task fails the thin baseline, adds only triggered kernel duties, survives an ambiguous effect, and transfers through the acyclic bootstrap.",
+    actions: [...HarnessTeachingPrototype.fullActions, "gate"]
+  },
+  {
+    name: "Thin baseline suffices",
+    note: "A read-only single-session task keeps the thin package and removes the proposed kernel because no lifecycle invariant requires it.",
+    actions: [...HarnessTeachingPrototype.thinActions, "gate"]
+  },
+  {
+    name: "Shadow owner state",
+    note: "Copying tracker, Ariadne, or host approval state into the harness violates single ownership even when the ordinary path passes.",
+    actions: [...HarnessTeachingPrototype.fullActions, "shadow", "gate"]
+  },
+  {
+    name: "Ambiguous replay",
+    note: "A crash after a side effect must remain waiting for inspection; automatic replay is rejected.",
+    actions: [...HarnessTeachingPrototype.fullActions.slice(0, 9), "replay", ...HarnessTeachingPrototype.fullActions.slice(10), "gate"]
+  },
+  {
+    name: "Pin drift",
+    note: "Derived attempt and artifact state fails closed when its Method Contract digest disappears.",
+    actions: [...HarnessTeachingPrototype.fullActions, "drift", "gate"]
+  },
+  {
+    name: "Runtime recursion",
+    note: "The active harness cannot call its authoring skill during the same self-application round.",
+    actions: [...HarnessTeachingPrototype.fullActions, "recurse", "gate"]
+  }
+];
+
+let state = HarnessTeachingPrototype.initial();
+let selectedScenario = 0;
+let scenarioStep = 0;
+const selfCheck = HarnessTeachingPrototype.selfCheck();
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+
+function render() {
+  const blockers = HarnessTeachingPrototype.blockers(state);
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>Learning state</strong>Phase: ${esc(state.phase)}<br>Status: <span class="${state.status === "independent" || state.status === "trimmed" ? "ok" : state.status === "rejected" ? "bad" : "warn"}">${esc(state.status)}</span></div>
+      <div class="card"><strong>Sources and task</strong>Task: ${esc(state.taskClass)}<br>Pins: ${state.pins ? "valid" : "missing"}<br>Baseline: ${state.baselineTested ? state.baselineFailures.length ? "failed required invariants" : "passed" : "not run"}</div>
+      <div class="card"><strong>Candidate</strong>${esc(state.candidate)}<br>${state.features.length ? state.features.map(item => `<code>${esc(item)}</code>`).join("<br>") : "no kernel mechanisms"}</div>
+      <div class="card"><strong>Practice</strong>Recovery: ${state.recoveryPracticed ? "yes" : "no"}<br>Evaluation: ${state.evaluated ? "yes" : "no"}<br>Lifecycle: ${state.lifecycle ? "yes" : "no"}<br>Faded: ${state.fadedCase ? "yes" : "no"}<br>Transfer: ${state.transferCase ? "yes" : "no"}</div>
+    </div>
+    <div class="card"><strong>Outcome requirements</strong>${state.requirements.length ? state.requirements.map(item => `<code>${esc(item)}</code>`).join(" · ") : "none"}</div>
+    <div class="card"><strong>Completion blockers</strong>${blockers.length ? `<ul>${blockers.map(item => `<li>${esc(item)}</li>`).join("")}</ul>` : '<span class="ok">none</span>'}</div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>
+    <p><strong>Prototype self-check:</strong> <span class="ok">${esc(selfCheck)}</span></p>`;
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = HarnessTeachingPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = HarnessTeachingPrototype.initial();
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `
+    <p>${esc(scenario.note)}</p>
+    ${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(action.replaceAll("-", " "))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = HarnessTeachingPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+render();
+</script>
+</html>

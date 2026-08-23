@@ -30,3 +30,4 @@ export * from "./gates/epistemic-gate.js";
 export * from "./harness/controller.js";
 export * from "./multiagent/delta.js";
 export * from "./multiagent/worktree-manager.js";
+export * from "./method-contract/index.js";

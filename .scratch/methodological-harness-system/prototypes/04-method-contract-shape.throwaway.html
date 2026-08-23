@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway Method Contract shape prototype</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.45 system-ui, sans-serif; color: #17211b; background: #f4f6f3; }
+  body { max-width: 980px; margin: 0 auto; padding: 2rem; }
+  h1 { margin-bottom: .35rem; }
+  .note { color: #526057; max-width: 76ch; }
+  .panel { background: white; border: 1px solid #d5ddd7; border-radius: 12px; padding: 1rem; margin: 1rem 0; }
+  button { border: 1px solid #789583; border-radius: 8px; background: #eaf3ed; padding: .55rem .8rem; margin: .2rem; cursor: pointer; }
+  button:hover { background: #dcecdf; }
+  .tabs button[aria-selected="true"] { background: #245c3b; color: white; }
+  .ok { color: #176c3a; }
+  .bad { color: #a33226; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f8f6; padding: .8rem; border-radius: 8px; }
+  ul { padding-left: 1.25rem; }
+</style>
+
+<h1>PROTOTYPE — compact Method Contract</h1>
+<p class="note">Question: can one readable, versioned JSON manifest use standard JSON Schema fragments to represent A0 and A1–A7, conditional obligations, completion gates, verification hooks, rationale pointers, and lifecycle metadata—without a prose parser, arbitrary callbacks, or a multi-file normative bundle?</p>
+
+<section class="panel">
+  <h2>Current result</h2>
+  <div id="summary"></div>
+  <pre id="state"></pre>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="pilot">Run A0-only pilot</button>
+  <button data-action="missing-a4">Trigger A4 but omit it</button>
+  <button data-action="add-a4">Add required A4</button>
+  <button data-action="meta-no-external">Check metamethod without external receipt</button>
+  <button data-action="meta-complete">Add external receipt</button>
+  <button data-action="bad-version">Use unsupported version</button>
+  <button data-action="bad-rationale">Remove rationale pointer</button>
+  <button data-action="compare">Compare representation candidates</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const MethodContractPrototype = (() => {
+  const objectWith = (...required) => ({ type: "object", required });
+
+  const artifactSchemas = {
+    A0: objectWith("user_and_situation", "action", "learning_path", "verification", "rationale_and_unknowns", "next_step"),
+    A1: objectWith("problem", "desired_outcome", "target_capability", "scope", "priority", "success_metrics", "assumptions_and_constraints"),
+    A2: objectWith("claims"),
+    A3: objectWith("roles", "prior_knowledge", "real_tasks", "work_context", "resources_and_constraints", "accessibility_and_equity", "user_participation"),
+    A4: objectWith("rules"),
+    A5: objectWith("meaningful_task", "worked_example", "decision_model", "self_explanation", "incomplete_example", "independent_task", "transfer_case"),
+    A6: objectWith("hypotheses", "pilot", "expert_review", "user_test", "transfer_test", "implementation", "decisions"),
+    A7: objectWith("ownership", "version", "review_triggers", "feedback", "deviations", "distribution", "history")
+  };
+
+  const expansionSignals = {
+    A1: "purpose_sprawl",
+    A2: "rationale_conflict",
+    A3: "audience_divergence",
+    A4: "branching_or_recovery",
+    A5: "transfer_needs_more_examples",
+    A6: "repeatable_verification_needed",
+    A7: "lifecycle_coordination_needed"
+  };
+
+  const contract = {
+    format: "method-contract/1",
+    id: "methodological-guide-authoring",
+    version: "1.0.0-draft",
+    status: "draft",
+    guide: { href: "docs/designing_methodological_guides.md", role: "rationale-and-provenance" },
+    artifacts: Object.fromEntries(Object.entries(artifactSchemas).map(([id, schema]) => [id, {
+      schema,
+      rationale_ref: id === "A0" ? "docs/designing_methodological_guides.md#working-card" : `docs/designing_methodological_guides.md#${id.toLowerCase()}`
+    }])),
+    rules: Object.entries(expansionSignals).map(([artifact, signal]) => ({
+      id: `expand-${artifact.toLowerCase()}`,
+      trigger: { target: "context", schema: { type: "object", properties: { signals: { type: "object", properties: { [signal]: { const: true } }, required: [signal] } }, required: ["signals"] } },
+      obligation: { require_artifacts: [artifact] },
+      output: { receipt: `artifact-valid:${artifact}` },
+      recovery: "complete-or-correct-required-artifact",
+      escalation: "stop-if-owner-or-evidence-is-missing",
+      rationale_ref: "docs/designing_methodological_guides.md#expansion-guide"
+    })),
+    completion_profiles: {
+      pilot: { require_artifacts: ["A0"], require_receipts: [] },
+      working: { require_artifacts: ["A0"], require_receipts: [] },
+      evidence_focused: { require_artifacts: ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"], require_receipts: ["external-verification"] },
+      metamethodological: { require_artifacts: ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"], require_receipts: ["external-verification", "audit-49", "leave-one-out", "fixed-point", "no-circular-validation"] }
+    },
+    verification_hooks: [
+      { id: "validate-artifact", on: "artifact.changed", check: "artifact-schema" },
+      { id: "refresh-obligations", on: "context.changed", check: "rule-triggers" },
+      { id: "gate-completion", on: "before.complete", check: "completion-profile" }
+    ],
+    lifecycle: {
+      owner: "method-owner",
+      compatibility: "declared-by-lifecycle-policy",
+      review_triggers: ["new-evidence", "recurring-error", "environment-change", "exception-accumulation", "metric-degradation", "new-audience"],
+      change_log: []
+    }
+  };
+
+  const sample = Object.fromEntries(Object.entries(artifactSchemas).map(([id, schema]) => [id, Object.fromEntries(schema.required.map(key => [key, {}]))]));
+
+  function matches(schema, value) {
+    if (schema.const !== undefined && value !== schema.const) return false;
+    if (schema.type === "object" && (!value || typeof value !== "object" || Array.isArray(value))) return false;
+    if (schema.required?.some(key => !(key in value))) return false;
+    return Object.entries(schema.properties || {}).every(([key, child]) => value[key] === undefined || matches(child, value[key]));
+  }
+
+  function validateContract(candidate) {
+    const problems = [];
+    if (candidate.format !== "method-contract/1") problems.push("unsupported contract format");
+    if (!candidate.id || !candidate.version || !candidate.guide?.href) problems.push("missing identity or guide pointer");
+    for (const [id, artifact] of Object.entries(candidate.artifacts || {})) {
+      if (!artifact.schema || !artifact.rationale_ref) problems.push(`${id} lacks schema or rationale pointer`);
+    }
+    for (const rule of candidate.rules || []) {
+      if (!rule.id || !rule.trigger?.schema || !rule.obligation || !rule.rationale_ref) problems.push(`${rule.id || "rule"} is incomplete`);
+    }
+    return problems;
+  }
+
+  function evaluate(candidate, fixture) {
+    const contractProblems = validateContract(candidate);
+    if (contractProblems.length) return { valid_contract: false, complete: false, problems: contractProblems, obligations: [] };
+    const obligations = candidate.rules
+      .filter(rule => matches(rule.trigger.schema, fixture[rule.trigger.target]))
+      .flatMap(rule => rule.obligation.require_artifacts.map(artifact => ({ rule: rule.id, artifact })));
+    const profile = candidate.completion_profiles[fixture.context.mode];
+    if (!profile) return { valid_contract: true, complete: false, problems: ["unknown completion profile"], obligations };
+    const requiredArtifacts = new Set([...profile.require_artifacts, ...obligations.map(item => item.artifact)]);
+    const problems = [];
+    for (const id of requiredArtifacts) {
+      if (!fixture.artifacts[id]) problems.push(`missing ${id}`);
+      else if (!matches(candidate.artifacts[id].schema, fixture.artifacts[id])) problems.push(`invalid ${id}`);
+    }
+    for (const receipt of profile.require_receipts) {
+      if (!fixture.receipts.includes(receipt)) problems.push(`missing receipt: ${receipt}`);
+    }
+    return { valid_contract: true, complete: problems.length === 0, problems, obligations };
+  }
+
+  function fixture(mode = "pilot") {
+    return { context: { mode, signals: {} }, artifacts: { A0: sample.A0 }, receipts: [] };
+  }
+
+  const scenarios = {
+    pilot: () => ({ contract, fixture: fixture("pilot") }),
+    "missing-a4": () => { const f = fixture("working"); f.context.signals.branching_or_recovery = true; return { contract, fixture: f }; },
+    "add-a4": () => { const f = fixture("working"); f.context.signals.branching_or_recovery = true; f.artifacts.A4 = sample.A4; return { contract, fixture: f }; },
+    "meta-no-external": () => { const f = fixture("metamethodological"); f.artifacts = { ...sample }; f.receipts = ["audit-49", "leave-one-out", "fixed-point", "no-circular-validation"]; return { contract, fixture: f }; },
+    "meta-complete": () => { const f = fixture("metamethodological"); f.artifacts = { ...sample }; f.receipts = ["external-verification", "audit-49", "leave-one-out", "fixed-point", "no-circular-validation"]; return { contract, fixture: f }; },
+    "bad-version": () => ({ contract: { ...contract, format: "method-contract/99" }, fixture: fixture("pilot") }),
+    "bad-rationale": () => { const broken = structuredClone(contract); delete broken.rules[0].rationale_ref; return { contract: broken, fixture: fixture("pilot") }; }
+  };
+
+  const candidates = [
+    { id: "schema-document", files: 1, atomic: true, standard_predicates: true, closed_obligations: false, reason: "needs custom JSON Schema keywords for procedure, hooks, and lifecycle" },
+    { id: "embedded-manifest", files: 1, atomic: true, standard_predicates: true, closed_obligations: true, reason: "passes all hard constraints with one small envelope vocabulary" },
+    { id: "module-bundle", files: 10, atomic: false, standard_predicates: true, closed_obligations: true, reason: "adds lock/digest-tree and partial-publication states without demonstrated need" }
+  ];
+
+  function compare() {
+    return candidates.map(candidate => ({ ...candidate, passes: candidate.atomic && candidate.files === 1 && candidate.standard_predicates && candidate.closed_obligations }));
+  }
+
+  function run(name) {
+    if (name === "compare") return { scenario: name, candidates: compare() };
+    const { contract: selected, fixture: input } = scenarios[name]();
+    return { scenario: name, ...evaluate(selected, input), context: input.context, present_artifacts: Object.keys(input.artifacts), receipts: input.receipts };
+  }
+
+  return { contract, run, scenarios: Object.keys(scenarios), compare };
+})();
+</script>
+
+<script>
+  const summary = document.querySelector("#summary");
+  const state = document.querySelector("#state");
+  const walkthrough = document.querySelector("#walkthrough");
+  const tabs = document.querySelector("#tabs");
+  const guides = {
+    "Expansion gate": ["missing-a4", "add-a4"],
+    "Metamethod release": ["meta-no-external", "meta-complete"],
+    "Fail closed": ["bad-version", "bad-rationale"],
+    "Candidate boundary": ["compare"]
+  };
+
+  function render(name) {
+    const result = MethodContractPrototype.run(name);
+    const ok = name === "compare" ? result.candidates.some(item => item.passes) : result.complete;
+    summary.innerHTML = `<strong class="${ok ? "ok" : "bad"}">${ok ? "PASS" : "STOP"}</strong> — ${name}`;
+    state.textContent = JSON.stringify(result, null, 2);
+  }
+
+  function selectGuide(label) {
+    document.querySelectorAll("#tabs button").forEach(button => button.setAttribute("aria-selected", button.textContent === label));
+    walkthrough.innerHTML = `<p>${label}: press each step and inspect the complete state above.</p>`;
+    guides[label].forEach(name => {
+      const button = document.createElement("button");
+      button.textContent = name;
+      button.onclick = () => render(name);
+      walkthrough.append(button);
+    });
+  }
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => render(button.dataset.action));
+  Object.keys(guides).forEach((label, index) => {
+    const button = document.createElement("button");
+    button.textContent = label;
+    button.setAttribute("aria-selected", index === 0);
+    button.onclick = () => selectGuide(label);
+    tabs.append(button);
+  });
+  selectGuide(Object.keys(guides)[0]);
+  render("pilot");
+</script>
+</html>

@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway kernel packaging and substrate prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #25313b; background: #f3f6f7; }
+  body { max-width: 1120px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .3rem; }
+  h2 { margin-top: 0; }
+  .note { max-width: 95ch; color: #596773; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d5dde2; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f5f8f9; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { padding: .55rem; border-bottom: 1px solid #dce3e7; text-align: left; vertical-align: top; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #788996; border-radius: 8px; background: #edf2f4; cursor: pointer; }
+  button:hover { background: #dfe9ed; }
+  button:disabled { cursor: default; opacity: .45; }
+  .tabs button[aria-selected="true"] { color: white; background: #2d6474; }
+  .ok { color: #16713b; }
+  .bad { color: #a33128; }
+  .warn { color: #8b5c08; }
+  code { overflow-wrap: anywhere; }
+  ul { margin: .35rem 0; padding-left: 1.2rem; }
+</style>
+
+<h1>PROTOTYPE — smallest neutral kernel</h1>
+<p class="note">Question: can one co-located, owner-neutral TypeScript module and a per-attempt file ledger provide atomic dispatch intent, fresh-process recovery, exact pins, and direct Matt/Ariadne use—without extending Ariadne’s epistemic controller or adding a package, daemon, database, queue, or scheduler? This models single-host repository operation only; the matched Clean-Session Run still decides whether even this kernel survives.</p>
+
+<section class="panel">
+  <h2>Candidate filter</h2>
+  <div id="candidates"></div>
+</section>
+
+<section class="panel">
+  <h2>Current packaging and attempt</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <div>
+    <button data-select="thin">Thin owner artifacts</button>
+    <button data-select="ariadne">Extend Ariadne controller</button>
+    <button data-select="colocated">Co-located neutral file kernel</button>
+    <button data-select="service">Standalone SQLite service</button>
+  </div>
+  <div>
+    <button data-action="reset">Reset attempt</button>
+    <button data-action="drift-pin">Drift a pin</button>
+    <button data-action="open">Open pinned attempt</button>
+    <button data-action="record-intent">Record dispatch intent</button>
+    <button data-action="concurrent-resume">Race another resumer</button>
+    <button data-action="dispatch">Invoke owner adapter</button>
+    <button data-action="crash">Crash after invocation</button>
+    <button data-action="resume">Resume in a fresh process</button>
+    <button data-action="owner-success">Attach owner success receipt</button>
+    <button data-action="corrupt-tail">Write a partial final record</button>
+    <button data-action="recover-tail">Recover the partial tail</button>
+    <button data-action="direct-use">Use Matt and Ariadne directly</button>
+    <button data-action="delete-kernel">Delete or inline the kernel</button>
+    <button data-action="gate">Run substrate gate</button>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const KernelPrototype = (() => {
+  const candidates = {
+    thin: {
+      name: "Thin owner-artifact baseline",
+      packaging: "No new module",
+      process: "Existing host session",
+      stack: "Existing owner tools",
+      location: "None",
+      ledger: "Owner receipts only",
+      lock: "None owned by the harness",
+      neutral: true, atomic: false, noExtraInfrastructure: true, directUse: true, removable: true,
+      note: "Smallest, but no repository-owned compare-and-append serializes two fresh resumers. Keep as the mandatory Rung 6 deletion test."
+    },
+    ariadne: {
+      name: "Extend AriadneHarnessController",
+      packaging: "Existing Ariadne module",
+      process: "In-process",
+      stack: "Node 20 + TypeScript + Zod",
+      location: "src/harness/controller.ts",
+      ledger: ".ariadne/GRAPH.jsonl",
+      lock: "Existing graph directory lock",
+      neutral: false, atomic: true, noExtraInfrastructure: true, directUse: true, removable: false,
+      note: "Atomic, but attempt state becomes Ariadne epistemic state and cannot be removed independently."
+    },
+    colocated: {
+      name: "Co-located neutral file kernel",
+      packaging: "One internal module; no new package",
+      process: "In-process or one-shot CLI; no daemon",
+      stack: "Node 20 + TypeScript + Zod + fs/promises",
+      location: "src/orchestration/",
+      ledger: ".orchestration/attempts/<id>.jsonl",
+      lock: "Per-attempt mkdir lock + expected revision + temp rewrite + same-volume rename",
+      neutral: true, atomic: true, noExtraInfrastructure: true, directUse: true, removable: true,
+      note: "Reuses the repository’s proven storage pattern while keeping orchestration state out of Ariadne’s graph."
+    },
+    service: {
+      name: "Standalone SQLite kernel service",
+      packaging: "New package, process, API, and database",
+      process: "Long-running daemon",
+      stack: "Node 20 + TypeScript + SQLite",
+      location: "New workspace package and database",
+      ledger: "SQLite tables and migrations",
+      lock: "Database transaction",
+      neutral: true, atomic: true, noExtraInfrastructure: false, directUse: true, removable: false,
+      note: "Correctness is plausible, but v1 has no cross-host requirement that pays for its service and migration lifecycle."
+    }
+  };
+
+  const candidateBlockers = candidate => [
+    !candidate.neutral && "attempt state is not owner-neutral",
+    !candidate.atomic && "no owned atomic dispatch-intent transaction",
+    !candidate.noExtraInfrastructure && "adds unproven service or database infrastructure",
+    !candidate.directUse && "direct owner use is intercepted",
+    !candidate.removable && "cannot be deleted or inlined independently"
+  ].filter(Boolean);
+
+  const initial = (candidateId = "colocated") => ({
+    candidateId,
+    status: "idle",
+    path: "normal",
+    revision: 0,
+    pinsValid: true,
+    durableIntent: false,
+    intentCount: 0,
+    ownerInvocations: 0,
+    lockConflicts: 0,
+    duplicateDispatch: false,
+    effect: "none",
+    pendingAction: "none",
+    partialTail: false,
+    recoveredTail: false,
+    directUsePreserved: true,
+    kernelPresent: candidateId !== "thin",
+    pointers: [],
+    ledger: [],
+    reason: "none",
+    verdict: "untested",
+    last: "No attempt action has run."
+  });
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const addPointer = (state, pointer) => { if (!state.pointers.includes(pointer)) state.pointers.push(pointer); };
+  const append = (state, event) => { state.revision += 1; state.ledger.push(`${state.revision}: ${event}`); };
+
+  const advance = (state, action) => {
+    if (action.startsWith("select:")) return initial(action.slice(7));
+    if (action === "reset") return initial(state.candidateId);
+    const next = copy(state);
+    const candidate = candidates[next.candidateId];
+    const stop = message => { next.last = `Stopped: ${message}.`; return next; };
+
+    switch (action) {
+      case "drift-pin":
+        if (next.status !== "idle") return stop("pins are immutable after opening");
+        next.pinsValid = false;
+        next.path = "pin rejection";
+        next.last = "The adapter digest no longer matches the Tested Release Bundle.";
+        return next;
+      case "open":
+        if (next.status !== "idle") return stop("the attempt is already open");
+        if (!next.pinsValid) {
+          next.status = "failed";
+          next.reason = "pin mismatch before dispatch";
+          next.last = "The kernel rejected the attempt before writing intent or invoking an owner.";
+          return next;
+        }
+        next.status = "opened";
+        addPointer(next, "bundle://b_1@sha256:bundle1");
+        addPointer(next, "adapter://owner@sha256:adapter1");
+        if (candidate.atomic) append(next, "attempt.opened (pins and pointers only)");
+        next.last = candidate.atomic
+          ? "A revisioned attempt was recorded in the candidate ledger."
+          : "Owner artifacts were read, but no neutral attempt revision was persisted.";
+        return next;
+      case "record-intent":
+        if (next.status !== "opened") return stop("open the attempt first");
+        next.intentCount += 1;
+        next.durableIntent = candidate.atomic;
+        next.status = "intent recorded";
+        if (candidate.atomic) append(next, "dispatch.intent step-1 expected-revision");
+        next.last = candidate.atomic
+          ? "Dispatch intent is durable before owner invocation."
+          : "Intent exists only in this host session and disappears on restart.";
+        return next;
+      case "concurrent-resume":
+        if (next.status !== "intent recorded") return stop("record one intent before racing resumers");
+        next.path = "concurrent resumers";
+        if (candidate.atomic && next.durableIntent) {
+          next.lockConflicts += 1;
+          next.last = "The competing resumer lost the per-attempt revision race and observed the existing intent.";
+        } else {
+          next.intentCount += 1;
+          next.ownerInvocations = 2;
+          next.duplicateDispatch = true;
+          next.status = "failed";
+          next.reason = "two sessions advanced the same step";
+          next.last = "Without a neutral transaction, both fresh sessions treated the step as undispatched.";
+        }
+        return next;
+      case "dispatch":
+        if (next.status !== "intent recorded") return stop("a durable or session-local intent is required");
+        next.ownerInvocations += 1;
+        next.status = "owner running";
+        next.effect = "unknown";
+        next.last = "The host invoked the owner adapter after intent recording.";
+        return next;
+      case "crash":
+        if (next.status !== "owner running") return stop("no owner invocation can be interrupted");
+        next.path = "crash recovery";
+        next.status = "waiting";
+        next.effect = "ambiguous";
+        next.pendingAction = "owner://inspect/effect-1";
+        next.last = "The process disappeared after invocation and before an owner effect receipt.";
+        return next;
+      case "resume":
+        if (next.status !== "waiting") return stop("no crashed attempt is waiting");
+        if (candidate.atomic && next.durableIntent) {
+          next.last = "The fresh process materialized the durable intent and kept the attempt waiting for owner inspection; it did not redispatch.";
+        } else {
+          next.ownerInvocations += 1;
+          next.duplicateDispatch = true;
+          next.status = "failed";
+          next.reason = "fresh process redispatched an ambiguous effect";
+          next.last = "The restart could not distinguish undispatched work from a lost receipt.";
+        }
+        return next;
+      case "owner-success":
+        if (!["owner running", "waiting"].includes(next.status)) return stop("no owner outcome is pending");
+        if (next.duplicateDispatch || next.ownerInvocations !== 1) return stop("duplicate invocation cannot become a valid success");
+        next.effect = "committed";
+        next.pendingAction = "none";
+        next.status = "succeeded";
+        addPointer(next, "owner://receipt/committed-1@sha256:r1");
+        if (candidate.atomic) append(next, "attempt.succeeded owner-receipt-pointer");
+        next.last = "An owner-issued receipt resolved the effect; no owner payload entered the ledger.";
+        return next;
+      case "corrupt-tail":
+        if (next.status !== "intent recorded") return stop("create a durable intent before corrupting its following record");
+        next.path = "partial tail recovery";
+        next.partialTail = true;
+        next.last = candidate.ledger.includes("jsonl")
+          ? "A simulated crash left one incomplete final JSONL record after the intact intent."
+          : "This candidate has no JSONL tail; the scenario is outside its storage model.";
+        return next;
+      case "recover-tail":
+        if (!next.partialTail) return stop("no partial tail exists");
+        if (next.candidateId === "colocated") {
+          next.partialTail = false;
+          next.recoveredTail = true;
+          next.last = "Recovery truncated only the incomplete final record and retained the durable dispatch intent.";
+        } else {
+          next.status = "failed";
+          next.reason = "candidate does not expose the required partial-tail recovery path";
+          next.last = "The selected substrate could not apply the repository’s JSONL recovery rule.";
+        }
+        return next;
+      case "direct-use":
+        next.path = "direct owner use";
+        next.status = "bypassed";
+        next.directUsePreserved = candidate.directUse;
+        next.last = "Matt and Ariadne ran through their own entry points; no orchestration ledger or graph interception occurred.";
+        return next;
+      case "delete-kernel":
+        next.path = "deletion";
+        if (candidate.removable) {
+          next.kernelPresent = false;
+          next.status = "removed";
+          next.directUsePreserved = true;
+          next.last = next.candidateId === "thin"
+            ? "There was no kernel to remove."
+            : "Removing src/orchestration and .orchestration leaves owner tools intact; a passing baseline may inline the remaining call seam.";
+        } else {
+          next.status = "failed";
+          next.reason = "kernel cannot be removed independently";
+          next.last = "Deletion also removes Ariadne integration or leaves a service/database lifecycle behind.";
+        }
+        return next;
+      case "gate": {
+        const blockers = candidateBlockers(candidate);
+        let pathPass = false;
+        if (next.path === "pin rejection") pathPass = next.status === "failed" && next.ownerInvocations === 0 && next.reason.includes("pin mismatch");
+        else if (next.path === "direct owner use") pathPass = next.status === "bypassed" && next.directUsePreserved;
+        else if (next.path === "deletion") pathPass = next.status === "removed" && !next.kernelPresent && next.directUsePreserved;
+        else pathPass = next.status === "succeeded" && next.ownerInvocations === 1 && !next.duplicateDispatch && !next.partialTail;
+        next.verdict = blockers.length === 0 && pathPass ? "passed" : "rejected";
+        next.last = next.verdict === "passed"
+          ? `Substrate passed the ${next.path} path.`
+          : `Substrate rejected: ${[...blockers, ...(!pathPass ? [`the ${next.path} path did not end safely`] : [])].join("; ")}.`;
+        return next;
+      }
+      default: return stop(`unknown action ${action}`);
+    }
+  };
+
+  const paths = {
+    happy: ["select:colocated", "open", "record-intent", "dispatch", "owner-success", "gate"],
+    crash: ["select:colocated", "open", "record-intent", "dispatch", "crash", "resume", "owner-success", "gate"],
+    race: ["select:colocated", "open", "record-intent", "concurrent-resume", "dispatch", "owner-success", "gate"],
+    pins: ["select:colocated", "drift-pin", "open", "gate"],
+    tail: ["select:colocated", "open", "record-intent", "corrupt-tail", "recover-tail", "dispatch", "owner-success", "gate"],
+    direct: ["select:colocated", "direct-use", "gate"],
+    deletion: ["select:colocated", "delete-kernel", "gate"],
+    thinRace: ["select:thin", "open", "record-intent", "concurrent-resume", "gate"],
+    ariadnePollution: ["select:ariadne", "open", "record-intent", "dispatch", "owner-success", "gate"],
+    serviceOverreach: ["select:service", "open", "record-intent", "dispatch", "owner-success", "gate"]
+  };
+
+  const selfCheck = () => {
+    const run = actions => actions.reduce(advance, initial());
+    const positive = [paths.happy, paths.crash, paths.race, paths.pins, paths.tail, paths.direct, paths.deletion].map(run);
+    const negative = [paths.thinRace, paths.ariadnePollution, paths.serviceOverreach].map(run);
+    const eligible = Object.entries(candidates).filter(([, candidate]) => candidateBlockers(candidate).length === 0).map(([id]) => id);
+    if (positive.some(state => state.verdict !== "passed")) throw new Error("positive substrate path failed");
+    if (negative.some(state => state.verdict !== "rejected")) throw new Error("ineligible substrate path passed");
+    if (eligible.length !== 1 || eligible[0] !== "colocated") throw new Error("candidate filter is not discriminating");
+    return "10 deterministic paths and 4 candidate filters passed";
+  };
+
+  return { advance, candidateBlockers, candidates, initial, paths, selfCheck };
+})();
+</script>
+
+<script>
+const scenarios = [
+  { name: "Happy path", note: "One-shot invocation persists intent before the owner call and stores only the terminal receipt pointer.", actions: KernelPrototype.paths.happy },
+  { name: "Crash after invocation", note: "A fresh process sees the durable intent and waits for the owner instead of redispatching an ambiguous effect.", actions: KernelPrototype.paths.crash },
+  { name: "Concurrent resumers", note: "Two processes target one revision; the per-attempt lock and expected revision admit one intent.", actions: KernelPrototype.paths.race },
+  { name: "Invalid pins", note: "A mismatched adapter digest fails before intent or owner invocation.", actions: KernelPrototype.paths.pins },
+  { name: "Partial JSONL tail", note: "Recovery drops only the incomplete final record and preserves the earlier intent.", actions: KernelPrototype.paths.tail },
+  { name: "Direct owner use", note: "Matt and Ariadne remain callable without the neutral module.", actions: KernelPrototype.paths.direct },
+  { name: "Delete or inline", note: "The clean-session baseline may remove the module and its state directory without removing either owner tool.", actions: KernelPrototype.paths.deletion },
+  { name: "Thin baseline race", note: "The thin path stays the empirical deletion test, but its structural model has no neutral compare-and-append across fresh sessions.", actions: KernelPrototype.paths.thinRace },
+  { name: "Ariadne graph pollution", note: "Reusing the existing controller is atomic but fails neutral state ownership.", actions: KernelPrototype.paths.ariadnePollution },
+  { name: "Service overreach", note: "A daemon and SQLite can serialize work, but add an unrequired deployment and migration lifecycle.", actions: KernelPrototype.paths.serviceOverreach }
+];
+
+let state = KernelPrototype.initial();
+let selectedScenario = 0;
+let scenarioStep = 0;
+const selfCheck = KernelPrototype.selfCheck();
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+const label = action => action.replace("select:", "choose ").replaceAll("-", " ");
+
+function render() {
+  const candidate = KernelPrototype.candidates[state.candidateId];
+  const blockers = KernelPrototype.candidateBlockers(candidate);
+  document.querySelector("#candidates").innerHTML = `<table><thead><tr><th>Candidate</th><th>Atomic</th><th>Neutral</th><th>No new infrastructure</th><th>Deletable</th><th>Result</th></tr></thead><tbody>${Object.entries(KernelPrototype.candidates).map(([id, item]) => {
+    const failures = KernelPrototype.candidateBlockers(item);
+    return `<tr><td><strong>${esc(item.name)}</strong><br>${esc(item.note)}</td><td>${item.atomic ? "yes" : "no"}</td><td>${item.neutral ? "yes" : "no"}</td><td>${item.noExtraInfrastructure ? "yes" : "no"}</td><td>${item.removable ? "yes" : "no"}</td><td class="${failures.length ? "bad" : "ok"}">${failures.length ? esc(failures.join("; ")) : "eligible"}</td></tr>`;
+  }).join("")}</tbody></table>`;
+
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>${esc(candidate.name)}</strong>Package: ${esc(candidate.packaging)}<br>Process: ${esc(candidate.process)}<br>Stack: ${esc(candidate.stack)}<br>Location: <code>${esc(candidate.location)}</code></div>
+      <div class="card"><strong>Ledger transaction</strong>Ledger: <code>${esc(candidate.ledger)}</code><br>Atomicity: ${esc(candidate.lock)}<br>Candidate blockers: ${blockers.length ? `<span class="bad">${esc(blockers.join("; "))}</span>` : '<span class="ok">none</span>'}</div>
+      <div class="card"><strong>Attempt state</strong>Status: ${esc(state.status)}<br>Path: ${esc(state.path)}<br>Revision: ${state.revision}<br>Intents: ${state.intentCount}<br>Owner invocations: ${state.ownerInvocations}<br>Lock conflicts: ${state.lockConflicts}<br>Effect: ${esc(state.effect)}</div>
+      <div class="card"><strong>Safety state</strong>Pins valid: ${state.pinsValid ? "yes" : "no"}<br>Durable intent: ${state.durableIntent ? "yes" : "no"}<br>Duplicate dispatch: ${state.duplicateDispatch ? "yes" : "no"}<br>Partial tail: ${state.partialTail ? "yes" : "no"}<br>Kernel present: ${state.kernelPresent ? "yes" : "no"}<br>Verdict: <span class="${state.verdict === "passed" ? "ok" : state.verdict === "rejected" ? "bad" : "warn"}">${esc(state.verdict)}</span></div>
+      <div class="card"><strong>Owner pointers</strong>${state.pointers.length ? state.pointers.map(pointer => `<code>${esc(pointer)}</code>`).join("<br>") : "none"}</div>
+      <div class="card"><strong>Attempt ledger</strong>${state.ledger.length ? state.ledger.map(event => `<code>${esc(event)}</code>`).join("<br>") : "none"}</div>
+    </div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>
+    <p><strong>Prototype self-check:</strong> <span class="ok">${esc(selfCheck)}</span></p>`;
+
+  document.querySelectorAll("[data-select]").forEach(button => button.onclick = () => {
+    state = KernelPrototype.advance(state, `select:${button.dataset.select}`);
+    render();
+  });
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = KernelPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = KernelPrototype.initial();
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `<p>${esc(scenario.note)}</p>${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(label(action))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = KernelPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+render();
+</script>
+</html>

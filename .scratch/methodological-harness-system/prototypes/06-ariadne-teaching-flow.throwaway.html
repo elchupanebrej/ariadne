@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway Ariadne teaching-flow prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #1f2630; background: #f3f5f8; }
+  body { max-width: 1050px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .35rem; }
+  h2 { margin-top: 0; }
+  .note, .muted { color: #5d6673; }
+  .note { max-width: 82ch; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d7dce3; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f7f8fa; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #7f8ca0; border-radius: 8px; background: #eef2f7; cursor: pointer; }
+  button:hover { background: #e1e8f1; }
+  button:disabled { cursor: default; opacity: .5; }
+  .tabs button[aria-selected="true"] { color: white; background: #334f77; }
+  .ok { color: #176c3a; }
+  .bad { color: #a33226; }
+  .warn { color: #8a5b08; }
+  code { overflow-wrap: anywhere; }
+  ul { margin: .35rem 0; padding-left: 1.25rem; }
+</style>
+
+<h1>PROTOTYPE — Ariadne teaching flow</h1>
+<p class="note">Question: does one task-first path—route the current uncertainty, load only the matching Ariadne rules, persist the required cards, explain the decisions, fade support, transfer once, and run one check—teach a fresh agent without copying the Method Contract or turning the lesson into a rule dump?</p>
+
+<section class="panel">
+  <h2>Current attempt</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="reset">Reset</button>
+  <button data-action="task">Start meaningful task</button>
+  <button data-action="uncertainty">Run uncertainty ingress</button>
+  <button data-action="frame">Frame behavior</button>
+  <button data-action="explore">Explore candidates</button>
+  <button data-action="value">Filter and select</button>
+  <button data-action="validate">Run example check</button>
+  <button data-action="explain">Answer why prompts</button>
+  <button data-action="fade">Complete faded case</button>
+  <button data-action="transfer">Route transfer case</button>
+  <button data-action="gate">Attempt completion</button>
+  <button data-action="load-all">Load every rule</button>
+  <button data-action="copy-contract">Copy Method Contract prose</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const TeachingPrototype = (() => {
+  const exampleArtifacts = [
+    "FRAME-config-line-parser",
+    "SPACE-config-line-parser",
+    "CAN-first-delimiter-stdlib",
+    "CAN-json-input",
+    "CAN-environment-boundary",
+    "VAL-SELECT-config-line-parser",
+    "EVDREQ-config-line-parser-r3",
+    "EVD-config-line-parser-r3",
+    "DEC-config-line-parser"
+  ];
+
+  const initial = () => ({
+    phase: "not started",
+    currentSource: "none",
+    loaded: [],
+    artifacts: [],
+    meaningfulTask: false,
+    selfExplanation: false,
+    fadedCase: false,
+    transferRoute: false,
+    runnableCheck: false,
+    bulkLoaded: false,
+    copiedContract: false,
+    status: "learning",
+    last: "No task has been presented."
+  });
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const load = (state, ...sources) => {
+    state.currentSource = sources.at(-1);
+    state.loaded = [...new Set([...state.loaded, ...sources])];
+  };
+  const requireArtifact = (state, id) => state.artifacts.includes(id);
+
+  const blockers = state => [
+    !state.meaningfulTask && "meaningful task was not attempted",
+    !requireArtifact(state, "FRAME-config-line-parser") && "behavior was not separated from the proposed dependency",
+    !requireArtifact(state, "VAL-SELECT-config-line-parser") && "candidates were not filtered against hard requirements",
+    !requireArtifact(state, "EVD-config-line-parser-r3") && "the algorithmic claim lacks Rung 3 evidence",
+    !requireArtifact(state, "DEC-config-line-parser") && "no evidence-backed decision was persisted",
+    !state.selfExplanation && "self-explanation prompts are unanswered",
+    !state.fadedCase && "the incomplete example is unfinished",
+    !state.transferRoute && "the transfer case was not routed",
+    !state.runnableCheck && "the runnable check did not pass",
+    state.bulkLoaded && "every rule was loaded before it was needed",
+    state.copiedContract && "the lesson copied normative Method Contract content"
+  ].filter(Boolean);
+
+  const advance = (state, action) => {
+    const next = copy(state);
+    const stop = message => { next.last = `Stopped: ${message}.`; return next; };
+    switch (action) {
+      case "reset": return initial();
+      case "task":
+        next.meaningfulTask = true;
+        next.phase = "orient";
+        load(next, "ariadne/SKILL.md");
+        next.last = "Task: replace a proposed parser dependency while preserving KEY=VALUE input, the first-delimiter rule, and empty-key rejection.";
+        return next;
+      case "uncertainty":
+        if (!next.meaningfulTask) return stop("start with the task");
+        next.phase = "uncertainty";
+        load(next, "rules/05-uncertainty.md");
+        next.last = "The dependency is still a proposal; the behavior and candidate mechanism are decision-significant.";
+        return next;
+      case "frame":
+        if (next.phase !== "uncertainty") return stop("run uncertainty ingress first");
+        next.phase = "framed";
+        load(next, "rules/10-frame.md", "rules/00-core.md");
+        next.artifacts.push("FRAME-config-line-parser");
+        next.last = "Persisted the observable parser contract; adding a dependency is not part of the requirement.";
+        return next;
+      case "explore":
+        if (!requireArtifact(next, "FRAME-config-line-parser")) return stop("persist the frame first");
+        next.phase = "explored";
+        load(next, "rules/40-explore.md");
+        next.artifacts.push(...exampleArtifacts.slice(1, 5));
+        next.last = "Compared first-delimiter stdlib parsing, a JSON representation change, and moving ownership to environment input.";
+        return next;
+      case "value":
+        if (!requireArtifact(next, "SPACE-config-line-parser")) return stop("explore structurally distinct candidates first");
+        next.phase = "selected, awaiting evidence";
+        load(next, "rules/80-value.md");
+        next.artifacts.push("VAL-SELECT-config-line-parser", "EVDREQ-config-line-parser-r3");
+        next.last = "JSON and environment input fail compatibility; the stdlib candidate remains provisional pending its Rung 3 check.";
+        return next;
+      case "validate":
+        if (!requireArtifact(next, "EVDREQ-config-line-parser-r3")) return stop("create the evidence request before validation");
+        next.phase = "validated";
+        load(next, "rules/90-validate.md", "rules/evidence.md");
+        next.runnableCheck = true;
+        next.artifacts.push("EVD-config-line-parser-r3", "DEC-config-line-parser");
+        next.last = "The Node assertion check passed four deterministic cases; Rung 3 supports algorithmic logic only.";
+        return next;
+      case "explain":
+        if (!next.runnableCheck) return stop("finish the worked example first");
+        next.selfExplanation = true;
+        next.phase = "explained";
+        next.last = "Explained why the package was a mechanism, why failed candidates were not scored, and why Dynamics was not loaded.";
+        return next;
+      case "fade":
+        if (!next.selfExplanation) return stop("explain the complete example before fading support");
+        next.fadedCase = true;
+        next.phase = "faded practice";
+        next.last = "Completed the partially supplied URL-query parsing decision without receiving the route or verdict.";
+        return next;
+      case "transfer":
+        if (!next.fadedCase) return stop("complete the faded case first");
+        next.transferRoute = true;
+        next.phase = "transfer";
+        next.last = "Routed duplicate invoices after timeouts to Diagnose, then Dynamics—not directly to Value.";
+        return next;
+      case "load-all":
+        next.bulkLoaded = true;
+        load(next, "all Ariadne rules");
+        next.last = "Loaded the full reference set before a branch required it.";
+        return next;
+      case "copy-contract":
+        next.copiedContract = true;
+        next.last = "Copied normative Method Contract content into the teaching layer.";
+        return next;
+      case "gate": { 
+        const reasons = blockers(next);
+        next.status = reasons.length ? "rejected" : "independent";
+        next.phase = reasons.length ? "blocked" : "complete";
+        next.last = reasons.length ? `Completion rejected: ${reasons.join("; ")}.` : "Completion passed: one complete path, one faded case, one transfer, valid evidence, and no duplicated source of truth.";
+        return next;
+      }
+      default: return stop(`unknown action ${action}`);
+    }
+  };
+
+  const selfCheck = () => {
+    const run = actions => actions.reduce(advance, initial());
+    const happy = run(["task", "uncertainty", "frame", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]);
+    const dump = run(["task", "load-all", "uncertainty", "frame", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]);
+    const copy = run(["task", "uncertainty", "frame", "copy-contract", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]);
+    if (happy.status !== "independent" || dump.status !== "rejected" || copy.status !== "rejected") throw new Error("teaching-flow invariant failed");
+    return "3 deterministic paths passed";
+  };
+
+  return { advance, blockers, initial, selfCheck };
+})();
+</script>
+
+<script>
+const scenarios = [
+  {
+    name: "Minimal complete path",
+    note: "One meaningful task drives progressive loading, artifacts, explanation, faded practice, transfer, and the runnable check.",
+    actions: ["task", "uncertainty", "frame", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]
+  },
+  {
+    name: "Rule dump",
+    note: "Loading the whole reference set is visible cognitive load and fails the teaching completion contract.",
+    actions: ["task", "load-all", "uncertainty", "frame", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]
+  },
+  {
+    name: "Copied contract",
+    note: "A complete lesson still fails if it creates a second normative source instead of citing Ariadne and the Method Contract.",
+    actions: ["task", "uncertainty", "frame", "copy-contract", "explore", "value", "validate", "explain", "fade", "transfer", "gate"]
+  },
+  {
+    name: "Premature decision",
+    note: "Selecting before the frame, candidate set, or evidence request leaves the decision blocked.",
+    actions: ["task", "value", "validate", "gate"]
+  }
+];
+
+let state = TeachingPrototype.initial();
+let selectedScenario = 0;
+let scenarioStep = 0;
+const selfCheck = TeachingPrototype.selfCheck();
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+
+function render() {
+  const blockers = TeachingPrototype.blockers(state);
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>Learning state</strong>Phase: ${esc(state.phase)}<br>Status: <span class="${state.status === "independent" ? "ok" : state.status === "rejected" ? "bad" : "warn"}">${esc(state.status)}</span></div>
+      <div class="card"><strong>Current source</strong><code>${esc(state.currentSource)}</code><br><span class="muted">Loaded only when its trigger fired.</span></div>
+      <div class="card"><strong>Persisted artifacts</strong>${state.artifacts.length ? state.artifacts.map(item => `<code>${esc(item)}</code>`).join("<br>") : "none"}</div>
+      <div class="card"><strong>Practice transfer</strong>Self-explanation: ${state.selfExplanation ? "yes" : "no"}<br>Faded case: ${state.fadedCase ? "yes" : "no"}<br>Transfer route: ${state.transferRoute ? "yes" : "no"}</div>
+    </div>
+    <div class="card"><strong>Sources loaded so far</strong>${state.loaded.length ? state.loaded.map(item => `<code>${esc(item)}</code>`).join(" · ") : "none"}</div>
+    <div class="card"><strong>Completion blockers</strong>${blockers.length ? `<ul>${blockers.map(item => `<li>${esc(item)}</li>`).join("")}</ul>` : '<span class="ok">none</span>'}</div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>
+    <p><strong>Prototype self-check:</strong> <span class="ok">${esc(selfCheck)}</span></p>`;
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = TeachingPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = TeachingPrototype.initial();
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `
+    <p>${esc(scenario.note)}</p>
+    ${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(action.replaceAll("-", " "))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = TeachingPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+render();
+</script>
+</html>

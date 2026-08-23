@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway staged self-application prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #17221c; background: #f4f6f3; }
+  body { max-width: 1050px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .35rem; }
+  h2 { margin-top: 0; }
+  .note, .muted { color: #59665e; }
+  .note { max-width: 82ch; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d5ddd7; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f7f9f6; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #789583; border-radius: 8px; background: #eaf3ed; cursor: pointer; }
+  button:hover { background: #dcecdf; }
+  button:disabled { cursor: default; opacity: .5; }
+  .tabs button[aria-selected="true"] { color: white; background: #245c3b; }
+  .ok { color: #176c3a; }
+  .bad { color: #a33226; }
+  .warn { color: #8a5b08; }
+  code { overflow-wrap: anywhere; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: .55rem; border-bottom: 1px solid #dde3de; text-align: left; vertical-align: top; }
+  ul { margin: .35rem 0; padding-left: 1.25rem; }
+</style>
+
+<h1>PROTOTYPE — staged self-application</h1>
+<p class="note">Question: can immutable bootstrap rounds take the current methodology through methodology-authoring, harness-authoring, and a neutral Orchestration Harness to a structurally stable v1, while making <code>F(M) ≡ M</code> executable, keeping runtime dependencies acyclic, and never treating empirical evidence as self-consistency evidence?</p>
+
+<section class="panel">
+  <h2>Current state</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="reset">Reset bootstrap round</button>
+  <button data-action="freeze-method">Freeze Method Contract</button>
+  <button data-action="build-methodology">Build methodology-authoring</button>
+  <button data-action="build-harness-authoring">Build harness-authoring</button>
+  <button data-action="build-orchestrator">Build Orchestration Harness</button>
+  <button data-action="presentation-edit">Use presentation-only edit</button>
+  <button data-action="normative-delta">Discover a normative rule</button>
+  <button data-action="disagreement">Make reviewer B disagree</button>
+  <button data-action="assess-a">Run independent assessment A</button>
+  <button data-action="assess-b">Run independent assessment B</button>
+  <button data-action="pin-drift">Drift a pin</button>
+  <button data-action="runtime-cycle">Add forbidden runtime callback</button>
+  <button data-action="external-receipt">Add empirical receipt</button>
+  <button data-action="release">Attempt structural v1</button>
+  <button data-action="next-round">Owner accepts delta into next round</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<section class="panel">
+  <h2>Mechanism comparison</h2>
+  <table>
+    <thead><tr><th>Mechanism</th><th>Useful property</th><th>Fatal gap</th><th>Verdict</th></tr></thead>
+    <tbody id="candidates"></tbody>
+  </table>
+</section>
+
+<script id="logic">
+const FixedPointPrototype = (() => {
+  const seedCore = Object.freeze({
+    P: ["P-complete", "P-no-circular-validation"],
+    A: ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+    R: ["R-apply-self", "R-propagate-change", "R-stop-on-delta"],
+    L: ["L-rule-rationale", "L-change-impact", "L-verification-owner"]
+  });
+
+  const candidates = [
+    { name: "Live mutual recursion", useful: "Automatic iteration", gap: "Active components rewrite and invoke their own dependencies", verdict: "Reject: runtime cycle" },
+    { name: "Detached snapshot audit", useful: "Immutable, acyclic comparison", gap: "Compares prepared files but does not execute Apply(M, M)", verdict: "Reject: F is not executed" },
+    { name: "Staged immutable snapshots", useful: "Executable F over pinned inputs with owner gates", gap: "A discovered delta requires a new explicit round", verdict: "Select" }
+  ];
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const canonical = value => {
+    if (Array.isArray(value)) return value.map(canonical).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    if (!value || typeof value !== "object") return value;
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
+  };
+  const project = artifact => canonical(artifact.core);
+  const digest = artifact => JSON.stringify(project(artifact));
+  const equivalent = (left, right) => digest(left) === digest(right);
+
+  const initial = round => ({
+    round,
+    stage: "guide-snapshot",
+    pins: { guide: `G-${round}@sha256:g${round}`, method: null, methodology: null, harnessAuthoring: null, orchestrator: null },
+    assessedPins: null,
+    input: { core: copy(seedCore), release: { round }, presentation: "current guide wording" },
+    probe: "no-delta",
+    disagreement: false,
+    assessments: {},
+    externalReceipts: 0,
+    runtimeEdges: [["Orchestrator", "MethodologyAdapter"], ["MethodologyAdapter", "MethodContract"]],
+    status: "building",
+    last: "Pinned the current guide as the bootstrap source."
+  });
+
+  const hasCycle = edges => {
+    const next = new Map();
+    for (const [from, to] of edges) next.set(from, [...(next.get(from) || []), to]);
+    const visiting = new Set();
+    const visited = new Set();
+    const visit = node => {
+      if (visiting.has(node)) return true;
+      if (visited.has(node)) return false;
+      visiting.add(node);
+      if ((next.get(node) || []).some(visit)) return true;
+      visiting.delete(node);
+      visited.add(node);
+      return false;
+    };
+    return [...new Set(edges.flat())].some(visit);
+  };
+
+  const candidateFor = (state, assessor) => {
+    const candidate = copy(state.input);
+    if (state.probe === "presentation") candidate.presentation = "clearer guide wording";
+    if (state.probe === "normative" && !(state.disagreement && assessor === "B")) {
+      candidate.core.R.push("R-new-mandatory-class");
+    }
+    return candidate;
+  };
+
+  const blockers = state => {
+    const reasons = [];
+    if (state.stage !== "ready") reasons.push("bootstrap artifacts are incomplete");
+    if (hasCycle(state.runtimeEdges)) reasons.push("runtime dependency graph contains a cycle");
+    for (const id of ["A", "B"]) {
+      const receipt = state.assessments[id];
+      if (!receipt) reasons.push(`assessment ${id} is missing`);
+      else {
+        if (!receipt.complete) reasons.push(`assessment ${id} is incomplete`);
+        if (!receipt.pinsMatch) reasons.push(`assessment ${id} used different pins`);
+        if (!receipt.equivalent) reasons.push(`assessment ${id} found a P/A/R/L delta`);
+      }
+    }
+    const [a, b] = [state.assessments.A, state.assessments.B];
+    if (a && b && a.context === b.context) reasons.push("assessments are not independent");
+    if (a && b && a.afterDigest !== b.afterDigest) reasons.push("assessors produced different core candidates");
+    return reasons;
+  };
+
+  const advance = (state, action) => {
+    const next = copy(state);
+    const requireStage = (stage, message) => {
+      if (next.stage === stage) return true;
+      next.last = `Stopped: ${message}.`;
+      return false;
+    };
+
+    switch (action) {
+      case "reset": return initial(0);
+      case "freeze-method":
+        if (!requireStage("guide-snapshot", "freeze the guide snapshot first")) return next;
+        next.pins.method = `M-${next.round}@sha256:m${next.round}`;
+        next.stage = "method-frozen";
+        next.last = "Frozen the draft Method Contract from the pinned guide; no harness was needed.";
+        return next;
+      case "build-methodology":
+        if (!requireStage("method-frozen", "freeze the Method Contract first")) return next;
+        next.pins.methodology = `MA-${next.round}@sha256:ma${next.round}`;
+        next.stage = "methodology-built";
+        next.last = "Built methodology-authoring from the pinned Method Contract.";
+        return next;
+      case "build-harness-authoring":
+        if (!requireStage("methodology-built", "build methodology-authoring first")) return next;
+        next.pins.harnessAuthoring = `HA-${next.round}@sha256:ha${next.round}`;
+        next.stage = "harness-authoring-built";
+        next.last = "Used methodology-authoring plus pinned harness research to build harness-authoring.";
+        return next;
+      case "build-orchestrator":
+        if (!requireStage("harness-authoring-built", "build harness-authoring first")) return next;
+        next.pins.orchestrator = `OH-${next.round}@sha256:oh${next.round}`;
+        next.stage = "ready";
+        next.last = "Built the Orchestration Harness. Runtime edges point downward only.";
+        return next;
+      case "presentation-edit":
+        next.probe = "presentation";
+        next.disagreement = false;
+        next.assessments = {};
+        next.last = "The next assessments will change guide wording only; presentation is outside P/A/R/L.";
+        return next;
+      case "normative-delta":
+        next.probe = "normative";
+        next.disagreement = false;
+        next.assessments = {};
+        next.last = "The next assessments will discover a new mandatory rule class.";
+        return next;
+      case "disagreement":
+        next.probe = "normative";
+        next.disagreement = true;
+        next.assessments = {};
+        next.last = "Assessment A will report a rule delta; assessment B will not.";
+        return next;
+      case "assess-a":
+      case "assess-b": { 
+        if (!requireStage("ready", "complete the bootstrap before self-application")) return next;
+        const id = action.endsWith("a") ? "A" : "B";
+        const after = candidateFor(next, id);
+        if (!next.assessedPins) next.assessedPins = copy(next.pins);
+        next.assessments[id] = {
+          context: `isolated-context-${id}`,
+          complete: true,
+          checks: ["A0-A7", "audit-49", "leave-one-out", "change-propagation", "no-circular-validation"],
+          pinsMatch: JSON.stringify(next.pins) === JSON.stringify(next.assessedPins),
+          beforeDigest: digest(next.input),
+          afterDigest: digest(after),
+          equivalent: equivalent(next.input, after)
+        };
+        next.last = `Assessment ${id} completed: ${next.assessments[id].equivalent ? "no P/A/R/L delta" : "normative delta found"}.`;
+        return next;
+      }
+      case "pin-drift":
+        next.pins.method = `${next.pins.method || "M-unfrozen"}-changed`;
+        next.last = "The active Method Contract pin changed after the assessment baseline.";
+        return next;
+      case "runtime-cycle":
+        next.runtimeEdges.push(["MethodContract", "Orchestrator"]);
+        next.last = "Added a forbidden callback from the method into its active orchestrator.";
+        return next;
+      case "external-receipt":
+        next.externalReceipts += 1;
+        next.last = "Recorded external evidence separately; it satisfies none of the fixed-point gates.";
+        return next;
+      case "release": { 
+        const reasons = blockers(next);
+        next.status = reasons.length ? "stopped" : "v1-structural";
+        next.last = reasons.length
+          ? `Release blocked: ${reasons.join("; ")}.`
+          : "Released structural v1: two independent complete assessments preserved P/A/R/L. Empirical status is unchanged.";
+        return next;
+      }
+      case "next-round": {
+        const [a, b] = [next.assessments.A, next.assessments.B];
+        if (!a || !b || a.afterDigest !== b.afterDigest || a.equivalent || b.equivalent) {
+          next.last = "Stopped: the owner may start a new round only from one agreed normative delta.";
+          return next;
+        }
+        const newer = initial(next.round + 1);
+        newer.last = "The method owner accepted the agreed delta into a new immutable draft. Every consumer must be repinned or rebuilt before reassessment.";
+        return newer;
+      }
+      default:
+        next.last = `Unknown action: ${action}.`;
+        return next;
+    }
+  };
+
+  return { advance, blockers, candidates, hasCycle, initial };
+})();
+</script>
+
+<script>
+const scenarios = [
+  {
+    name: "Stable v1",
+    note: "Build from immutable inputs, run two isolated complete assessments, and release only when both preserve P/A/R/L.",
+    actions: ["freeze-method", "build-methodology", "build-harness-authoring", "build-orchestrator", "assess-a", "assess-b", "release"]
+  },
+  {
+    name: "Normative delta",
+    note: "A new mandatory rule is not convergence. The current run stops; the method owner may accept one agreed delta into a new bootstrap round.",
+    actions: ["freeze-method", "build-methodology", "build-harness-authoring", "build-orchestrator", "normative-delta", "assess-a", "assess-b", "release", "next-round"]
+  },
+  {
+    name: "Presentation edit",
+    note: "Guide wording and release metadata are outside the normative projection. Stable P/A/R/L still passes.",
+    actions: ["freeze-method", "build-methodology", "build-harness-authoring", "build-orchestrator", "presentation-edit", "assess-a", "assess-b", "release"]
+  },
+  {
+    name: "False proof",
+    note: "External evidence never substitutes for the two internal assessments; a live dependency cycle blocks release too.",
+    actions: ["freeze-method", "build-methodology", "build-harness-authoring", "build-orchestrator", "external-receipt", "assess-a", "runtime-cycle", "release"]
+  },
+  {
+    name: "Reviewer disagreement",
+    note: "Two assessments are necessary but not sufficient: different core candidates stop the run for owner resolution.",
+    actions: ["freeze-method", "build-methodology", "build-harness-authoring", "build-orchestrator", "disagreement", "assess-a", "assess-b", "release", "next-round"]
+  }
+];
+
+let state = FixedPointPrototype.initial(0);
+let selectedScenario = 0;
+let scenarioStep = 0;
+
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+const assessment = (id, receipt) => receipt
+  ? `<li><strong>${id}</strong>: ${receipt.equivalent ? '<span class="ok">equivalent</span>' : '<span class="bad">core delta</span>'}; pins ${receipt.pinsMatch ? "match" : "drifted"}; ${receipt.checks.join(", ")}</li>`
+  : `<li><strong>${id}</strong>: missing</li>`;
+
+function render() {
+  const blocks = FixedPointPrototype.blockers(state);
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>Bootstrap</strong>Round <code>b${state.round}</code><br>Stage: ${esc(state.stage)}<br>Status: <span class="${state.status === "v1-structural" ? "ok" : state.status === "stopped" ? "bad" : "warn"}">${esc(state.status)}</span></div>
+      <div class="card"><strong>Pinned artifacts</strong>${Object.entries(state.pins).map(([key, value]) => `${esc(key)}: <code>${esc(value || "not built")}</code>`).join("<br>")}</div>
+      <div class="card"><strong>Self-application receipts</strong><ul>${assessment("A", state.assessments.A)}${assessment("B", state.assessments.B)}</ul></div>
+      <div class="card"><strong>Separate empirical track</strong>${state.externalReceipts} receipt(s)<br><span class="muted">Never consumed by fixed-point completion.</span></div>
+    </div>
+    <div class="card"><strong>Build provenance</strong><code>Guide → Method Contract → methodology-authoring → harness-authoring → Orchestration Harness</code></div>
+    <div class="card"><strong>Runtime dependencies</strong>${state.runtimeEdges.map(([from, to]) => `<code>${esc(from)} → ${esc(to)}</code>`).join(" · ")}<br>Cycle: <span class="${FixedPointPrototype.hasCycle(state.runtimeEdges) ? "bad" : "ok"}">${FixedPointPrototype.hasCycle(state.runtimeEdges) ? "yes" : "no"}</span></div>
+    <div class="card"><strong>Current release blockers</strong>${blocks.length ? `<ul>${blocks.map(item => `<li>${esc(item)}</li>`).join("")}</ul>` : '<span class="ok">none</span>'}</div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>`;
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = FixedPointPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = FixedPointPrototype.initial(0);
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `
+    <p>${esc(scenario.note)}</p>
+    ${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(action.replaceAll("-", " "))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = FixedPointPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+document.querySelector("#candidates").innerHTML = FixedPointPrototype.candidates.map(candidate => `<tr><td>${esc(candidate.name)}</td><td>${esc(candidate.useful)}</td><td>${esc(candidate.gap)}</td><td>${esc(candidate.verdict)}</td></tr>`).join("");
+render();
+</script>
+</html>

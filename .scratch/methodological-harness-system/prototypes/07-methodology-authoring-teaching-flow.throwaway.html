@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Throwaway methodology-authoring teaching-flow prototype</title>
+<style>
+  :root { font: 16px/1.45 system-ui, sans-serif; color: #222a35; background: #f4f6f8; }
+  body { max-width: 1120px; margin: auto; padding: 2rem; }
+  h1 { margin-bottom: .35rem; }
+  h2 { margin-top: 0; }
+  .note, .muted { color: #5c6674; }
+  .note { max-width: 88ch; }
+  .panel { margin: 1rem 0; padding: 1rem; border: 1px solid #d6dce3; border-radius: 12px; background: white; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: .75rem; }
+  .card { padding: .75rem; border-radius: 9px; background: #f7f9fb; }
+  .card strong { display: block; margin-bottom: .25rem; }
+  button { margin: .2rem; padding: .55rem .8rem; border: 1px solid #7f8ca0; border-radius: 8px; background: #edf2f7; cursor: pointer; }
+  button:hover { background: #e0e8f1; }
+  button:disabled { cursor: default; opacity: .5; }
+  .tabs button[aria-selected="true"] { color: white; background: #395b80; }
+  .ok { color: #176b39; }
+  .bad { color: #a13227; }
+  .warn { color: #8a5b08; }
+  code { overflow-wrap: anywhere; }
+  ul { margin: .35rem 0; padding-left: 1.25rem; }
+</style>
+
+<h1>PROTOTYPE — Methodology authoring teaching flow</h1>
+<p class="note">Question: can one task-first, contract-pinned vertical slice teach a fresh session to author a complete A0 and A1–A7 guide project, preserve live rationale links, recover from a failed obligation, keep external evidence separate from self-consistency, and transfer to a metamethodological target without creating a shadow Method Contract?</p>
+
+<section class="panel">
+  <h2>Current attempt</h2>
+  <div id="state"></div>
+</section>
+
+<section class="panel">
+  <h2>Free play</h2>
+  <button data-action="reset">Reset</button>
+  <button data-action="task">Start dependency-review guide task</button>
+  <button data-action="pin">Load and pin Method Contract</button>
+  <button data-action="a0">Draft A0</button>
+  <button data-action="a1">Expand A1</button>
+  <button data-action="a2">Expand A2</button>
+  <button data-action="a3">Expand A3</button>
+  <button data-action="a4">Expand A4</button>
+  <button data-action="a5">Expand A5</button>
+  <button data-action="a6">Expand A6</button>
+  <button data-action="a7">Expand A7</button>
+  <button data-action="trace">Resolve rationale links</button>
+  <button data-action="break-link">Break one rationale link</button>
+  <button data-action="repair">Run targeted recovery</button>
+  <button data-action="external">Record external verification</button>
+  <button data-action="explain">Answer why prompts</button>
+  <button data-action="fade">Complete faded case</button>
+  <button data-action="transfer">Route metamethodology transfer</button>
+  <button data-action="gate">Attempt completion</button>
+  <button data-action="shadow">Generate a shadow contract</button>
+  <button data-action="unpin">Discard the contract pin</button>
+  <button data-action="circular">Use self-consistency as effectiveness proof</button>
+</section>
+
+<section class="panel">
+  <h2>Guided walkthroughs</h2>
+  <div class="tabs" id="tabs"></div>
+  <div id="walkthrough"></div>
+</section>
+
+<script id="logic">
+const MethodTeachingPrototype = (() => {
+  const artifactReasons = {
+    A0: "Concise current map for the dependency-change review guide",
+    A1: "The guide is organization-normative and needs explicit scope and success measures",
+    A2: "Security, license, and test recommendations have different sources and confidence",
+    A3: "Reviewer, maintainer, security, and legal roles have different authority",
+    A4: "Advisory, license, lockfile, verification, recovery, and escalation branches are observable",
+    A5: "A novice must move from one worked review to independent and transfer performance",
+    A6: "Expert review, target-user execution, and pilot decisions require repeatable receipts",
+    A7: "Advisory changes, tool changes, ownership, versions, and retirement require lifecycle rules"
+  };
+
+  const rationaleLinks = [
+    "A2:CLAIM-advisory-check -> guide#epistemology",
+    "A2:CLAIM-license-escalation -> guide#epistemology",
+    "A4:RULE-review-dependency-change -> guide#chapter-10",
+    "A5:MODULE-first-review -> guide#chapter-14",
+    "A6:VERIFY-independent-review -> guide#chapter-16"
+  ];
+
+  const initial = () => ({
+    phase: "not started",
+    currentSource: "none",
+    task: false,
+    contractPinned: false,
+    contractPin: "none",
+    completionProfile: "none",
+    artifacts: {},
+    links: [],
+    externalReceipt: false,
+    selfConsistencyReceipt: false,
+    selfConsistencySeparated: false,
+    selfExplanation: false,
+    fadedCase: false,
+    transferCase: false,
+    recoveryPracticed: false,
+    brokenLink: false,
+    shadowContract: false,
+    circularProof: false,
+    status: "learning",
+    last: "No guide-authoring task has been presented."
+  });
+
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const allArtifacts = state => Object.keys(artifactReasons).every(id => state.artifacts[id]);
+
+  const blockers = state => [
+    !state.task && "the meaningful guide-authoring task was not attempted",
+    !state.contractPinned && "the Method Contract version and digest are not pinned",
+    !state.artifacts.A0 && "A0 is missing",
+    !allArtifacts(state) && "one or more triggered A1-A7 artifacts are missing",
+    state.links.length !== rationaleLinks.length && "material rules do not all resolve to live rationale anchors",
+    state.brokenLink && "a rationale link remains broken",
+    !state.recoveryPracticed && "the targeted recovery exercise is unfinished",
+    !state.externalReceipt && "external verification has no owner receipt",
+    !state.selfExplanation && "self-explanation prompts are unanswered",
+    !state.fadedCase && "the faded case is unfinished",
+    !state.transferCase && "the metamethodological transfer was not routed",
+    !state.selfConsistencySeparated && "self-consistency is not kept as a separate receipt class",
+    state.shadowContract && "the lesson created a shadow Method Contract",
+    state.circularProof && "self-consistency was used as empirical effectiveness evidence"
+  ].filter(Boolean);
+
+  const advance = (state, action) => {
+    const next = copy(state);
+    const stop = message => { next.last = `Stopped: ${message}.`; return next; };
+    const expand = id => {
+      if (!next.artifacts.A0) return stop("draft A0 before expanding a specialized artifact");
+      next.artifacts[id] = artifactReasons[id];
+      next.currentSource = `M_n#artifacts.${id}`;
+      next.phase = `expanded ${id}`;
+      next.last = `${id} added because: ${artifactReasons[id]}.`;
+      return next;
+    };
+
+    switch (action) {
+      case "reset": return initial();
+      case "task":
+        next.task = true;
+        next.phase = "meaningful task";
+        next.last = "Task: author an evidence-focused guide that lets a first-time reviewer approve, reject, or escalate a dependency-change pull request and leave a verifiable review record.";
+        return next;
+      case "pin":
+        if (!next.task) return stop("start with the guide-authoring task");
+        next.contractPinned = true;
+        next.contractPin = "methodological-guide-authoring@b_n + sha256";
+        next.completionProfile = "evidence-focused";
+        next.currentSource = "pinned M_n";
+        next.phase = "contract loaded";
+        next.last = "Validated the closed contract envelope and selected evidence-focused completion; no method rule was copied into the lesson.";
+        return next;
+      case "a0":
+        if (!next.contractPinned) return stop("pin and validate the Method Contract first");
+        next.artifacts.A0 = artifactReasons.A0;
+        next.currentSource = "M_n#artifacts.A0";
+        next.phase = "working map";
+        next.last = "A0 now names the novice reviewer, dependency-change task, observable review record, learning path, verification, unknowns, and next expansion signal.";
+        return next;
+      case "a1": return expand("A1");
+      case "a2": return expand("A2");
+      case "a3": return expand("A3");
+      case "a4": return expand("A4");
+      case "a5": return expand("A5");
+      case "a6": return expand("A6");
+      case "a7": return expand("A7");
+      case "trace":
+        if (!allArtifacts(next)) return stop("complete every triggered artifact before the traceability pass");
+        next.links = [...rationaleLinks];
+        next.brokenLink = false;
+        next.currentSource = "G_n rationale anchors resolved from M_n";
+        next.phase = "traceable";
+        next.last = "Resolved stable Method Contract IDs through to long-guide rationale anchors; example text remains non-normative.";
+        return next;
+      case "break-link":
+        if (!next.links.length) return stop("resolve rationale links before practicing link failure");
+        next.links.pop();
+        next.brokenLink = true;
+        next.phase = "blocked";
+        next.last = "The A6 verification rationale anchor no longer resolves; completion fails closed.";
+        return next;
+      case "repair":
+        if (!next.brokenLink) return stop("targeted recovery requires an observed failed obligation");
+        next.links = [...rationaleLinks];
+        next.brokenLink = false;
+        next.recoveryPracticed = true;
+        next.currentSource = "M_n verification hook + G_n#chapter-16";
+        next.phase = "recovered";
+        next.last = "Re-resolved the owner-approved anchor under the same pins and reran only link resolution and affected completion checks.";
+        return next;
+      case "external":
+        if (next.brokenLink || next.links.length !== rationaleLinks.length) return stop("repair traceability before external verification");
+        if (!next.artifacts.A6) return stop("A6 must define the external verification protocol");
+        next.externalReceipt = true;
+        next.phase = "externally verified";
+        next.last = "Recorded separate expert-review, novice task-performance, and pilot-decision owner receipts; none came from self-application.";
+        return next;
+      case "explain":
+        if (!next.externalReceipt) return stop("finish the complete worked project before self-explanation");
+        next.selfExplanation = true;
+        next.phase = "explained";
+        next.last = "Explained why each A1-A7 expansion fired, why A0 stayed concise, and why an owner receipt cannot be inferred from prose.";
+        return next;
+      case "fade":
+        if (!next.selfExplanation) return stop("explain the worked example before fading support");
+        next.fadedCase = true;
+        next.phase = "faded practice";
+        next.last = "Completed a partially supplied incident-handoff guide project with expansion reasons, trace links, and receipts withheld.";
+        return next;
+      case "transfer":
+        if (!next.fadedCase) return stop("complete the faded case first");
+        next.transferCase = true;
+        next.selfConsistencyReceipt = true;
+        next.selfConsistencySeparated = true;
+        next.phase = "metamethodological transfer";
+        next.last = "For a guide-authoring methodology, selected the metamethodological profile and separate immutable self-consistency assessments; the skill did not invoke or rewrite itself.";
+        return next;
+      case "shadow":
+        next.shadowContract = true;
+        next.last = "Generated a local copy of artifact schemas and method rules inside the teaching package.";
+        return next;
+      case "unpin":
+        next.contractPinned = false;
+        next.contractPin = "none";
+        next.last = "Removed the contract digest while retaining derived artifacts.";
+        return next;
+      case "circular":
+        next.circularProof = true;
+        next.selfConsistencyReceipt = true;
+        next.externalReceipt = true;
+        next.last = "Relabeled a self-consistency receipt as proof that target users can apply the guide.";
+        return next;
+      case "gate": { 
+        const reasons = blockers(next);
+        next.status = reasons.length ? "rejected" : "independent";
+        next.phase = reasons.length ? "blocked" : "complete";
+        next.last = reasons.length ? `Completion rejected: ${reasons.join("; ")}.` : "Completion passed: one pinned, traceable, recovered, externally verified guide project plus faded and metamethodological transfer cases.";
+        return next;
+      }
+      default: return stop(`unknown action ${action}`);
+    }
+  };
+
+  const completeActions = ["task", "pin", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "trace", "break-link", "repair", "external", "explain", "fade", "transfer"];
+  const selfCheck = () => {
+    const run = actions => actions.reduce(advance, initial());
+    const complete = advance(run(completeActions), "gate");
+    const shadow = advance(run([...completeActions, "shadow"]), "gate");
+    const unpinned = advance(run([...completeActions, "unpin"]), "gate");
+    const circular = advance(run([...completeActions.slice(0, 13), "circular", "explain", "fade", "transfer"]), "gate");
+    const unrepaired = advance(run(["task", "pin", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "trace", "break-link", "external", "explain", "fade", "transfer"]), "gate");
+    if (complete.status !== "independent" || [shadow, unpinned, circular, unrepaired].some(state => state.status !== "rejected")) throw new Error("methodology-authoring teaching invariant failed");
+    return "5 deterministic paths passed";
+  };
+
+  return { advance, blockers, initial, selfCheck, completeActions };
+})();
+</script>
+
+<script>
+const scenarios = [
+  {
+    name: "Complete recovered path",
+    note: "The dependency-review task drives a pinned evidence-focused project, justified expansion through A1-A7, rationale-link recovery, external verification, fading, and metamethodological transfer.",
+    actions: [...MethodTeachingPrototype.completeActions, "gate"]
+  },
+  {
+    name: "Unrepaired rationale",
+    note: "A schema-valid-looking bundle still fails when one material rationale anchor is unresolved and the targeted recovery is skipped.",
+    actions: ["task", "pin", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "trace", "break-link", "external", "gate"]
+  },
+  {
+    name: "Shadow contract",
+    note: "Copying method schemas into the lesson creates a second normative owner even when all normal work is complete.",
+    actions: [...MethodTeachingPrototype.completeActions, "shadow", "gate"]
+  },
+  {
+    name: "Circular proof",
+    note: "A self-consistency receipt cannot stand in for expert review, target-user performance, or an external pilot.",
+    actions: ["task", "pin", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "trace", "break-link", "repair", "circular", "explain", "fade", "transfer", "gate"]
+  },
+  {
+    name: "Pin drift",
+    note: "Derived artifacts fail closed after their Method Contract digest is removed; narrative compatibility is not enough.",
+    actions: [...MethodTeachingPrototype.completeActions, "unpin", "gate"]
+  }
+];
+
+let state = MethodTeachingPrototype.initial();
+let selectedScenario = 0;
+let scenarioStep = 0;
+const selfCheck = MethodTeachingPrototype.selfCheck();
+const esc = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+
+function render() {
+  const blockers = MethodTeachingPrototype.blockers(state);
+  const artifacts = Object.entries(state.artifacts);
+  document.querySelector("#state").innerHTML = `
+    <div class="grid">
+      <div class="card"><strong>Learning state</strong>Phase: ${esc(state.phase)}<br>Status: <span class="${state.status === "independent" ? "ok" : state.status === "rejected" ? "bad" : "warn"}">${esc(state.status)}</span></div>
+      <div class="card"><strong>Normative source</strong><code>${esc(state.contractPin)}</code><br>Profile: ${esc(state.completionProfile)}<br>Current: <code>${esc(state.currentSource)}</code></div>
+      <div class="card"><strong>Guide artifacts</strong>${artifacts.length ? artifacts.map(([id, reason]) => `<code>${esc(id)}</code>: ${esc(reason)}`).join("<br>") : "none"}</div>
+      <div class="card"><strong>Receipts and practice</strong>External: ${state.externalReceipt ? "yes" : "no"}<br>Self-consistency: ${state.selfConsistencyReceipt ? "separate" : "none"}<br>Self-explanation: ${state.selfExplanation ? "yes" : "no"}<br>Faded: ${state.fadedCase ? "yes" : "no"}<br>Transfer: ${state.transferCase ? "yes" : "no"}</div>
+    </div>
+    <div class="card"><strong>Rationale trace</strong>${state.links.length ? state.links.map(link => `<code>${esc(link)}</code>`).join("<br>") : "none"}</div>
+    <div class="card"><strong>Completion blockers</strong>${blockers.length ? `<ul>${blockers.map(item => `<li>${esc(item)}</li>`).join("")}</ul>` : '<span class="ok">none</span>'}</div>
+    <p><strong>Last change:</strong> ${esc(state.last)}</p>
+    <p><strong>Prototype self-check:</strong> <span class="ok">${esc(selfCheck)}</span></p>`;
+
+  document.querySelectorAll("[data-action]").forEach(button => button.onclick = () => {
+    state = MethodTeachingPrototype.advance(state, button.dataset.action);
+    render();
+  });
+
+  const tabs = document.querySelector("#tabs");
+  tabs.innerHTML = scenarios.map((scenario, index) => `<button aria-selected="${index === selectedScenario}" data-tab="${index}">${esc(scenario.name)}</button>`).join("");
+  tabs.querySelectorAll("button").forEach(button => button.onclick = () => {
+    selectedScenario = Number(button.dataset.tab);
+    scenarioStep = 0;
+    state = MethodTeachingPrototype.initial();
+    render();
+  });
+
+  const scenario = scenarios[selectedScenario];
+  document.querySelector("#walkthrough").innerHTML = `
+    <p>${esc(scenario.note)}</p>
+    ${scenario.actions.map((action, index) => `<button data-step="${index}" ${index !== scenarioStep ? "disabled" : ""}>${index + 1}. ${esc(action.replaceAll("-", " "))}</button>`).join("")}`;
+  document.querySelectorAll("[data-step]").forEach(button => button.onclick = () => {
+    state = MethodTeachingPrototype.advance(state, scenario.actions[Number(button.dataset.step)]);
+    scenarioStep += 1;
+    render();
+  });
+}
+
+render();
+</script>
+</html>
