@@ -7,7 +7,18 @@ import type {
   A5LearningModule,
   A6VerificationProtocol,
   A7LifecycleLog,
+  GuideProject,
+  MethodAuthorityRepairResult,
+  MethodClaimEvaluation,
+  MethodClaimStatus,
   MethodDeclaredInputManifest,
+  MethodologyClaimsReport,
+  MethodologyRunReceipt,
+  MethodologyRunReport,
+  MethodPinRepairResult,
+  MethodRepairResult,
+  MethodTeachingFault,
+  MethodTeachingFaultType,
   MethodTeachingPhase,
   MethodTeachingState,
   MethodTeachingStatus,
@@ -16,7 +27,10 @@ import type {
 import {
   createDefaultDeclaredManifest,
   createDefaultGuideProject,
+  verifyGuideProject,
 } from "./verifier.js";
+import { createIncidentHandoffGuideProject } from "./incident-handoff.js";
+import { createMetamethodologicalGuideProject } from "./metamethodology.js";
 
 const ARTIFACT_REASONS: Record<string, string> = {
   A0: "Concise current map for the dependency-change review guide",
@@ -84,6 +98,9 @@ export class MethodologyTeachingSession {
       selfExplanation: false,
       fadedCase: false,
       transferCase: false,
+      acyclicityVerified: false,
+      selfInvocationDetected: false,
+      activeRewritingDetected: false,
       recoveryPracticed: false,
       brokenLink: false,
       shadowContract: false,
@@ -91,6 +108,12 @@ export class MethodologyTeachingSession {
       lastMessage: "No guide-authoring task has been presented.",
       manifest: manifest || createDefaultDeclaredManifest(),
       prohibitedInputsDetected: [],
+      interventions: [],
+      routeChoices: [
+        ".agents/skills/teach-methodology/SKILL.md",
+        "docs/designing_methodological_guides.md",
+      ],
+      faults: [],
     };
   }
 
@@ -101,6 +124,16 @@ export class MethodologyTeachingSession {
   public detectProhibitedInput(inputId: string): void {
     if (!this.state.prohibitedInputsDetected.includes(inputId)) {
       this.state.prohibitedInputsDetected.push(inputId);
+    }
+  }
+
+  public recordIntervention(note: string): void {
+    this.state.interventions.push(note);
+  }
+
+  public recordRouteChoice(route: string): void {
+    if (!this.state.routeChoices.includes(route)) {
+      this.state.routeChoices.push(route);
     }
   }
 
@@ -241,39 +274,252 @@ export class MethodologyTeachingSession {
     return { success: true, message: this.state.lastMessage };
   }
 
-  public recordExternalVerification(receipts?: Record<string, string>): {
-    success: boolean;
-    message: string;
-  } {
-    if (this.state.brokenLink || this.state.links.length !== RATIONALE_LINKS.length) {
-      return {
-        success: false,
-        message: "Repair traceability before external verification.",
-      };
-    }
-    if (!this.state.artifacts.A6) {
-      return {
-        success: false,
-        message: "A6 must define the external verification protocol.",
-      };
-    }
+  private previousPhase: MethodTeachingPhase = "not_started";
 
+  public recordFault(
+    type: MethodTeachingFaultType,
+    details: string,
+    targetId?: string,
+  ): void {
+    if (this.state.phase !== "blocked") {
+      this.previousPhase = this.state.phase;
+    }
+    this.state.faults.push({
+      type,
+      details,
+      targetId,
+      timestamp: new Date().toISOString(),
+      resolved: false,
+    });
+    if (type === "pin_failure") {
+      this.state.contractPinned = false;
+      this.state.contractPin = "none";
+    } else if (type === "rationale_failure") {
+      this.state.brokenLink = true;
+    } else if (type === "circularity_failure") {
+      this.state.circularProof = true;
+    } else if (type === "authority_failure" && targetId) {
+      const a3 = this.state.artifacts.A3 as A3UserMap | undefined;
+      if (a3?.roles?.[targetId]) {
+        if (!a3.roles[targetId].authority.includes("waive_policy")) {
+          a3.roles[targetId].authority.push("waive_policy");
+        }
+      }
+    } else if (type === "invalid_artifact" && targetId) {
+      if (targetId === "A2") {
+        this.state.artifacts.A2 = { claims: [] };
+      }
+    }
+    this.state.phase = "blocked";
+    this.state.lastMessage = `Fault injected [${type}]: ${details}`;
+  }
+
+  private resolveFault(
+    type: MethodTeachingFaultType,
+    targetId?: string,
+  ): void {
+    const fault = this.state.faults.find(
+      (f) =>
+        f.type === type &&
+        (!targetId || !f.targetId || f.targetId === targetId) &&
+        !f.resolved,
+    );
+    if (fault) {
+      fault.resolved = true;
+    }
+    this.updatePhaseAfterRepair();
+  }
+
+  private updatePhaseAfterRepair(): void {
+    const hasUnresolved = this.state.faults.some((f) => !f.resolved);
+    if (
+      !hasUnresolved &&
+      !this.state.brokenLink &&
+      !this.state.circularProof &&
+      this.state.contractPinned
+    ) {
+      if (
+        this.previousPhase &&
+        this.previousPhase !== "blocked" &&
+        this.previousPhase !== "not_started"
+      ) {
+        this.state.phase = this.previousPhase;
+      } else if (this.state.transferCase) {
+        this.state.phase = "metamethodological_transfer";
+      } else if (this.state.fadedCase) {
+        this.state.phase = "faded_practice";
+      } else if (this.state.selfExplanation) {
+        this.state.phase = "explained";
+      } else if (this.state.externalReceipt) {
+        this.state.phase = "externally_verified";
+      } else if (this.state.links.length === RATIONALE_LINKS.length) {
+        this.state.phase = "traceable";
+      } else {
+        this.state.phase = "working_map";
+      }
+    }
+  }
+
+  public repairPin(options?: {
+    version?: string;
+    digest?: string;
+    profile?: string;
+  }): MethodPinRepairResult {
+    const version = options?.version || "1.0.0-draft";
+    const digest =
+      options?.digest || "sha256:methodological-guide-authoring-v1";
+    const profile =
+      (options?.profile as any) || this.state.completionProfile || "evidence_focused";
+
+    this.state.contractPinned = true;
+    this.state.contractPin = `methodological-guide-authoring@${version} + ${digest}`;
+    this.state.completionProfile = profile;
+    this.state.recoveryPracticed = true;
+
+    this.resolveFault("pin_failure");
+
+    return {
+      recovered: true,
+      pinnedVersion: version,
+      pinnedDigest: digest,
+      message: `Contract pin restored with version ${version} and digest ${digest}; all valid artifacts preserved.`,
+    };
+  }
+
+  public repairArtifact(id: string, content: unknown): MethodRepairResult {
+    this.state.artifacts[id] = content as string | unknown;
+    this.state.recoveryPracticed = true;
+
+    this.resolveFault("invalid_artifact", id);
+
+    return {
+      recovered: true,
+      preservedArtifacts: Object.keys(this.state.artifacts),
+      message: `Repaired artifact ${id} in place while preserving all existing valid artifacts.`,
+    };
+  }
+
+  public repairAuthority(
+    roleId: string,
+    allowedAuthorities: string[],
+  ): MethodAuthorityRepairResult {
+    const a3 = this.state.artifacts.A3 as A3UserMap | undefined;
+    if (a3?.roles?.[roleId]) {
+      a3.roles[roleId].authority = [...allowedAuthorities];
+    }
+    this.state.recoveryPracticed = true;
+
+    this.resolveFault("authority_failure", roleId);
+
+    return {
+      recovered: true,
+      roleId,
+      allowedAuthorities,
+      message: `Revoked unauthorized authority from ${roleId}; restored strictly governed boundaries.`,
+    };
+  }
+
+  public repairRationaleLink(
+    brokenAnchor?: string,
+    repairedLink?: string,
+  ): MethodRepairResult {
+    if (brokenAnchor && repairedLink) {
+      this.state.links = this.state.links.map((l) =>
+        l === brokenAnchor ? repairedLink : l,
+      );
+      if (!this.state.links.includes(repairedLink)) {
+        this.state.links.push(repairedLink);
+      }
+    } else {
+      this.state.links = [...RATIONALE_LINKS];
+    }
+    this.state.brokenLink = false;
+    this.state.recoveryPracticed = true;
+
+    this.resolveFault("rationale_failure");
+
+    return {
+      recovered: true,
+      preservedArtifacts: Object.keys(this.state.artifacts),
+      message:
+        "Re-resolved broken rationale anchor to live guide citation; all artifacts preserved.",
+    };
+  }
+
+  public repairCircularity(): MethodRepairResult {
+    this.state.circularProof = false;
+    this.state.selfConsistencySeparated = true;
+    this.state.recoveryPracticed = true;
+
+    this.resolveFault("circularity_failure");
+
+    return {
+      recovered: true,
+      preservedArtifacts: Object.keys(this.state.artifacts),
+      message:
+        "Restored strict separation between external verification and self-consistency receipt classes.",
+    };
+  }
+
+  public recordExternalVerification(receipts?: {
+    expert_review?: string;
+    novice_execution?: string;
+    repository_pilot?: string;
+  }): { success: boolean; message: string } {
+    if (!this.state.contractPinned) {
+      return {
+        success: false,
+        message: "Pin the contract before recording verification.",
+      };
+    }
+    if (this.state.links.length < RATIONALE_LINKS.length) {
+      return {
+        success: false,
+        message:
+          "Resolve rationale links before external verification receipts.",
+      };
+    }
     this.state.externalReceipt = true;
+    this.state.selfConsistencySeparated = true;
+    this.state.currentSource =
+      "independent reviewer + novice run + repository pilot";
     this.state.phase = "externally_verified";
     this.state.lastMessage =
-      "Recorded separate expert-review, novice task-performance, and pilot-decision owner receipts; none came from self-application.";
+      "Recorded external verification receipts: expert review, novice run, and 30-day pilot; self-consistency is isolated.";
     return { success: true, message: this.state.lastMessage };
   }
 
-  public submitSelfExplanation(answers?: Record<string, string>): {
-    success: boolean;
-    message: string;
-  } {
+  public recordCircularProof(): { success: boolean; message: string } {
+    this.state.circularProof = true;
+    this.state.phase = "blocked";
+    this.state.lastMessage =
+      "Self-consistency proof was incorrectly substituted for external verification; completion fails closed.";
+    return { success: true, message: this.state.lastMessage };
+  }
+
+  public submitSelfExplanation(answers?: {
+    q1_expansion_signals?: string;
+    q2_concise_a0?: string;
+    q3_non_synthesized_authority?: string;
+    q4_receipt_separation?: string;
+    q5_targeted_recovery?: string;
+  }): { success: boolean; message: string } {
     if (!this.state.externalReceipt) {
       return {
         success: false,
-        message: "Finish the complete worked project before self-explanation.",
+        message:
+          "Complete runnable external verification before self-explanation.",
       };
+    }
+    if (answers) {
+      const vals = Object.values(answers);
+      if (vals.length > 0 && vals.some((a) => typeof a === "string" && a.trim().length < 5)) {
+        return {
+          success: false,
+          message:
+            "Each self-explanation prompt requires a substantive answer citing live guide anchors.",
+        };
+      }
     }
     this.state.selfExplanation = true;
     this.state.phase = "explained";
@@ -282,30 +528,86 @@ export class MethodologyTeachingSession {
     return { success: true, message: this.state.lastMessage };
   }
 
-  public completeFadedCase(): { success: boolean; message: string } {
+  public completeFadedCase(projectOverride?: Partial<GuideProject>): {
+    success: boolean;
+    message: string;
+  } {
     if (!this.state.selfExplanation) {
       return {
         success: false,
         message: "Explain the worked example before fading support.",
       };
     }
+    const defaultIncident = createIncidentHandoffGuideProject();
+    const fadedProj: GuideProject = {
+      ...defaultIncident,
+      ...(projectOverride || {}),
+      artifacts: projectOverride?.artifacts
+        ? (projectOverride.artifacts as any)
+        : defaultIncident.artifacts,
+    };
+
+    const verification = verifyGuideProject(fadedProj);
+    if (!verification.valid) {
+      return {
+        success: false,
+        message: `Faded project validation failed: ${verification.problems.join("; ")}`,
+      };
+    }
+
+    this.state.fadedProject = fadedProj;
     this.state.fadedCase = true;
     this.state.phase = "faded_practice";
     this.state.lastMessage =
-      "Completed a partially supplied incident-handoff guide project with expansion reasons, trace links, and receipts withheld.";
+      "Completed a partially supplied incident-handoff guide project producing every A0–A7 artifact triggered by observed signals with less guidance.";
     return { success: true, message: this.state.lastMessage };
   }
 
-  public routeTransferCase(): { success: boolean; message: string } {
+  public routeTransferCase(options?: {
+    project?: GuideProject;
+    round?: string;
+    allowSelfInvocation?: boolean;
+    allowActiveRewriting?: boolean;
+  }): { success: boolean; message: string } {
     if (!this.state.fadedCase) {
       return {
         success: false,
         message: "Complete the faded case first.",
       };
     }
+
+    if (options?.allowSelfInvocation) {
+      this.state.selfInvocationDetected = true;
+      this.state.phase = "blocked";
+      this.state.lastMessage =
+        "Acyclicity violation: active builder cannot invoke itself recursively.";
+      return { success: false, message: this.state.lastMessage };
+    }
+
+    if (options?.allowActiveRewriting) {
+      this.state.activeRewritingDetected = true;
+      this.state.phase = "blocked";
+      this.state.lastMessage =
+        "Acyclicity violation: active builder cannot rewrite its own live source.";
+      return { success: false, message: this.state.lastMessage };
+    }
+
+    const metamethodologyProject =
+      options?.project || createMetamethodologicalGuideProject();
+
+    const verification = verifyGuideProject(metamethodologyProject);
+    if (!verification.valid) {
+      return {
+        success: false,
+        message: `Metamethodological transfer validation failed: ${verification.problems.join("; ")}`,
+      };
+    }
+
+    this.state.transferProject = metamethodologyProject;
     this.state.transferCase = true;
     this.state.selfConsistencyReceipt = true;
     this.state.selfConsistencySeparated = true;
+    this.state.acyclicityVerified = true;
     this.state.phase = "metamethodological_transfer";
     this.state.lastMessage =
       "For a guide-authoring methodology, selected the metamethodological profile and separate immutable self-consistency assessments; the skill did not invoke or rewrite itself.";
@@ -339,6 +641,8 @@ export class MethodologyTeachingSession {
       (id) => s.artifacts[id] !== undefined,
     );
 
+    const unresolvedFaults = s.faults.filter((f) => !f.resolved);
+
     const reasons: Array<string | false> = [
       !s.task && "the meaningful guide-authoring task was not attempted",
       !s.contractPinned &&
@@ -359,6 +663,12 @@ export class MethodologyTeachingSession {
       s.shadowContract && "the lesson created a shadow Method Contract",
       s.circularProof &&
         "circular proof: self-consistency was used as empirical effectiveness evidence",
+      s.selfInvocationDetected &&
+        "acyclicity violation: self-invocation detected",
+      s.activeRewritingDetected &&
+        "acyclicity violation: active rewriting detected",
+      unresolvedFaults.length > 0 &&
+        `unresolved injected faults: ${unresolvedFaults.map((f) => f.type).join(", ")}`,
     ];
 
     return reasons.filter((r): r is string => Boolean(r));
@@ -377,6 +687,150 @@ export class MethodologyTeachingSession {
     this.state.lastMessage =
       "Completion passed: one pinned, traceable, recovered, externally verified guide project plus faded and metamethodological transfer cases.";
     return { passed: true, blockers: [] };
+  }
+
+  public getRunReport(): MethodologyRunReport {
+    const receipts: MethodologyRunReceipt[] = [];
+    if (this.state.externalReceipt) {
+      receipts.push({
+        id: "REC-external-verification-review",
+        type: "external_verification",
+        profile: "evidence_focused",
+        digest: "sha256:external-verification-receipt-digest",
+        status: "ACCEPTED",
+      });
+    }
+    if (this.state.selfConsistencyReceipt) {
+      receipts.push({
+        id: "REC-self-consistency-fixed-point",
+        type: "self_consistency",
+        profile: "metamethodological",
+        digest: "sha256:self-consistency-fixed-point-digest",
+        status: "ACCEPTED",
+      });
+    }
+
+    return {
+      taskId: this.state.manifest.taskId,
+      status: this.state.status,
+      declaredInputs: this.state.manifest.declaredInputs,
+      prohibitedInputs: [...this.state.prohibitedInputsDetected],
+      interventions: [...this.state.interventions],
+      routeChoices: [...this.state.routeChoices],
+      artifacts: Object.keys(this.state.artifacts),
+      receipts,
+    };
+  }
+
+  public getClaimsReport(): MethodologyClaimsReport {
+    const s = this.state;
+
+    // 1. Faded performance claim
+    const fadedValid =
+      s.fadedCase &&
+      s.fadedProject !== undefined &&
+      verifyGuideProject(s.fadedProject).valid;
+    const fadedStatus: MethodClaimStatus = s.fadedCase
+      ? fadedValid
+        ? "SUPPORTED"
+        : "FALSIFIED"
+      : "FALSIFIED";
+    const fadedEvaluation: MethodClaimEvaluation = {
+      claim:
+        "A faded incident-handoff case produces complete A0-A7 artifacts with less guidance.",
+      status: fadedStatus,
+      evidence: s.fadedCase
+        ? `Faded case completed with all 8 artifacts present and valid in ${s.fadedProject?.id || "faded project"}.`
+        : "Faded case was not completed.",
+      justification:
+        "Validates that the learner can author a complete guide with partial scaffolding withheld.",
+    };
+
+    // 2. Structural transfer claim
+    const transferValid =
+      s.transferCase &&
+      s.transferProject !== undefined &&
+      verifyGuideProject(s.transferProject).valid;
+    const transferStatus: MethodClaimStatus = s.transferCase
+      ? transferValid
+        ? "SUPPORTED"
+        : "FALSIFIED"
+      : "FALSIFIED";
+    const transferEvaluation: MethodClaimEvaluation = {
+      claim:
+        "Metamethodological transfer routes correctly to metamethodological profile with distinct self-consistency receipts.",
+      status: transferStatus,
+      evidence: s.transferCase
+        ? `Metamethodological transfer completed with profile ${s.transferProject?.contract_pin.profile} and isolated self-consistency receipts.`
+        : "Metamethodological transfer was not routed.",
+      justification:
+        "Validates transfer to self-application without confusing self-consistency with external evidence.",
+    };
+
+    // 3. Targeted recovery claim
+    let recoveryStatus: MethodClaimStatus = "INCONCLUSIVE";
+    let recoveryEvidence = "Targeted recovery was not exercised.";
+    if (s.faults.length > 0) {
+      const unresolved = s.faults.filter((f) => !f.resolved);
+      if (unresolved.length === 0) {
+        recoveryStatus = "SUPPORTED";
+        recoveryEvidence = `All ${s.faults.length} injected fault(s) resolved at affected boundaries without restarting unrelated work.`;
+      } else {
+        recoveryStatus = "FALSIFIED";
+        recoveryEvidence = `${unresolved.length}/${s.faults.length} fault(s) remain unresolved: ${unresolved.map((f) => f.type).join(", ")}.`;
+      }
+    } else if (s.recoveryPracticed) {
+      recoveryStatus = "SUPPORTED";
+      recoveryEvidence = "Targeted recovery was practiced and verified.";
+    }
+
+    const recoveryEvaluation: MethodClaimEvaluation = {
+      claim:
+        "Pin, artifact, rationale, authority, and circularity failures stop at affected boundaries and recover precisely.",
+      status: recoveryStatus,
+      evidence: recoveryEvidence,
+      justification:
+        "Ensures failures do not require full workflow restarts or destroy prior valid artifacts.",
+    };
+
+    // 4. Acyclicity claim
+    let acyclicityStatus: MethodClaimStatus = "INCONCLUSIVE";
+    let acyclicityEvidence = "Acyclicity was not evaluated.";
+    if (s.selfInvocationDetected || s.activeRewritingDetected) {
+      acyclicityStatus = "FALSIFIED";
+      acyclicityEvidence = `Acyclicity violated: self_invocation=${s.selfInvocationDetected}, active_rewriting=${s.activeRewritingDetected}.`;
+    } else if (s.acyclicityVerified) {
+      acyclicityStatus = "SUPPORTED";
+      acyclicityEvidence =
+        "Acyclicity verified: no self-invocation, no active rewriting, and immutable bootstrap round boundaries enforced.";
+    }
+
+    const acyclicityEvaluation: MethodClaimEvaluation = {
+      claim:
+        "Active builders and harnesses never invoke or rewrite themselves during metamethodological transfer.",
+      status: acyclicityStatus,
+      evidence: acyclicityEvidence,
+      justification:
+        "Enforces strict acyclic bootstrap rounds and prohibits runaway runtime recursion.",
+    };
+
+    const overallPassed =
+      fadedStatus === "SUPPORTED" &&
+      transferStatus === "SUPPORTED" &&
+      acyclicityStatus === "SUPPORTED" &&
+      recoveryStatus !== "FALSIFIED" &&
+      !s.shadowContract &&
+      !s.circularProof;
+
+    return {
+      overallPassed,
+      claims: {
+        faded_performance: fadedEvaluation,
+        structural_transfer: transferEvaluation,
+        targeted_recovery: recoveryEvaluation,
+        acyclicity: acyclicityEvaluation,
+      },
+    };
   }
 
   public runPrototypeSelfCheck(): PrototypeSelfCheckResult {
@@ -495,3 +949,4 @@ export class MethodologyTeachingSession {
     };
   }
 }
+

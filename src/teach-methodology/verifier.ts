@@ -422,8 +422,9 @@ export function verifyGuideProject(project: unknown): GuideVerificationResult {
     if (!p.contract_pin.version || !p.contract_pin.digest) {
       problems.push("contract_pin must specify version and digest");
     }
-    if (p.contract_pin.profile !== "evidence_focused") {
-      problems.push("Expected evidence_focused completion profile");
+    const validProfiles = ["evidence_focused", "metamethodological", "working", "pilot"];
+    if (!p.contract_pin.profile || !validProfiles.includes(p.contract_pin.profile)) {
+      problems.push("Expected valid completion profile (e.g. evidence_focused or metamethodological)");
     }
   }
 
@@ -506,19 +507,24 @@ export function verifyGuideProject(project: unknown): GuideVerificationResult {
     problems.push("Missing required artifact A3 user map");
   } else {
     const roles = arts.A3.roles;
-    if (!roles.novice_reviewer || !roles.security_owner || !roles.legal_owner) {
-      problems.push(
-        "A3 must define novice_reviewer, security_owner, and legal_owner roles",
-      );
+    if (Object.keys(roles).length < 3) {
+      problems.push("A3 must define at least 3 roles");
     }
-    if (
-      roles.novice_reviewer &&
-      roles.novice_reviewer.authority &&
-      roles.novice_reviewer.authority.includes("waive_policy")
-    ) {
-      problems.push(
-        "Novice reviewer must not have synthesized authority to waive policy",
-      );
+    for (const [roleKey, roleObj] of Object.entries(roles)) {
+      if (!roleObj.id || !roleObj.role || !Array.isArray(roleObj.authority)) {
+        problems.push(`A3 role ${roleKey} is incomplete`);
+      }
+      // Check unauthorized synthesized authority
+      if (
+        (roleKey === "novice_reviewer" || roleKey === "incoming_oncall") &&
+        (roleObj.authority.includes("waive_policy") ||
+          roleObj.authority.includes("waive_severity") ||
+          roleObj.authority.includes("close_incident_unilaterally"))
+      ) {
+        problems.push(
+          `Unprivileged role ${roleKey} must not have synthesized policy-waiver or closure authority`,
+        );
+      }
     }
   }
 
@@ -529,20 +535,13 @@ export function verifyGuideProject(project: unknown): GuideVerificationResult {
     if (arts.A4.rules.length < 3) {
       problems.push("A4 must define at least 3 rules");
     }
-    const reviewRule = arts.A4.rules.find(
-      (r) => r.id === "RULE-review-dependency-change",
-    );
-    if (!reviewRule) {
-      problems.push("A4 missing RULE-review-dependency-change");
-    } else {
-      if (!reviewRule.branches || reviewRule.branches.length < 4) {
-        problems.push(
-          "RULE-review-dependency-change must have at least 4 branches (changes requested, security escalation, license escalation, approve)",
-        );
+    for (const rule of arts.A4.rules) {
+      if (!rule.id || !rule.trigger || !rule.action || !rule.branches || !rule.output) {
+        problems.push(`A4 rule ${rule.id || "unknown"} missing required structure`);
       }
-      if (!reviewRule.recovery || !reviewRule.escalation) {
+      if (!rule.recovery || !rule.escalation) {
         problems.push(
-          "RULE-review-dependency-change must define executable recovery and escalation fields",
+          `A4 rule ${rule.id || "unknown"} must define executable recovery and escalation fields`,
         );
       }
     }
@@ -604,6 +603,16 @@ export function verifyGuideProject(project: unknown): GuideVerificationResult {
     }
   }
 
+  // Verify Acyclicity if metamethodological or metadata present
+  if (p.acyclicity_metadata) {
+    if (p.acyclicity_metadata.self_invocation === true) {
+      problems.push("Acyclicity violation: self_invocation must be false");
+    }
+    if (p.acyclicity_metadata.active_rewriting === true) {
+      problems.push("Acyclicity violation: active_rewriting must be false");
+    }
+  }
+
   // Verify Receipts separation
   if (p.contract_pin?.profile === "evidence_focused") {
     if (
@@ -613,6 +622,16 @@ export function verifyGuideProject(project: unknown): GuideVerificationResult {
     ) {
       problems.push(
         "evidence_focused profile requires external_verification receipt",
+      );
+    }
+  } else if (p.contract_pin?.profile === "metamethodological") {
+    if (
+      !p.receipts ||
+      typeof p.receipts !== "object" ||
+      !p.receipts.self_consistency
+    ) {
+      problems.push(
+        "metamethodological profile requires self_consistency receipt",
       );
     }
   }

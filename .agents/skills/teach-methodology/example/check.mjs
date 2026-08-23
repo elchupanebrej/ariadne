@@ -122,4 +122,64 @@ assert.throws(() => {
   validateProject(project, invalidReceipts);
 }, /circular self-consistency proof/);
 
-console.log("All Methodology Authoring guide project checks and invalid path rejections passed successfully.");
+// 11. Validate Metamethodology & Acyclicity Rules
+function validateMetamethodologyProject(p, receipts) {
+  if (p.contract_pin?.profile !== "metamethodological") {
+    throw new Error("Rejected: expected metamethodological profile");
+  }
+  if (p.acyclicity_metadata?.self_invocation === true) {
+    throw new Error("Rejected: self_invocation attempted");
+  }
+  if (p.acyclicity_metadata?.active_rewriting === true) {
+    throw new Error("Rejected: active_rewriting attempted");
+  }
+  if (!receipts?.self_consistency) {
+    throw new Error("Rejected: missing self_consistency receipts for metamethodological profile");
+  }
+  return true;
+}
+
+const metaProject = {
+  format: "methodological-guide-project/1",
+  id: "metamethodology-authoring-guide",
+  contract_pin: {
+    id: "methodological-guide-authoring",
+    version: "1.0.0-draft",
+    digest: "sha256:methodological-guide-authoring-v1",
+    profile: "metamethodological",
+  },
+  guide_pin: {
+    href: "docs/designing_methodological_guides.md",
+  },
+  acyclicity_metadata: {
+    immutable_round: "round-1",
+    build_time_input: true,
+    self_invocation: false,
+    active_rewriting: false,
+  },
+  receipts: {
+    self_consistency: {
+      assessor_a: "passed",
+      assessor_b: "passed",
+      fixed_point: "passed",
+    },
+  },
+};
+
+assert.equal(validateMetamethodologyProject(metaProject, metaProject.receipts), true);
+
+// Invalid path 5: metamethodological self-invocation
+assert.throws(() => {
+  const invalid = JSON.parse(JSON.stringify(metaProject));
+  invalid.acyclicity_metadata.self_invocation = true;
+  validateMetamethodologyProject(invalid, invalid.receipts);
+}, /self_invocation attempted/);
+
+// Invalid path 6: active rewriting
+assert.throws(() => {
+  const invalid = JSON.parse(JSON.stringify(metaProject));
+  invalid.acyclicity_metadata.active_rewriting = true;
+  validateMetamethodologyProject(invalid, invalid.receipts);
+}, /active_rewriting attempted/);
+
+console.log("All Methodology Authoring guide project checks, transfer assertions, and invalid path rejections passed successfully.");

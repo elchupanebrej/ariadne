@@ -129,6 +129,8 @@ export interface A7LifecycleLog {
   review_triggers: string[];
   feedback_and_deviations: string;
   distribution_and_retirement: string;
+  active_successor?: string;
+  retirement_criteria?: string[];
 }
 
 export interface TraceabilityRow {
@@ -139,6 +141,12 @@ export interface TraceabilityRow {
   lifecycle_version: string;
 }
 
+export type MethodCompletionProfile =
+  | "pilot"
+  | "working"
+  | "evidence_focused"
+  | "metamethodological";
+
 export interface GuideProject {
   format: "methodological-guide-project/1";
   id: string;
@@ -148,7 +156,7 @@ export interface GuideProject {
     id: string;
     version: string;
     digest: string;
-    profile: string;
+    profile: MethodCompletionProfile;
   };
   guide_pin: {
     href: string;
@@ -166,6 +174,47 @@ export interface GuideProject {
   };
   traceability: TraceabilityRow[];
   receipts?: Record<string, unknown>;
+  acyclicity_metadata?: {
+    immutable_round: string;
+    build_time_input: boolean;
+    self_invocation: boolean;
+    active_rewriting: boolean;
+  };
+}
+
+export type MethodTeachingFaultType =
+  | "pin_failure"
+  | "invalid_artifact"
+  | "rationale_failure"
+  | "authority_failure"
+  | "circularity_failure";
+
+export interface MethodTeachingFault {
+  type: MethodTeachingFaultType;
+  targetId?: string;
+  details: string;
+  timestamp: string;
+  resolved: boolean;
+}
+
+export interface MethodRepairResult {
+  recovered: boolean;
+  preservedArtifacts: string[];
+  message: string;
+}
+
+export interface MethodPinRepairResult {
+  recovered: boolean;
+  pinnedVersion: string;
+  pinnedDigest: string;
+  message: string;
+}
+
+export interface MethodAuthorityRepairResult {
+  recovered: boolean;
+  roleId: string;
+  allowedAuthorities: string[];
+  message: string;
 }
 
 export interface MethodTeachingState {
@@ -183,7 +232,12 @@ export interface MethodTeachingState {
   selfConsistencySeparated: boolean;
   selfExplanation: boolean;
   fadedCase: boolean;
+  fadedProject?: GuideProject;
   transferCase: boolean;
+  transferProject?: GuideProject;
+  acyclicityVerified: boolean;
+  selfInvocationDetected: boolean;
+  activeRewritingDetected: boolean;
   recoveryPracticed: boolean;
   brokenLink: boolean;
   shadowContract: boolean;
@@ -191,6 +245,9 @@ export interface MethodTeachingState {
   lastMessage: string;
   manifest: MethodDeclaredInputManifest;
   prohibitedInputsDetected: string[];
+  interventions: string[];
+  routeChoices: string[];
+  faults: MethodTeachingFault[];
 }
 
 export interface GuideVerificationResult {
@@ -203,4 +260,43 @@ export interface PrototypeSelfCheckResult {
   passed: boolean;
   pathsPassed: number;
   message: string;
+}
+
+export interface MethodologyRunReceipt {
+  id: string;
+  type: string;
+  profile: string;
+  digest: string;
+  status: string;
+}
+
+export interface MethodologyRunReport {
+  taskId: string;
+  status: MethodTeachingStatus;
+  declaredInputs: MethodDeclaredInputItem[];
+  prohibitedInputs: string[];
+  interventions: string[];
+  routeChoices: string[];
+  artifacts: string[];
+  receipts: MethodologyRunReceipt[];
+}
+
+export type MethodClaimStatus = "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE";
+
+export interface MethodClaimEvaluation {
+  claim: string;
+  status: MethodClaimStatus;
+  evidence: string;
+  justification: string;
+  details?: Record<string, unknown>;
+}
+
+export interface MethodologyClaimsReport {
+  overallPassed: boolean;
+  claims: {
+    faded_performance: MethodClaimEvaluation;
+    structural_transfer: MethodClaimEvaluation;
+    targeted_recovery: MethodClaimEvaluation;
+    acyclicity: MethodClaimEvaluation;
+  };
 }
