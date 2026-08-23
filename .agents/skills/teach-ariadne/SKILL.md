@@ -55,6 +55,11 @@ After the runnable check passes, the learner must answer:
 
 ## Runnable Completion Check
 
+From the repository root:
+
 ```sh
-node example/check.mjs && ariadne gate all --strict
+npm run build && node .agents/skills/teach-ariadne/example/check.mjs
 ```
+
+The check runs the parser assertions and graph integrity checks, then invokes
+the built CLI (`gate all --strict`) against `example/.ariadne/GRAPH.jsonl`.

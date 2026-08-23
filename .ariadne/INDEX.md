@@ -1,6 +1,6 @@
 # Ariadne Epistemic Index
 
-Nodes: 168 · Edges: 263 · Active: 168
+Nodes: 163 · Edges: 240 · Active: 163
 Unknowns: 16 · Candidates: 34
 
 ## Frontier
@@ -33,4 +33,4 @@ Unknowns: 16 · Candidates: 34
 | CLM-owner-adapters-clean-session-conformance | PROPOSED | UNVERIFIED | Every advertised owner adapter implements capabilities, start, resume, cancel, and events against r… |
 | CLM-teaching-skills-clean-session-transfer | PROPOSED | UNVERIFIED | Each retained Teaching Skill lets a fresh session complete one held-out faded task and one structur… |
 
-*Omitted 68 additional frontier nodes for compactness.*
+*Omitted 63 additional frontier nodes for compactness.*
