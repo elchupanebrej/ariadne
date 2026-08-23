@@ -88,6 +88,7 @@ export interface HarnessTriggerDecision {
   smallest_mechanism_added: string;
   trigger_observed: boolean;
   necessity_criterion: string;
+  owner?: "method" | "tracker" | "ariadne" | "host" | "orchestration_harness";
 }
 
 export interface ContextManifestPointer {
@@ -254,11 +255,17 @@ export interface HarnessProject {
 export interface HarnessTeachingFault {
   type:
     | "pin_mismatch"
+    | "invalid_pointer"
+    | "ownership_conflict"
+    | "ambiguous_side_effect"
+    | "unsupported_capability"
+    | "normative_delta"
+    | "runtime_recursion"
     | "shadow_state"
     | "ambiguous_effect_duplicate_replay"
-    | "untested_baseline"
-    | "runtime_recursion";
+    | "untested_baseline";
   details: string;
+  target?: string;
   resolved: boolean;
   timestamp: string;
 }
@@ -281,7 +288,12 @@ export interface HarnessTeachingState {
   lifecycle: boolean;
   selfExplanation: boolean;
   fadedCase: boolean;
+  fadedProject?: HarnessProject;
   transferCase: boolean;
+  transferProject?: HarnessProject;
+  acyclicityVerified?: boolean;
+  selfInvocationDetected?: boolean;
+  runtimeRecursionDetected?: boolean;
   shadowState: boolean;
   duplicateEffect: boolean;
   pinDrift: boolean;
@@ -292,6 +304,8 @@ export interface HarnessTeachingState {
   interventions: string[];
   routeChoices: string[];
   faults: HarnessTeachingFault[];
+  artifacts: string[];
+  receipts: Array<{ id: string; type: string; owner: string; digest?: string }>;
 }
 
 export interface HarnessVerificationResult {
@@ -304,4 +318,42 @@ export interface HarnessSelfCheckResult {
   passed: boolean;
   pathsPassed: number;
   message: string;
+}
+
+export interface HarnessComparisonArm {
+  taskId: string;
+  sourcePins: Record<string, string>;
+  capabilities: Record<string, boolean | string | string[]>;
+  criticalCriteria: string[];
+}
+
+export interface HarnessRunReport {
+  taskId: string;
+  taskDescription: string;
+  declaredInputs: HarnessDeclaredInputItem[];
+  prohibitedInputs: string[];
+  interventions: string[];
+  routeChoices: string[];
+  artifacts: string[];
+  receipts: Array<{ id: string; type: string; owner: string }>;
+  comparisonArms: {
+    teaching_skill_arm: HarnessComparisonArm;
+    thin_baseline_arm: HarnessComparisonArm;
+  };
+}
+
+export interface HarnessClaimEvaluation {
+  status: "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE";
+  evidence: string;
+}
+
+export interface HarnessClaimsReport {
+  overallPassed: boolean;
+  claims: {
+    faded_performance: HarnessClaimEvaluation;
+    structural_transfer: HarnessClaimEvaluation;
+    targeted_recovery: HarnessClaimEvaluation;
+    mechanism_necessity: HarnessClaimEvaluation;
+    deletion_discipline: HarnessClaimEvaluation;
+  };
 }

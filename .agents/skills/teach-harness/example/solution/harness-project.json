@@ -214,49 +214,57 @@
       "observable_condition": "Ordered context must survive a fresh process",
       "smallest_mechanism_added": "content-addressed context manifest",
       "trigger_observed": true,
-      "necessity_criterion": "Process loss requires fresh session to reload exact context without opaque prompt assembly"
+      "necessity_criterion": "Process loss requires fresh session to reload exact context without opaque prompt assembly",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "An attempt must pause, resume, cancel, or correlate retries",
       "smallest_mechanism_added": "repository-visible attempt cursor",
       "trigger_observed": true,
-      "necessity_criterion": "Cross-session continuation requires repository-visible run_id, step, status, and event cursor"
+      "necessity_criterion": "Cross-session continuation requires repository-visible run_id, step, status, and event cursor",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "Advancement depends on machine-checkable output",
       "smallest_mechanism_added": "closed artifact and receipt gates",
       "trigger_observed": true,
-      "necessity_criterion": "Owner verification receipts must be checkable by gates before advancing steps"
+      "necessity_criterion": "Owner verification receipts must be checkable by gates before advancing steps",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "Invocation, resume, approvals, sandbox, or traces differ by host",
       "smallest_mechanism_added": "host capability adapter",
       "trigger_observed": true,
-      "necessity_criterion": "Different host environments require standard capability negotiation and pointer passing"
+      "necessity_criterion": "Different host environments require standard capability negotiation and pointer passing",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "Human input or permission is pending",
       "smallest_mechanism_added": "pending approval pointer",
       "trigger_observed": true,
-      "necessity_criterion": "Security approval requires waiting state with pending-action pointer without synthesized authority"
+      "necessity_criterion": "Security approval requires waiting state with pending-action pointer without synthesized authority",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "An effect may replay after process loss",
       "smallest_mechanism_added": "idempotency and replay declaration",
       "trigger_observed": true,
-      "necessity_criterion": "Crash after publication must stop retries and await owner inspection receipt instead of duplicate replay"
+      "necessity_criterion": "Crash after publication must stop retries and await owner inspection receipt instead of duplicate replay",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "Diagnosis or cross-host comparison needs correlation",
       "smallest_mechanism_added": "normalized lifecycle and trace correlation",
       "trigger_observed": true,
-      "necessity_criterion": "Normalized lifecycle events must carry run, attempt, step, and host trace correlation"
+      "necessity_criterion": "Normalized lifecycle events must carry run, attempt, step, and host trace correlation",
+      "owner": "orchestration_harness"
     },
     {
       "observable_condition": "Method, skill, adapter, workspace, or state versions may drift",
       "smallest_mechanism_added": "version and digest pin gate",
       "trigger_observed": true,
-      "necessity_criterion": "State loads must fail closed if source pins or digests do not match exactly"
+      "necessity_criterion": "State loads must fail closed if source pins or digests do not match exactly",
+      "owner": "orchestration_harness"
     }
   ],
   "artifact_contract": {

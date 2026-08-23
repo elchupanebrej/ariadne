@@ -77,6 +77,12 @@ if (!project.triggered_mechanisms || project.triggered_mechanisms.length < 8) {
   fail("Must declare at least 8 observed triggered mechanisms for minimal neutral kernel");
 }
 
+for (const tm of project.triggered_mechanisms) {
+  if (!tm.observable_condition || !tm.smallest_mechanism_added || tm.trigger_observed !== true || !tm.necessity_criterion) {
+    fail(`Mechanism ${tm.smallest_mechanism_added} missing trigger or necessity criterion`);
+  }
+}
+
 if (!project.artifact_contract?.context_manifest?.length || !project.artifact_contract?.attempt_cursor) {
   fail("Artifact contract must define context_manifest and attempt_cursor");
 }

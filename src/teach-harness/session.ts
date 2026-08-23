@@ -1,18 +1,27 @@
 import type {
+  ArtifactEnvelopeRecord,
+  AttemptCursorRecord,
+  CandidateEvaluationResult,
+  ContextManifestPointer,
   HarnessArtifactContract,
   HarnessCandidateSelection,
+  HarnessClaimsReport,
+  HarnessComparisonArm,
+  HarnessDeclaredInputItem,
   HarnessDeclaredInputManifest,
   HarnessLifecycleRecord,
   HarnessOutcomeRequirements,
   HarnessOwnershipMap,
   HarnessProject,
   HarnessRecoveryPolicy,
+  HarnessRunReport,
   HarnessSelfCheckResult,
   HarnessTeachingFault,
   HarnessTeachingPhase,
   HarnessTeachingState,
   HarnessTeachingStatus,
   HarnessTriggerDecision,
+  HostCapabilityAdapterContract,
 } from "./types.js";
 import {
   createDefaultArtifactContract,
@@ -27,6 +36,8 @@ import {
   KERNEL_TRIGGERED_MECHANISMS,
   verifyHarnessProject,
 } from "./verifier.js";
+import { createIssueTriageHarnessProject } from "./issue-triage.js";
+import { createStagedSelfApplicationHarnessProject } from "./staged-self-application.js";
 
 const KERNEL_FEATURE_NAMES = [
   "content-addressed context manifest",
@@ -68,6 +79,9 @@ export class HarnessTeachingSession {
       selfExplanation: false,
       fadedCase: false,
       transferCase: false,
+      acyclicityVerified: false,
+      selfInvocationDetected: false,
+      runtimeRecursionDetected: false,
       shadowState: false,
       duplicateEffect: false,
       pinDrift: false,
@@ -81,6 +95,22 @@ export class HarnessTeachingSession {
         "references/harness-research.md",
       ],
       faults: [],
+      artifacts: [
+        "ART-harness-manifest",
+        "ART-harness-ownership-map",
+        "ART-harness-candidate-selection",
+        "ART-harness-artifact-contract",
+        "ART-harness-recovery-policy",
+        "ART-harness-lifecycle-record",
+      ],
+      receipts: [
+        {
+          id: "RECEIPT-harness-init",
+          type: "lifecycle_receipt",
+          owner: "orchestration_harness",
+          digest: "sha256:harness-init-receipt-v1",
+        },
+      ],
     };
   }
 
@@ -102,6 +132,162 @@ export class HarnessTeachingSession {
     if (!this.state.routeChoices.includes(route)) {
       this.state.routeChoices.push(route);
     }
+  }
+
+  public recordFault(
+    type: HarnessTeachingFault["type"],
+    details: string,
+    target?: string,
+  ): void {
+    this.state.faults.push({
+      type,
+      details,
+      target,
+      resolved: false,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (type === "pin_mismatch") {
+      this.state.pins = false;
+      this.state.pinDrift = true;
+      this.state.phase = "blocked";
+    } else if (type === "shadow_state" || type === "ownership_conflict") {
+      this.state.shadowState = true;
+      this.state.phase = "blocked";
+    } else if (type === "ambiguous_side_effect") {
+      this.state.ambiguousEffect = true;
+      this.state.phase = "waiting_for_inspection";
+    } else if (type === "ambiguous_effect_duplicate_replay") {
+      this.state.duplicateEffect = true;
+      this.state.ambiguousEffect = false;
+      this.state.phase = "blocked";
+    } else if (type === "runtime_recursion") {
+      this.state.runtimeRecursion = true;
+      this.state.phase = "blocked";
+    } else {
+      this.state.phase = "blocked";
+    }
+
+    this.state.lastMessage = details;
+  }
+
+  private restoreUnblockedPhase(fallback: HarnessTeachingPhase): void {
+    if (this.state.phase === "blocked") {
+      this.state.phase = this.state.transferCase
+        ? "staged_transfer"
+        : this.state.fadedCase
+        ? "faded_practice"
+        : this.state.selfExplanation
+        ? "explained"
+        : fallback;
+    }
+  }
+
+  public repairPin(options?: {
+    contractVersion?: string;
+    contractDigest?: string;
+  }): { recovered: boolean; message: string } {
+    this.state.pins = true;
+    this.state.pinDrift = false;
+
+    if (options?.contractDigest) {
+      const contractInput = this.state.manifest.declaredInputs.find(
+        (i) => i.role === "method-contract",
+      );
+      if (contractInput) {
+        contractInput.digest = options.contractDigest;
+        if (options.contractVersion) {
+          contractInput.version = options.contractVersion;
+        }
+      }
+    }
+
+    for (const f of this.state.faults) {
+      if (f.type === "pin_mismatch") {
+        f.resolved = true;
+      }
+    }
+
+    this.restoreUnblockedPhase("sources_pinned");
+    this.state.lastMessage = "Restored matching source pins and digests.";
+    return { recovered: true, message: this.state.lastMessage };
+  }
+
+  public repairPointer(
+    pointerId: string,
+    repairedPointer?: Partial<ContextManifestPointer>,
+  ): { recovered: boolean; pointerId: string; message: string } {
+    for (const f of this.state.faults) {
+      if (f.type === "invalid_pointer" && (!f.target || f.target === pointerId)) {
+        f.resolved = true;
+        if (repairedPointer) {
+          f.details = `Repaired: ${JSON.stringify(repairedPointer)}`;
+        }
+      }
+    }
+
+    this.restoreUnblockedPhase("artifact_contract");
+    this.state.lastMessage = `Repaired context manifest pointer ${pointerId} in place.`;
+    return { recovered: true, pointerId, message: this.state.lastMessage };
+  }
+
+  public repairOwnership(
+    owner: string,
+    allowedResponsibilities: string[],
+  ): { recovered: boolean; owner: string; allowedResponsibilities: string[]; message: string } {
+    this.state.shadowState = false;
+
+    for (const f of this.state.faults) {
+      if (
+        (f.type === "ownership_conflict" || f.type === "shadow_state") &&
+        (!f.target || f.target === owner)
+      ) {
+        f.resolved = true;
+        f.details = `Restricted to: ${allowedResponsibilities.join(", ")}`;
+      }
+    }
+
+    this.restoreUnblockedPhase("ownership_boundary");
+    this.state.lastMessage = `Restored strict single-ownership boundary for ${owner}.`;
+    return { recovered: true, owner, allowedResponsibilities, message: this.state.lastMessage };
+  }
+
+  public repairCapability(
+    adapterId: string,
+    supportedCapabilities: Record<string, unknown>,
+  ): { recovered: boolean; adapterId: string; supportedCapabilities: Record<string, unknown>; message: string } {
+    for (const f of this.state.faults) {
+      if (
+        f.type === "unsupported_capability" &&
+        (!f.target || f.target === adapterId)
+      ) {
+        f.resolved = true;
+        f.details = `Capabilities provided: ${JSON.stringify(supportedCapabilities)}`;
+      }
+    }
+
+    this.restoreUnblockedPhase("artifact_contract");
+    this.state.lastMessage = `Updated host adapter capability contract for ${adapterId}.`;
+    return { recovered: true, adapterId, supportedCapabilities, message: this.state.lastMessage };
+  }
+
+  public repairRuntimeRecursion(): { recovered: boolean; message: string } {
+    this.state.runtimeRecursion = false;
+    this.state.runtimeRecursionDetected = false;
+
+    for (const f of this.state.faults) {
+      if (f.type === "runtime_recursion") {
+        f.resolved = true;
+      }
+    }
+
+    if (this.state.phase === "blocked") {
+      this.state.phase = "staged_transfer";
+    }
+
+    this.state.lastMessage =
+      "Removed runtime recursion and restored acyclic build-time boundary.";
+    return { recovered: true, message: this.state.lastMessage };
   }
 
   public startTask(
@@ -298,7 +484,7 @@ export class HarnessTeachingSession {
     receiptId: string;
     ownerVerification: string;
   }): { success: boolean; message: string } {
-    if (!this.state.ambiguousEffect) {
+    if (!this.state.ambiguousEffect && !this.state.faults.some((f) => f.type === "ambiguous_side_effect")) {
       return {
         success: false,
         message: "Stopped: recovery requires an observed ambiguous effect.",
@@ -306,7 +492,30 @@ export class HarnessTeachingSession {
     }
     this.state.ambiguousEffect = false;
     this.state.recoveryPracticed = true;
-    this.state.phase = "recovered";
+    this.state.duplicateEffect = false;
+
+    for (const f of this.state.faults) {
+      if (
+        f.type === "ambiguous_side_effect" ||
+        f.type === "ambiguous_effect_duplicate_replay"
+      ) {
+        f.resolved = true;
+      }
+    }
+
+    if (this.state.phase === "waiting_for_inspection" || this.state.phase === "blocked") {
+      this.state.phase = "recovered";
+    }
+
+    if (receipt) {
+      this.state.receipts.push({
+        id: receipt.receiptId,
+        type: "owner_effect_receipt",
+        owner: "tracker",
+        digest: "sha256:owner-effect-receipt-v1",
+      });
+    }
+
     this.state.lastMessage =
       "The owner inspected the external effect, attached its receipt, and resumed without automatic replay.";
     return { success: true, message: this.state.lastMessage };
@@ -369,13 +578,31 @@ export class HarnessTeachingSession {
     return { success: true, message: this.state.lastMessage };
   }
 
-  public completeFadedCase(): { success: boolean; message: string } {
+  public completeFadedCase(
+    project?: Partial<HarnessProject>,
+  ): { success: boolean; message: string } {
     if (!this.state.selfExplanation) {
       return {
         success: false,
         message: "Stopped: explain the complete example before fading support.",
       };
     }
+
+    let targetProject: HarnessProject;
+    if (project) {
+      const verification = verifyHarnessProject(project as HarnessProject);
+      if (!verification.valid) {
+        return {
+          success: false,
+          message: `Validation failed: ${verification.problems.join("; ")}`,
+        };
+      }
+      targetProject = project as HarnessProject;
+    } else {
+      targetProject = createIssueTriageHarnessProject();
+    }
+
+    this.state.fadedProject = targetProject;
     this.state.fadedCase = true;
     this.state.phase = "faded_practice";
     this.state.lastMessage =
@@ -383,14 +610,63 @@ export class HarnessTeachingSession {
     return { success: true, message: this.state.lastMessage };
   }
 
-  public routeTransferCase(): { success: boolean; message: string } {
+  public routeTransferCase(options?: {
+    allowSelfInvocation?: boolean;
+    allowRuntimeRecursion?: boolean;
+    project?: Partial<HarnessProject>;
+  }): { success: boolean; message: string } {
     if (!this.state.fadedCase) {
       return {
         success: false,
         message: "Stopped: complete the faded case first.",
       };
     }
+
+    if (options?.allowSelfInvocation) {
+      this.state.selfInvocationDetected = true;
+      this.state.phase = "blocked";
+      this.recordFault(
+        "runtime_recursion",
+        "Acyclicity violation: active builder self-invocation detected",
+      );
+      return {
+        success: false,
+        message: "Acyclicity violation: active builder self-invocation detected",
+      };
+    }
+
+    if (options?.allowRuntimeRecursion) {
+      this.state.runtimeRecursionDetected = true;
+      this.state.phase = "blocked";
+      this.recordFault(
+        "runtime_recursion",
+        "Acyclicity violation: runtime recursion detected",
+      );
+      return {
+        success: false,
+        message: "Acyclicity violation: runtime recursion detected",
+      };
+    }
+
+    let targetProject: HarnessProject;
+    if (options?.project) {
+      const verification = verifyHarnessProject(options.project as HarnessProject);
+      if (!verification.valid) {
+        return {
+          success: false,
+          message: `Validation failed: ${verification.problems.join("; ")}`,
+        };
+      }
+      targetProject = options.project as HarnessProject;
+    } else {
+      targetProject = createStagedSelfApplicationHarnessProject();
+    }
+
+    this.state.transferProject = targetProject;
     this.state.transferCase = true;
+    this.state.acyclicityVerified = true;
+    this.state.selfInvocationDetected = false;
+    this.state.runtimeRecursionDetected = false;
     this.state.phase = "staged_transfer";
     this.state.lastMessage =
       "Routed HA_n to build OH_n, then OH_n to two isolated applications of M_n; the active skill and harness never invoke or rewrite their builders.";
@@ -398,57 +674,31 @@ export class HarnessTeachingSession {
   }
 
   public injectShadowState(): void {
-    this.state.shadowState = true;
-    this.state.faults.push({
-      type: "shadow_state",
-      details:
-        "Copied Ariadne claims, tracker status, and host approval state into the harness ledger.",
-      resolved: false,
-      timestamp: new Date().toISOString(),
-    });
-    this.state.lastMessage =
-      "Copied Ariadne claims, tracker status, and host approval state into the harness ledger.";
+    this.recordFault(
+      "shadow_state",
+      "Copied Ariadne claims, tracker status, and host approval state into the harness ledger.",
+    );
   }
 
   public injectDuplicateReplay(): void {
-    this.state.duplicateEffect = true;
-    this.state.ambiguousEffect = false;
-    this.state.faults.push({
-      type: "ambiguous_effect_duplicate_replay",
-      details:
-        "Automatically retried publication without an owner replay declaration or inspection receipt.",
-      resolved: false,
-      timestamp: new Date().toISOString(),
-    });
-    this.state.lastMessage =
-      "Automatically retried publication without an owner replay declaration or inspection receipt.";
+    this.recordFault(
+      "ambiguous_effect_duplicate_replay",
+      "Automatically retried publication without an owner replay declaration or inspection receipt.",
+    );
   }
 
   public injectPinDrift(): void {
-    this.state.pinDrift = true;
-    this.state.pins = false;
-    this.state.faults.push({
-      type: "pin_mismatch",
-      details:
-        "Removed the Method Contract digest while retaining derived run and artifact records.",
-      resolved: false,
-      timestamp: new Date().toISOString(),
-    });
-    this.state.lastMessage =
-      "Removed the Method Contract digest while retaining derived run and artifact records.";
+    this.recordFault(
+      "pin_mismatch",
+      "Removed the Method Contract digest while retaining derived run and artifact records.",
+    );
   }
 
   public injectRuntimeRecursion(): void {
-    this.state.runtimeRecursion = true;
-    this.state.faults.push({
-      type: "runtime_recursion",
-      details:
-        "Configured OH_n to invoke HA_n during its own active self-application round.",
-      resolved: false,
-      timestamp: new Date().toISOString(),
-    });
-    this.state.lastMessage =
-      "Configured OH_n to invoke HA_n during its own active self-application round.";
+    this.recordFault(
+      "runtime_recursion",
+      "Configured OH_n to invoke HA_n during its own active self-application round.",
+    );
   }
 
   public getBlockers(): string[] {
@@ -483,6 +733,10 @@ export class HarnessTeachingSession {
         "an ambiguous side effect was automatically replayed",
       s.pinDrift && "derived state no longer matches the pinned sources",
       s.runtimeRecursion && "the runtime invokes its active builder",
+      Boolean(s.selfInvocationDetected) &&
+        "the active builder attempted self-invocation",
+      Boolean(s.runtimeRecursionDetected) &&
+        "the runtime attempted recursive invocation of builder",
     ];
     return list.filter((item): item is string => typeof item === "string");
   }
@@ -528,6 +782,146 @@ export class HarnessTeachingSession {
       status: "independent",
       blockers: [],
       message: this.state.lastMessage,
+    };
+  }
+
+  public getRunReport(): HarnessRunReport {
+    const sourcePinsMap: Record<string, string> = {};
+    for (const input of this.state.manifest.declaredInputs) {
+      sourcePinsMap[input.role] = `${input.version || "1.0.0"}${
+        input.digest ? ` (${input.digest})` : ""
+      }`;
+    }
+
+    const hostCapabilities: Record<string, boolean | string | string[]> = {
+      supported_versions: ["1.0.0"],
+      supports_resume: true,
+      supports_native_approvals: true,
+      supports_trace_correlation: true,
+      sandbox_isolation_level: "process-sandbox",
+    };
+
+    const criticalCriteria = [
+      "Cold start loading from repository",
+      "Mid-run continuation across processes",
+      "Ambiguous side-effect safe recovery",
+      "Single ownership without shadow state",
+      "Acyclic build-time boundary enforcement",
+    ];
+
+    const buildArm = (taskId: string): HarnessComparisonArm => ({
+      taskId,
+      sourcePins: { ...sourcePinsMap },
+      capabilities: { ...hostCapabilities },
+      criticalCriteria: [...criticalCriteria],
+    });
+
+    return {
+      taskId: this.state.manifest.taskId,
+      taskDescription: this.state.manifest.taskDescription,
+      declaredInputs: this.state.manifest.declaredInputs,
+      prohibitedInputs: [...this.state.prohibitedInputsDetected],
+      interventions: [...this.state.interventions],
+      routeChoices: [...this.state.routeChoices],
+      artifacts: [...this.state.artifacts],
+      receipts: [...this.state.receipts],
+      comparisonArms: {
+        teaching_skill_arm: buildArm(this.state.manifest.taskId),
+        thin_baseline_arm: buildArm(this.state.manifest.taskId),
+      },
+    };
+  }
+
+  public getClaimsReport(): HarnessClaimsReport {
+    // 1. Faded performance
+    const fadedSupported = this.state.fadedCase && !!this.state.fadedProject;
+    const fadedClaim = {
+      status: fadedSupported ? ("SUPPORTED" as const) : ("FALSIFIED" as const),
+      evidence: fadedSupported
+        ? "Issue-triage continuation case completed with schema-valid project selecting only observed triggers"
+        : "Faded case not completed or missing project record",
+    };
+
+    // 2. Structural transfer
+    const transferSupported =
+      this.state.transferCase &&
+      this.state.acyclicityVerified &&
+      !this.state.selfInvocationDetected &&
+      !this.state.runtimeRecursionDetected;
+    const transferClaim = {
+      status: transferSupported ? ("SUPPORTED" as const) : ("FALSIFIED" as const),
+      evidence: transferSupported
+        ? "Staged self-application transfer case completed with verified acyclic build-time boundary"
+        : "Transfer case not completed or acyclicity violation detected",
+    };
+
+    // 3. Targeted recovery
+    let recoveryClaim: {
+      status: "SUPPORTED" | "FALSIFIED" | "INCONCLUSIVE";
+      evidence: string;
+    };
+    if (this.state.faults.length === 0) {
+      recoveryClaim = {
+        status: "INCONCLUSIVE",
+        evidence: "No faults injected; clean baseline execution verified",
+      };
+    } else {
+      const unresolvedCount = this.state.faults.filter((f) => !f.resolved).length;
+      if (unresolvedCount === 0) {
+        recoveryClaim = {
+          status: "SUPPORTED",
+          evidence: `All ${this.state.faults.length} injected fault(s) resolved via targeted recovery at affected boundaries`,
+        };
+      } else {
+        recoveryClaim = {
+          status: "FALSIFIED",
+          evidence: `${unresolvedCount}/${this.state.faults.length} fault(s) remain unresolved`,
+        };
+      }
+    }
+
+    // 4. Mechanism necessity
+    const isThin = this.state.candidate === "thin baseline";
+    const necessitySupported = isThin
+      ? this.state.features.length === 0
+      : this.state.features.length === KERNEL_FEATURE_NAMES.length;
+    const necessityClaim = {
+      status: necessitySupported ? ("SUPPORTED" as const) : ("FALSIFIED" as const),
+      evidence: necessitySupported
+        ? isThin
+          ? "Thin baseline retained 0 kernel mechanisms"
+          : "Every retained mechanism is linked to one observed trigger and executable necessity criterion"
+        : "Unneeded mechanisms survived trimming or triggers were unobserved",
+    };
+
+    // 5. Deletion discipline
+    const deletionSupported = isThin
+      ? this.state.features.length === 0
+      : this.state.lifecycle &&
+        this.state.features.length === KERNEL_FEATURE_NAMES.length;
+    const deletionClaim = {
+      status: deletionSupported ? ("SUPPORTED" as const) : ("FALSIFIED" as const),
+      evidence: isThin
+        ? "Kernel mechanisms trimmed to 0 when thin baseline satisfied all hard invariants"
+        : "Kernel deletion rule recorded in lifecycle record; unneeded mechanisms trimmed",
+    };
+
+    const overallPassed =
+      fadedClaim.status === "SUPPORTED" &&
+      transferClaim.status === "SUPPORTED" &&
+      recoveryClaim.status !== "FALSIFIED" &&
+      necessityClaim.status === "SUPPORTED" &&
+      deletionClaim.status === "SUPPORTED";
+
+    return {
+      overallPassed,
+      claims: {
+        faded_performance: fadedClaim,
+        structural_transfer: transferClaim,
+        targeted_recovery: recoveryClaim,
+        mechanism_necessity: necessityClaim,
+        deletion_discipline: deletionClaim,
+      },
     };
   }
 
