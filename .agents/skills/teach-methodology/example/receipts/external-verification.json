@@ -1,0 +1,30 @@
+{
+  "guide_project_id": "dependency-change-review-guide",
+  "receipt_class": "external-verification",
+  "receipts": [
+    {
+      "id": "RECEIPT-expert-review",
+      "evaluator_role": "domain_expert",
+      "scope": "rules and rationale validation",
+      "verdict": "SUPPORTED",
+      "timestamp": "2026-08-23T11:00:00Z",
+      "signature": "expert:sec-ops-lead"
+    },
+    {
+      "id": "RECEIPT-novice-execution",
+      "evaluator_role": "novice_reviewer",
+      "scope": "unaided run on synthetic dependency PR",
+      "verdict": "SUPPORTED",
+      "timestamp": "2026-08-23T11:15:00Z",
+      "signature": "novice:maintainer-intern"
+    },
+    {
+      "id": "RECEIPT-repository-pilot",
+      "evaluator_role": "repository_pilot",
+      "scope": "error detection, recovery, decision accuracy, duration",
+      "verdict": "SUPPORTED",
+      "timestamp": "2026-08-23T11:30:00Z",
+      "signature": "pilot:ci-runner"
+    }
+  ]
+}

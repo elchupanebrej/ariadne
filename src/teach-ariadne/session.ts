@@ -8,6 +8,7 @@ import type {
   AriadneRunReceipt,
   AriadneRunReport,
   AriadneTeachingState,
+  ClaimStatus,
   CompletionResult,
   DeclaredInputManifest,
   FadedCaseSolution,
