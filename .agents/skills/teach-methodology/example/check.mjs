@@ -73,4 +73,53 @@ const receiptsData = JSON.parse(readFileSync(receiptsPath, "utf-8"));
 assert.equal(receiptsData.receipt_class, "external-verification");
 assert.ok(receiptsData.receipts.length >= 3, "Must contain expert, novice, and pilot receipts");
 
-console.log("All Methodology Authoring guide project checks passed successfully.");
+// 10. Validate Invalid Paths Rejection (Fail-closed assertions)
+function validateProject(p, receipts) {
+  if (!p.contract_pin?.digest || p.contract_pin.digest === "none") {
+    throw new Error("Rejected: unpinned contract digest");
+  }
+  for (const c of p.artifacts?.A2?.claims || []) {
+    if (!c.rationale_ref || !c.rationale_ref.includes("#")) {
+      throw new Error("Rejected: unresolved rationale link");
+    }
+  }
+  if (p.artifacts?.A3?.roles?.novice_reviewer?.authority?.includes("waive_policy")) {
+    throw new Error("Rejected: synthesized policy waiver authority");
+  }
+  if (receipts?.receipt_class === "self-consistency" && p.contract_pin?.profile === "evidence_focused") {
+    throw new Error("Rejected: circular self-consistency proof substituted for external verification");
+  }
+  return true;
+}
+
+// Baseline valid project passes
+assert.equal(validateProject(project, receiptsData), true);
+
+// Invalid path 1: unpinned contract
+assert.throws(() => {
+  const invalid = JSON.parse(JSON.stringify(project));
+  invalid.contract_pin.digest = "none";
+  validateProject(invalid, receiptsData);
+}, /unpinned contract digest/);
+
+// Invalid path 2: broken rationale link
+assert.throws(() => {
+  const invalid = JSON.parse(JSON.stringify(project));
+  invalid.artifacts.A2.claims[0].rationale_ref = "unresolved-anchor";
+  validateProject(invalid, receiptsData);
+}, /unresolved rationale link/);
+
+// Invalid path 3: synthesized policy waiver
+assert.throws(() => {
+  const invalid = JSON.parse(JSON.stringify(project));
+  invalid.artifacts.A3.roles.novice_reviewer.authority.push("waive_policy");
+  validateProject(invalid, receiptsData);
+}, /synthesized policy waiver authority/);
+
+// Invalid path 4: circular proof
+assert.throws(() => {
+  const invalidReceipts = { receipt_class: "self-consistency" };
+  validateProject(project, invalidReceipts);
+}, /circular self-consistency proof/);
+
+console.log("All Methodology Authoring guide project checks and invalid path rejections passed successfully.");
