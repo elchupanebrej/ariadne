@@ -48,7 +48,9 @@ export type AttemptReason =
   | "attempt_missing"
   | "ledger_corrupt"
   | "invalid_transition"
-  | "cursor_conflict";
+  | "cursor_conflict"
+  | "replay_declaration_invalid"
+  | "prior_effect_unresolved";
 
 export interface AttemptDisposition {
   action: AttemptAction;
@@ -271,6 +273,16 @@ const REASON_PROFILES: Record<AttemptReason, ReasonProfile> = {
     pendingAction: "host://pending/register-attempt",
     resumePredicate: "attempt id exists under <root>/attempts/",
   },
+  replay_declaration_invalid: {
+    authorityRef: "owner://authority/replay-authorization",
+    pendingAction: "owner://pending/issue-replay-declaration",
+    resumePredicate: "owner declaration with specific operation, stable key, and future deadline",
+  },
+  prior_effect_unresolved: {
+    authorityRef: "owner://authority/effect-inspection",
+    pendingAction: "owner://pending/inspect-effects",
+    resumePredicate: "owner inspection receipt present in ownerPointers",
+  },
   invalid_transition: {
     authorityRef: "harness://authority/lifecycle",
     pendingAction: "harness://pending/repair-lifecycle",
@@ -301,11 +313,14 @@ function enrichedDisposition(
   };
 }
 
-const failedDisposition = (
-  reason: AttemptReason,
+const failedDisposition = <F extends AttemptReason>(
+  reason: F,
   evidenceRefs: string[],
   deadline?: string,
-): AttemptDisposition => enrichedDisposition("escalate", reason, evidenceRefs, deadline);
+): AttemptDisposition & { reason: F } =>
+  enrichedDisposition("escalate", reason, evidenceRefs, deadline) as AttemptDisposition & {
+    reason: F;
+  };
 
 export function nextDisposition(
   attempt: OrchestrationAttempt,
@@ -368,7 +383,7 @@ async function planDispatch(
   if (request.requestedPins?.some((pin) => !attempt.pins.includes(pin))) {
     return failedDisposition("pin_mismatch", [...attempt.pins], deadline);
   }
-  if (attempt.dispatches >= attempt.replayBudget) {
+  if (budgetExhausted(attempt)) {
     return failedDisposition("replay_budget_exhausted", [], deadline);
   }
   return { action: "dispatch", deadline };
@@ -520,12 +535,17 @@ export interface DirectResultJoinRequest {
   artifactRef?: string;
 }
 
-export type JoinDirectResultOutcome =
+// Guards return enriched fail-closed dispositions; lifecycle violations
+// (invalid transitions, missing intent, terminal state) throw BoundaryError.
+export type GuardOutcome<F extends AttemptReason> =
   | { ok: true; attempt: OrchestrationAttempt }
-  | (AttemptDisposition & {
-      ok: false;
-      reason: Extract<AttemptReason, "receipt_invalid" | "artifact_invalid">;
-    });
+  | (AttemptDisposition & { ok: false; reason: F });
+
+export type JoinDirectResultOutcome =
+  | GuardOutcome<"receipt_invalid" | "artifact_invalid">;
+
+const budgetExhausted = (attempt: OrchestrationAttempt): boolean =>
+  attempt.dispatches >= attempt.replayBudget;
 
 export async function joinDirectResult(
   rootDirectory: string,
@@ -565,5 +585,134 @@ export async function joinDirectResult(
   const joined: OrchestrationAttempt = { ...advanced, ownerPointers };
   await saveAttempt(rootDirectory, joined);
   return { ok: true, attempt: joined };
+}
+
+export interface ReplayDeclaration {
+  operation: string;
+  key: string;
+  deadline: string;
+}
+
+// Replay starts from a zero counter and is granted only against an
+// owner-issued declaration with a specific operation, the attempt's stable
+// key, a finite unspent budget, a future deadline, and an inspection receipt
+// resolving the prior effect.
+export async function planReplay(
+  rootDirectory: string,
+  id: string,
+  declaration: ReplayDeclaration,
+  options: { now?: () => Date } = {},
+): Promise<GuardOutcome<"replay_declaration_invalid" | "prior_effect_unresolved" | "replay_budget_exhausted">> {
+  const attempt = await loadAttempt(rootDirectory, id);
+  const deadlineValid =
+    typeof declaration.deadline === "string" &&
+    Number.isFinite(Date.parse(declaration.deadline)) &&
+    (options.now ?? (() => new Date()))() < new Date(declaration.deadline);
+  const stableKey = declaration.key === attempt.idempotencyKey;
+  const specificOperation = typeof declaration.operation === "string" && /\S/.test(declaration.operation);
+  if (!stableKey || !specificOperation || !deadlineValid) {
+    return {
+      ok: false,
+      ...failedDisposition("replay_declaration_invalid", [], attempt.deadline),
+    };
+  }
+  if (!attempt.ownerPointers.some((ptr) => ptr.startsWith("owner://receipt/"))) {
+    return {
+      ok: false,
+      ...failedDisposition("prior_effect_unresolved", [...attempt.ownerPointers], attempt.deadline),
+    };
+  }
+  if (budgetExhausted(attempt)) {
+    return {
+      ok: false,
+      ...failedDisposition("replay_budget_exhausted", [], attempt.deadline),
+    };
+  }
+  const replayed: OrchestrationAttempt = {
+    ...attempt,
+    dispatches: attempt.dispatches + 1,
+    revision: attempt.revision + 1,
+  };
+  await saveAttempt(rootDirectory, replayed);
+  return { ok: true, attempt: replayed };
+}
+
+export type EffectVerdict = "committed" | "no_effect";
+
+// Only an Owner Effect Receipt declaring committed or no-effect resolves
+// ambiguity. Compensation is deliberately absent here: it stays a separate
+// owner-authorized operation and can never be implied by resolution.
+export async function resolveEffects(
+  rootDirectory: string,
+  id: string,
+  receiptRef: string,
+  verdict: EffectVerdict | "ambiguous",
+): Promise<OrchestrationAttempt> {
+  assertOwnerScheme(receiptRef, ["matt", "ariadne", "host", "owner"], "receiptRef");
+  if (verdict !== "committed" && verdict !== "no_effect") {
+    throw new BoundaryError(
+      "prior_effect_unresolved",
+      `Only committed or no-effect receipts resolve ambiguity; received '${verdict}'`,
+    );
+  }
+  const attempt = await loadAttempt(rootDirectory, id);
+  if (TERMINAL_STATUSES.has(attempt.status)) {
+    throw new BoundaryError(
+      "invalid_transition",
+      `Cannot resolve effects on terminal attempt ${id}`,
+    );
+  }
+  const inspectionReceipt = `owner://receipt/inspection-${pointerDigest(receiptRef)}`;
+  const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(receiptRef));
+  const resolved: OrchestrationAttempt = {
+    ...advanced,
+    ownerPointers: [
+      ...advanced.ownerPointers,
+      receiptRef,
+      ...(advanced.ownerPointers.includes(inspectionReceipt)
+        ? []
+        : [inspectionReceipt]),
+    ],
+  };
+  await saveAttempt(rootDirectory, resolved);
+  return resolved;
+}
+
+export type CancellationOutcomeKind =
+  | "committed_success"
+  | "acknowledged"
+  | "no_effect"
+  | "ambiguous";
+
+// Cancellation intent persists until an owner receipt distinguishes one of the
+// four outcomes; ambiguity keeps the intent open for further inspection.
+export async function resolveCancellation(
+  rootDirectory: string,
+  id: string,
+  cancelReceiptRef: string,
+  outcome: CancellationOutcomeKind,
+): Promise<OrchestrationAttempt> {
+  assertOwnerScheme(cancelReceiptRef, ["host", "owner"], "cancelReceiptRef");
+  let attempt = await loadAttempt(rootDirectory, id);
+  if (!attempt.cancellationIntent) {
+    throw new BoundaryError("invalid_transition", `No cancellation intent on attempt ${id}`);
+  }
+  const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(`cancel:${cancelReceiptRef}`));
+  if (outcome === "ambiguous") {
+    // Ambiguity keeps the intent open; only inspection advances state.
+    attempt = { ...advanced };
+  } else {
+    // The owner receipt is the authority for the terminal mapping.
+    attempt = {
+      ...advanced,
+      cancellationIntent: false,
+      status: outcome === "committed_success" ? "succeeded" : "canceled",
+    };
+  }
+  if (!attempt.ownerPointers.includes(cancelReceiptRef)) {
+    attempt.ownerPointers = [...attempt.ownerPointers, cancelReceiptRef];
+  }
+  await saveAttempt(rootDirectory, attempt);
+  return attempt;
 }
 
