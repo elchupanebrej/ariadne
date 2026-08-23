@@ -25,6 +25,7 @@ export * from "./adapters/gsd/operational-notice.js";
 export * from "./adapters/gsd/migrate.js";
 export * from "./adapters/lifecycle.js";
 export * from "./adapters/matt/index.js";
+export * from "./adapters/ariadne/index.js";
 export * from "./adapters/handoff/generator.js";
 export * from "./capabilities/provider-manager.js";
 export * from "./gates/epistemic-gate.js";
