@@ -1,5 +1,4 @@
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -14,16 +13,20 @@ import {
   reconstructNextAction,
   saveAttempt,
 } from "../../src/harness/attempt.js";
+import { hourFromNow, newRoot } from "./helpers.js";
 
-const newRoot = async (): Promise<string> =>
-  join(await mkdtemp(join(tmpdir(), "ariadne-attempt-")), ".ariadne");
+const readLedgerRecord = async (
+  root: string,
+  id: string,
+): Promise<Record<string, unknown>> => {
+  const raw = await readFile(join(root, "attempts", `${id}.jsonl`), "utf8");
+  const lines = raw.trim().split("\n");
+  return JSON.parse(lines[lines.length - 1]) as Record<string, unknown>;
+};
 
 const builtModule = resolve(
   fileURLToPath(new URL("../../dist/harness/attempt.js", import.meta.url)),
 );
-
-const hourFromNow = (hours: number): string =>
-  new Date(Date.now() + hours * 3_600_000).toISOString();
 
 describe("thin Orchestration Attempt continuity", () => {
   it("retains only the declared pointer-only fields on disk", async () => {
@@ -32,9 +35,7 @@ describe("thin Orchestration Attempt continuity", () => {
       root,
       createAttempt({ id: "att-fields", pins: ["contract://method@sha256:m1"], replayBudget: 1 }),
     );
-    const persisted = JSON.parse(
-      await readFile(join(root, "attempts", "att-fields.json"), "utf8"),
-    );
+    const persisted = await readLedgerRecord(root, "att-fields");
     expect(Object.keys(persisted).sort()).toEqual(
       [
         "cancellationIntent",
@@ -55,7 +56,9 @@ describe("thin Orchestration Attempt continuity", () => {
     const root = await newRoot();
     await saveAttempt(root, createAttempt({ id: "att-cold", replayBudget: 2 }));
 
-    const reconstructed = await reconstructNextAction(root, "att-cold");
+    const reconstructed = await reconstructNextAction(root, "att-cold", {
+      request: { knownRevision: 1 },
+    });
     expect(reconstructed).toEqual({ action: "dispatch" });
 
     const loaded = await loadAttempt(root, "att-cold");
@@ -73,10 +76,9 @@ describe("thin Orchestration Attempt continuity", () => {
 
     const first = await reconstructNextAction(root, "att-midrun");
     const second = await reconstructNextAction(root, "att-midrun");
-    expect(first).toEqual({
-      action: "inspect_effects",
-      reason: "mid_run_reset_effects_unknown",
-    });
+    expect(first.action).toBe("inspect_effects");
+    expect(first.reason).toBe("mid_run_reset_effects_unknown");
+    expect(first.authorityRef).toBe("owner://authority/effect-inspection");
     expect(second).toEqual(first);
   });
 
@@ -93,7 +95,7 @@ describe("thin Orchestration Attempt continuity", () => {
     attempt.pendingApprovalRef = approvalRef;
     await saveAttempt(root, attempt);
 
-    await expect(reconstructNextAction(root, "att-approve")).resolves.toEqual({
+    await expect(reconstructNextAction(root, "att-approve")).resolves.toMatchObject({
       action: "escalate",
       reason: "host_permission_unverified",
     });
@@ -101,12 +103,12 @@ describe("thin Orchestration Attempt continuity", () => {
       reconstructNextAction(root, "att-approve", {
         hasHostPermission: () => Promise.resolve(false),
       }),
-    ).resolves.toEqual({ action: "escalate", reason: "host_permission_lost" });
+    ).resolves.toMatchObject({ action: "escalate", reason: "host_permission_lost" });
     await expect(
       reconstructNextAction(root, "att-approve", {
         hasHostPermission: () => Promise.resolve(true),
       }),
-    ).resolves.toEqual({ action: "resume_approval", approvalRef });
+    ).resolves.toMatchObject({ action: "resume_approval", approvalRef });
   });
 
   it("rejects expired or unbound approvals fail-closed", async () => {
@@ -125,7 +127,7 @@ describe("thin Orchestration Attempt continuity", () => {
       reconstructNextAction(root, "att-expired", {
         hasHostPermission: () => Promise.resolve(true),
       }),
-    ).resolves.toEqual({ action: "escalate", reason: "approval_expired" });
+    ).resolves.toMatchObject({ action: "escalate", reason: "approval_expired" });
 
     const unbound = createAttempt({ id: "att-unbound" });
     unbound.status = "waiting";
@@ -135,7 +137,7 @@ describe("thin Orchestration Attempt continuity", () => {
       reconstructNextAction(root, "att-unbound", {
         hasHostPermission: () => Promise.resolve(true),
       }),
-    ).resolves.toEqual({ action: "escalate", reason: "approval_not_bound_to_attempt" });
+    ).resolves.toMatchObject({ action: "escalate", reason: "approval_not_bound_to_attempt" });
 
     const corruptDeadline = createAttempt({ id: "att-corrupt-deadline", pins: [approvalRef] });
     corruptDeadline.status = "waiting";
@@ -146,7 +148,7 @@ describe("thin Orchestration Attempt continuity", () => {
       reconstructNextAction(root, "att-corrupt-deadline", {
         hasHostPermission: () => Promise.resolve(true),
       }),
-    ).resolves.toEqual({ action: "escalate", reason: "approval_deadline_invalid" });
+    ).resolves.toMatchObject({ action: "escalate", reason: "approval_deadline_invalid" });
   });
 
   it("treats equal cursor and digest as idempotent but refuses conflicts and gaps", () => {
@@ -156,8 +158,8 @@ describe("thin Orchestration Attempt continuity", () => {
     expect(advanced.revision).toBe(base.revision + 1);
 
     expect(applyEvent(advanced, 1, "digest-a")).toBe(advanced);
-    expect(() => applyEvent(advanced, 1, "digest-b")).toThrow(/conflict or gap/);
-    expect(() => applyEvent(advanced, 3, "digest-c")).toThrow(/conflict or gap/);
+    expect(() => applyEvent(advanced, 1, "digest-b")).toThrow(/conflict, gap/);
+    expect(() => applyEvent(advanced, 3, "digest-c")).toThrow(/conflict, gap/);
   });
 
   it("joins direct Matt and Ariadne receipts as pointers without payload copying", async () => {
@@ -171,27 +173,34 @@ describe("thin Orchestration Attempt continuity", () => {
     const ariadneJoined = await joinDirectResult(root, "att-direct", {
       receiptRef: "ariadne://receipt/a-1",
     });
-    expect(mattJoined.ownerPointers).toEqual([
+    expect(mattJoined.ok).toBe(true);
+    expect(ariadneJoined.ok).toBe(true);
+    if (ariadneJoined.ok) {
+      expect(ariadneJoined.attempt.ownerPointers).toEqual([
+        "matt://receipt/m-1",
+        "file://artifacts/spec.json",
+        "ariadne://receipt/a-1",
+      ]);
+    }
+
+    const reread = await readLedgerRecord(root, "att-direct");
+    expect(reread.ownerPointers).toEqual([
       "matt://receipt/m-1",
       "file://artifacts/spec.json",
+      "ariadne://receipt/a-1",
     ]);
-    expect(ariadneJoined.ownerPointers).toContain("ariadne://receipt/a-1");
-
-    const reread = JSON.parse(
-      await readFile(join(root, "attempts", "att-direct.json"), "utf8"),
-    );
-    expect(reread.ownerPointers).toEqual(ariadneJoined.ownerPointers);
     expect(Object.keys(reread)).not.toContain("payloads");
 
     const before = (await loadAttempt(root, "att-direct")).revision;
     const duplicate = await joinDirectResult(root, "att-direct", {
       receiptRef: "matt://receipt/m-1",
     });
-    expect(duplicate.revision).toBe(before);
+    expect(duplicate.ok && duplicate.attempt.revision).toBe(before);
 
-    await expect(
-      joinDirectResult(root, "att-direct", { receiptRef: "kernel://receipt/x" }),
-    ).rejects.toThrow(/Owner mismatch|Invalid receiptRef/);
+    const invalidOwner = await joinDirectResult(root, "att-direct", {
+      receiptRef: "kernel://receipt/x",
+    });
+    expect(invalidOwner).toMatchObject({ ok: false, reason: "receipt_invalid" });
   });
 
   it("verifies cold start and mid-run reset across a real process boundary", async () => {
@@ -202,9 +211,10 @@ describe("thin Orchestration Attempt continuity", () => {
     await writeFile(
       probe,
       [
-        `import { reconstructNextAction } from ${JSON.stringify(builtModule)};`,
+        `import { loadAttempt, nextDisposition } from ${JSON.stringify(builtModule)};`,
         `const [root, id] = process.argv.slice(2);`,
-        `process.stdout.write(JSON.stringify(await reconstructNextAction(root, id)));`,
+        `const attempt = await loadAttempt(root, id);`,
+        `process.stdout.write(JSON.stringify(await nextDisposition(attempt, { request: { knownRevision: attempt.revision } })));`,
       ].join("\n"),
       "utf8",
     );
@@ -223,7 +233,7 @@ describe("thin Orchestration Attempt continuity", () => {
     const reset = runProbe("att-proc-midrun");
     expect(reset.stderr).toBe("");
     expect(reset.status).toBe(0);
-    expect(JSON.parse(reset.stdout.trim())).toEqual({
+    expect(JSON.parse(reset.stdout.trim())).toMatchObject({
       action: "inspect_effects",
       reason: "mid_run_reset_effects_unknown",
     });
@@ -234,7 +244,9 @@ describe("thin Orchestration Attempt continuity", () => {
     const attempt = createAttempt({ id: "att-budget", replayBudget: 1 });
     attempt.dispatches = 1;
     await saveAttempt(root, attempt);
-    await expect(reconstructNextAction(root, "att-budget")).resolves.toEqual({
+    await expect(
+      reconstructNextAction(root, "att-budget", { request: { knownRevision: 1 } }),
+    ).resolves.toMatchObject({
       action: "escalate",
       reason: "replay_budget_exhausted",
     });
@@ -271,8 +283,8 @@ describe("thin Orchestration Attempt continuity", () => {
     await expect(loadAttempt(root, "missing")).rejects.toThrow(/Attempt not found/);
 
     await saveAttempt(root, createAttempt({ id: "att-corrupt" }));
-    const ledgerPath = join(root, "attempts", "att-corrupt.json");
+    const ledgerPath = join(root, "attempts", "att-corrupt.jsonl");
     await writeFile(ledgerPath, "{not json", "utf8");
-    await expect(loadAttempt(root, "att-corrupt")).rejects.toThrow(/Corrupted attempt ledger/);
+    await expect(loadAttempt(root, "att-corrupt")).rejects.toThrow(/No recoverable record/);
   });
 });
