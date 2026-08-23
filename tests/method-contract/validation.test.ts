@@ -438,7 +438,7 @@ describe("Method Contract Public Validation Boundary", () => {
         output: { result: "evaluated" },
         recovery: "retry with clean state",
         escalation: "escalate to human owner",
-        rationale_ref: "docs/designing_methodological_guides.md#rules",
+        rationale_ref: "docs/designing_methodological_guides.md#a4",
       });
 
       const result = validateMethodContract(contract);

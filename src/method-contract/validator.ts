@@ -1,32 +1,49 @@
 import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
   MethodContractSchema,
   type MethodContract,
   type VerificationHook,
 } from "./schemas.js";
 import type {
+  MethodContractDiagnostic,
   MethodContractPin,
   MethodContractValidationResult,
+  ProfileCompletionResult,
+  ProfileCompletionState,
   ResolvedObligations,
   ResolvedProfile,
   ValidateMethodContractOptions,
 } from "./types.js";
 
-export const EXTERNAL_VERIFICATION_RECEIPTS = new Set([
+export const CANONICAL_EXTERNAL_VERIFICATION_RECEIPTS = [
   "external-verification",
-  "user-test",
-  "expert-review",
-  "pilot-implementation",
-  "performance-assessment",
-  "empirical-validation",
-]);
+] as const;
 
-export const SELF_CONSISTENCY_RECEIPTS = new Set([
+export const CANONICAL_SELF_CONSISTENCY_RECEIPTS = [
   "audit-49",
   "leave-one-out",
   "fixed-point",
   "no-circular-validation",
-  "structural-closure",
+] as const;
+
+export const EXTERNAL_VERIFICATION_RECEIPTS: Set<string> = new Set(
+  CANONICAL_EXTERNAL_VERIFICATION_RECEIPTS,
+);
+
+export const SELF_CONSISTENCY_RECEIPTS: Set<string> = new Set(
+  CANONICAL_SELF_CONSISTENCY_RECEIPTS,
+);
+
+const VALID_JSON_SCHEMA_TYPES = new Set([
+  "object",
+  "string",
+  "number",
+  "integer",
+  "boolean",
+  "array",
+  "null",
 ]);
 
 /**
@@ -69,7 +86,106 @@ export function calculateByteDigest(input: string | Uint8Array): string {
 }
 
 /**
- * Simple JSON Schema fragment matcher for rule triggers.
+ * Validate that an object is a well-formed JSON Schema fragment.
+ */
+export function validateJsonSchemaFragment(
+  schema: unknown,
+  basePath: string,
+): MethodContractDiagnostic[] {
+  const diagnostics: MethodContractDiagnostic[] = [];
+
+  if (schema === null || typeof schema !== "object" || Array.isArray(schema)) {
+    diagnostics.push({
+      path: basePath,
+      message: "JSON Schema predicate must be a non-null object",
+    });
+    return diagnostics;
+  }
+
+  const obj = schema as Record<string, unknown>;
+
+  if (obj.type !== undefined) {
+    if (typeof obj.type === "string") {
+      if (!VALID_JSON_SCHEMA_TYPES.has(obj.type)) {
+        diagnostics.push({
+          path: `${basePath}.type`,
+          message: `Invalid JSON Schema type "${obj.type}". Expected one of: ${Array.from(VALID_JSON_SCHEMA_TYPES).join(", ")}`,
+        });
+      }
+    } else if (Array.isArray(obj.type)) {
+      for (const t of obj.type) {
+        if (typeof t !== "string" || !VALID_JSON_SCHEMA_TYPES.has(t)) {
+          diagnostics.push({
+            path: `${basePath}.type`,
+            message: `Invalid JSON Schema type "${String(t)}" in type union`,
+          });
+        }
+      }
+    } else {
+      diagnostics.push({
+        path: `${basePath}.type`,
+        message: "JSON Schema type must be a string or array of strings",
+      });
+    }
+  }
+
+  if (obj.required !== undefined) {
+    if (!Array.isArray(obj.required)) {
+      diagnostics.push({
+        path: `${basePath}.required`,
+        message: "JSON Schema required property must be an array of strings",
+      });
+    } else {
+      for (let i = 0; i < obj.required.length; i++) {
+        if (typeof obj.required[i] !== "string" || obj.required[i].trim() === "") {
+          diagnostics.push({
+            path: `${basePath}.required[${i}]`,
+            message: "Required property names must be non-empty strings",
+          });
+        }
+      }
+    }
+  }
+
+  if (obj.properties !== undefined) {
+    if (obj.properties === null || typeof obj.properties !== "object" || Array.isArray(obj.properties)) {
+      diagnostics.push({
+        path: `${basePath}.properties`,
+        message: "JSON Schema properties must be an object",
+      });
+    } else {
+      for (const [propKey, childSchema] of Object.entries(obj.properties as Record<string, unknown>)) {
+        diagnostics.push(...validateJsonSchemaFragment(childSchema, `${basePath}.properties.${propKey}`));
+      }
+    }
+  }
+
+  return diagnostics;
+}
+
+function matchesPrimitiveType(type: string, val: unknown): boolean {
+  switch (type) {
+    case "string":
+      return typeof val === "string";
+    case "number":
+      return typeof val === "number" && !Number.isNaN(val);
+    case "integer":
+      return typeof val === "number" && Number.isInteger(val);
+    case "boolean":
+      return typeof val === "boolean";
+    case "array":
+      return Array.isArray(val);
+    case "object":
+      return val !== null && typeof val === "object" && !Array.isArray(val);
+    case "null":
+      return val === null;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Deterministic JSON Schema fragment matcher for rule triggers.
  */
 export function matchesJsonSchemaPredicate(
   schema: Record<string, unknown>,
@@ -78,25 +194,44 @@ export function matchesJsonSchemaPredicate(
   if (schema.const !== undefined && value !== schema.const) {
     return false;
   }
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    return schema.type === undefined || schema.type !== "object";
-  }
 
-  const rec = value as Record<string, unknown>;
-
-  if (Array.isArray(schema.required)) {
-    for (const key of schema.required as string[]) {
-      if (!(key in rec)) return false;
+  if (schema.enum !== undefined && Array.isArray(schema.enum)) {
+    if (!schema.enum.includes(value)) {
+      return false;
     }
   }
 
-  if (schema.properties && typeof schema.properties === "object") {
-    for (const [prop, childSchema] of Object.entries(
-      schema.properties as Record<string, Record<string, unknown>>,
-    )) {
-      if (rec[prop] !== undefined) {
-        if (!matchesJsonSchemaPredicate(childSchema, rec[prop])) {
-          return false;
+  if (schema.type !== undefined) {
+    if (typeof schema.type === "string") {
+      if (!matchesPrimitiveType(schema.type, value)) {
+        return false;
+      }
+    } else if (Array.isArray(schema.type)) {
+      const anyMatch = schema.type.some(
+        (t) => typeof t === "string" && matchesPrimitiveType(t, value),
+      );
+      if (!anyMatch) return false;
+    }
+  }
+
+  // If value is an object, validate required fields and child properties
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    const rec = value as Record<string, unknown>;
+
+    if (Array.isArray(schema.required)) {
+      for (const key of schema.required as string[]) {
+        if (!(key in rec)) return false;
+      }
+    }
+
+    if (schema.properties && typeof schema.properties === "object") {
+      for (const [prop, childSchema] of Object.entries(
+        schema.properties as Record<string, Record<string, unknown>>,
+      )) {
+        if (rec[prop] !== undefined) {
+          if (!matchesJsonSchemaPredicate(childSchema, rec[prop])) {
+            return false;
+          }
         }
       }
     }
@@ -107,7 +242,7 @@ export function matchesJsonSchemaPredicate(
 
 /**
  * Classify receipts into external-verification and self-consistency classes.
- * Explicitly preserves separation without arbitrary fuzzy inference.
+ * Explicitly preserves separation without arbitrary fuzzy guessing.
  */
 export function classifyReceipts(receipts: string[]): {
   external: string[];
@@ -121,13 +256,142 @@ export function classifyReceipts(receipts: string[]): {
       external.push(receipt);
     } else if (SELF_CONSISTENCY_RECEIPTS.has(receipt)) {
       selfConsistency.push(receipt);
-    } else {
-      // Non-standard/custom receipts: do not silently assign to self-consistency
-      external.push(receipt);
     }
   }
 
   return { external, selfConsistency };
+}
+
+/**
+ * Extract anchor IDs and headers from markdown content.
+ */
+function extractMarkdownAnchors(content: string): Set<string> {
+  const anchors = new Set<string>();
+
+  // Match <a id="..." or <a name="..." or id="..."
+  const anchorRegex = /<(?:a|span|div)\s+[^>]*(?:id|name)=["']([^"']+)["']/gi;
+  let match: RegExpExecArray | null;
+  while ((match = anchorRegex.exec(content)) !== null) {
+    anchors.add(match[1].toLowerCase());
+  }
+
+  // Match markdown headers: # Heading or # Heading {#custom-id}
+  const headerRegex = /^#{1,6}\s+(.+)$/gm;
+  while ((match = headerRegex.exec(content)) !== null) {
+    const rawHeader = match[1].trim();
+    // Check for explicit {#custom-id}
+    const explicitIdMatch = /\{#([^}]+)\}/.exec(rawHeader);
+    if (explicitIdMatch) {
+      anchors.add(explicitIdMatch[1].toLowerCase());
+    }
+    // Generate standard slug
+    const slug = rawHeader
+      .replace(/\{#[^}]+\}/, "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    if (slug) {
+      anchors.add(slug);
+    }
+  }
+
+  return anchors;
+}
+
+/**
+ * Validate that all rationale references resolve to existing anchors/documents.
+ */
+export function validateRationaleReferences(
+  contract: MethodContract,
+  options: ValidateMethodContractOptions,
+): MethodContractDiagnostic[] {
+  const diagnostics: MethodContractDiagnostic[] = [];
+  const guideHref = contract.guide?.href;
+  const shouldResolve = options.checkRationale !== false;
+
+  const checkReference = (ref: string, path: string) => {
+    if (!ref || typeof ref !== "string" || ref.trim() === "") {
+      diagnostics.push({
+        path,
+        message: "Rationale reference must be a non-empty string",
+      });
+      return;
+    }
+
+    if (!shouldResolve) {
+      return;
+    }
+
+    const trimmed = ref.trim();
+    let targetDoc = guideHref;
+    let anchor: string | undefined;
+
+    if (trimmed.includes("#")) {
+      const parts = trimmed.split("#");
+      if (parts[0]) {
+        targetDoc = parts[0];
+      }
+      anchor = parts[1];
+    } else {
+      targetDoc = trimmed;
+    }
+
+    let docContent: string | null = null;
+    if (options.guideContentResolver) {
+      docContent = options.guideContentResolver(targetDoc);
+    } else if (existsSync(targetDoc)) {
+      try {
+        docContent = readFileSync(targetDoc, "utf-8");
+      } catch {
+        docContent = null;
+      }
+    } else if (existsSync(resolve(process.cwd(), targetDoc))) {
+      try {
+        docContent = readFileSync(resolve(process.cwd(), targetDoc), "utf-8");
+      } catch {
+        docContent = null;
+      }
+    }
+
+    if (docContent === null) {
+      diagnostics.push({
+        path,
+        message: `Unresolved rationale reference: guide document "${targetDoc}" not found`,
+      });
+      return;
+    }
+
+    if (anchor) {
+      const availableAnchors = extractMarkdownAnchors(docContent);
+      if (!availableAnchors.has(anchor.toLowerCase())) {
+        diagnostics.push({
+          path,
+          message: `Unresolved rationale reference: anchor "#${anchor}" not found in "${targetDoc}"`,
+        });
+      }
+    }
+  };
+
+  for (const [id, art] of Object.entries(contract.artifacts || {})) {
+    checkReference(art.rationale_ref, `artifacts.${id}.rationale_ref`);
+  }
+
+  for (let i = 0; i < (contract.rules || []).length; i++) {
+    checkReference(contract.rules[i].rationale_ref, `rules[${i}].rationale_ref`);
+  }
+
+  for (const [id, prof] of Object.entries(contract.completion_profiles || {})) {
+    if (prof.rationale_ref) {
+      checkReference(prof.rationale_ref, `completion_profiles.${id}.rationale_ref`);
+    }
+  }
+
+  for (let i = 0; i < (contract.verification_hooks || []).length; i++) {
+    checkReference(contract.verification_hooks[i].rationale_ref, `verification_hooks[${i}].rationale_ref`);
+  }
+
+  return diagnostics;
 }
 
 /**
@@ -196,9 +460,77 @@ export function resolveProfile(
     profile: {
       name: profileName,
       profile: profileConfig,
+      contract,
       obligations,
       verification_hooks,
     },
+  };
+}
+
+/**
+ * Check profile completion against provided state artifacts and receipts.
+ * Strictly verifies that external-verification and self-consistency cannot substitute for each other.
+ */
+export function checkProfileCompletion(
+  resolved: ResolvedProfile,
+  state: ProfileCompletionState,
+): ProfileCompletionResult {
+  const missingArtifacts: string[] = [];
+  const invalidArtifacts: string[] = [];
+  const missingReceipts: string[] = [];
+  const problems: string[] = [];
+
+  const providedArtifacts = state.artifacts ?? {};
+  const providedReceipts = new Set<string>(state.receipts ?? []);
+
+  // Check required artifacts
+  for (const artifactId of resolved.obligations.artifacts) {
+    const artifactValue = providedArtifacts[artifactId];
+    if (artifactValue === undefined) {
+      missingArtifacts.push(artifactId);
+      problems.push(`Missing required artifact "${artifactId}"`);
+    } else if (resolved.contract?.artifacts[artifactId]) {
+      const schema = resolved.contract.artifacts[artifactId].schema;
+      if (!matchesJsonSchemaPredicate(schema, artifactValue)) {
+        invalidArtifacts.push(artifactId);
+        problems.push(`Artifact "${artifactId}" does not satisfy its schema`);
+      }
+    }
+  }
+
+  // Check required receipts
+  for (const receipt of resolved.obligations.receipts) {
+    if (!providedReceipts.has(receipt)) {
+      missingReceipts.push(receipt);
+      problems.push(`Missing required receipt "${receipt}"`);
+    }
+  }
+
+  const checkCategory = (requiredList: string[]) =>
+    requiredList.every((r) => providedReceipts.has(r));
+
+  const externalVerificationPassed = checkCategory(
+    resolved.obligations.external_verification_receipts,
+  );
+  const selfConsistencyPassed = checkCategory(
+    resolved.obligations.self_consistency_receipts,
+  );
+
+  const complete =
+    missingArtifacts.length === 0 &&
+    invalidArtifacts.length === 0 &&
+    missingReceipts.length === 0 &&
+    externalVerificationPassed &&
+    selfConsistencyPassed;
+
+  return {
+    complete,
+    missingArtifacts,
+    invalidArtifacts,
+    missingReceipts,
+    problems,
+    externalVerificationPassed,
+    selfConsistencyPassed,
   };
 }
 
@@ -282,6 +614,34 @@ export function validateMethodContract(
 
   const contract = parseResult.data;
 
+  // Validate JSON schema fragments in artifact schemas, rule triggers, and branches
+  const schemaDiagnostics: MethodContractDiagnostic[] = [];
+  for (const [id, art] of Object.entries(contract.artifacts)) {
+    schemaDiagnostics.push(...validateJsonSchemaFragment(art.schema, `artifacts.${id}.schema`));
+  }
+
+  for (let i = 0; i < contract.rules.length; i++) {
+    const rule = contract.rules[i];
+    schemaDiagnostics.push(...validateJsonSchemaFragment(rule.trigger.schema, `rules[${i}].trigger.schema`));
+    if (rule.branches) {
+      for (let j = 0; j < rule.branches.length; j++) {
+        schemaDiagnostics.push(...validateJsonSchemaFragment(rule.branches[j].when.schema, `rules[${i}].branches[${j}].when.schema`));
+      }
+    }
+  }
+
+  // Validate rationale references
+  const rationaleDiagnostics = validateRationaleReferences(contract, options);
+
+  const allDiagnostics = [...schemaDiagnostics, ...rationaleDiagnostics];
+  if (allDiagnostics.length > 0) {
+    return {
+      valid: false,
+      problems: allDiagnostics.map((d) => `${d.path}: ${d.message}`),
+      diagnostics: allDiagnostics,
+    };
+  }
+
   // Compute byte digest
   const digest = rawBytes
     ? calculateByteDigest(rawBytes)
@@ -359,9 +719,6 @@ export function validateMethodContract(
   };
 }
 
-/**
- * Public resolution boundary that validates and resolves a Method Contract with an active profile.
- */
 export function resolveMethodContract(
   input: unknown,
   options: ValidateMethodContractOptions = {},

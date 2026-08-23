@@ -129,11 +129,14 @@ export const VERIFICATION_HOOK_CHECKS = [
   "owner-receipt",
 ] as const;
 
+export const VerificationHookEventSchema = z.enum(VERIFICATION_HOOK_EVENTS);
+export const VerificationHookCheckSchema = z.enum(VERIFICATION_HOOK_CHECKS);
+
 export const VerificationHookSchema = z
   .object({
     id: z.string().min(1),
-    on: z.string().min(1),
-    check: z.string().min(1),
+    on: VerificationHookEventSchema,
+    check: VerificationHookCheckSchema,
     owner: z.string().min(1),
     required_receipt: z.string().min(1).optional(),
     rationale_ref: z.string().min(1),
@@ -197,6 +200,8 @@ export type SupportedEffect = z.infer<typeof SupportedEffectSchema>;
 export type RuleBranch = z.infer<typeof RuleBranchSchema>;
 export type RuleRecord = z.infer<typeof RuleRecordSchema>;
 export type CompletionProfile = z.infer<typeof CompletionProfileSchema>;
+export type VerificationHookEvent = z.infer<typeof VerificationHookEventSchema>;
+export type VerificationHookCheck = z.infer<typeof VerificationHookCheckSchema>;
 export type VerificationHook = z.infer<typeof VerificationHookSchema>;
 export type ChangeLogEntry = z.infer<typeof ChangeLogEntrySchema>;
 export type RetirementPolicy = z.infer<typeof RetirementPolicySchema>;

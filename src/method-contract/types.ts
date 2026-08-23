@@ -22,6 +22,7 @@ export interface ResolvedObligations {
 export interface ResolvedProfile {
   name: string;
   profile: CompletionProfile;
+  contract?: MethodContract;
   obligations: ResolvedObligations;
   verification_hooks: VerificationHook[];
 }
@@ -36,6 +37,8 @@ export interface ValidateMethodContractOptions {
     version?: string;
     digest?: string;
   };
+  checkRationale?: boolean;
+  guideContentResolver?: (href: string) => string | null;
 }
 
 export interface MethodContractDiagnostic {
@@ -60,3 +63,18 @@ export interface MethodContractValidationFailure {
 export type MethodContractValidationResult =
   | MethodContractValidationSuccess
   | MethodContractValidationFailure;
+
+export interface ProfileCompletionState {
+  artifacts?: Record<string, unknown>;
+  receipts?: string[];
+}
+
+export interface ProfileCompletionResult {
+  complete: boolean;
+  missingArtifacts: string[];
+  invalidArtifacts: string[];
+  missingReceipts: string[];
+  problems: string[];
+  externalVerificationPassed: boolean;
+  selfConsistencyPassed: boolean;
+}
