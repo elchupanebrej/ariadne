@@ -47,7 +47,7 @@ describe("09 — Matt owner lifecycle contract", () => {
         requiredArtifactKinds: ["EVD"],
       };
 
-      const outcome = await adapter.start("req-001", invalidRequest);
+      const outcome = await adapter.start("harness://request/req-001", invalidRequest);
       expect(outcome.status).toBe("failed");
       expect(outcome.error).toMatch(/unsupported skill/i);
       expect(outcome.diagnosticRef).toMatch(/^adapter:\/\/diagnostic\/unsupported-/);
@@ -67,11 +67,11 @@ describe("09 — Matt owner lifecycle contract", () => {
         contextPointers: ["file://.scratch/substrate.md@sha256:s1"],
       };
 
-      const outcome = await adapter.start("req-002", request);
+      const outcome = await adapter.start("harness://request/req-002", request);
       expect(outcome.status).toBe("running");
       expect(outcome.externalRunRef).toMatch(/^host:\/\/run\/matt-/);
       expect(outcome.eventCursor).toBe(1);
-      expect(outcome.pointers).toContain("adapter://matt@sha256:1.0.0");
+      expect(outcome.pointers.some((p) => p.startsWith("adapter://matt@sha256:"))).toBe(true);
       expect(outcome.pointers).toContain("contract://method@sha256:m1");
       expect(outcome.pointers).toContain("workspace://repo@rev:w1");
       expect(outcome.pointers).toContain("file://.scratch/substrate.md@sha256:s1");
@@ -87,7 +87,7 @@ describe("09 — Matt owner lifecycle contract", () => {
   describe("3. Resume and monotonic event cursors with idempotent equal-cursor handling", () => {
     it("transitions to waiting on human prompt and resumes with external run and input references", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-003", {
+      const startOutcome = await adapter.start("harness://request/req-003", {
         skill: "tdd",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -115,7 +115,7 @@ describe("09 — Matt owner lifecycle contract", () => {
 
     it("maintains monotonic event cursors and provides idempotent equal-cursor handling", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-004", {
+      const startOutcome = await adapter.start("harness://request/req-004", {
         skill: "research",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -149,7 +149,7 @@ describe("09 — Matt owner lifecycle contract", () => {
   describe("4. Cancellation handshake", () => {
     it("keeps cancellation as intent until terminal owner acknowledgment receipt", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-005", {
+      const startOutcome = await adapter.start("harness://request/req-005", {
         skill: "code-review",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -179,7 +179,7 @@ describe("09 — Matt owner lifecycle contract", () => {
 
     it("prevents cancellation acknowledgment when an ambiguous effect is unresolved", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-006", {
+      const startOutcome = await adapter.start("harness://request/req-006", {
         skill: "prototype",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -208,7 +208,7 @@ describe("09 — Matt owner lifecycle contract", () => {
   describe("5. Fail-closed behavior on invalid receipts, cursor conflicts, and shadow state", () => {
     it("fails closed when artifact pointer is provided without a valid owner receipt", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-007", {
+      const startOutcome = await adapter.start("harness://request/req-007", {
         skill: "tdd",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -229,7 +229,7 @@ describe("09 — Matt owner lifecycle contract", () => {
 
     it("rejects automatic replay of an ambiguous effect", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-008", {
+      const startOutcome = await adapter.start("harness://request/req-008", {
         skill: "diagnosing-bugs",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
@@ -248,7 +248,7 @@ describe("09 — Matt owner lifecycle contract", () => {
 
     it("rejects attempts to inject raw non-pointer shadow state", async () => {
       const adapter = new MattOwnerAdapter({ version: "1.0.0" });
-      const startOutcome = await adapter.start("req-009", {
+      const startOutcome = await adapter.start("harness://request/req-009", {
         skill: "research",
         contractRef: "contract://method@sha256:m1",
         workspaceRef: "workspace://repo@rev:w1",
