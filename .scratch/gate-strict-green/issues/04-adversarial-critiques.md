@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Zero `MISSING_ADVERSARIAL_CRITIQUE` diagnostics from `node dist/cli/index.js gate all --strict` at the repo root
 - [ ] Each critique names at least one concrete attack (failure mode, cost shift, or ownership gap) and its response
@@ -13,3 +13,5 @@
 ## Comments
 
 `DEC-semantic-gate-preflight-contract` was the only flagged node. Added a substantive critique via `ariadne node update`: attack on preflight/gate rule drift and on callers treating preflight as gate-skipping license; response grounded in the pure single-source helper and preserved invariants; falsification condition recorded (preflight/gate disagreement reopens the decision). Repo-root strict gate now reports zero diagnostics.
+
+Verification (2026-08-24, branch codex/first-work... codex/first-version): rebuilt CLI (`npx tsc -p tsconfig.build.json`, no errors) and re-ran `node dist/cli/index.js gate all --strict` from repo root — `passed: true`, empty diagnostics across structural, semantic, and epistemic gates. Critique quality audit of `.ariadne/GRAPH.jsonl`: DEC-semantic-gate-preflight-contract carries a structured critique with two concrete attacks (preflight/gate rule drift producing stale breadth guidance; callers treating preflight as gate-skipping license) with responses grounded in the pure single-source helper, gate authority, and preserved invariants, plus a falsification condition — no empty strings, no self-restatement. Full suite: 54 files / 558 tests passed via `node ./node_modules/vitest/vitest.mjs run`.
