@@ -17,6 +17,7 @@ Ariadne по итогам исследования пишет отчёт: дер
 ## Decisions so far
 
 - [DEC-RPT-01..13, ASM-RPT-01..02, CTR-RPT-01](.ariadne/GRAPH.jsonl) — все дизайн-решения диалога зафиксированы карточками с обоснованиями и adversarial critique; полная сводка — в тикетах ниже.
+- [T1 resolved](issues/01-prototype-tree-grammar.md) — грамматика ASCII-отчёта зафиксирована прототипом: строка узла `<prefix>|-- <edge-type> --> <ID> [STATUS] title` + ответ `~ …` следующей строкой (UNK→resolved_by, EVD→verdict, DEC/EVDREQ→первое предложение statement), лог изменений = 3 строки на событие (действие/карточка/причина, фильтр CAN/DEC/EVD/UNK+tombstones: 177 из 277). Замечание: формулировка корня в DEC-RPT-08 расходится с фактической ориентацией рёбер. Скрипт: `scripts/proto-tree.mjs`. Реакция человека pending, соберёт orchestrator.
 
 ## Not yet specified
 
