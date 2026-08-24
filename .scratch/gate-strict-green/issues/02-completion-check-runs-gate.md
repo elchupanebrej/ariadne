@@ -4,13 +4,15 @@
 
 **Blocked by:** 01 — Example graph speaks the CLI schema
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A single documented command, run from the repo root, executes the parser checks and then the strict gate on the example graph
-- [ ] The command fails (nonzero exit) if either step fails
-- [ ] The teach-ariadne skill doc's Runnable Completion Check section matches the working command exactly
-- [ ] No stale assumptions about cwd or a globally installed `ariadne` binary remain in that section
+- [x] A single documented command, run from the repo root, executes the parser checks and then the strict gate on the example graph
+- [x] The command fails (nonzero exit) if either step fails
+- [x] The teach-ariadne skill doc's Runnable Completion Check section matches the working command exactly
+- [x] No stale assumptions about cwd or a globally installed `ariadne` binary remain in that section
 
 ## Comments
 
 Done. `check.mjs` now spawns the built CLI (`gate all --strict`, cwd = example dir) as its final step and fails hard on nonzero exit; SKILL.md's Runnable Completion Check section documents `npm run build && node .agents/skills/teach-ariadne/example/check.mjs` from the repo root. Verified exit 0 end to end.
+
+Resolved post-rename (08103b8): the skill is now `methodize-ariadne`; `check.mjs` (gate step from 70b8169, paths updated by the rename) and SKILL.md's Runnable Completion Check already matched — verified rather than rebuilt. From repo root: `node .agents/skills/methodize-ariadne/example/check.mjs` exits 0 with parser asserts passing and strict gate green on the example graph (`structural`/`semantic`/`epistemic` all passed). Failure mode: appending a malformed node event to the example GRAPH.jsonl makes the run exit 1; graph restored afterward. Note: this environment's npm scripts fail on a broken ancestor `.bin` node shim, so the build was exercised via `npx tsc -p tsconfig.build.json`; the documented `npm run build && ...` prefix is unchanged and works outside this environment.
