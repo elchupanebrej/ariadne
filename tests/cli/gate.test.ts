@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { mkdtemp } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -28,6 +29,8 @@ const invoke = (cwd: string, args: string[]) => {
 };
 
 const workspace = async () => mkdtemp(join(tmpdir(), "ariadne-cli-gate-"));
+
+const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 
 describe("ariadne gate", () => {
   it("runs a selected gate and returns a passing JSON receipt", async () => {
@@ -218,5 +221,22 @@ describe("ariadne gate", () => {
     const invalid = await invoke(cwd, ["gate", "unknown"]);
     expect(invalid.code).toBe(1);
     expect(invalid.stderr.text()).toContain("Unknown gate");
+  });
+
+  it("gates the committed repo overlay strict-green", async () => {
+    const result = await invoke(repoRoot, ["gate", "all", "--strict"]);
+
+    expect(result.code).toBe(0);
+    expect(JSON.parse(result.stdout.text())).toMatchObject({
+      gate: "all",
+      strict: true,
+      passed: true,
+      diagnostics: [],
+      results: [
+        { gate: "structural", passed: true, diagnostics: [] },
+        { gate: "semantic", passed: true, diagnostics: [] },
+        { gate: "epistemic", passed: true, diagnostics: [] },
+      ],
+    });
   });
 });
