@@ -228,11 +228,55 @@ export function renderIndex(graph: MaterializedGraph): string {
   return lines.join("\n");
 }
 
+const CARD_HEADER_FIELDS = new Set([
+  "id",
+  "type",
+  "provenance_type",
+  "statement",
+  "title",
+  "status",
+  "tombstone",
+]);
+
+export function renderCard(node: Node): string {
+  const status = node.status ?? "ACTIVE";
+  const payload: Record<string, unknown> = Object.fromEntries(
+    Object.entries(node).filter(([key]) => !CARD_HEADER_FIELDS.has(key)),
+  );
+  const payloadLines =
+    Object.keys(payload).length > 0
+      ? [
+          "",
+          "## Payload",
+          "",
+          "```json",
+          JSON.stringify(payload, null, 2),
+          "```",
+          "",
+        ]
+      : [""];
+
+  return [
+    `# ${node.id}${node.title ? `: ${node.title}` : ""}`,
+    "",
+    `- Status: ${status}`,
+    `- Provenance: ${node.provenance_type}`,
+    `- Type: ${node.type}`,
+    `- Revised: ${new Date().toISOString().slice(0, 10)}`,
+    "",
+    "## Statement",
+    "",
+    node.statement,
+    ...payloadLines,
+  ].join("\n");
+}
+
 export class GraphStorage {
   readonly rootDirectory: string;
   readonly statePath: string;
   readonly graphPath: string;
   readonly indexPath: string;
+  readonly cardsDirectory: string;
   readonly graphLockPath: string;
   readonly stateLockPath: string;
 
@@ -241,6 +285,7 @@ export class GraphStorage {
     this.statePath = join(rootDirectory, "STATE.yaml");
     this.graphPath = join(rootDirectory, "GRAPH.jsonl");
     this.indexPath = join(rootDirectory, "INDEX.md");
+    this.cardsDirectory = join(rootDirectory, "cards");
     this.graphLockPath = `${this.graphPath}.lock`;
     this.stateLockPath = `${this.statePath}.lock`;
   }
@@ -327,6 +372,7 @@ export class GraphStorage {
           await rm(temporaryPath, { force: true });
         }
         await this.writeIndexUnlocked(prospective);
+        await this.writeCardsUnlocked(parsed);
         if (parsed.some((event) => event.kind === "node")) {
           await this.syncStateWithGraph(prospective);
         }
@@ -443,7 +489,16 @@ export class GraphStorage {
 
   async regenerateIndex(): Promise<void> {
     await enqueue(this.graphPath, () =>
-      withFileLock(this.graphLockPath, () => this.writeIndexUnlocked()),
+      withFileLock(this.graphLockPath, async () => {
+        const graph = applyEvents(
+          { nodes: [], edges: [] },
+          await this.readEventsUnlocked(true),
+        );
+        await this.writeIndexUnlocked(graph);
+        await this.writeCardsUnlocked(
+          graph.nodes.map((node) => ({ kind: "node" as const, node })),
+        );
+      }),
     );
   }
 
@@ -453,6 +508,17 @@ export class GraphStorage {
       this.indexPath,
       renderIndex(graph ?? applyEvents({ nodes: [], edges: [] }, await this.readEventsUnlocked(true))),
       "utf8",
+    );
+  }
+
+  private async writeCardsUnlocked(events: readonly GraphEvent[]): Promise<void> {
+    const nodes = events.flatMap((event) => (event.kind === "node" ? [event.node] : []));
+    if (nodes.length === 0) return;
+    await mkdir(this.cardsDirectory, { recursive: true });
+    await Promise.all(
+      nodes.map((node) =>
+        writeFile(join(this.cardsDirectory, `${node.id}.md`), renderCard(node), "utf8"),
+      ),
     );
   }
 }
