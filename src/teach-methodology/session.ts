@@ -110,7 +110,7 @@ export class MethodologyTeachingSession {
       prohibitedInputsDetected: [],
       interventions: [],
       routeChoices: [
-        ".agents/skills/teach-methodology/SKILL.md",
+        ".agents/skills/methodize/SKILL.md",
         "docs/designing_methodological_guides.md",
       ],
       faults: [],

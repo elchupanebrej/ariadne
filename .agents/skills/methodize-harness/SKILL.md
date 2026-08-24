@@ -1,5 +1,5 @@
 ---
-name: teach-harness
+name: methodize-harness
 description: Teach a fresh agent to design an orchestration harness from an observed continuation failure.
 disable-model-invocation: true
 ---
@@ -7,6 +7,8 @@ disable-model-invocation: true
 # Harness Authoring Teaching Skill
 
 Teach a fresh agent session to design a minimal, owner-safe agent orchestration harness from an observed continuation failure, placing every responsibility with its existing owner and testing the thin baseline before retaining a new boundary.
+
+All relative paths in this lesson (`bootstrap.lock`, `example/`, `references/`) resolve from this skill's directory, not the repository root.
 
 ## Learning Path
 

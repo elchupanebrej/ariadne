@@ -250,7 +250,7 @@ describe("Methodology Authoring Teaching Skill — Issue 05", () => {
 
   describe("Runnable Completion Check on Solution Package", () => {
     it("validates the package files and passes check.mjs assertions", () => {
-      const skillDir = resolve(__dirname, "../../.agents/skills/teach-methodology");
+      const skillDir = resolve(__dirname, "../../.agents/skills/methodize");
       expect(existsSync(resolve(skillDir, "SKILL.md"))).toBe(true);
       expect(existsSync(resolve(skillDir, "example/README.md"))).toBe(true);
       expect(existsSync(resolve(skillDir, "example/input/dependency-change.json"))).toBe(true);

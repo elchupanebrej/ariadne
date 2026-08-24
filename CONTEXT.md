@@ -213,3 +213,17 @@ _Avoid_: Migration status, release phase, ticket progress
 **Separation Diversity Rule**:
 The epistemic quality gate requiring that any active technical contradiction be addressed by at least three candidate mechanisms spanning distinct separation principles before locking decisions.
 _Avoid_: Multi-solution rule, brainstorming quota, candidate threshold
+
+### Research Reporting
+
+**Card File**:
+The persisted markdown document generated from one epistemic graph node, carrying the card's stable project-relative path and a lifecycle status header that survives invalidation and removal.
+_Avoid_: Graph dump, invented per-card path, bare card ID
+
+**Decision Tree Report**:
+The research outcome artifact rendering the traversal from the framed problem through every graph node to locked decisions, showing edge relations, derived intermediate answers, and links to card files.
+_Avoid_: ASCII spiral, session transcript, freeform summary
+
+**Decision Change Log**:
+The replayable ordered trace of decision-relevant graph events, where each step cites the action taken, the reason recorded on the card, and a link to the card file.
+_Avoid_: Commit log, event dump, debug trace

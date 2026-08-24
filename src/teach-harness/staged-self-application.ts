@@ -35,7 +35,7 @@ export function createStagedSelfApplicationDeclaredManifest(): HarnessDeclaredIn
       {
         id: "harness-authoring-pinned",
         role: "authoring-skill",
-        source: ".agents/skills/teach-harness/SKILL.md",
+        source: ".agents/skills/methodize-harness/SKILL.md",
         digest: "sha256:teach-harness-skill-v1",
         version: "1.0.0",
       },
@@ -201,7 +201,7 @@ export function createStagedSelfApplicationArtifactContract(): HarnessArtifactCo
         version: "1.0.0",
         digest: "sha256:teach-harness-skill-v1",
         owner: "method",
-        target_uri: "file://.agents/skills/teach-harness/SKILL.md",
+        target_uri: "file://.agents/skills/methodize-harness/SKILL.md",
       },
     ],
     attempt_cursor: {

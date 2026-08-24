@@ -358,7 +358,7 @@ describe("Verify Harness Transfer, Fading, Recovery, and Deletion Discipline (Ti
       expect(report.declaredInputs.length).toBeGreaterThanOrEqual(4);
       expect(report.prohibitedInputs).toEqual([]);
       expect(report.interventions).toEqual([]);
-      expect(report.routeChoices).toContain(".agents/skills/teach-harness/SKILL.md");
+      expect(report.routeChoices).toContain(".agents/skills/methodize-harness/SKILL.md");
       expect(report.routeChoices).toContain("references/harness-research.md");
       expect(report.receipts.length).toBeGreaterThanOrEqual(1);
 

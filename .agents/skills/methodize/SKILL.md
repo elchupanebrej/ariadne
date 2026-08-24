@@ -1,12 +1,26 @@
 ---
-name: teach-methodology
-description: Teach a fresh agent to author a Methodological Guide from the pinned Method Contract.
+name: methodize
+description: Teach a fresh agent a method through task-first progressive loading. Routes to Ariadne usage, orchestration harness design, or Methodological Guide authoring.
 disable-model-invocation: true
 ---
 
-# Methodology Authoring Teaching Skill
+# Methodize: Teaching Skill Router
 
-Teach a fresh agent session to author a complete, traceable Methodological Guide project from the compact Method Contract without copying normative contract fields or long-guide rationale prose into the lesson.
+Teach a fresh agent a method through task-first progressive loading. This skill holds the shared teaching contract and its own lesson on authoring a Methodological Guide; two specific lessons live beside it.
+
+## Routing
+
+Route by what the learner must do next:
+
+| Learner's goal | Lesson |
+|---|---|
+| Use Ariadne for decision-significant reasoning on live tasks | `.agents/skills/methodize-ariadne/SKILL.md` |
+| Design a minimal orchestration harness from an observed continuation failure | `.agents/skills/methodize-harness/SKILL.md` |
+| Author a Methodological Guide from the pinned Method Contract | Continue below |
+
+All three lessons follow one contract: present the meaningful task first, load only the owner sources each step requires, demand self-explanation citing live sources after runnable checks pass, then faded practice and transfer.
+
+Relative lesson paths (`bootstrap.lock`, `example/`) resolve from this skill's directory, not the repository root.
 
 ## Learning Path
 

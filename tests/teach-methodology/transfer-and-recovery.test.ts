@@ -326,7 +326,7 @@ describe("Verify Guide Transfer, Fading, and Recovery (Ticket 06)", () => {
       expect(report.declaredInputs.length).toBeGreaterThanOrEqual(4);
       expect(report.prohibitedInputs).toEqual([]);
       expect(report.interventions).toEqual([]);
-      expect(report.routeChoices).toContain(".agents/skills/teach-methodology/SKILL.md");
+      expect(report.routeChoices).toContain(".agents/skills/methodize/SKILL.md");
       expect(report.artifacts.length).toBe(8);
       expect(report.receipts.length).toBeGreaterThanOrEqual(2);
       expect(report.receipts.some((r) => r.type === "external_verification")).toBe(true);

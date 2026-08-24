@@ -206,10 +206,10 @@ describe("Verify Ariadne Transfer, Fading, and Recovery (Ticket 04)", () => {
         "Attempted unisolated write outside teaching directory",
       );
 
-      const boundaryResult = session.repairOwnerBoundary(".agents/skills/teach-ariadne/example/.ariadne");
+      const boundaryResult = session.repairOwnerBoundary(".agents/skills/methodize-ariadne/example/.ariadne");
       expect(boundaryResult.recovered).toBe(true);
-      expect(boundaryResult.isolatedPath).toBe(".agents/skills/teach-ariadne/example/.ariadne");
-      expect(session.getState().isolatedGraphPath).toBe(".agents/skills/teach-ariadne/example/.ariadne");
+      expect(boundaryResult.isolatedPath).toBe(".agents/skills/methodize-ariadne/example/.ariadne");
+      expect(session.getState().isolatedGraphPath).toBe(".agents/skills/methodize-ariadne/example/.ariadne");
     });
   });
 

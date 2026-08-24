@@ -250,7 +250,7 @@ describe("Harness Authoring Teaching Skill — Issue 07", () => {
 
   describe("Package Artifacts and Runnable Completion Check", () => {
     it("validates that package files exist and pass verification", () => {
-      const skillDir = resolve(__dirname, "../../.agents/skills/teach-harness");
+      const skillDir = resolve(__dirname, "../../.agents/skills/methodize-harness");
       expect(existsSync(resolve(skillDir, "SKILL.md"))).toBe(true);
       expect(existsSync(resolve(skillDir, "references/harness-research.md"))).toBe(true);
       expect(existsSync(resolve(skillDir, "example/README.md"))).toBe(true);

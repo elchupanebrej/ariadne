@@ -94,7 +94,7 @@ export class AriadneTeachingSession {
       transferRouteCompleted: false,
       bulkLoadedRules: false,
       copiedMethodContractProse: false,
-      isolatedGraphPath: ".agents/skills/teach-ariadne/example/.ariadne",
+      isolatedGraphPath: ".agents/skills/methodize-ariadne/example/.ariadne",
       lastMessage: "No task has been presented.",
       faults: [],
       interventions: [],
@@ -809,7 +809,7 @@ export class AriadneTeachingSession {
     };
   }
 
-  repairOwnerBoundary(isolatedPath: string = ".agents/skills/teach-ariadne/example/.ariadne"): OwnerBoundaryRepairResult {
+  repairOwnerBoundary(isolatedPath: string = ".agents/skills/methodize-ariadne/example/.ariadne"): OwnerBoundaryRepairResult {
     this.state.isolatedGraphPath = isolatedPath;
 
     for (const fault of this.state.faults) {

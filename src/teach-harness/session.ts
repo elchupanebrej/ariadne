@@ -91,7 +91,7 @@ export class HarnessTeachingSession {
       prohibitedInputsDetected: [],
       interventions: [],
       routeChoices: [
-        ".agents/skills/teach-harness/SKILL.md",
+        ".agents/skills/methodize-harness/SKILL.md",
         "references/harness-research.md",
       ],
       faults: [],

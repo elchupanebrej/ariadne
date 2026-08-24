@@ -34,7 +34,7 @@ export function createDefaultHarnessDeclaredManifest(): HarnessDeclaredInputMani
       {
         id: "methodology-authoring-pinned",
         role: "authoring-skill",
-        source: ".agents/skills/teach-methodology/SKILL.md",
+        source: ".agents/skills/methodize/SKILL.md",
         digest: "sha256:teach-methodology-skill-v1",
         version: "1.0.0",
       },

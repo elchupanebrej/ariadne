@@ -1,5 +1,5 @@
 ---
-name: teach-ariadne
+name: methodize-ariadne
 description: Teach a fresh agent to use Ariadne through a task-first progressive reasoning flow.
 disable-model-invocation: true
 ---
@@ -20,6 +20,16 @@ Teach a fresh agent to use Ariadne without preloading unrelated rules or copying
 8. **Self-Explanation**: Answer the 4 why-questions citing live sources after runnable checks pass.
 9. **Faded Practice**: Complete the faded case (URL query parsing) without route scaffolding.
 10. **Transfer**: Route a changed-structure transfer case (duplicate invoices -> Uncertainty -> Diagnose -> Dynamics).
+
+## Cold-Start Transcript
+
+`example/teaching-transcript.md` holds a complete teacher + learner session: the
+lesson (Part 1) followed by a fresh agent's unaided faded-practice and transfer
+work (Part 2), including its loaded/not-loaded rule lists and evidence receipts.
+When onboarding an agent that must become productive immediately, hand it this
+transcript to read top-to-bottom **as if it were its own output**, then have it
+imitate Part 2's shape on a live task. Evidence in Part 2 is reproducible; see
+the header of the transcript for commands.
 
 ## Complete Worked Example: Config-Line Parser
 
@@ -58,7 +68,7 @@ After the runnable check passes, the learner must answer:
 From the repository root:
 
 ```sh
-npm run build && node .agents/skills/teach-ariadne/example/check.mjs
+npm run build && node .agents/skills/methodize-ariadne/example/check.mjs
 ```
 
 The check runs the parser assertions and graph integrity checks, then invokes

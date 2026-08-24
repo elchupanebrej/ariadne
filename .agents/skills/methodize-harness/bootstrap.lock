@@ -1,0 +1,52 @@
+{
+  "lock_version": 1,
+  "note": "Real sha256 of every file-backed lesson source. Paths are relative to the repository root unless marked skill-relative. Verify with: sha256sum <path> and compare per pin.",
+  "pins": [
+    {
+      "id": "G_n",
+      "role": "long-guide",
+      "path": "docs/designing_methodological_guides.md",
+      "version": "repo",
+      "sha256": "fbf338536f145cb7952d0832bd405d2870c8a53e64fb28cad6fac38e35d6bad1"
+    },
+    {
+      "id": "M_n-engine-schemas",
+      "role": "method-contract-engine",
+      "path": "src/method-contract/schemas.ts",
+      "version": "repo",
+      "sha256": "eb0c85ffc929c23e63b6b43e44ed23c9404dadc7acdadb51e2ab3adb4d52398a"
+    },
+    {
+      "id": "MA_n",
+      "role": "authoring-skill",
+      "path": ".agents/skills/methodize/SKILL.md",
+      "version": "repo",
+      "sha256": "afaa9c18312800836980facdfac7d5e7bfda6f056ca7c3fdff90b366bcc841f4"
+    },
+    {
+      "id": "harness-research",
+      "role": "harness-research",
+      "path": "references/harness-research.md (skill-relative)",
+      "path_resolved": ".agents/skills/methodize-harness/references/harness-research.md",
+      "version": "2026.1",
+      "sha256": "9db0447f637e8d76100d25794a3a47e7127a652114d79cde18538632374f5124"
+    }
+  ],
+  "engine_resolved_pins": [
+    {
+      "id": "M_n-contract-id",
+      "role": "method-contract",
+      "value": "methodological-guide-authoring@1.0.0-draft (sha256:methodological-guide-authoring-v1)"
+    },
+    {
+      "id": "workspace-revision",
+      "role": "workspace",
+      "value": "workspace-v1"
+    },
+    {
+      "id": "host-capabilities",
+      "role": "host-adapter",
+      "value": "host-capabilities@1.0.0"
+    }
+  ]
+}
