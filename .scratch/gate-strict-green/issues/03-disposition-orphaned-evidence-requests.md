@@ -4,12 +4,12 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Zero `MISSING_EVIDENCE_RESULT` diagnostics from `node dist/cli/index.js gate all --strict` at the repo root
-- [ ] No fabricated receipts: every added EVD names an executed method, rung, verdict, receipt digest, and reproducible environment
-- [ ] Each removed request has a written rationale in this file's Comments section
-- [ ] The append-only spirit is respected: removals are justified as superseded/aspirational state cleanup, not history rewrites of other nodes
+- [x] Zero `MISSING_EVIDENCE_RESULT` diagnostics from `node dist/cli/index.js gate all --strict` at the repo root
+- [x] No fabricated receipts: every added EVD names an executed method, rung, verdict, receipt digest, and reproducible environment
+- [x] Each removed request has a written rationale in this file's Comments section
+- [x] The append-only spirit is respected: removals are justified as superseded/aspirational state cleanup, not history rewrites of other nodes
 
 ## Comments
 
@@ -24,3 +24,5 @@ Disposition of each removed request (all five were aspiration-only: no evidence 
 23 edges referencing these requests were dropped with them. No receipts were fabricated; git history retains the removed events. Post-edit strict epistemic gate reports zero MISSING_EVIDENCE_RESULT.
 
 Deviation note (append-only): docs/TICKETS.md TICKET-201/202 prefer tombstone events, but a tombstoned node is still materialized as an EVDREQ and re-flagged by the epistemic gate (`applyEvents` keeps it; the gate filters only on type). With no cancelled-request representation, physical removal from current state is the only honest disposition; git history retains the events. Follow-up scrub: 11 active nodes had dead request IDs filtered from forward-looking pointer fields (`next_evidence_requests`, `required_evidence`, `required_evidence_requests`, `evidence_requests`); prose narratives and OBS records were intentionally left untouched.
+
+Verification (2026-08-24, re-run): rebuilt CLI (`npx tsc -p tsconfig.build.json` — no errors) and re-ran `node dist/cli/index.js gate all --strict`: passed=true, diagnostics=[] across structural/semantic/epistemic. Honesty audit: all five removed request IDs appear in current GRAPH.jsonl only inside historical OBS/FACT prose statements, not as materialized EVDREQ nodes; zero EVD records were added by the disposition commit (git show 70b8169 confirms only removals); remaining 10 EVD receipts carry sha256 digests, report commits, main heads, gate results, and environment timestamps from earlier executed runs. Nothing to redo; ticket closed on verification alone.
