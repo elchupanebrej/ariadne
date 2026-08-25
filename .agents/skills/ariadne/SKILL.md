@@ -24,5 +24,6 @@ invariants, load only the matching `rules/00-core.md`, `rules/evidence.md`,
 `rules/agent-rules.md`. Load value/validation only after discriminating
 evidence; otherwise use knowledge first.
 
-Artifact operations must report the ASCII spiral and actual-file Markdown
-links required by `rules/05-uncertainty.md`; never expose a bare card ID.
+Artifact operations must embed the decision tree and change log produced by
+`ariadne report`, plus the actual-file Markdown links required by
+`rules/05-uncertainty.md`; never expose a bare card ID as a document.

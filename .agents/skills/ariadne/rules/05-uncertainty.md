@@ -37,9 +37,11 @@ Before handing control to a downstream skill, provide:
   or decision cards and marked as provisional when uncertainty remains;
 - inline Markdown links whose href targets an existing persisted artifact file.
 
-When cards share `GRAPH.jsonl`, link each card label to that real graph file
-and link `INDEX.md` and `STATE.yaml` separately. Never invent a per-card path
-or expose a bare card ID as if it were a document.
+Link each card label to its persisted file at `.ariadne/cards/<ID>.md`
+(gsd deployment: `.planning/ariadne/cards/<ID>.md`), and link `GRAPH.jsonl`,
+`INDEX.md`, and `STATE.yaml` separately when they back the substrate. Then
+run `ariadne report <FRAME-id>` and embed its output — the decision tree and
+change log — in the response.
 
 ## Handoff boundary
 
