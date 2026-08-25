@@ -109,6 +109,8 @@ describe("GSD detector and zero-shadow state", () => {
               evidence_refs: ["EVD-001"],
             }),
             unresolved_risk: "UNRESOLVED",
+            // DEC-RPT-06: emitted node paths are project-root-relative.
+            source_path: ".planning/phases/01-foundation/CONTEXT.md",
           }),
           expect.objectContaining({
             id: "DEC-D-002",
@@ -156,7 +158,15 @@ describe("GSD detector and zero-shadow state", () => {
 
       expect(projection.activePhase).toBe("02-delivery");
       expect(projection.documents.state).toContain("Current Phase: 02-delivery");
-      expect(projection.documents.phaseContextPath).toContain("02-delivery");
+      // DEC-RPT-06: projection documents expose root-relative paths.
+      expect(projection.documents.phaseContextPath).toBe(
+        ".planning/phases/02-delivery/CONTEXT.md",
+      );
+      expect(projection.documents.statePath).toBe(".planning/STATE.md");
+      for (const path of [projection.documents.statePath, projection.documents.phaseContextPath]) {
+        expect(path.startsWith("/")).toBe(false);
+        expect(path.includes(root)).toBe(false);
+      }
       expect(projection.nodes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: "STATE-GSD-STATE", type: "STATE", external_ref: "gsd:STATE" }),

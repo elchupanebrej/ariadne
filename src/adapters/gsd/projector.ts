@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { NodeSchema, type Node } from "../../core/schemas/nodes.js";
+import { toRootRelative } from "../../core/root-relative.js";
 import {
   detectGsd,
   type GsdDetectionOptions,
@@ -331,14 +332,19 @@ export async function projectGsd(
     phaseContextPath ? readOptional(phaseContextPath) : Promise.resolve(""),
   ]);
 
+  // DEC-RPT-06: documents and node provenance expose root-relative paths;
+  // the absolute originals above are for internal fs reads only.
+  const emittedPhaseContextPath = phaseContextPath
+    ? toRootRelative(environment.rootPath, phaseContextPath)
+    : undefined;
   const documents: GsdDocuments = {
     project,
     requirements,
     roadmap,
     state,
     phaseContext,
-    ...(phaseContextPath ? { phaseContextPath } : {}),
-    statePath,
+    ...(emittedPhaseContextPath ? { phaseContextPath: emittedPhaseContextPath } : {}),
+    statePath: toRootRelative(environment.rootPath, statePath),
     ...(activePhase ? { activePhase } : {}),
   };
   const sourceNodes = [
@@ -351,7 +357,7 @@ export async function projectGsd(
       : []),
   ];
   const decisions = decisionStatements(phaseContext).map((decision) =>
-    decisionNode(decision.id, decision.statement, phaseContextPath),
+    decisionNode(decision.id, decision.statement, emittedPhaseContextPath),
   );
 
   return {

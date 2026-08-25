@@ -44,9 +44,10 @@ describe("ariadne init", () => {
     const root = join(cwd, ".ariadne");
 
     expect(result.code).toBe(0);
+    // DEC-RPT-06: emitted paths are project-root-relative.
     expect(JSON.parse(result.stdout.text())).toMatchObject({
       mode: "standalone",
-      storage_root: root,
+      storage_root: ".ariadne",
     });
     expect(JSON.parse(await readFile(join(root, "STATE.yaml"), "utf8"))).toMatchObject({
       mode: "standalone",
@@ -63,7 +64,7 @@ describe("ariadne init", () => {
     expect(auto.code).toBe(0);
     expect(JSON.parse(auto.stdout.text())).toMatchObject({
       mode: "gsd",
-      storage_root: join(cwd, ".planning", "ariadne"),
+      storage_root: ".planning/ariadne",
     });
 
     const shadowed = await workspace();

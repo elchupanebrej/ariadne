@@ -7,6 +7,7 @@ import type { EpistemicEdge } from "../core/schemas/edges.js";
 import { EdgeSchema } from "../core/schemas/edges.js";
 import type { Node } from "../core/schemas/nodes.js";
 import { NodeSchema } from "../core/schemas/nodes.js";
+import { toRootRelative } from "../core/root-relative.js";
 import type { GraphStorage } from "../graph/storage.js";
 
 const CANDIDATE_ID = /^CAN-[0-9A-Za-z_-]+$/;
@@ -569,7 +570,7 @@ export class WorktreeManager {
             : "FAILED",
       candidate_id: worktree.candidateId,
       branch: worktree.branch,
-      worktree_path: worktree.path,
+      worktree_path: toRootRelative(this.repoRoot, worktree.path),
       command,
       args: [...args],
       test_command: testCommand,

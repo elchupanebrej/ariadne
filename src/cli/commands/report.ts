@@ -1,7 +1,8 @@
 import { mkdir, readdir, writeFile } from "node:fs/promises";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 import type { EpistemicEdge } from "../../core/schemas/edges.js";
 import type { Node } from "../../core/schemas/nodes.js";
+import { toRootRelative } from "../../core/root-relative.js";
 import type { GraphEvent } from "../../graph/storage.js";
 import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
 
@@ -296,9 +297,6 @@ const slugify = (frameId: string): string =>
 
 const REPORT_USAGE = "Usage: ariadne report [FRAME-id] [--json]\n";
 
-const toRepoRelative = (from: string, to: string): string =>
-  relative(from, to).replaceAll("\\", "/");
-
 export async function runReport(args: readonly string[], io: CliIO): Promise<number> {
   if (hasHelp(args)) {
     io.stdout.write(REPORT_USAGE);
@@ -311,8 +309,8 @@ export async function runReport(args: readonly string[], io: CliIO): Promise<num
 
   const { environment, storage } = await resolveCliWorkspace(io);
   const report = buildReport(await storage.readEvents(), {
-    cardsPrefix: toRepoRelative(environment.rootPath, storage.cardsDirectory),
-    graphPath: toRepoRelative(environment.rootPath, storage.graphPath),
+    cardsPrefix: toRootRelative(environment.rootPath, storage.cardsDirectory),
+    graphPath: toRootRelative(environment.rootPath, storage.graphPath),
     rootId: frameArg,
   });
 
@@ -332,7 +330,7 @@ export async function runReport(args: readonly string[], io: CliIO): Promise<num
   if (json) {
     io.stdout.write(
       `${JSON.stringify({
-        file: `${toRepoRelative(environment.rootPath, reportsDirectory)}/${fileName}`,
+        file: `${toRootRelative(environment.rootPath, reportsDirectory)}/${fileName}`,
         ...report.summary,
       })}\n`,
     );

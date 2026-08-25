@@ -60,6 +60,17 @@ describe("WorktreeManager", () => {
         expect(firstRun.stdout).toBe(first.path);
         expect(secondRun.stdout).toBe(second.path);
         expect(firstRun.durationMs).toBeGreaterThanOrEqual(0);
+        // DEC-RPT-06: emitted evidence receipts carry root-relative paths.
+        expect(firstRun.evidence).toMatchObject({
+          worktree_path: ".ariadne/worktrees/CAN-01-raft",
+        });
+        for (const execution of [firstRun, secondRun]) {
+          const emitted = String(
+            (execution.evidence as { worktree_path?: unknown }).worktree_path ?? "",
+          );
+          expect(emitted.startsWith("/")).toBe(false);
+          expect(emitted.includes(repoRoot)).toBe(false);
+        }
         expect(NodeSchema.parse(firstRun.evidence)).toMatchObject({
           id: expect.stringMatching(/^EVD-/),
           type: "EVD",

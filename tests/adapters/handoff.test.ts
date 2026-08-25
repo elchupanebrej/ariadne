@@ -53,6 +53,9 @@ describe("generateHandoff", () => {
 
       expect(result.artifactPath).toBe(join(root, ".planning", "ariadne", "HANDOFF.md"));
       expect(result.recommendedCommand).toBe("/to-spec");
+      // DEC-RPT-06: card links inside emitted artifacts are root-relative.
+      expect(result.content).toContain(".planning/ariadne/GRAPH.jsonl");
+      expect(result.content).not.toContain(root);
       expect(result.content).toContain("OBS-001");
       expect(result.content).toContain("GRAPH.jsonl is append-only.");
       expect(result.content).toContain("ASM-001");
@@ -165,6 +168,9 @@ describe("generateGrillSubstrate", () => {
 
       expect(result.artifactPath).toBe(join(root, ".ariadne", "GRILL-SUBSTRATE.md"));
       expect(result.content).toContain("[UNK-001](<");
+      // DEC-RPT-06: source and card links are root-relative, never absolute.
+      expect(result.content).toContain(".ariadne/GRAPH.jsonl");
+      expect(result.content).not.toContain(`${root}/`);
       expect(result.content).toContain("GRAPH.jsonl");
       expect(result.content).toContain("What is the minimum trigger?");
       expect(result.content).toContain("## Assumptions");

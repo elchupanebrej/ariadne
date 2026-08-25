@@ -6,6 +6,7 @@ import {
   type GsdEnvironment,
 } from "../../adapters/gsd/detector.js";
 import { GraphStorage } from "../../graph/storage.js";
+import { toRootRelative } from "../../core/root-relative.js";
 import { hasHelp } from "../workspace.js";
 import type { CliIO } from "./status.js";
 
@@ -90,7 +91,7 @@ export async function runInit(args: readonly string[], io: CliIO): Promise<numbe
   io.stdout.write(
     `${JSON.stringify({
       mode: environment.active ? "gsd" : "standalone",
-      storage_root: storage.rootDirectory,
+      storage_root: toRootRelative(io.cwd, storage.rootDirectory),
       files: [...MANAGED_FILES],
       force,
     })}\n`,

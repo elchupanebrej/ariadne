@@ -2,6 +2,7 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import type { EpistemicEdge } from "../../core/schemas/edges.js";
 import type { Node } from "../../core/schemas/nodes.js";
+import { toRootRelative } from "../../core/root-relative.js";
 import type { MaterializedGraph } from "../../graph/storage.js";
 import { detectGsd } from "../gsd/detector.js";
 
@@ -190,12 +191,20 @@ export async function generateGrillSubstrate(
     join(defaultDirectory, "STATE.yaml"),
   ];
   const sourceLinks = (await Promise.all(sourceFiles.map(existingPath)))
-    .map((exists, index) => (exists ? markdownLink(sourceFiles[index].split(/[\\/]/u).pop()!, sourceFiles[index]) : null))
+    .map((exists, index) =>
+      exists
+        ? markdownLink(
+            sourceFiles[index].split(/[\\/]/u).pop()!,
+            toRootRelative(rootDirectory, sourceFiles[index]),
+          )
+        : null,
+    )
     .filter((link): link is string => link !== null);
   const cardLink = (node: Node): string =>
     // Rule 05 discipline: hrefs target the real persisted graph file, never
-    // the substrate itself and never invented per-card paths.
-    markdownLink(node.id, join(defaultDirectory, "GRAPH.jsonl"));
+    // the substrate itself and never invented per-card paths. DEC-RPT-06:
+    // emitted links are root-relative.
+    markdownLink(node.id, toRootRelative(rootDirectory, join(defaultDirectory, "GRAPH.jsonl")));
   const frontierNodes = activeNodes.filter((node) => node.type === "UNK");
   const recommendation =
     activeNodes.find((node) => node.type === "VAL-SELECT") ??
@@ -301,8 +310,8 @@ export async function generateHandoff(
     "",
     compact(decision.statement),
     "",
-    renderSection("Verified facts", verifiedFacts, join(defaultDirectory, "GRAPH.jsonl")),
-    renderSection("Active invariants", activeInvariants, join(defaultDirectory, "GRAPH.jsonl")),
+    renderSection("Verified facts", verifiedFacts, toRootRelative(rootDirectory, join(defaultDirectory, "GRAPH.jsonl"))),
+    renderSection("Active invariants", activeInvariants, toRootRelative(rootDirectory, join(defaultDirectory, "GRAPH.jsonl"))),
     "## ADR references",
     "",
     ...(adrRefs.length > 0 ? adrRefs.map((reference) => `- ${reference}`) : ["- None"]),
