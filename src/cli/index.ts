@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { resolve } from "node:path";
+import { realpathSync } from "node:fs";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { runEdge } from "./commands/edge.js";
@@ -93,8 +94,8 @@ export async function runCli(
   }
 }
 
-const invokedFile = process.argv[1] ? resolve(process.argv[1]) : undefined;
-if (invokedFile === resolve(fileURLToPath(import.meta.url))) {
+const invokedFile = process.argv[1] ? realpathSync(process.argv[1]) : undefined;
+if (invokedFile === fileURLToPath(import.meta.url)) {
   runCli(process.argv.slice(2)).then((code) => {
     process.exitCode = code;
   });

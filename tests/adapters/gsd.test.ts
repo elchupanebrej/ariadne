@@ -164,8 +164,8 @@ describe("GSD detector and zero-shadow state", () => {
       );
       expect(projection.documents.statePath).toBe(".planning/STATE.md");
       for (const path of [projection.documents.statePath, projection.documents.phaseContextPath]) {
-        expect(path.startsWith("/")).toBe(false);
-        expect(path.includes(root)).toBe(false);
+        expect(path?.startsWith("/")).toBe(false);
+        expect(path?.includes(root)).toBe(false);
       }
       expect(projection.nodes).toEqual(
         expect.arrayContaining([
