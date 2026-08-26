@@ -424,7 +424,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       if (isDerivedPremise(dependency.provenance_type)) continue;
       diagnostics.push({
         code: "INVALID_DERIVED_PROVENANCE",
-        message: `${node.id} cannot be DERIVED from ${dependency.id} with ${dependency.provenance_type} provenance`,
+        message: `${node.id} cannot be DERIVED from ${dependency.id} with ${dependency.provenance_type} provenance; downgrade ${node.id} provenance to ASSUMED/PROPOSED until ${dependency.id} resolves`,
         nodeId: node.id,
         dependencyId: dependency.id,
       });

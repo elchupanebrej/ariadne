@@ -187,6 +187,40 @@ describe("runEpistemicGate", () => {
     );
   });
 
+  it("suggests a provenance downgrade when DERIVED depends on an unresolved premise", () => {
+    const result = runEpistemicGate(
+      graph(
+        [node("FRAME-1", "FRAME", "DERIVED"), node("UNK-1", "UNK", "UNKNOWN")],
+        [{ source: "FRAME-1", target: "UNK-1", type: "depends_on" }],
+      ),
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "INVALID_DERIVED_PROVENANCE",
+          nodeId: "FRAME-1",
+          dependencyId: "UNK-1",
+          message:
+            "FRAME-1 cannot be DERIVED from UNK-1 with UNKNOWN provenance; downgrade FRAME-1 provenance to ASSUMED/PROPOSED until UNK-1 resolves",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps the no-antecedents message distinct from the downgrade hint", () => {
+    const result = runEpistemicGate(graph([node("CLM-1", "CLM", "DERIVED")]));
+
+    expect(result.diagnostics).toEqual([
+      {
+        code: "INVALID_DERIVED_PROVENANCE",
+        message: "CLM-1 cannot claim DERIVED provenance without antecedent dependencies",
+        nodeId: "CLM-1",
+      },
+    ]);
+  });
+
   it("requires a non-empty adversarial critique before locking DEC or CAN", () => {
     const result = runEpistemicGate(
       graph([
