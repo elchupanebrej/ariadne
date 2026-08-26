@@ -87,6 +87,17 @@ describe("buildReport (pure renderer)", () => {
     );
   });
 
+  it("explains edge orientation once in the header of every mode", () => {
+    const forest = buildReport(events, { cardsPrefix: ".ariadne/cards" });
+    expect(forest.text.match(/edges read X --> Y: X depends on \/ derives from Y/g)?.length).toBe(1);
+
+    const tree = buildReport(events, {
+      cardsPrefix: ".ariadne/cards",
+      rootId: "FRAME-rpt-001",
+    });
+    expect(tree.text.match(/edges read X --> Y: X depends on \/ derives from Y/g)?.length).toBe(1);
+  });
+
   it("renders single-tree mode when a root frame is given", () => {
     const other = [
       ...events,

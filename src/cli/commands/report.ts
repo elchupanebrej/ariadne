@@ -101,6 +101,7 @@ export function buildReport(
   const out: string[] = [];
   out.push("ARIADNE DECISION-TREE REPORT");
   out.push(`graph: ${graphPath ?? "-"} | nodes: ${nodes.size} | edges: ${graph.edges.length}`);
+  out.push("edges read X --> Y: X depends on / derives from Y");
   out.push("");
 
   type Deferred = { id: string; label: string };
