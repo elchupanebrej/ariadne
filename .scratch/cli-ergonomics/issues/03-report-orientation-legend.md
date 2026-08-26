@@ -21,9 +21,9 @@ summary stay byte-identical.
 
 ## Acceptance criteria
 
-- [ ] Legend appears once per report in both forest and single-tree modes
-- [ ] JSON summary unchanged
-- [ ] Existing render-sequence tests updated only for the new header line
+- [x] Legend appears once per report in both forest and single-tree modes
+- [x] JSON summary unchanged
+- [x] Existing render-sequence tests updated only for the new header line
 
 ## Comments
 

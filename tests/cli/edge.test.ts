@@ -97,6 +97,11 @@ describe("ariadne edge", () => {
     expect(noArgs.stderr.text()).toContain(
       "Usage: ariadne edge remove <from_id> <relation> <to_id> (got 0, expected 3)",
     );
+
+    const oneArg = await invoke(cwd, ["edge", "add", "TASK-2"]);
+    expect(oneArg.stderr.text()).toContain(
+      "Usage: ariadne edge add <from_id> <relation> <to_id> (got 1, expected 3)",
+    );
   });
 
   it("removes an edge with an append-only tombstone", async () => {

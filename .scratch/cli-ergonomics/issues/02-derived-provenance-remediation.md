@@ -23,9 +23,9 @@ untouched.
 
 ## Acceptance criteria
 
-- [ ] Dependency-provenance case message includes the downgrade hint naming the dependency id
-- [ ] The no-antecedents case keeps its distinct message (nothing to wait for there)
-- [ ] Gate result structure and codes unchanged; tests updated
+- [x] Dependency-provenance case message includes the downgrade hint naming the dependency id
+- [x] The no-antecedents case keeps its distinct message (nothing to wait for there)
+- [x] Gate result structure and codes unchanged; tests updated
 
 ## Comments
 

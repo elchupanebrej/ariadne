@@ -20,10 +20,10 @@ hint was absent; current code prints the bare signature for 0/1/2 args.)
 
 ## Acceptance criteria
 
-- [ ] `edge add` with 0, 1, and 2 args yields the usage line including `(got N, expected 3)`
-- [ ] `edge remove` behaves the same (shared parser)
-- [ ] A correct 3-arg invocation is unaffected
-- [ ] Tests updated through the `runCli` seam
+- [x] `edge add` with 0, 1, and 2 args yields the usage line including `(got N, expected 3)`
+- [x] `edge remove` behaves the same (shared parser)
+- [x] A correct 3-arg invocation is unaffected
+- [x] Tests updated through the `runCli` seam
 
 ## Comments
 
