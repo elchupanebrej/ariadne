@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано а: при удалении или инвалидации файл карточки сохраняется, шапка обновляется статусом INVALIDATED или REMOVED. Отклонено б (удалять файл) как разрывающее ссылки из лога изменений.
+Option a chosen: on removal or invalidation the card file is kept, its header updated to INVALIDATED or REMOVED. Option b (delete the file) rejected as breaking links from the change log.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: накопление мёртвых файлов; принят осознанно ради постоянства ссылок."
+  "adversarial_critique": "Risk: accumulation of dead files; accepted deliberately for link permanence."
 }
 ```

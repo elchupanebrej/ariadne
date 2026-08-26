@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано б репо-vaйд: все артефакты, которые ariadne пишет или печатает, нормализуют пути относительно корня проекта. Отклонено а (только новый отчёт) как оставляющее старые абсолютные пути в evidence и notices.
+Option b repo-wide chosen: every artifact ariadne writes or prints normalizes paths relative to the project root. Option a (new report only) rejected as leaving old absolute paths in evidence and notices.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: внутренние операции fs остаются абсолютными - инвариант касается только выдаваемых наружу строк, иначе ломаются resolve-проверки worktree."
+  "adversarial_critique": "Risk: internal fs operations stay absolute - the invariant covers only strings emitted outward, otherwise worktree resolve checks break."
 }
 ```

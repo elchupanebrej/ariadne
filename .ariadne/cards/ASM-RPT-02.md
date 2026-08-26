@@ -7,14 +7,14 @@
 
 ## Statement
 
-Полный граф в ASCII остаётся читаемым при реалистичном размере активных узлов порядка десятков при секциях и лимитах.
+The full graph stays readable in ASCII at a realistic scale of dozens of active nodes, given sections and width limits.
 
 ## Payload
 
 ```json
 {
   "falsification_conditions": [
-    "Прототип рендера T1 на живом графе нечитаем"
+    "The T1 render prototype on the live graph is unreadable"
   ]
 }
 ```

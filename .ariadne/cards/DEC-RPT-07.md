@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано а: промежуточный ответ шага выводится из существующих узлов - разрешённый UNK, вердикт EVD, обоснование DEC; новый тип карточки ANS не вводится. Отклонено б (новый тип) как дублирующая сущность, ломающая канонический словарь.
+Option a chosen: a step's intermediate answer is derived from existing nodes - a resolved UNK, an EVD verdict, a DEC rationale; no new ANS card type introduced. Option b (a new type) rejected as a duplicating entity breaking the canonical vocabulary.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: агент оставил UNK нерешённым - шаг остаётся без ответа; это честно видно фронтиром, а не маскируется."
+  "adversarial_critique": "Risk: the agent left an UNK unresolved - the step stays without an answer; honestly visible at the frontier rather than masked."
 }
 ```

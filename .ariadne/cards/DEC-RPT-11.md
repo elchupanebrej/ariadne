@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано а: слаг отчёта строится из id корневого FRAME, например 001-frame-login-retry.md. Отклонено б (дата) как не говорящее, какое исследование открыто.
+Option a chosen: the report slug derives from the root FRAME id, e.g. 001-frame-login-retry.md. Option b (date) rejected as saying nothing about which investigation is open.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: коллизия NN при параллельных исследованиях одного корня; смягчение - NN глобальный счётчик каталога."
+  "adversarial_critique": "Risk: NN collision across parallel investigations of one root; mitigation - NN is a global directory counter."
 }
 ```

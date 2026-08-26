@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано да: в gsd-режиме карточки и отчёты живут зеркально под .planning/ariadne/cards и .planning/ariadne/reports по тем же правилам.
+Yes chosen: in gsd mode cards and reports live mirrored under .planning/ariadne/cards and .planning/ariadne/reports under the same rules.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: двойная реализация путей; смягчение - один конфиг корней в GraphStorage, режимы отличаются только базой."
+  "adversarial_critique": "Risk: duplicated path logic; mitigation - one root config in GraphStorage, modes differ only in base."
 }
 ```

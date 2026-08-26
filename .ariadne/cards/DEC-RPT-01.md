@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано в: отчёт рендерит команда ariadne report детерминированно из графа, а правило скилла обязывает агента вызвать её и вложить вывод в ответ. Отклонено а (рендерит только агент) как недетерминированное между сессиями и б (только CLI) как не гарантирующее показ пользователю.
+Option c chosen: the ariadne report command renders the report deterministically from the graph, and a skill rule obliges the agent to invoke it and embed the output in its answer. Option a (agent renders alone) rejected as non-deterministic across sessions; option b (CLI only) rejected as not guaranteeing the user sees it.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: в хост-режиме без CLI отчёт недоступен; смягчение - правило 05 оставляет ручной ASCII-формат как деградацию."
+  "adversarial_critique": "Risk: in host mode without the CLI the report is unavailable; mitigation - rule 05 keeps a manual ASCII format as degradation."
 }
 ```

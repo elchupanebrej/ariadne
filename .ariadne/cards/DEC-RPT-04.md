@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано а с фильтром: лог изменений включает события решающих типов CAN, DEC, EVD, UNK и инвалидации; каждый шаг = действие, ссылка на карточку и причина. Отклонён вариант без фильтра как шумный.
+Option a with filter chosen: the change log includes events of decisive types CAN, DEC, EVD, UNK plus invalidations; each step = action, card link, reason. The unfiltered variant rejected as noisy.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: фильтр скроет причинную цепочку через узлы вне списка; смягчение - типы фильтра пересматриваются прототипом T1."
+  "adversarial_critique": "Risk: the filter hides a causal chain through nodes outside the list; mitigation - filter types revisited by prototype T1."
 }
 ```

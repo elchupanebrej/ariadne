@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано да: на каждом ребре дерева печатается тип связи, например derived_from или supersedes, потому что тип ребра и есть причина существования ветки.
+Yes chosen: each tree edge prints its relation type, e.g. derived_from or supersedes, because the edge type is the very reason the branch exists.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: шум на плотном графе; смягчение - сокращённые глифы типов, форма фиксируется прототипом T1."
+  "adversarial_critique": "Risk: noise on a dense graph; mitigation - abbreviated type glyphs, form fixed by prototype T1."
 }
 ```

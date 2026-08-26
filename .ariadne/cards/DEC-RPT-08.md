@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано: без аргумента отчёт рендерит лес всех корневых FRAME, с аргументом - одно дерево от заданного корня.
+Chosen: without an argument the report renders a forest of all root FRAMEs; with an argument - a single tree from the given root.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: два FRAME претендуют на одно поддерево; смягчение - корень = узел без входящих структурных рёбер, неоднозначность фиксируется в отчёте."
+  "adversarial_critique": "Risk: two FRAMEs claim one subtree; mitigation - root = node without incoming structural edges, ambiguity flagged in the report."
 }
 ```

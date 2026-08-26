@@ -6,36 +6,36 @@ Blocked by: 01, 02
 
 ## Question
 
-Реализовать `ariadne report [FRAME-id] [--json]`: без аргумента лес всех корней, с аргументом одно дерево (DEC-RPT-08); рёбра с типами связи (DEC-RPT-10); промежуточные ответы из разрешённых UNK / вердиктов EVD / обоснований DEC (DEC-RPT-07); лог изменений по фильтру CAN/DEC/EVD/UNK/инвалидации с шагами действие-причина-ссылка (DEC-RPT-04); ссылки на `.ariadne/cards/<ID>.md`; запись в `.ariadne/reports/<NN>-<slug из FRAME>.md` (DEC-RPT-05, DEC-RPT-11); все пути корне-относительные (DEC-RPT-06); gsd-зеркало (DEC-RPT-12). Формат — утверждённый прототипом 01. Тесты по каждому пункту.
+Implement `ariadne report [FRAME-id] [--json]`: without an argument a forest of all roots, with an argument a single tree (DEC-RPT-08); edges with relation types (DEC-RPT-10); intermediate answers from resolved UNKs / EVD verdicts / DEC rationales (DEC-RPT-07); change log filtered to CAN/DEC/EVD/UNK/invalidations with action-reason-link steps (DEC-RPT-04); links to `.ariadne/cards/<ID>.md`; writes to `.ariadne/reports/<NN>-<slug from FRAME>.md` (DEC-RPT-05, DEC-RPT-11); all paths root-relative (DEC-RPT-06); gsd mirror (DEC-RPT-12). Format as approved by prototype 01. Tests per point.
 
-Критерий готовности: на текущем живом графе команда выдаёт читаемый отчёт, включая дерево от FRAME-RPT-001 с DEC-RPT-01..13.
+Done criterion: on the current live graph the command emits a readable report, including the tree from FRAME-RPT-001 with DEC-RPT-01..13.
 
 ## Comments
 
-### Реализация (2026-08-25)
+### Implementation (2026-08-25)
 
-- `src/cli/commands/report.ts` — рендерер (`buildReport`, чистая функция над событиями графа) + раннер `runReport`; команда подключена в `src/cli/index.ts`. Тесты: `tests/cli/report.test.ts` (13 шт., TDD через seam runCli + чистый рендерер). `scripts/proto-tree.mjs` удалён — реальная команда его замещает, последовательность рендера сверена с прототипом байт-в-байт (147/147 событий рендера идентичны).
-- Использование: `node dist/cli/index.js report` (лес), `report FRAME-RPT-001` (одно дерево), `+ --json`. Отчёт пишется в `<корень хранилища>/reports/<NN>-<slug>.md`, NN — глобальный счётчик каталога (DEC-RPT-11), stdout = содержимое файла.
+- `src/cli/commands/report.ts` — renderer (`buildReport`, pure function over graph events) + runner `runReport`; command wired in `src/cli/index.ts`. Tests: `tests/cli/report.test.ts` (13 cases, TDD through the runCli seam + pure renderer). `scripts/proto-tree.mjs` deleted — the real command supersedes it; render sequence verified byte-for-byte against the prototype (147/147 render events identical).
+- Usage: `node dist/cli/index.js report` (forest), `report FRAME-RPT-001` (single tree), plus `--json`. The report is written to `<storage root>/reports/<NN>-<slug>.md`, NN being a global counter over the directory (DEC-RPT-11); stdout = file contents.
 
-### Отклонения и уточнения DEC
+### Deviations and refinements of DECs
 
-- **DEC-RPT-08 (амендмент формулировки):** корень = узел, ни разу не встречающийся как **source**, а не «узел без входящих рёбер». В живом графе source = внизу (зависит от target), поэтому буквально «без входящих» исключило бы сам FRAME-RPT-001 — его решения указывают НА него. Реализовано намерение (FRAME-корневой лес), формулировку DEC стоит поправить при следующей ревизии карточки. Замечено ещё прототипом (тикет 01, п.1), здесь закреплено в коде и комментарии.
-- **Тумбстоун-шаги:** узел решающего типа со статусом REMOVED/INVALIDATED помечается `append` (решающий тип выигрывает), TOMBSTONE — только для не-решающих типов; поведение перенесено из прототипа без изменений.
-- **Причина в логе:** полный текст `adversarial_critique || statement`, обрезанный по ширине (как в коде прототипа и утверждённых образцах), а не «первое предложение», как сказано в прозе тикета 01.
+- **DEC-RPT-08 (wording amendment):** root = a node never occurring as **source**, not "a node without incoming edges". In the live graph source sits below (depends on target), so literally "without incoming" would exclude FRAME-RPT-001 itself — its decisions point AT it. The intent (FRAME-rooted forest) implemented; the DEC wording should be amended at the card's next revision. Flagged earlier by the prototype (ticket 01, item 1); here fixed in code and comment.
+- **Tombstone steps:** a node of decisive type with status REMOVED/INVALIDATED is marked `append` (decisive type wins), TOMBSTONE only for non-decisive types; behavior carried over from the prototype unchanged.
+- **Log reason:** full text of `adversarial_critique || statement`, width-truncated (as in the prototype code and approved samples), not "first sentence" as ticket 01's prose says.
 
-### Решения фог-пунктов map.md
+### Resolutions of map.md fog items
 
-- **JSON-схема:** минимальная, следует за текстовой формой: `{file, mode: forest|tree, sections:[{root, reachable}], remainder_roots:[], change_log:{shown, appends}}`.
-- **Циклы CTR:** специальной отрисовки нет — по 00-core дедуктивный цикл в графе невозможен (цикл обязан быть узлом CTR), обратное ребро всегда попадает в `seen` и печатается заглушкой `<id> (rendered above)`; обход завершается.
-- **Верифицировать ли отчёт команде verify:** оставлено вне рамок (третий фог-пункт map.md, «всплыёт после T3») — не тронуто.
+- **JSON schema:** minimal, follows the text form: `{file, mode: forest|tree, sections:[{root, reachable}], remainder_roots:[], change_log:{shown, appends}}`.
+- **CTR cycles:** no special rendering — per 00-core a deductive cycle cannot exist in the graph (a cycle must become a CTR node), the back edge always hits `seen` and prints as the stub `<id> (rendered above)`; traversal terminates.
+- **Should verify gate the report:** left out of scope (third fog item of map.md, "surfaces after T3") — untouched.
 
-### Два сознательных фикса относительно байтов прототипа
+### Two deliberate fixes relative to prototype bytes
 
-1. Статус без значения печатается `[ACTIVE]` вместо `[undefined]` (согласовано с renderCard).
-2. Неразрешённый UNK даёт одну метку ответа `~ UNRESOLVED` вместо двойной `~ ~ UNRESOLVED`.
+1. A status without value prints `[ACTIVE]` instead of `[undefined]` (consistent with renderCard).
+2. An unresolved UNK yields a single answer marker `~ UNRESOLVED` instead of double `~ ~ UNRESOLVED`.
 
-### Доказательства
+### Evidence
 
-- Тесты: полный сюит 577 passed / 56 файлов (включая 13 новых); `npx tsc --noEmit` чисто.
-- Строгий гейт на живом оверлее: `node dist/cli/index.js gate all --strict` → passed, diagnostics [].
-- Живой граф: лес = 5 TREE-секций + REMAINDER (143 узла, 66 локальных корней) + лог `177 of 277 appends shown` (ровно как у прототипа); `report FRAME-RPT-001` содержит DEC-RPT-01..13; ширина — единственное превышение 100 колонок 107 символов, тот же известный потолок, что зафиксирован в тикете 01 (ponytail-комментарий в коде).
+- Tests: full suite 577 passed / 56 files (including 13 new); `npx tsc --noEmit` clean.
+- Strict gate on the live overlay: `node dist/cli/index.js gate all --strict` → passed, diagnostics [].
+- Live graph: forest = 5 TREE sections + REMAINDER (143 nodes, 66 local roots) + log `177 of 277 appends shown` (exactly as the prototype); `report FRAME-RPT-001` contains DEC-RPT-01..13; width — the single 100-column overflow is 107 characters, same known ceiling as recorded in ticket 01 (ponytail comment in code).

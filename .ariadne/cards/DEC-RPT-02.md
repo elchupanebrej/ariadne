@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано а: при каждой записи узла генерируется файл .ariadne/cards/<ID>.md (как INDEX.md), ссылки ведут на него; запрет выдуманных per-card путей в правиле 05 переписывается. Отклонены б (якоря на строки GRAPH.jsonl хрупки при компакции) и в (ссылка на общий граф не даёт пути карточки).
+Option a chosen: every node write generates a .ariadne/cards/<ID>.md file (like INDEX.md) and links point to it; the ban on invented per-card paths in rule 05 is rewritten. Options b (line anchors into GRAPH.jsonl are fragile under compaction) and c (linking the shared graph gives no card path) rejected.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: рассинхрон файла и журнала при сбое; смягчение - материализация внутри той же транзакции storage и регенерация как у INDEX."
+  "adversarial_critique": "Risk: file and journal desync on failure; mitigation - materialization inside the same storage transaction and regeneration like INDEX."
 }
 ```

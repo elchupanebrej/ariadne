@@ -5,28 +5,29 @@ Status: open
 
 ## Destination
 
-Ariadne по итогам исследования пишет отчёт: дерево обхода от поставленной проблемы с промежуточными ответами, полный лог изменений решений (почему выбран именно этот путь), ASCII-визуализацию принятых решений и ссылки на файлы-карточки; все выдаваемые пути локальны относительно корня проекта. Изменение сделано в коде и в контракте скилла.
+At the end of an investigation ariadne produces a report: a traversal tree from the posed problem with intermediate answers, a complete decision change log (why exactly this path was chosen), an ASCII visualization of accepted decisions, and links to card files; all emitted paths are project-root-relative. The change lands in code and in the skill contract.
 
 ## Notes
 
-- Все решения дизайна зафиксированы в эпистемическом графе как `DEC-RPT-01`..`DEC-RPT-13` (см. `.ariadne/GRAPH.jsonl`, гейты strict зелёные). Тикет при работе должен опираться на соответствующие DEC, а не переоткрывать выбор.
-- Скиллы для сессий: `codebase-design` при проектировании рендера, `tdd` при реализации, `writing-for-agents` при переписывании правил скилла.
-- Стоящее предпочтение: ponytail full — минимальные диффы, никаких абстракций впрок.
-- Режимы: standalone база — `.ariadne/`, gsd-зеркало — `.planning/ariadne/`; логика одна, отличается корень.
+- All design decisions are captured in the epistemic graph as `DEC-RPT-01`..`DEC-RPT-13` (see `.ariadne/GRAPH.jsonl`, strict gates green). Tickets must build on the corresponding DECs rather than re-opening the choices.
+- Skills for sessions: `codebase-design` when designing the render, `tdd` when implementing, `writing-for-agents` when rewriting skill rules.
+- Standing preference: ponytail full — minimal diffs, no speculative abstractions.
+- Modes: standalone base is `.ariadne/`, gsd mirror is `.planning/ariadne/`; one logic, differing root only.
+- All documentation in this repository is written in English.
 
 ## Decisions so far
 
-- [DEC-RPT-01..13, ASM-RPT-01..02, CTR-RPT-01](.ariadne/GRAPH.jsonl) — все дизайн-решения диалога зафиксированы карточками с обоснованиями и adversarial critique; полная сводка — в тикетах ниже.
-- [T1 resolved](issues/01-prototype-tree-grammar.md) — грамматика ASCII-отчёта зафиксирована прототипом: строка узла `<prefix>|-- <edge-type> --> <ID> [STATUS] title` + ответ `~ …` следующей строкой (UNK→resolved_by, EVD→verdict, DEC/EVDREQ→первое предложение statement), лог изменений = 3 строки на событие (действие/карточка/причина, фильтр CAN/DEC/EVD/UNK+tombstones: 177 из 277). Замечание: формулировка корня в DEC-RPT-08 расходится с фактической ориентацией рёбер. Скрипт: `scripts/proto-tree.mjs`. Реакция человека pending, соберёт orchestrator.
+- [DEC-RPT-01..13, ASM-RPT-01..02, CTR-RPT-01](.ariadne/GRAPH.jsonl) — every design decision from the dialogue is captured as cards with rationales and adversarial critique; full summary in the tickets below.
+- [T1 resolved](issues/01-prototype-tree-grammar.md) — the ASCII report grammar fixed by prototype: node line `<prefix>|-- <edge-type> --> <ID> [STATUS] title` + answer line `~ …` beneath (UNK→resolved_by, EVD→verdict, DEC/EVDREQ→first sentence of statement), change log = 3 lines per event (action/card/reason, filter CAN/DEC/EVD/UNK+tombstones: 177 of 277). Caveat: DEC-RPT-08's root wording diverges from actual edge orientation. Script: `scripts/proto-tree.mjs`. Human reaction pending, orchestrator will collect it.
 
 ## Not yet specified
 
-- JSON-схема вывода `ariadne report --json`: форма узлов/рёбер/шагов лога не решена до прототипа текстового формата.
-- Отрисовка дедуктивных циклов (CTR вместо цикла) внутри дерева: правило есть в 00-core, визуальная форма не выбрана.
-- Должен ли `ariadne verify` гейтить отчёт (падать на невалидном дереве) — вопрос качества, всплывёт после T3.
+- JSON schema of `ariadne report --json` output: shape of nodes/edges/log steps undecided until the text-format prototype.
+- Rendering deductive cycles (CTR instead of a cycle) inside the tree: rule exists in 00-core, visual form not chosen.
+- Whether `ariadne verify` should gate the report (fail on an invalid tree) — a quality question, surfaces after T3.
 
 ## Out of scope
 
-- Формат хранения графа: append-only GRAPH.jsonl не меняется.
-- Что-либо помимо ASCII-вывода: TUI/HTML/экспорты картинок.
-- Политика чистки старых отчётов и мёртвых карточек: рост каталога принят осознанно.
+- Graph storage format: append-only GRAPH.jsonl stays unchanged.
+- Anything beyond ASCII output: TUI/HTML/image exports.
+- Policy for pruning old reports and dead cards: directory growth accepted deliberately.

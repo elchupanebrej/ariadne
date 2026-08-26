@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано в: дерево показывает весь граф со всеми узлами, а не только выбранный путь или путь с отсечёнными ветвями. Отклонены а (только выбранный путь - теряется контекст альтернатив) и б (отсечённые кандидаты одной строкой - неполно для повторного прохождения пути).
+Option c chosen: the tree shows the whole graph with all nodes, not just the selected path or a path with pruned branches. Options a (selected path only - context of alternatives lost) and b (pruned candidates as single lines - insufficient to re-walk the path) rejected.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: нечитаемость на большом графе - зафиксировано как CTR-RPT-01 и разрешено секциями и лимитами; подтверждается прототипом."
+  "adversarial_critique": "Risk: unreadability on a large graph - captured as CTR-RPT-01 and resolved by sections and limits; confirmed by the prototype."
 }
 ```

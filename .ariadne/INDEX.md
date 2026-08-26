@@ -10,8 +10,8 @@ Unknowns: 16 · Candidates: 34
 | ASM-dedicated-runtime-necessity | ASSUMED | OPEN | The required clean-session orchestration, cross-skill coordination, artifact contracts, and evaluat… |
 | ASM-fresh-session-reteaching | ASSUMED | OPEN | Each new agent invocation should be treated as having no retained procedural experience beyond the … |
 | ASM-matt-ownership-boundary | ASSUMED | OPEN | Matt skills own interviewing, specification, ticketing, and implementation workflows, while Ariadne… |
-| ASM-RPT-01 | ASSUMED | ACTIVE | Лог изменений восстанавливает почему только если причина решения записана в карточке в момент выбор… |
-| ASM-RPT-02 | ASSUMED | ACTIVE | Полный граф в ASCII остаётся читаемым при реалистичном размере активных узлов порядка десятков при … |
+| ASM-RPT-01 | ASSUMED | ACTIVE | The why-log reconstructs why only if the rationale is recorded in the card at the moment of cho… |
+| ASM-RPT-02 | ASSUMED | ACTIVE | The full graph stays readable in ASCII at a realistic scale of dozens of active nodes, given sec… |
 | CAN-cross-skill-wrapper | PROPOSED | PROPOSED | Add an integration wrapper that invokes Ariadne preflight before grill-me/grill-with-docs and seria… |
 | CAN-dedicated-orchestration-runtime | PROPOSED | PROPOSED | Provide host-neutral fresh-session enforcement as the smallest executable kernel: a repository-visi… |
 | CAN-failure-driven-harness-vertical-slice | PROPOSED | EVALUATED | Start with one repository-observable continuation failure, pin the method and research sources, tes… |

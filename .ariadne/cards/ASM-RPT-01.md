@@ -7,14 +7,14 @@
 
 ## Statement
 
-Лог изменений восстанавливает почему только если причина решения записана в карточке в момент выбора. Все DEC этого диалога вкладывают обоснование в statement.
+The why-log reconstructs why only if the rationale is recorded in the card at the moment of choice. Every DEC of this dialogue embeds its justification in the statement.
 
 ## Payload
 
 ```json
 {
   "falsification_conditions": [
-    "Появляется DEC без rationale в payload - шаг лога остаётся без объяснения"
+    "A DEC appears without rationale in its payload - a log step is left without an explanation"
   ]
 }
 ```

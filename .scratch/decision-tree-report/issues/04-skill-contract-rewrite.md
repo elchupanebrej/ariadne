@@ -6,14 +6,14 @@ Blocked by: 03
 
 ## Question
 
-Привести контракт скилла к реализованной реальности: в `.agents/skills/ariadne/SKILL.md` заменить неопределённый "ASCII spiral" на определённый артефакт — дерево решений и лог изменений (DEC-RPT-13); в `rules/05-uncertainty.md` переписать раздел про ссылки: вместо запрета per-card путей — обязательные ссылки на `.ariadne/cards/<ID>.md` (gsd: `.planning/ariadne/cards/<ID>.md`) и обязательство агента вызвать `ariadne report` и вложить вывод в ответ (DEC-RPT-01). Проверить согласованность с `rules/agent-rules.md` и depth-modes. Править по `writing-for-agents`.
+Bring the skill contract in line with the implemented reality: in `.agents/skills/ariadne/SKILL.md` replace the undefined "ASCII spiral" with a defined artifact — the decision tree and change log (DEC-RPT-13); in `rules/05-uncertainty.md` rewrite the links section: instead of banning per-card paths — mandatory links to `.ariadne/cards/<ID>.md` (gsd: `.planning/ariadne/cards/<ID>.md`) plus the agent's obligation to invoke `ariadne report` and embed its output in the answer (DEC-RPT-01). Check consistency with `rules/agent-rules.md` and depth-modes. Edit per `writing-for-agents`.
 
-Блокируется тикетом 03: правила описывают работающую команду, а не план.
+Blocked by ticket 03: the rules describe a working command, not a plan.
 
 ## Comments
 
-- `SKILL.md`: "ASCII spiral" заменён на определённый артефакт — дерево решений и лог изменений от `ariadne report` (DEC-RPT-13).
-- `rules/05-uncertainty.md`: запрет per-card путей переписан на обязательные ссылки `.ariadne/cards/<ID>.md` (gsd: `.planning/ariadne/cards/<ID>.md`) плюс обязательство вызвать `ariadne report <FRAME-id>` и вложить вывод (DEC-RPT-01).
-- Grep по `.agents/skills/ariadne/`: "spiral" — 0 попаданий; "per-card" — 0; остальные "report" (`10-frame.md`, `roles.md`) — английский глагол, не ссылки на команду. В `agent-rules.md` и `depth-modes.md` противоречий нет — не менялись.
-- Проверка реальности: `node dist/cli/index.js report FRAME-RPT-001 --json` отработал на живом графе (`.ariadne/reports/001-frame-rpt-001.md`, 17 узлов достижимо, change log 177/277); сгенерированный отчёт удалён после проверки как воспроизводимый артефакт.
-- `node dist/cli/index.js gate all --strict` — зелёный.
+- `SKILL.md`: "ASCII spiral" replaced by a defined artifact — the decision tree and change log from `ariadne report` (DEC-RPT-13).
+- `rules/05-uncertainty.md`: the per-card-path ban rewritten into mandatory links `.ariadne/cards/<ID>.md` (gsd: `.planning/ariadne/cards/<ID>.md`) plus the obligation to run `ariadne report <FRAME-id>` and embed the output (DEC-RPT-01).
+- Grep over `.agents/skills/ariadne/`: "spiral" — 0 hits; "per-card" — 0; remaining "report" occurrences (`10-frame.md`, `roles.md`) are the English verb, not command references. No contradictions in `agent-rules.md` or `depth-modes.md` — left unchanged.
+- Reality check: `node dist/cli/index.js report FRAME-RPT-001 --json` ran against the live graph (`.ariadne/reports/001-frame-rpt-001.md`, 17 nodes reachable, change log 177/277); the generated report was deleted after the check as a reproducible artifact.
+- `node dist/cli/index.js gate all --strict` — green.

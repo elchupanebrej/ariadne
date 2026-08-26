@@ -7,14 +7,14 @@
 
 ## Statement
 
-Полнота дерева против читаемости ASCII на больших графах. Разрешено секциями по корню, лимитами отображения как в INDEX и метками рёбер; подтверждается прототипом тикета T1.
+Tree completeness versus ASCII readability on large graphs. Resolved by per-root sections, display limits like INDEX, and edge labels; confirmed by the ticket-T1 prototype.
 
 ## Payload
 
 ```json
 {
   "falsification_conditions": [
-    "Прототип показывает нечитаемый рендер при текущих смягчениях"
+    "The prototype shows an unreadable render under the current mitigations"
   ]
 }
 ```

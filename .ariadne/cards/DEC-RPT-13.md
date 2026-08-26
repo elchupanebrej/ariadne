@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано да: упоминание неопределённого ASCII spiral в SKILL.md заменяется определённым артефактом - деревом решений и логом изменений этого усилия.
+Yes chosen: the mention of an undefined ASCII spiral in SKILL.md is replaced by a defined artifact - the decision tree and change log of this effort.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: внешние ссылки на старую формулировку; их нет - термин нигде больше не определялся."
+  "adversarial_critique": "Risk: external links to the old wording; none exist - the term was never defined elsewhere."
 }
 ```

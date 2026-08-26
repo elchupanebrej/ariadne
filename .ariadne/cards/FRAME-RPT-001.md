@@ -7,4 +7,4 @@
 
 ## Statement
 
-По итогам исследования ariadne выдаёт: дерево обхода от поставленной проблемы, промежуточные ответы, полный лог изменений решений, ASCII-визуализацию принятых решений и ссылки на файлы-карточки; все пути локальны относительно корня проекта.
+At the end of an investigation ariadne produces: a traversal tree from the posed problem, intermediate answers, a complete decision change log, an ASCII visualization of accepted decisions, and links to card files; all paths are project-root-relative.

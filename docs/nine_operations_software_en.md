@@ -12309,7 +12309,7 @@ In classical TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the 
 
 \$\$I = \frac{\sum F\_{\text{useful}}}{\sum C\_{\text{cost}} + \sum H\_{\text{harm}}} \to \infty\$\$
 
-The most powerful operator for increasing ideality is **Trimming (Сворачивание)**: the complete elimination of a physical component from the system while ensuring its useful function is either no longer necessary or successfully redistributed to remaining system elements or the surrounding environment.
+The most powerful operator for increasing ideality is **Trimming**: the complete elimination of a physical component from the system while ensuring its useful function is either no longer necessary or successfully redistributed to remaining system elements or the surrounding environment.
 
 In physical mechanical engineering, removing a component requires physical retooling, material re-engineering, and spatial recalculation. In software engineering, however, **the physical manufacturing cost of code is zero, but the continuous carrying cost of code is astronomical**.
 
@@ -12570,7 +12570,7 @@ The following table specifies the concrete CLI commands and inspection mechanism
 
 ## 12.1. Theoretical Foundations & The Cognitive Pathology of Solution Bias
 
-In [*Creativity as an Exact Science* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Altshuller warned against the primary cognitive trap of inventors: **Problem Displacement (Смещение противоречия)**. When an engineer devises a solution to eliminate Contradiction \$A\$, they frequently celebrate the victory while blinding themselves to the fact that their mechanism has merely shifted the friction into Secondary Contradiction \$B\$ elsewhere in the system.
+In [*Creativity as an Exact Science* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Altshuller warned against the primary cognitive trap of inventors: **Problem Displacement**. When an engineer devises a solution to eliminate Contradiction \$A\$, they frequently celebrate the victory while blinding themselves to the fact that their mechanism has merely shifted the friction into Secondary Contradiction \$B\$ elsewhere in the system.
 
 In [*The Field Guide to Understanding 'Human Error'* (Dekker, 2014)](https://www.routledge.com/The-Field-Guide-to-Understanding-Human-Error/Dekker/p/book/9781472439055), Dekker analyzes how systemic failures arise from **Drift into Failure**: complex systems incrementally trade off safety margins, operational resilience, and verification rigor to satisfy local optimization goals (e.g., speed of feature delivery, microbenchmark optimization).
 

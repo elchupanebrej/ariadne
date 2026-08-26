@@ -7,13 +7,13 @@
 
 ## Statement
 
-Выбрано б: отчёты сохраняются в .ariadne/reports/<NN>-<slug>.md как история. Отклонены а (один перезаписываемый файл теряет историю прогонов) и в (без сохранения нельзя пройти путь после исследования).
+Option b chosen: reports persist under .ariadne/reports/<NN>-<slug>.md as history. Options a (one overwritable file loses run history) and c (without persistence the path cannot be re-walked after the investigation) rejected.
 
 ## Payload
 
 ```json
 {
   "owner": "human",
-  "adversarial_critique": "Риск: неограниченный рост каталога; чистка признана вне рамок этого усилия."
+  "adversarial_critique": "Risk: unbounded directory growth; cleanup acknowledged out of scope for this effort."
 }
 ```
