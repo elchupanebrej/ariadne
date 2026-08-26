@@ -1,5 +1,9 @@
 ﻿## Agent skills
 
+### Documentation language
+
+All documentation in this repository is written in English — specs, issues, ADRs, research notes, and tracker artifacts included.
+
 ### Issue tracker
 
 Issues and specs live as local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
