@@ -34,9 +34,9 @@ const parseFlags = (
 
 const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
 
-const parseEdge = (args: readonly string[]): EpistemicEdge => {
+const parseEdge = (args: readonly string[], usage: string): EpistemicEdge => {
   if (args.length !== 3) {
-    throw new Error("Usage: ariadne edge add <from_id> <relation> <to_id>");
+    throw new Error(`${usage} (got ${args.length}, expected 3)`);
   }
   const [source, relation, target] = args;
   // Canonical relation semantics: formatting aliases are accepted and
@@ -51,8 +51,12 @@ const parseEdge = (args: readonly string[]): EpistemicEdge => {
 const edgeKey = (edge: EpistemicEdge): string =>
   `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
 
-async function addEdge(args: readonly string[], io: CliIO): Promise<EpistemicEdge> {
-  const edge = parseEdge(args);
+async function addEdge(
+  args: readonly string[],
+  usage: string,
+  io: CliIO,
+): Promise<EpistemicEdge> {
+  const edge = parseEdge(args, usage);
   const storage = await storageFor(io);
   const graph = await storage.materialize();
   const nodeIds = new Set(graph.nodes.map((node) => node.id));
@@ -89,8 +93,12 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
   );
 }
 
-async function removeEdge(args: readonly string[], io: CliIO): Promise<EpistemicEdge> {
-  const edge = parseEdge(args);
+async function removeEdge(
+  args: readonly string[],
+  usage: string,
+  io: CliIO,
+): Promise<EpistemicEdge> {
+  const edge = parseEdge(args, usage);
   const storage = await storageFor(io);
   const graph = await storage.materialize();
   if (!graph.edges.some((candidate) => edgeKey(candidate) === edgeKey(edge))) {
@@ -101,9 +109,9 @@ async function removeEdge(args: readonly string[], io: CliIO): Promise<Epistemic
 }
 
 const EDGE_USAGE = "Usage: ariadne edge <add|list|remove> ...\n";
-const EDGE_ADD_USAGE = "Usage: ariadne edge add <from_id> <relation> <to_id>\n";
+const EDGE_ADD_USAGE = "Usage: ariadne edge add <from_id> <relation> <to_id>";
 const EDGE_LIST_USAGE = "Usage: ariadne edge list [--from] [--to] [--relation]\n";
-const EDGE_REMOVE_USAGE = "Usage: ariadne edge remove <from_id> <relation> <to_id>\n";
+const EDGE_REMOVE_USAGE = "Usage: ariadne edge remove <from_id> <relation> <to_id>";
 
 export async function runEdge(args: readonly string[], io: CliIO): Promise<number> {
   const command = args[0];
@@ -116,10 +124,10 @@ export async function runEdge(args: readonly string[], io: CliIO): Promise<numbe
   switch (command) {
     case "add":
       if (hasHelp(rest)) {
-        io.stdout.write(EDGE_ADD_USAGE);
+        io.stdout.write(`${EDGE_ADD_USAGE}\n`);
         return 0;
       }
-      result = await addEdge(rest, io);
+      result = await addEdge(rest, EDGE_ADD_USAGE, io);
       break;
     case "list":
       if (hasHelp(rest, ["--from", "--to", "--relation"])) {
@@ -130,10 +138,10 @@ export async function runEdge(args: readonly string[], io: CliIO): Promise<numbe
       break;
     case "remove":
       if (hasHelp(rest)) {
-        io.stdout.write(EDGE_REMOVE_USAGE);
+        io.stdout.write(`${EDGE_REMOVE_USAGE}\n`);
         return 0;
       }
-      result = await removeEdge(rest, io);
+      result = await removeEdge(rest, EDGE_REMOVE_USAGE, io);
       break;
     default:
       throw new Error(EDGE_USAGE.trim());

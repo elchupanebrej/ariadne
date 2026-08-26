@@ -84,6 +84,21 @@ describe("ariadne edge", () => {
     expect((await storage.materialize()).edges).toHaveLength(1);
   });
 
+  it("reports actual vs expected argument count on arity errors", async () => {
+    const { cwd } = await workspace();
+    const twoArgs = await invoke(cwd, ["edge", "add", "TASK-2", "TASK-1"]);
+    expect(twoArgs.code).toBe(1);
+    expect(twoArgs.stderr.text()).toContain(
+      "Usage: ariadne edge add <from_id> <relation> <to_id> (got 2, expected 3)",
+    );
+
+    const noArgs = await invoke(cwd, ["edge", "remove"]);
+    expect(noArgs.code).toBe(1);
+    expect(noArgs.stderr.text()).toContain(
+      "Usage: ariadne edge remove <from_id> <relation> <to_id> (got 0, expected 3)",
+    );
+  });
+
   it("removes an edge with an append-only tombstone", async () => {
     const { cwd, storage } = await workspace();
     expect((await invoke(cwd, ["edge", "add", "TASK-2", "supports", "TASK-1"])).code).toBe(0);
