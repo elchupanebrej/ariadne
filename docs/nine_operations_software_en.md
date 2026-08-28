@@ -2003,7 +2003,7 @@ The correction is shared. The control differs. Humans need a review ritual that 
 
 ## Why framing comes first
 
-**Operation 1: Frame and Model the Software Problem** is the first epistemic gate. Downstream failures in architecture, implementation, or verification often start as a framing defect: optimize an irrelevant metric, automate a flawed assumption, solve an accidental symptom rather than an essential constraint, or couple a business requirement to a transient infrastructure technology too early.
+**Operation 1: Frame and Model the Software Problem** is the first gate. A framing error can make the team optimize the wrong measure, automate a false assumption, solve a symptom instead of a constraint, or select a technology too early.
 
 ``` mermaid
 flowchart TD
@@ -2038,9 +2038,9 @@ flowchart TD
     FrameNode ==> Op2 & Op3 & Op4 & Op6 & Op7 & Op9
 ```
 
-Operation 1 acts on **framing uncertainty** (\$U\_{\text{frame}}\$). Framing uncertainty exists when required observable behavior, invariant boundaries, or success criteria are mixed with implementation mechanisms, underspecified, or in conflict across stakeholder perspectives.
+Operation 1 reduces **framing uncertainty** (\$U\_{\text{frame}}\$). This uncertainty exists when required behavior, invariants, or success criteria are incomplete, conflict with each other, or contain an implementation choice.
 
-Until framing uncertainty is resolved into a structured **Problem Framing Map (`FRAME-`)**, do not generate candidate architectures (`CAN-`), causal hypotheses (`HYP-`), or verification suites (`VAL-`). Under **transitive invalidation**, a candidate from an unframed or mis-framed problem inherits a fatal defect: when the true requirement is later clarified, dependent architectural decisions, proofs, and code collapse.
+Before you create candidate architectures (`CAN-`), causal hypotheses (`HYP-`), or verification suites (`VAL-`), create a **Problem Framing Map (`FRAME-`)**. If a later fact changes the frame, invalidate every dependent candidate, decision, test, and code change.
 
 ------------------------------------------------------------------------
 
@@ -2048,7 +2048,7 @@ Until framing uncertainty is resolved into a structured **Problem Framing Map (`
 
 > **What software system behavior must change, under what observable conditions, and bounded by what non-negotiable invariants, regardless of what code, service, database, or library currently exists?**
 
-The primary cognitive failure occurs before architectural design begins: **the implementation mechanism is embedded in the problem statement**.
+The first failure occurs before architecture design: **the problem statement already names an implementation**.
 
 Engineers and AI agents routinely receive requests framed as technological imperatives:
 
@@ -2058,9 +2058,9 @@ Engineers and AI agents routinely receive requests framed as technological imper
 - *"We need to rewrite the ingestion engine in Rust."*
 - *"We need a distributed lock manager."*
 
-These formulations are **solutions**, not problems. They name specific computational mechanisms. The mechanisms may or may not be appropriate. When a team accepts these statements as problem definitions, the search space collapses to minor variants of one implementation class. Simpler, more reliable, and cheaper alternatives become invisible.
+These statements are **solutions**, not problems. The named mechanism can be wrong. If the team accepts it as the problem, it sees only small variants of one design. Simpler, more reliable, and less costly options are then hidden.
 
-Rigorous framing strips implementation vocabulary. It states the **observable behavioral delta**:
+Good framing removes implementation names. It states the **observable behavioral delta**:
 
 - Not *"add Redis,"* but *"deliver read access to session state with \$p99 \< 5\text{ ms}\$ under 50,000 concurrent requests/sec without serving stale authorization grants."*
 - Not *"split into microservices,"* but *"enable independent deployment and scaling of billing and catalog workflows such that a catalog outage cannot prevent transaction settlement."*
@@ -3057,11 +3057,11 @@ Humans usually over-trust the slice of the system they can see. Agents over-trus
     │      and paired with a differentiating test whose negative outcome decisively disproves it.     │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-In software engineering, the most expensive failures do not come from incorrect implementations of chosen algorithms. They come from **mistaking intermediate symptoms for causal mechanisms**, or from **accepting false compromises** without exposing the underlying contradiction.
+The most costly failures often start when a team treats a symptom as its cause, or accepts a trade-off without making the contradiction clear.
 
-When an engineer sees high tail latency under peak load, the claim "we need to add more memory" or "we need to rewrite the service in Go" skips diagnosis. High memory usage, connection pool exhaustion, CPU spikes, and error rates are **Undesirable Effects (UDEs)**. They are visible signs of an underlying structural mechanism: a serialized execution section, a cache coherency storm, an unindexed query plan, or a contradiction between data consistency and availability.
+For example, high tail latency does not prove that the service needs more memory or a rewrite in Go. Memory use, connection-pool exhaustion, CPU spikes, and error rates are **undesirable effects (UDEs)**. They can come from a serialized section, a cache-coherency storm, an unindexed query, or a conflict between consistency and availability.
 
-Operation 2 is **abductive diagnosis and constraint localization**. It stops the engineering team or AI agent from jumping to solution generation (Operations 3 and 4) while the true failure mechanism is still unknown.
+Operation 2 is **abductive diagnosis and constraint localization**. Do not generate solutions in Operations 3 and 4 until you know the failure mechanism.
 
 ------------------------------------------------------------------------
 
@@ -3781,9 +3781,9 @@ The human correction is an incentives and review problem. The agent correction i
 
 > **How can we transform the structure, state ownership, and execution dynamics of the software system without anchoring to the first obvious implementation or resorting to unguided technological cycling?**
 
-When engineers encounter a bottleneck, architectural friction, or an unfulfilled requirement, the habitual reflex is additive: add another microservice, add a caching layer, insert a message broker, or rewrite the codebase in a trending language. Additive approaches increase system entropy. They expand the operational attack surface. They raise cognitive overhead. They do not resolve the underlying structural contradiction.
+When engineers find a bottleneck, a design problem, or a missing function, they often add a service, cache, message broker, or new language. Each addition adds operational work and more states to manage. It might not resolve the structural contradiction.
 
-**Operation 3 (Transform the Existing Software System)** is the engine of targeted inventiveness. Physical inventive principles map onto computational systems. The operation is a calculus for changing topology, component boundaries, execution timing, and resource use. The engineer does not wait for insight. The engineer applies five transformation operators to the problem model from [Operation 1](#operation-1-frame-and-model-the-software-problem) and the causal mechanisms from [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction).
+**Operation 3 (Transform the Existing Software System)** changes topology, component boundaries, execution time, and resource use. Apply its five transformation operators to the problem model from [Operation 1](#operation-1-frame-and-model-the-software-problem) and the causal mechanisms from [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction). Start with removal, delegation, or a smaller boundary change before you add a component.
 
 ``` mermaid
 flowchart TD
