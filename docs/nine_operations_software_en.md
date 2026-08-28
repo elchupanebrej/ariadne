@@ -103,19 +103,19 @@ Every formal term has an **engineering reading**. The formal statement keeps pre
 - [Part 1. Why Software Engineering Needs a Shared Foundation](#part-1-why-software-engineering-needs-a-shared-foundation)
   - [1. The Problem of Multiple Engineering Schools](#1-the-problem-of-multiple-engineering-schools)
     - [1.1. The Same Operation Receives Different Names](#11-the-same-operation-receives-different-names)
-    - [1.2. A Single School Conflates Different Kinds of Work](#12-a-single-school-conflates-different-kinds-of-work)
-    - [1.3. The False Question "Which Methodology is Better?" Arises](#13-the-false-question-which-methodology-is-better-arises)
+    - [1.2. A Single School Mixes Different Kinds of Work](#12-a-single-school-mixes-different-kinds-of-work)
+    - [1.3. The False Question "Which Methodology is Better?"](#13-the-false-question-which-methodology-is-better)
   - [2. From Methods to Operations on Problem State](#2-from-methods-to-operations-on-problem-state)
-    - [2.1. The Epistemic Shift: Beyond Methodological Rituals](#21-the-epistemic-shift-beyond-methodological-rituals)
-    - [2.2. Formalization of Problem State and Epistemic Overlay](#22-formalization-of-problem-state-and-epistemic-overlay)
-    - [2.3. Input-Action-Output Operational Model](#23-input-action-output-operational-model)
-    - [2.4. Cognitive Operators on Uncertainty](#24-cognitive-operators-on-uncertainty)
-  - [3. The Nine Principles-Operations of the Methodology](#3-the-nine-principles-operations-of-the-methodology)
-  - [4. Three Levels of the Methodology for Software Engineering](#4-three-levels-of-the-methodology-for-software-engineering)
-    - [4.1. Level 1: Operations (Epistemic State Transformations)](#41-level-1-operations-epistemic-state-transformations)
-    - [4.2. Level 2: Techniques (Concrete Inventive Operators)](#42-level-2-techniques-concrete-inventive-operators)
-    - [4.3. Level 3: Working Artifacts and Executable Evidence](#43-level-3-working-artifacts-and-executable-evidence)
-  - [5. What Constitutes a Good Result of Engineering Reasoning](#5-what-constitutes-a-good-result-of-engineering-reasoning)
+    - [2.1. From Method Rituals to Operations on Problem State](#21-from-method-rituals-to-operations-on-problem-state)
+    - [2.2. Problem State and Epistemic Overlay](#22-problem-state-and-epistemic-overlay)
+    - [2.3. Input-Action-Output Model](#23-input-action-output-model)
+    - [2.4. Humans vs AI Agents](#24-humans-vs-ai-agents)
+  - [3. The Nine Operations](#3-the-nine-operations)
+  - [4. Three Levels of the Methodology](#4-three-levels-of-the-methodology)
+    - [4.1. Operations (The Epistemic State Transformations)](#41-operations-the-epistemic-state-transformations)
+    - [4.2. Techniques (The 36 Concrete Inventive Operators)](#42-techniques-the-36-concrete-inventive-operators)
+    - [4.3. Working Artifacts and Executable Evidence (The Dual-Layer Evidence Model)](#43-working-artifacts-and-executable-evidence-the-dual-layer-evidence-model)
+  - [5. What a Good Result of Engineering Reasoning Is](#5-what-a-good-result-of-engineering-reasoning-is)
 - [Part 2. The Nine Core Operations](#part-2-the-nine-core-operations)
   - [Operation 1. Frame and Model the Software Problem](#operation-1-frame-and-model-the-software-problem)
   - [Operation 2. Find the Constraint, Cause, or Contradiction](#operation-2-find-the-constraint-cause-or-contradiction)
@@ -130,10 +130,10 @@ Every formal term has an **engineering reading**. The formal statement keeps pre
   - [6. Foundations of the Nine Operations](#6-foundations-of-the-nine-operations)
   - [7. How to Understand Core Concepts in Software](#7-how-to-understand-core-concepts-in-software)
   - [8. Software Contradictions as a First-Class Concept](#8-software-contradictions-as-a-first-class-concept)
-  - [9. Software Architectural & Computational Effects Database](#9-software-architectural--computational-effects-database)
-  - [10. Theory of Component Elimination (Trimming) in Software](#10-theory-of-component-elimination-trimming-in-software)
-  - [11. Repository & Telemetry Grounding Protocol for Autonomous Agents](#11-repository--telemetry-grounding-protocol-for-autonomous-agents)
-  - [12. Independent Adversarial Contradiction Reviewer](#12-independent-adversarial-contradiction-reviewer)
+  - [9. Software Equivalent of an Effects Database](#9-software-equivalent-of-an-effects-database)
+  - [10. Why Component Elimination is Crucial in Software](#10-why-component-elimination-is-crucial-in-software)
+  - [11. Why Agents Must Model from Codebase and System Data](#11-why-agents-must-model-from-codebase-and-system-data)
+  - [12. Independent Contradiction Reviewer](#12-independent-contradiction-reviewer)
 - [Part 4. The Unified Development Reasoning Cycle](#part-4-the-unified-development-reasoning-cycle)
   - [13. Not a Project Lifecycle, but an Uncertainty Router](#13-not-a-project-lifecycle-but-an-uncertainty-router)
   - [14. Primary Route for an Unfamiliar Software Problem](#14-primary-route-for-an-unfamiliar-software-problem)
@@ -161,13 +161,13 @@ Every formal term has an **engineering reading**. The formal statement keeps pre
   - [35. Human-AI Handoff \[HANDOFF-ID\]](#35-human-ai-handoff-handoff-id)
   - [36. Minimal Artifact Set for Small Tasks](#36-minimal-artifact-set-for-small-tasks)
   - [37. Full Artifact Set for Complex Projects](#37-full-artifact-set-for-complex-projects)
-- [Appendix 1. 36 Techniques for Software Engineering](#appendix-1-36-techniques-for-software-engineering)
-- [Appendix 2. Practice × Operation Matrix](#appendix-2-practice--operation-matrix)
+- [Appendix 1. 36 Techniques for Software Engineering](#appendix-1-36-techniques-for-software-engineering-expanded-reference-manual)
+- [Appendix 2. Practice × Operation Matrix](#appendix-2-practice--operation-matrix-expanded-analytical-guide)
 - [Appendix 3. Glossary of Epistemic and Architectural Concepts](#appendix-3-glossary-of-epistemic-and-architectural-concepts)
-- [Appendix 4. Engineering Task Template](#appendix-4-engineering-task-template)
-- [Appendix 5. Rules for the Developer Agent](#appendix-5-rules-for-the-developer-agent)
-- [Conclusion](#conclusion)
-- [Master Academic Bibliography](#master-academic-bibliography)
+- [Appendix 4. Engineering Task Template](#appendix-4-engineering-task-template-instantiable-specification)
+- [Appendix 5. Rules for the Developer Agent](#appendix-5-rules-for-the-developer-agent-operational-standard)
+- [Conclusion](#conclusion-the-synthesis-of-inventive-thought-and-executable-software)
+- [Master Bibliography](#master-bibliography)
 
 ------------------------------------------------------------------------
 
@@ -4642,9 +4642,9 @@ Humans prune too early by organizational feasibility. Agents converge too early 
     │      and no two candidates differ solely by third-party library, vendor, or language syntax.     │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-In software engineering, the most common failure of architectural reasoning is **premature convergence on a local design optimum**. Faced with a complex requirement—a high-throughput ingestion engine, a distributed replication protocol, a real-time search indexer, or a multi-tenant billing engine—engineering teams and LLMs suffer **cognitive anchoring**. They generate variants of the one architectural paradigm most present in memory or training data (for example, five minor variants of a microservice that talks HTTP and persists to a relational database with Redis caching).
+The usual architecture failure is an **early choice of one familiar design**. A team can face a high-throughput ingestion engine, a replication protocol, a real-time search index, or a multi-tenant billing engine. Both engineers and LLMs can then anchor on the design they know best. They produce small variants of it. For example, they change parts of an HTTP service with a relational database and Redis cache.
 
-Such variants are not genuine architectural exploration. They are cosmetic permutations of one point in the multi-dimensional design space. If that design paradigm has an intrinsic structural flaw or clashes with a system invariant, all five variants fail the same way under production load.
+These variants do not explore different architectures. They change only one point in the design space. If the basic design conflicts with an invariant, every variant can fail in the same way under production load.
 
 ``` mermaid
 flowchart TD
@@ -4682,7 +4682,7 @@ flowchart TD
     OP4 --> OUT
 ```
 
-**Operation 4 (Explore the Space of Architectures and Implementations)** expands, structures, and filters the architectural solution space. Map the solution space into an independent **morphological field** (\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n\$). Verify structural independence with **Axiomatic Design**. Apply distributed-systems bounds (**CAP** and **PACELC**). Prune infeasible branches with **two-tier constraint satisfaction**. The resulting candidate mechanisms (`CAN-*`) are mathematically grounded, structurally diverse, and robust against cognitive anchoring.
+**Operation 4 (Explore the Space of Architectures and Implementations)** finds, organizes, and filters architecture options. Put independent decisions in a **morphological field** (\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n\$). Check that one decision does not change an unrelated requirement. Apply distributed-system limits, such as **CAP** and **PACELC**. Remove options that cannot meet hard constraints. The remaining candidates (`CAN-*`) must use different operating principles. Do not keep candidates that differ only by vendor, library, or programming language.
 
 ------------------------------------------------------------------------
 
@@ -4733,45 +4733,45 @@ classDiagram
 
 ### 2.1. Fritz Zwicky: Morphological Analysis and Systematic Field Generation
 
-In his landmark treatise [*Discovery, Invention, Research Through the Morphological Approach* (Zwicky, 1969, Macmillan)](https://books.google.com/books?id=m05RAAAAMAAJ), the astrophysicist Fritz Zwicky established **General Morphological Analysis (GMA)** as a rigorous method for exploring non-quantifiable, multi-dimensional complex problem spaces.
+In [*Discovery, Invention, Research Through the Morphological Approach* (Zwicky, 1969, Macmillan)](https://books.google.com/books?id=m05RAAAAMAAJ), Fritz Zwicky described **General Morphological Analysis (GMA)**. GMA is a method to explore complex problems that do not have one numeric answer.
 
-Zwicky's insight was that complex systems are governed by a finite set of fundamental structural dimensions \$D_1, D_2, \dots, D_n\$. By discretizing each dimension into distinct possible parameter values \$D_i = {v\_{i,1}, v\_{i,2}, \dots, v\_{i,k_i}}\$, the entire universe of possible system configurations is captured by the multi-dimensional Cartesian product:
+Zwicky treated a complex system as a finite set of structural dimensions \$D_1, D_2, \dots, D_n\$. Give each dimension a small set of possible values: \$D_i = {v\_{i,1}, v\_{i,2}, \dots, v\_{i,k_i}}\$. The Cartesian product contains every combination:
 
 \$\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n\$\$
 
-Zwicky demonstrated that human intuition typically explores less than 1% of \$\mathcal{S}\$, repeatedly gravitating toward familiar configurations while ignoring viable, highly novel permutations. Furthermore, Zwicky introduced **Cross-Consistency Assessment (CCA)** to systematically prune logically impossible or mutually contradictory configurations, reducing the total field to an admissible set of high-value structural solutions.
+People usually explore familiar combinations first and can miss valid alternatives. Zwicky used **Cross-Consistency Assessment (CCA)** to remove combinations that cannot work together. The result is a smaller set of valid options.
 
 ### 2.2. Nam P. Suh: Axiomatic Design and the Independence Axiom
 
-In [*The Principles of Design* (Suh, 1990, Oxford University Press)](https://global.oup.com/academic/product/the-principles-of-design-9780195043457), Nam P. Suh formalized the mathematical criteria governing optimal engineering architectures. Suh established two universal design axioms:
+In [*The Principles of Design* (Suh, 1990, Oxford University Press)](https://global.oup.com/academic/product/the-principles-of-design-9780195043457), Nam P. Suh gave two rules for architecture design:
 
-1.  **The Independence Axiom (Axiom 1):** Maintain the independence of functional requirements (\$\mathbf{FR}\$). An optimal design ensures that altering a specific design parameter (\$\mathbf{DP}\$) satisfies its corresponding functional requirement without causing unintended collateral perturbations to other functional requirements.
-2.  **The Information Axiom (Axiom 2):** Minimize the information content of the design. Among all designs satisfying the Independence Axiom, the design with the minimum information content (maximum simplicity, least architectural entropy) is superior.
+1. **Independence axiom:** Keep functional requirements (\$\mathbf{FR}\$) independent. A change to one design parameter (\$\mathbf{DP}\$) must meet its requirement without changing other requirements.
+2. **Information axiom:** If two designs meet the requirements, select the one with less information content. In practice, select the simpler design with fewer coupled parts.
 
 Mathematically, the relationship between the vector of Functional Requirements \$\mathbf{FR}\$ and Design Parameters \$\mathbf{DP}\$ is defined by the **Design Matrix** \$\[A\]\$:
 
 \$\$\mathbf{FR} = \[A\],\mathbf{DP} \iff \begin{bmatrix} FR_1 \\ FR_2 \\ \vdots \\ FR_m \end{bmatrix} = \begin{bmatrix} A\_{11} & A\_{12} & \dots & A\_{1n} \\ A\_{21} & A\_{22} & \dots & A\_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ A\_{m1} & A\_{m2} & \dots & A\_{mn} \end{bmatrix} \begin{bmatrix} DP_1 \\ DP_2 \\ \vdots \\ DP_n \end{bmatrix}\$\$
 
-Suh classified all engineering architectures into three structural topologies based on the properties of \$\[A\]\$:
+Suh described three forms of \$\[A\]\$:
 
-- **Uncoupled Design:** \$\[A\]\$ is a diagonal matrix (\$A\_{ij} = 0\$ for all \$i \neq j\$). Each functional requirement is satisfied independently by exactly one design parameter. This represents the theoretical ideal of software modularity.
-- **Decoupled Design:** \$\[A\]\$ is a triangular matrix. Functional requirements can be satisfied sequentially without cyclical coupling if design parameters are modified in a strict topological order.
-- **Coupled Design:** \$\[A\]\$ is full or arbitrary. Modifying any design parameter unpredictably alters multiple functional requirements, creating a combinatorial nightmare of regression bugs and cognitive overload. Operation 4 actively prunes coupled designs.
+- **Uncoupled design:** \$\[A\]\$ is diagonal (\$A\_{ij} = 0\$ for all \$i \neq j\$). One parameter meets one requirement. This is the ideal for a module.
+- **Decoupled design:** \$\[A\]\$ is triangular. The team can change parameters in a defined order without a cycle.
+- **Coupled design:** \$\[A\]\$ is full or arbitrary. A change to one parameter changes several requirements. This causes regression defects and makes the system hard to change. Operation 4 should remove such options where possible.
 
 ### 2.3. Eric Brewer, Seth Gilbert & Nancy Lynch: The CAP Theorem and Distributed State Bounds
 
-In [*Towards Robust Distributed Systems* (Brewer, 2000, ACM PODC)](https://doi.org/10.1145/343477.343502) and [*CAP Twelve Years Later: How the "Rules" Have Changed* (Brewer, 2012, IEEE Computer)](https://doi.org/10.1109/MC.2012.37), Eric Brewer formulated the fundamental bound of distributed data systems: a distributed read-write register cannot simultaneously guarantee **Consistency (Linearizability)**, **Availability (Every non-failing node returns a non-error response)**, and **Partition Tolerance (Tolerance of arbitrary message loss or network delay)**.
+In [*Towards Robust Distributed Systems* (Brewer, 2000, ACM PODC)](https://doi.org/10.1145/343477.343502) and [*CAP Twelve Years Later: How the "Rules" Have Changed* (Brewer, 2012, IEEE Computer)](https://doi.org/10.1109/MC.2012.37), Eric Brewer described a limit of distributed data systems. During a network partition, a system cannot give both **linearizable consistency** and **availability** for every request.
 
-In [*Brewer's Conjecture and the Feasibility of Consistent, Available, Partition-Tolerant Web Services* (Gilbert & Lynch, 2002, ACM SIGACT News, DOI: 10.1145/564585.564601)](https://doi.org/10.1145/564585.564601), Seth Gilbert and Nancy Lynch provided the formal mathematical proof of the CAP theorem under asynchronous network models. Gilbert and Lynch proved that in the presence of a network partition (\$\mathcal{P}\$), any distributed state machine must fundamentally choose between:
+[Gilbert and Lynch](https://doi.org/10.1145/564585.564601) proved this limit for asynchronous networks. When a partition (\$\mathcal{P}\$) occurs, a distributed state machine must choose one of these actions:
 
-1.  **Halting or returning an error (sacrificing Availability to guarantee Linearizable Consistency: \$CP\$)**, or
-2.  **Serving local stale or divergent state (sacrificing Consistency to preserve Availability: \$AP\$)**.
+1. Return an error or wait. This keeps linearizable consistency (\$CP\$).
+2. Return local state that can be stale or different. This keeps availability (\$AP\$).
 
-In Operation 4, the CAP theorem serves as an unyielding pruning filter: any candidate mechanism that claims to achieve \$CA\$ across an untrusted network boundary is mathematically impossible and must be eliminated immediately during morphological analysis.
+Use CAP as a filter in Operation 4. Remove a candidate that claims that it can preserve linearizable consistency and return a successful response for every request across an untrusted network partition.
 
 ### 2.4. Daniel J. Abadi: The PACELC Theorem and Normal-State Latency Trade-offs
 
-In [*Consistency Tradeoffs in Modern Distributed Database System Design: CAP is Only Part of the Story* (Abadi, 2012, IEEE Computer, DOI: 10.1109/MC.2012.33)](https://doi.org/10.1109/MC.2012.33), Daniel J. Abadi demonstrated that the CAP theorem provides an incomplete characterization of the architectural trade-off space because network partitions are rare operating exceptions.
+In [*Consistency Tradeoffs in Modern Distributed Database System Design: CAP is Only Part of the Story* (Abadi, 2012, IEEE Computer, DOI: 10.1109/MC.2012.33)](https://doi.org/10.1109/MC.2012.33), Daniel J. Abadi showed that CAP does not describe the normal case. Partitions are not the only design condition.
 
 Abadi formulated the **PACELC Theorem**, which models system behavior under both partition and nominal conditions:
 
@@ -4796,25 +4796,23 @@ Abadi formulated the **PACELC Theorem**, which models system behavior under both
        │ Strong Cons.│           │ Async Repl.)│         │ Low Latency │         │ Stale Master│
        └─────────────┘           └─────────────┘         └─────────────┘         └─────────────┘
 
-The PACELC theorem forces Operation 4 to explicitly isolate the normal-state execution trade-off: even when the network is healthy, a system cannot achieve linearizability without paying the latency penalty of round-trip coordination (for example, synchronous quorum replication or 2-phase commit).
+PACELC makes the normal-case trade-off explicit. Even when the network is healthy, linearizable consistency needs round-trip coordination. For example, it can need synchronous quorum replication or two-phase commit. This adds latency.
 
 ### 2.5. Martin Kleppmann: Unbundling Data Systems and Derived State
 
-In [*Designing Data-Intensive Applications* (Kleppmann, 2017, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/), Martin Kleppmann unified the paradigms of transactions, streams, and batch processing by treating complex software architectures as **unbundled databases**.
+In [*Designing Data-Intensive Applications* (Kleppmann, 2017, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/), Martin Kleppmann describes complex data systems as **unbundled databases**. The system can separate:
 
-Kleppmann's core architectural principle posits that modern data systems consist of:
+- **Primary records of truth:** Immutable, durable state changes in an append-only log or event stream.
+- **Derived state and materialized views:** Caches, search indexes, graph stores, and read replicas. They apply a defined function \$f(\text{log})\$ for a specific query.
+- **Change data capture (CDC) and stream processors:** Asynchronous pipelines that bring derived views toward the source state.
 
-- **Primary Records of Truth (Append-Only Logs / Event Streams):** Total order, immutable, durable state transitions.
-- **Derived State & Materialized Views (Caches, Search Indexes, Graph Stores, Read Replicas):** Deterministic transformations \$f(\text{log})\$ optimized for specialized query access patterns.
-- **Change Data Capture (CDC) & Stream Processors:** Asynchronous, fault-tolerant pipelines ensuring eventual convergence between source-of-truth logs and derived views.
-
-This framework allows Operation 4 to break monolithic database architectures into decoupled, composable dimensions of storage, indexing, and synchronization.
+This model lets Operation 4 separate storage, indexing, and synchronization decisions instead of treating the database as one indivisible component.
 
 ### 2.6. Buschmann et al.: Pattern-Oriented Software Architecture (POSA)
 
-In [*Pattern-Oriented Software Architecture: A System of Patterns* (Buschmann, Meunier, Rohnert, Sommerlad & Stal, 1996, Wiley)](https://www.wiley.com/en-us/Pattern+Oriented+Software+Architecture%2C+Volume+1%2C+A+System+of+Patterns-p-9780471958697), the authors established a rigorous taxonomy of software architectural styles, structural patterns, and communication idioms.
+In [*Pattern-Oriented Software Architecture: A System of Patterns* (Buschmann, Meunier, Rohnert, Sommerlad & Stal, 1996, Wiley)](https://www.wiley.com/en-us/Pattern+Oriented+Software+Architecture%2C+Volume+1%2C+A+System+of+Patterns-p-9780471958697), the authors list architectural styles, structural patterns, and communication patterns.
 
-POSA formalized the structural properties of canonical patterns such as *Layers*, *Pipes and Filters*, *Blackboard*, *Broker*, *Microkernel*, *Reactor*, and *Proactor*. Operation 4 leverages POSA's structural categories to ensure that candidate generation spans fundamentally different execution and communication topologies rather than minor code-level idioms.
+POSA describes *Layers*, *Pipes and Filters*, *Blackboard*, *Broker*, *Microkernel*, *Reactor*, and *Proactor*. Use these categories to create candidates with different execution and communication topologies. Do not count small code changes as different architectures.
 
 ------------------------------------------------------------------------
 
@@ -5825,7 +5823,7 @@ The human failure is often a search-cost and status calculation. The agent failu
 
 ## 1. Why knowledge expansion comes first
 
-**Operation 5: Expand Knowledge and Obtain Missing Evidence** is the empirical truth-engine of technical reasoning. In non-trivial software engineering, the primary failure of architectural design and defect resolution is not a failure of logical deduction. It is a failure of **epistemic grounding**: high-impact, irreversible commitments based on unverified assumptions, marketing claims, stale mental models, or unexamined legacy codebases.
+**Operation 5: Expand Knowledge and Obtain Missing Evidence** turns important unknowns into evidence. Architecture and defect work often fail because a team makes a costly or irreversible choice from an unverified assumption, a vendor claim, old knowledge, or code that nobody has inspected.
 
 ``` mermaid
 flowchart TD
@@ -5862,12 +5860,12 @@ flowchart TD
     MathematicalGate --> OutputState
 ```
 
-Engineering reasoning routinely encounters a fundamental fork in the cognitive road:
+Engineering work commonly reaches one of these two states:
 
-- **Lack of Options:** The team has sufficient empirical facts about the system, but lacks structurally distinct architectural classes to resolve the problem (requiring [Operation 3: Transform System](#operation-3-transform-the-existing-software-system) and [Operation 4: Explore Solution Space](#operation-4-explore-the-space-of-architectures-and-implementations)).
-- **Lack of Knowledge:** The team has multiple candidate architectures or diagnostic hypotheses, but lacks the empirical data required to discriminate between them or to determine whether a specific mechanism will violate system invariants.
+- **Lack of options:** The team has enough facts, but no different architecture classes. Use [Operation 3: Transform System](#operation-3-transform-the-existing-software-system) and [Operation 4: Explore Solution Space](#operation-4-explore-the-space-of-architectures-and-implementations).
+- **Lack of knowledge:** The team has candidate architectures or diagnostic hypotheses, but no data to choose between them or to check their invariants.
 
-Operation 5 provides the systematic discipline for converting **Engineering Uncertainty** into **Verified Evidence** (`EVD-`) through targeted repository mining, cross-domain mechanism borrowing, and empirical experimentation. Under the principle of **Transitive Invalidation**, if an architectural candidate rests upon an assumption (`ASM-`) that is subsequently falsified by evidence, that candidate and all its downstream design artifacts are automatically invalidated, preventing catastrophic rework late in the software lifecycle.
+Use Operation 5 to change **engineering uncertainty** into **verified evidence** (`EVD-`). Inspect the repository, reuse a proven mechanism from another domain, or run an experiment. If evidence falsifies an assumption (`ASM-`), invalidate every candidate and decision that depends on it. This avoids late rework.
 
 ------------------------------------------------------------------------
 
@@ -5877,7 +5875,7 @@ Operation 5 provides the systematic discipline for converting **Engineering Unce
 
 > **What unknown information prevents us from distinguishing between options or discovering a new solution class, and what is the cheapest, most decisive empirical test that can resolve it?**
 
-The purpose of Operation 5 is never passive reading or open-ended exploration. In software engineering, information gathering without a falsifiable hypothesis is a form of cognitive waste known as **epistemic entropy**.
+Do not use Operation 5 for passive reading or open-ended research. First state the claim that the evidence can disprove. Research without a decision question wastes time.
 
 Every activation of Operation 5 must be governed by a strict operational calculus:
 
@@ -5951,58 +5949,58 @@ classDiagram
 
 ### 3.1. Karl Popper: Falsificationism and the Asymmetry of Verification
 
-In [*The Logic of Scientific Discovery* (Popper, 1959/1934)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper established that empirical hypotheses can never be conclusively verified by positive observations, because no number of successful tests can guarantee that a future test will not fail. However, a single reproducible counterexample can decisively **falsify** a universal claim:
+In [*The Logic of Scientific Discovery* (Popper, 1959/1934)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper states that successful observations cannot prove an empirical hypothesis. A future observation can still fail. One reproducible counterexample can **falsify** a universal claim:
 
 \$\$\forall x , (P(x) \rightarrow Q(x)) \quad \text{is falsified by} \quad \exists x , (P(x) \land \neg Q(x))\$\$
 
 In software engineering:
 
-- Proving that a caching mechanism is thread-safe across 10,000 runs does not prove absence of race conditions.
-- Demonstrating a single race condition under high CPU core contention instantly falsifies the thread-safety claim.
-- Therefore, Operation 5 directs engineers and AI agents to design **severe tests** (experiments explicitly optimized to maximize the probability of exposing the hypothesized failure mode) rather than confirmatory demonstrations.
+- A caching mechanism can pass 10,000 runs and still contain a race condition.
+- One reproducible race condition under CPU contention falsifies the thread-safety claim.
+- For this reason, Operation 5 uses **severe tests**. A severe test is an experiment designed to expose the suspected failure mode.
 
 ### 3.2. Herbert A. Simon: Bounded Rationality and Information Search in Artificial Systems
 
-In [*The Sciences of the Artificial* (Simon, 1969, MIT Press)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/), Herbert A. Simon introduced the concepts of **Bounded Rationality** and **Satisficing**:
+In [*The Sciences of the Artificial* (Simon, 1969, MIT Press)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/), Herbert A. Simon introduced **bounded rationality** and **satisficing**:
 
-- Software systems are "artificial systems" whose design is constrained by the inner environment (hardware, runtime, memory hierarchy) and outer environment (workloads, network latency, user behavior).
-- Real-world decision makers possess finite computational capacity, memory, and time. An exhaustive search of all possible architectures or codebase invariants is impossible.
-- Operation 5 implements Simon's **heuristic search**: searching for information only until a candidate meets the *satisficing threshold* (the minimum evidence required to guarantee non-negotiable safety and performance invariants), at which point information acquisition terminates.
+- Software design is limited by the internal environment (hardware, runtime, and memory) and the external environment (workload, network latency, and user behavior).
+- A team has limited time, memory, and computing capacity. It cannot inspect every architecture or every code invariant.
+- Stop collecting information when a candidate has the minimum evidence needed to meet non-negotiable safety and performance invariants.
 
 ### 3.3. Ronald A. Howard: Information Value Theory and Decision Analysis
 
-In [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), Ronald A. Howard established the mathematical foundations for evaluating whether acquiring additional information is economically rational before making a decision. Howard formalized the **Expected Value of Information (EVOI)**:
+In [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), Ronald A. Howard defined the **expected value of information (EVOI)**. Use it to decide whether to obtain more information before a decision:
 
-- Information has zero intrinsic value; its value derives solely from its potential to **change a decision** to one with a higher expected utility.
-- If an empirical test will yield an outcome that does not alter the chosen architectural path, the test has an \$\text{EVOI} = 0\$ and must not be conducted.
-- Howard's framework provides the mathematical stop condition for Operation 5, preventing both *analysis paralysis* and *reckless implementation under uncertainty*.
+- Information has value only if it can change the decision to a better one.
+- If a test cannot change the selected architecture, its \$\text{EVOI} = 0\$. Do not run it.
+- EVOI gives Operation 5 a stop condition. It prevents both unnecessary analysis and unsafe work with unknown facts.
 
 ### 3.4. John Allspaw: Observability, Cognitive Triaging, and Incident Epistemics
 
-In [*Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages* (Allspaw, 2015, Lund University)](https://www.thestrangeloop.com/2015/how-your-systems-will-fail.html), John Allspaw demonstrated that during live incidents and architectural debugging:
+In [*Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages* (Allspaw, 2015, Lund University)](https://www.thestrangeloop.com/2015/how-your-systems-will-fail.html), John Allspaw describes incident work:
 
-- Engineers navigate complex, dynamic systems by constructing and updating mental models through active sensing and cross-checking telemetry.
-- Observability is not merely dashboards; it is the capacity of human-agent cognitive systems to ask arbitrary, un-precalculated questions of the running software.
-- Operation 5 codifies Allspaw's findings: transforming raw telemetry, log lines, and distributed traces into structured evidence nodes that validate or invalidate causal hypotheses under time and resource pressure.
+- Engineers update their model of a running system from telemetry and cross-checks.
+- Observability is more than dashboards. It lets the team ask new questions of the running software.
+- Operation 5 turns telemetry, logs, and distributed traces into evidence that supports or falsifies a causal hypothesis.
 
 ### 3.5. Betsy Beyer et al.: Site Reliability Engineering and Production Ground Truth
 
-In [*Site Reliability Engineering: How Google Runs Production Systems* (Beyer et al., 2016, O'Reilly)](https://sre.google/sre-book/table-of-contents/), the authors established that:
+In [*Site Reliability Engineering: How Google Runs Production Systems* (Beyer et al., 2016, O'Reilly)](https://sre.google/sre-book/table-of-contents/), the authors make three relevant points:
 
-- Production systems must be treated as empirical physical phenomena: system behavior cannot be inferred purely from architectural diagrams or code inspections; it must be continuously measured via Service Level Indicators (SLIs).
-- Blameless postmortems and incident archives constitute a critical organizational knowledge base for uncovering latent systemic failure modes.
-- Operation 5 leverages SRE principles to mandate automated Canary analysis, dark launches, and synthetic load profiling as formal knowledge-generation protocols.
+- Diagrams and code inspection do not show all production behavior. Measure the system with service level indicators (SLIs).
+- Blameless postmortems and incident records show hidden failure modes.
+- Use canary analysis, dark launches, and synthetic load as methods to obtain evidence.
 
 ### 3.6. Diomidis Spinellis: Code Quality and Repository Mining
 
-In [*Code Quality: The Open Source Perspective* (Spinellis, 2006, Addison-Wesley)](https://www.spinellis.gr/codequality/), Diomidis Spinellis detailed how source code, version control metadata, build logs, and static analysis trees can be systematically mined to extract architectural invariants, detect hidden couplings, and quantify technical debt. Operation 5 formalizes these practices into executable data-mining pipelines for both human developers and AI coding agents.
+In [*Code Quality: The Open Source Perspective* (Spinellis, 2006, Addison-Wesley)](https://www.spinellis.gr/codequality/), Diomidis Spinellis shows how to inspect source code, version-control data, build logs, and static-analysis trees. Use these sources to find invariants, hidden coupling, and technical debt. Operation 5 applies this work to both human developers and AI coding agents.
 
 ### 3.7. Michael Feathers: Legacy Code Invariants and Characterization Testing
 
-In [*Working Effectively with Legacy Code* (Feathers, 2004, Prentice Hall)](https://www.pearson.com/en-us/subject-catalog/p/working-effectively-with-legacy-code/P200000009472), Michael Feathers defined legacy code as "code without tests" and introduced the formal method of **Characterization Testing**:
+In [*Working Effectively with Legacy Code* (Feathers, 2004, Prentice Hall)](https://www.pearson.com/en-us/subject-catalog/p/working-effectively-with-legacy-code/P200000009472), Michael Feathers defines legacy code as "code without tests" and introduces **characterization testing**:
 
-- When legacy systems lack formal specifications, the current observable behavior of the code *is* the actual specification.
-- By placing software components within sensing *seams* and executing characterization tests across diverse inputs, engineers extract the system's true implicit invariants before refactoring or redesigning.
+- If a legacy system has no formal specification, its current observable behavior is the working specification.
+- Use seams and characterization tests with varied inputs to identify its implicit invariants before you change it.
 
 ------------------------------------------------------------------------
 
@@ -10326,9 +10324,9 @@ flowchart TD
     MathematicalGate --> OutputState
 ```
 
-Software engineering is fundamentally distinct from pure mathematics and static physical engineering. A software architecture is never proven correct by static diagramming, whiteboard consensus, or eloquent argumentation. Software systems are complex, non-linear, dynamic state machines operating across asynchronous networks, volatile hardware, and mutating data distributions.
+Diagrams, meetings, and persuasive writing cannot prove that a software architecture works. Software systems change state over time. They run on hardware that can fail, over networks that can delay messages, and with data that can change.
 
-Consequently, in the Ariadne epistemological framework, every proposed architectural change or bug fix remains an **unproven causal hypothesis** (\$\mathcal{H}\$) until it is subjected to **severe empirical execution** designed explicitly to falsify it, and migrated into production via a **reversible, state-preserving transition system**.
+In Ariadne, every architecture change and bug fix is an **unproven causal hypothesis** (\$\mathcal{H}\$). Run a test that can falsify it. Then use a reversible transition that preserves data.
 
 ------------------------------------------------------------------------
 
@@ -10336,18 +10334,18 @@ Consequently, in the Ariadne epistemological framework, every proposed architect
 
 > **Does the change deliver the promised behavior and preserve all system invariants under real execution, and can we transition to it safely from the current state without service disruption or data loss?**
 
-When an engineering team or AI agent evaluates a solution candidate, the central inquiry is not *"Does this design look elegant?"* or *"Did the happy-path unit test pass?"*, but rather:
+When an engineering team or AI agent evaluates a candidate, do not ask only *"Does this design look elegant?"* or *"Did the happy-path unit test pass?"* Ask:
 
-1.  **Empirical Falsification:** What is the cheapest, most severe executable test that could prove this mechanism fails to satisfy our functional, performance, or safety invariants?
-2.  **Problem Displacement:** What new failure modes, resource contentions, operational complexities, or secondary contradictions are introduced by this fix?
-3.  **Transition Duality:** What intermediate, temporary software architecture must be constructed to bridge the running legacy state to the target state without downtime?
-4.  **Invariant Reversibility:** At every millisecond of the deployment, if an unpredicted failure manifests, can the system revert to the known-good state with zero data corruption and zero manual intervention?
+1. **Falsification:** What is the cheapest executable test that can show that this mechanism breaks a function, performance, or safety invariant?
+2. **New problems:** What failure modes, resource conflicts, or operating work does this fix add?
+3. **Transition:** What temporary software is needed to move from the current system to the target system without downtime?
+4. **Rollback:** At each deployment stage, can the system return to the known-good state without data loss or manual repair?
 
 ------------------------------------------------------------------------
 
 ### The Dual Nature of Transition: Target Architecture vs. Transition Architecture
 
-A pervasive failure mode in software engineering is confusing the **Target Architecture** (\$\mathcal{A}*{\text{target}}\$) with the **Transition Architecture** (\$\mathcal{A}*{\text{trans}}\$).
+Teams often confuse the **target architecture** (\$\mathcal{A}*{\text{target}}\$) with the **transition architecture** (\$\mathcal{A}*{\text{trans}}\$).
 
 \$\$\mathcal{A}*{\text{target}} \neq \mathcal{A}*{\text{trans}}\$\$
 
@@ -10367,7 +10365,7 @@ A pervasive failure mode in software engineering is confusing the **Target Archi
     │  - Rule: Must have an explicit decommissioning lifecycle to prevent permanent architectural rot.│
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-If an engineer designs only \$\mathcal{A}*{\text{target}}\$, the rollout inevitably defaults to a **Big Bang Migration** (a high-risk, irreversible cutover requiring maintenance windows, schema locks, and catastrophic failure potential). Operation 9 treats \$\mathcal{A}*{\text{trans}}\$ as a first-class engineering deliverable with its own formal verification requirements.
+If an engineer designs only \$\mathcal{A}*{\text{target}}\$, the rollout can become a **big-bang migration**. A big-bang migration can require a maintenance window or schema lock, and it can be hard to reverse. Operation 9 requires \$\mathcal{A}*{\text{trans}}\$ as a separate deliverable with its own verification.
 
 ------------------------------------------------------------------------
 
@@ -10462,45 +10460,45 @@ In his ACM Turing Lecture [*The Humble Programmer* (CACM, 1972, DOI: 10.1145/355
 
 > *"Program testing can be used to show the presence of bugs, but never to show their absence!"*
 
-Dijkstra warned that because the input space of even modest programs is astronomically large (combinatorial explosion), exhaustive testing is mathematically impossible. Therefore:
+Dijkstra warned that even a small program has too many possible inputs for exhaustive testing. Therefore:
 
-1.  We cannot rely on haphazard sample inputs.
-2.  We must structure software hierarchically with rigorous mathematical abstractions and formal invariants.
-3.  Where formal mathematical proofs are cost-prohibitive, empirical verification must systematically explore the state space using structured, generative, and boundary-focused testing techniques.
+1. Do not rely on random sample inputs.
+2. Define clear abstractions and invariants.
+3. If a formal proof costs too much, use structured tests that generate inputs and test boundaries.
 
 ------------------------------------------------------------------------
 
 ### 1.3. Koen Claessen & John Hughes: Property-Based Testing and Automated Shrinking (2000)
 
-In [*QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs* (ACM ICFP, 2000, DOI: 10.1145/351240.351266)](https://doi.org/10.1145/351240.351266), Koen Claessen and John Hughes revolutionized automated verification by introducing **Property-Based Testing (PBT)**:
+In [*QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs* (ACM ICFP, 2000, DOI: 10.1145/351240.351266)](https://doi.org/10.1145/351240.351266), Koen Claessen and John Hughes introduced **property-based testing (PBT)**:
 
-- Instead of writing individual unit test cases with hand-crafted inputs \$x_1, x_2\$, the engineer defines universal algebraic properties (invariants) over the domain:
+- Instead of writing only unit tests with hand-made inputs \$x_1, x_2\$, define a property (an invariant) for the input domain:
 
 \$\$\forall x \in \mathcal{D}, \quad \text{Invariant}(f(x)) \equiv \text{True}\$\$
 
-- The testing engine generates hundreds of thousands of pseudo-random, edge-case-biased inputs across \$\mathcal{D}\$.
-- **Automated Shrinking:** When a counterexample \$x\_{\text{fail}}\$ is discovered that falsifies the invariant, the engine automatically applies a deterministic reduction algorithm to find the **minimal failing input** \$x\_{\text{min}} \subseteq x\_{\text{fail}}\$ (for example, shrinking an array of 5,000 elements to a 2-element array containing `[0, -1]`), isolating the root cause instantly.
+- The test engine generates many pseudo-random inputs, with a bias toward boundary cases, across \$\mathcal{D}\$.
+- **Automated shrinking:** If input \$x\_{\text{fail}}\$ falsifies the property, the engine reduces it to a **minimal failing input** \$x\_{\text{min}} \subseteq x\_{\text{fail}}\$. For example, it can reduce an array of 5,000 items to `[0, -1]`.
 
 ------------------------------------------------------------------------
 
 ### 1.4. Richard DeMillo, Richard Lipton & Frederick Sayward: Mutation Analysis and the Coupling Effect (1978)
 
-In [*Hints on Test Data Selection: Help for the Practicing Programmer* (IEEE Computer, 1978, DOI: 10.1109/C-M.1978.218136)](https://doi.org/10.1109/C-M.1978.218136), DeMillo, Lipton, and Sayward established the theoretical foundation of **Mutation Testing**:
+In [*Hints on Test Data Selection: Help for the Practicing Programmer* (IEEE Computer, 1978, DOI: 10.1109/C-M.1978.218136)](https://doi.org/10.1109/C-M.1978.218136), DeMillo, Lipton, and Sayward describe the basis of **mutation testing**:
 
-- Traditional code coverage (line, branch) is a dangerously flawed metric: code can be 100% executed by a test without the test asserting anything about the computation's correctness.
-- **The Competent Programmer Hypothesis:** Competent engineers write programs that are close to correct; faults are typically small syntactic variations (for example, `<` instead of `<=`, `+` instead of `-`, inverted booleans, off-by-one indices).
-- **The Coupling Effect:** Test suites capable of detecting and killing all simple first-order mutants are statistically coupled to detecting complex, higher-order compound faults.
-- **Mutation Score (\$MS\$):**
+- Line or branch coverage is not enough. A test can execute all code and still make no useful assertion.
+- Most defects are small changes, such as `<` instead of `<=`, `+` instead of `-`, an inverted Boolean, or an off-by-one index.
+- A test suite that detects simple mutations is also more likely to detect larger related defects.
+- **Mutation score (\$MS\$):**
 
 \$\$MS = \frac{\text{Mutants Killed}}{\text{Total Mutants} - \text{Equivalent Mutants}} \in \[0, 1\]\$\$
 
-A test suite is only considered epistemically adequate in Operation 9 if its Mutation Score exceeds a rigorous threshold (\$MS \ge 0.85\$).
+In Operation 9, a mutation score must meet the required threshold (\$MS \ge 0.85\$) before it supports the related claim.
 
 ------------------------------------------------------------------------
 
 ### 1.5. Paul Ammann & Jeff Offutt: The RIPR Model of Software Faults (2016)
 
-In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 2016)](https://cs.gmu.edu/~offutt/softwaretest/), Paul Ammann and Jeff Offutt formalized the **RIPR Model**, defining the four necessary and sufficient conditions for an empirical test to expose a software fault:
+In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 2016)](https://cs.gmu.edu/~offutt/softwaretest/), Paul Ammann and Jeff Offutt define the **RIPR model**. A test needs four conditions to expose a software fault:
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                    THE RIPR MODEL OF FAULT EXECUTION                             │
@@ -10520,28 +10518,28 @@ In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 201
 
 \$\$\text{Fault Exposed} \iff \text{Reachability} \land \text{Infection} \land \text{Propagation} \land \text{Revealability}\$\$
 
-If any link in this causal chain is broken (for example, the state is infected but overwritten before reaching the return value, or the test lacks an assertion), the test suite produces a dangerous false sense of security.
+If one link is missing, the test does not expose the fault. For example, the program can overwrite an incorrect state before it returns, or the test can have no assertion.
 
 ------------------------------------------------------------------------
 
 ### 1.6. K. Basiri et al.: Chaos Engineering in Distributed Systems (2016)
 
-In [*Chaos Engineering* (IEEE Software, 2016, DOI: 10.1109/MS.2016.60)](https://doi.org/10.1109/MS.2016.60), Basiri et al. (the Netflix Chaos Engineering team) formulated the discipline of experimenting on distributed systems to build confidence in their capability to withstand turbulent conditions in production:
+In [*Chaos Engineering* (IEEE Software, 2016, DOI: 10.1109/MS.2016.60)](https://doi.org/10.1109/MS.2016.60), Basiri et al. describe experiments on distributed systems under production-like faults:
 
-1.  **Define Steady State:** Measure normal system behavior via high-level business metrics (for example, successful checkouts per minute, p99 API latency).
-2.  **Hypothesize Steady State Persistence:** Formulate the hypothesis that steady state will continue even when real-world faults occur.
-3.  **Inject Real-World Variables:** Introduce realistic failures (server crashes, network partitions, disk latency spikes, clock skew, DNS dropouts).
-4.  **Disprove Hypothesis:** Look for a divergence between the steady state and the perturbed state. The inability to maintain steady state reveals systemic architectural flaws (for example, missing fallbacks, retry storms, cascading timeouts).
+1. **Define steady state:** Measure normal behavior, for example successful checkouts per minute and p99 API latency.
+2. **State the hypothesis:** Specify which measures must remain acceptable during a fault.
+3. **Inject a real fault:** For example, stop a server, partition the network, increase disk latency, change clock time, or remove DNS.
+4. **Compare the result:** A failed measure shows an architectural weakness, such as a missing fallback, a retry storm, or cascading timeouts.
 
 ------------------------------------------------------------------------
 
 ### 1.7. Michael T. Nygard: Stability Patterns and Rollback Invariants (2018)
 
-In [*Release It! Design and Deploy Production-Ready Software* (2nd ed., Pragmatic Bookshelf, 2018)](https://pragprog.com/titles/mnee2/release-it-second-edition/), Michael T. Nygard analyzed the mechanics of catastrophic production failures:
+In [*Release It! Design and Deploy Production-Ready Software* (2nd ed., Pragmatic Bookshelf, 2018)](https://pragprog.com/titles/mnee2/release-it-second-edition/), Michael T. Nygard explains production failures:
 
-- **Cascading Failures:** Localized resource exhaustion or slow network calls trigger thread pool starvation, causing upstream callers to block, exhausting their own pools, and collapsing the entire enterprise topology.
-- **Stability Patterns:** Mandatory defensive mechanisms including **Circuit Breakers**, **Bulkheads**, **Timeouts**, **Fail-Fast**, and **Shed Load**.
-- **Deployment Safety:** Transitioning systems must be architected with clear blast radius containment, canary routing, and immediate automated rollback capabilities.
+- **Cascading failure:** A slow call or exhausted resource blocks callers. Their pools then exhaust and the failure spreads.
+- **Stability patterns:** Use **circuit breakers**, **bulkheads**, **timeouts**, **fail-fast**, and **load shedding** where they apply.
+- **Deployment safety:** Limit the blast radius, use canary routing, and make rollback immediate and automatic.
 
 ------------------------------------------------------------------------
 
@@ -13698,9 +13696,9 @@ For rapid heuristic estimation by human architects or AI agents, the EVOI formul
 
     ---
 
-    ## 16. Three Depth Modes
+## 16. Three Depth Modes
 
-    ## 16.1. The Economic Governance of Epistemic Rigor
+### 16.1. The Economic Governance of Epistemic Rigor
 
     A central failure mode in both human engineering organizations and autonomous multi-agent systems is **epistemic mismatch**: applying either excessive cognitive overhead to trivial, reversible tasks (analysis paralysis) or insufficient analytical and empirical rigor to irreversible, high-blast-radius architectural transformations (reckless deployment).
 
