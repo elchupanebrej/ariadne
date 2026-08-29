@@ -1812,63 +1812,17 @@ flowchart LR
 
 To establish rigorous quality gates for both human software engineers and AI agents, we define the precise criteria for a sound outcome across each of the nine operations:
 
-    +---------------------------------------------------------------------------------------------------------+
-    |                                OPERATIONAL QUALITY & STOP CRITERIA                                      |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 1: FRAME & MODEL                                                                                     |
-    |   ✓ Observable behavioral delta ΔB defined without naming concrete implementation technologies.         |
-    |   ✓ Non-negotiable system invariants and SLA/SLO bounds explicitly separated from mutable preferences.  |
-    |   ✓ Explicit system boundary and stakeholder perspectives (User, SRE, Adversary, Data Owner) locked.   |
-    |   🛑 STOP CONDITION: Two independent engineers agree on what constitutes success and failure.          |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 2: FIND CONTRADICTION / CAUSE                                                                        |
-    |   ✓ Directed Causal Graph (DAG) isolates the underlying physical/computational mechanism.               |
-    |   ✓ Clashing quality attributes formulated as a formal contradiction (Parameter A vs. Parameter B).     |
-    |   ✓ Differentiating empirical test specified to distinguish the hypothesis from alternative narratives.  |
-    |   🛑 STOP CONDITION: A concrete experiment exists whose failure would decisively refute the hypothesis.  |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 3: TRANSFORM SYSTEM                                                                                  |
-    |   ✓ Morphological transformations applied (Elimination, Separation, Delegation, Mechanism Replacement). |
-    |   ✓ Any eliminated component has its useful function explicitly reabsorbed by an existing carrier.      |
-    |   ✓ Zero unaddressed collateral functional loss.                                                        |
-    |   🛑 STOP CONDITION: Candidate mechanisms differ by fundamental operating principle, not syntax.       |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 4: EXPLORE SOLUTION SPACE                                                                            |
-    |   ✓ Problem decomposed into orthogonal architectural dimensions (State, Consistency, Compute, Flow).    |
-    |   ✓ Multi-dimensional space populated with distinct structural classes (not lexical variants).         |
-    |   ✓ Non-viable regions systematically pruned against hard invariants.                                   |
-    |   🛑 STOP CONDITION: Morphological space covers at least 3 distinct architectural paradigms.            |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 5: EXPAND KNOWLEDGE                                                                                  |
-    |   ✓ Epistemic state typed strictly: FACT vs. MEASURED vs. DERIVED vs. ASSUMED vs. UNKNOWN.              |
-    |   ✓ All Decision-Significant Unknowns resolved via empirical spikes, benchmarks, or documentation.      |
-    |   ✓ Zero unexamined implicit assumptions blocking candidate selection.                                  |
-    |   🛑 STOP CONDITION: No unknown remains whose resolution could alter the choice of candidate.           |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 6: STRUCTURE DEPENDENCIES                                                                            |
-    |   ✓ Static, dynamic, data, and operational couplings explicitly mapped.                                 |
-    |   ✓ Accidental co-change couplings eliminated; modules coupled only along identical axes of change.     |
-    |   ✓ Direct enforcement mechanisms established for every critical architectural invariant.               |
-    |   🛑 STOP CONDITION: Blast radius of anticipated changes is bounded to isolated, single modules.        |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 7: MODEL SYSTEM DYNAMICS                                                                             |
-    |   ✓ Stock-and-flow behavior of queues, memory buffers, thread pools, and connections quantified.        |
-    |   ✓ Closed feedback loops modeled (retry amplification, thundering herds, backpressure propagation).    |
-    |   ✓ Transient states (startup, shutdown, network partition, rolling deployment) analyzed.              |
-    |   🛑 STOP CONDITION: Clear failure degradation modes and queue saturation boundaries are proven.        |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 8: DETERMINE VALUE & SELECT                                                                          |
-    |   ✓ Candidates evaluated on Pareto frontier across TCO, operational complexity, and blast radius.       |
-    |   ✓ Explicit trade-off rationale documented (no hand-waving or unweighted scoring averages).            |
-    |   ✓ Review Triggers recorded specifying exact conditions under which the decision must be reopened.     |
-    |   🛑 STOP CONDITION: The winning decision is uniquely justified by evidence against explicit criteria. |
-    +---------------------------------------------------------------------------------------------------------+
-    | OP 9: VERIFY & TRANSITION                                                                               |
-    |   ✓ Solution verified via executable property-based tests, mutation suites, and performance spikes.     |
-    |   ✓ Multi-phase reversible transition plan designed (dual-writing, feature flags, dark launches).       |
-    |   ✓ Real-time telemetry monitoring and automated rollback criteria active during deployment cutover.    |
-    |   🛑 STOP CONDITION: Observable proof of sustained improvement in production without regression.        |
-    +---------------------------------------------------------------------------------------------------------+
+| Operation | Quality criteria | Stop condition |
+|---|---|---|
+| **1. Frame and model** | ✓ Define the observable behavioral delta ΔB without naming implementation technologies.<br/>✓ Separate mandatory invariants and SLA/SLO bounds from mutable preferences.<br/>✓ Lock the system boundary and stakeholder perspectives (user, SRE, adversary, data owner). | Two independent engineers agree on the success and failure conditions. |
+| **2. Find the contradiction or cause** | ✓ Build a Directed Causal Graph (DAG) that isolates the physical or computational mechanism.<br/>✓ State the quality conflict as a formal contradiction.<br/>✓ Define a differentiating empirical test. | A concrete experiment can decisively refute the hypothesis. |
+| **3. Transform the system** | ✓ Apply elimination, separation, delegation, or mechanism replacement.<br/>✓ Move every required function from an eliminated component to an existing carrier.<br/>✓ Check for collateral functional loss. | Candidate mechanisms differ by operating principle, not only by syntax. |
+| **4. Explore the solution space** | ✓ Decompose the problem into orthogonal dimensions (state, consistency, compute, flow).<br/>✓ Include structurally distinct candidate classes.<br/>✓ Prune candidates that violate hard invariants. | The morphological space contains at least three distinct architectural paradigms. |
+| **5. Expand knowledge** | ✓ Type epistemic state as FACT, MEASURED, DERIVED, ASSUMED, or UNKNOWN.<br/>✓ Resolve decision-significant unknowns with spikes, benchmarks, or documentation.<br/>✓ Remove unexamined assumptions that block selection. | No remaining unknown can change the candidate choice. |
+| **6. Structure dependencies** | ✓ Map static, dynamic, data, and operational couplings.<br/>✓ Remove accidental co-change coupling.<br/>✓ Define an enforcement mechanism for every critical invariant. | The expected change blast radius is bounded to isolated modules. |
+| **7. Model system dynamics** | ✓ Quantify queues, buffers, thread pools, and connections.<br/>✓ Model retry amplification, thundering herds, and backpressure.<br/>✓ Analyze startup, shutdown, partitions, and rolling deployments. | Failure degradation modes and queue saturation limits are proven. |
+| **8. Determine value and select** | ✓ Compare candidates on the Pareto frontier using lifecycle cost, operational complexity, and blast radius.<br/>✓ Record explicit trade-off reasoning.<br/>✓ Record exact review triggers. | Evidence uniquely justifies the selected decision against the stated criteria. |
+| **9. Verify and transition** | ✓ Verify the solution with executable property tests, mutation tests, and performance spikes.<br/>✓ Design a reversible multi-phase transition.<br/>✓ Activate telemetry and automated rollback criteria. | Production evidence shows sustained improvement without regression. |
 
 ------------------------------------------------------------------------
 
