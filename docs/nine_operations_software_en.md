@@ -1913,52 +1913,22 @@ Good framing removes implementation names. It states the **observable behavioral
 
 Operation 1 rests on computer science, software architecture theory, and mathematical logic. The base is: separate the problem domain from the implementation machine, specify behavioral invariants, and model quality attributes from multiple perspectives.
 
-``` mermaid
-classDiagram
-    class JacksonProblemFrames {
-        +DomainProperties D
-        +MachineSpecification M
-        +Requirements R
-        +Proof: D, M ⊢ R
-    }
-    class ParnasInformationHiding {
-        +EncapsulateVolatileSecrets()
-        +StableBehavioralContracts()
-        +DecomposeByReasonForChange()
-    }
-    class DijkstraSeparationOfConcerns {
-        +CognitiveHumility()
-        +IsolateWhatFromHow()
-        +ManageEssentialComplexity()
-    }
-    class HoareAxiomaticSemantics {
-        +Precondition P
-        +Command C
-        +Postcondition Q
-        +Invariant I
-        +{P} C {Q}
-    }
-    class LamportTemporalLogic {
-        +StatePredicate Init
-        +ActionNext Next
-        +SafetyProperty BoxInv
-        +LivenessProperty DiamondTarget
-    }
-    class BassKazmanQualityAttributes {
-        +StimulusSource
-        +Stimulus
-        +Artifact
-        +Environment
-        +Response
-        +ResponseMeasure
-    }
+```mermaid
+flowchart TD
+    Jackson["Michael Jackson<br/>Problem Frames<br/>Domain properties and machine specification"]
+    Parnas["David Parnas<br/>Information Hiding<br/>Stable behavioral contracts"]
+    Dijkstra["Edsger Dijkstra<br/>Separation of Concerns<br/>Separate what from how"]
+    Hoare["C. A. R. Hoare<br/>Axiomatic Semantics<br/>Precondition, command, postcondition"]
+    Lamport["Leslie Lamport<br/>Temporal Logic<br/>Safety and liveness invariants"]
+    Bass["Bass, Clements, and Kazman<br/>Quality Attribute Scenarios<br/>Observable response measures"]
+    Framing["Operation 1<br/>Frame and Model the Software Problem"]
 
-    JacksonProblemFrames <|-- Operation1_Framing : Epistemic Foundation
-    ParnasInformationHiding <|-- Operation1_Framing : Boundary Definition
-    DijkstraSeparationOfConcerns <|-- Operation1_Framing : Cognitive Discipline
-    HoareAxiomaticSemantics <|-- Operation1_Framing : Behavioral Contracts
-    LamportTemporalLogic <|-- Operation1_Framing : Invariant Rigor
-    BassKazmanQualityAttributes <|-- Operation1_Framing : Measurable Scenarios
+    Jackson --> Framing
+    Parnas --> Framing
+    Dijkstra --> Framing
+    Hoare --> Framing
+    Lamport --> Framing
+    Bass --> Framing
 ```
 
 #### 2.1.3.1. Michael Jackson's Problem Frames Theory (2001)
