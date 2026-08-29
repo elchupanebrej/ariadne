@@ -324,7 +324,7 @@ The operation is: **find a component that adds overhead, latency, or maintenance
 - **Refactoring** ([Martin Fowler, 1999](https://martinfowler.com/books/refactoring.html)): Names include *Inline Class*, *Inline Method*, *Collapse Hierarchy*, and *Remove Middle Man*. Fowler describes *Remove Middle Man* as the inverse of *Hide Delegate*. When an intermediary only passes calls through, the client talks directly to the underlying server. The extra indirection is gone.
 - **Enterprise and distributed systems architecture** ([Martin Fowler, 2002](https://martinfowler.com/books/eaa.html)): Names include *Service Consolidation*, *Monolith Extraction Reversal*, and *Direct Storage Delegation*. An intermediary proxy microservice only relays calls from an API gateway to a document store. You remove the proxy. The API gateway or the database client takes the responsibility, with parameterized query templates.
 - **Clean Architecture and Hexagonal Architecture:** Names include *Flattening the Use-Case Layer* and *Collapsing Anemic Controllers*. You remove redundant Data Transfer Object (DTO) mappers and one-line interactors that only forward repository calls.
-- **TRIZ / Systematic Inventive Thinking** ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)): The name is *Trimming (Ideal Final Result)*. You remove an element. You move its useful functions to remaining elements or to existing external resources. The system moves closer to ideality (\$I = \frac{\sum \text{Useful Functions}}{\sum \text{Costs} + \sum \text{Harm}}\$).
+- **TRIZ / Systematic Inventive Thinking** ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)): The name is *Trimming (Ideal Final Result)*. You remove an element. You move its useful functions to remaining elements or to existing external resources. The system moves closer to ideality ($I = \frac{\sum \text{Useful Functions}}{\sum \text{Costs} + \sum \text{Harm}}$).
 
 ##### Concrete Architectural Example: Telemetry Ingestion Pipeline
 
@@ -398,7 +398,7 @@ The operation is: **decouple two conflicting concerns, execution models, or rate
   1. *Separation in Time:* Assign conflicting properties to different time intervals.
   2. *Separation in Space / State:* Assign conflicting properties to distinct components or partitions.
   3. *Separation upon Condition:* Change behavior from operating context or workload characteristics.
-  4. *Separation between Parts and Whole:* The subsystem has property \$A\$. The macro-system has property \$\neg A\$.
+  4. *Separation between Parts and Whole:* The subsystem has property $A$. The macro-system has property $\neg A$.
 
 ##### Comparative Mapping Table: Separation Across Schools
 
@@ -419,7 +419,7 @@ The operation is: **find the structural, logical, or physical mechanism that kee
 - **Test-Driven Development** ([Kent Beck, 2002](https://www.informit.com/store/test-driven-development-by-example-9780321146533)): The name is *Writing a Differentiating Failing Test*. You write a minimal, deterministic reproduction script. The script fails if and only if the suspected defect is present.
 - **Threat Modeling** (Shostack, 2014; STRIDE / PASTA): Names include *Attack Tree Decomposition* and *Trust Boundary Violation Mapping*. You construct causal hypotheses about how an adversary could exploit system assumptions to violate confidentiality, integrity, or availability invariants.
 - **Theory of Constraints** ([Goldratt, 1984](https://en.wikipedia.org/wiki/The_Goal_%28novel%29)): Names include *Current Reality Tree (CRT)* and *Evaporating Cloud (Conflict Resolution Diagram)*. You map Undesirable Effects (UDEs) through cause-and-effect logic branches back to a core organizational or physical conflict.
-- **TRIZ** ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)): The name is *Technical and Physical Contradiction Modeling*. You formulate the problem so that an improvement of parameter \$A\$ degrades parameter \$B\$ (\$P_1 \uparrow \implies P_2 \downarrow\$). The root trade-off becomes visible. You must eliminate the trade-off. You must not only compromise.
+- **TRIZ** ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)): The name is *Technical and Physical Contradiction Modeling*. You formulate the problem so that an improvement of parameter $A$ degrades parameter $B$ ($P_1 \uparrow \implies P_2 \downarrow$). The root trade-off becomes visible. You must eliminate the trade-off. You must not only compromise.
 
 ------------------------------------------------------------------------
 
@@ -600,7 +600,7 @@ Under Ariadne, an engineering system at any time has a **problem state**. The pr
 - **Derived claims (`DERIVED`):** Formal logical or mathematical consequences of facts and proven claims.
 - **Assumptions (`ASM-`):** Working premises that you treat as true, but that lack empirical proof.
 - **Causal hypotheses (`HYP-`):** Testable propositions that explain why a defect, bottleneck, or behavioral anomaly occurs.
-- **Contradictions (`CTR-`):** Formal trade-offs where an improvement of parameter \$P_1\$ degrades parameter \$P_2\$.
+- **Contradictions (`CTR-`):** Formal trade-offs where an improvement of parameter $P_1$ degrades parameter $P_2$.
 - **Decision-significant unknowns (`UNK-`):** Missing information or unverified metrics. Resolution can invalidate an architectural candidate or select between mutually exclusive mechanisms.
 - **Candidate mechanisms (`CAN-`):** Structurally distinct solution variants that can satisfy required invariants.
 - **Evidence requests (`EVDREQ-`):** Concrete specifications of benchmarks, unit tests, mutation tests, or proof scripts required to validate a claim.
@@ -612,9 +612,9 @@ Under Ariadne, an engineering system at any time has a **problem state**. The pr
 
 A core rule of Ariadne is **transitive invalidation**. In software design, decisions often rest on trees of implicit assumptions:
 
-\$\$\text{Decision } D_1 \implies \text{Candidate } C_1 \implies \text{Hypothesis } H_1 \implies \text{Assumption } A_1\$\$
+$$\text{Decision } D_1 \implies \text{Candidate } C_1 \implies \text{Hypothesis } H_1 \implies \text{Assumption } A_1$$
 
-In dogmatic engineering, when production falsifies assumption \$A_1\$ (for example, network latency between availability zones is 15 ms, not 1 ms), teams often patch decision \$D_1\$ with local hacks. The patches add accidental complexity.
+In dogmatic engineering, when production falsifies assumption $A_1$ (for example, network latency between availability zones is 15 ms, not 1 ms), teams often patch decision $D_1$ with local hacks. The patches add accidental complexity.
 
 In the Ariadne graph, when an evidence result (`EVD-`) **falsifies** an assumption (`ASM-`) or a causal hypothesis (`HYP-`), **transitive invalidation** moves downstream:
 
@@ -693,21 +693,21 @@ The nine operations resolve the contradiction without a compromise:
 
 ##### Step 1: Operation 1 (Frame problem and contract)
 
-- **Required observable behavior:** The system must process authorized settlements. No account balance may drop below zero (\$Balance \ge 0\$ at all times).
-- **System boundary:** Account Settlement Ingress \$\to\$ Account Ledger State.
-- **Non-negotiable invariants:** Linearizable consistency per account; throughput \$\ge 50,000 \text{ ops/sec}\$; p99 latency \$\le 10 \text{ ms}\$.
+- **Required observable behavior:** The system must process authorized settlements. No account balance may drop below zero ($Balance \ge 0$ at all times).
+- **System boundary:** Account Settlement Ingress $\to$ Account Ledger State.
+- **Non-negotiable invariants:** Linearizable consistency per account; throughput $\ge 50,000 \text{ ops/sec}$; p99 latency $\le 10 \text{ ms}$.
 
 ##### Step 2: Operation 2 (Find cause and contradiction)
 
 - **Contradiction statement (`CTR-01`):**
-  - If you use *global pessimistic locking* across distributed databases, you keep \$P_2\$ (consistency), but you degrade \$P_1\$ (throughput) because of lock contention and distributed transaction overhead (2PC).
-  - If you use *asynchronous eventual consistency*, you maximize \$P_1\$ (throughput), but you violate \$P_2\$ (linearizable invariant). Concurrent overdraft transactions can pass before state reconciles.
+  - If you use *global pessimistic locking* across distributed databases, you keep $P_2$ (consistency), but you degrade $P_1$ (throughput) because of lock contention and distributed transaction overhead (2PC).
+  - If you use *asynchronous eventual consistency*, you maximize $P_1$ (throughput), but you violate $P_2$ (linearizable invariant). Concurrent overdraft transactions can pass before state reconciles.
 
 ##### Step 3: Operation 5 (Expand knowledge and decision-significant unknowns)
 
 - **Decision-significant unknown (`UNK-01`):** What is the real-world cross-account contention distribution?
 - **Evidence request (`EVDREQ-01`):** Query production historical audit logs. Calculate the probability that simultaneous concurrent transactions hit the *exact same* account ID within a 100 ms window.
-- **Evidence result (`EVD-01`):** \$99.98%\$ of transactions target mutually independent account IDs. High contention sits in a small fraction (\$0.02%\$) of merchant accounts.
+- **Evidence result (`EVD-01`):** $99.98\%$ of transactions target mutually independent account IDs. High contention sits in a small fraction ($0.02\%$) of merchant accounts.
 
 ##### Step 4: Operation 6 and TRIZ separation principles (Arrange dependencies and boundaries)
 
@@ -795,7 +795,7 @@ pub struct JournalEntry {
 
 ##### Step 7: Empirical verification (`EVD-02`)
 
-- Benchmark results: Sustained throughput of \$140,000 \text{ ops/sec}\$ across a 16-core node; p99 latency of \$2.1 \text{ ms}\$; zero invariant violations under \$10\times\$ overload mutation fuzzing.
+- Benchmark results: Sustained throughput of $140,000 \text{ ops/sec}$ across a 16-core node; p99 latency of $2.1 \text{ ms}$; zero invariant violations under $10\times$ overload mutation fuzzing.
 - **Transition plan (`TRANS-01`):** Deploy the actor partition cluster in shadow mode. Mirror production transactions with a CDC stream. Verify ledger hash equivalence for 72 hours. Then shift live traffic.
 
 ------------------------------------------------------------------------
@@ -822,7 +822,7 @@ The unit of analysis must change. Do not analyze *method rituals*. Analyze **for
 
 Herbert A. Simon states this in [*The Sciences of the Artificial* (Simon, 1969/1996)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/). Design is not mystical generation of artifacts. Design is a goal-directed search through combinatorial state spaces under bounded rationality. To solve an ill-structured problem, you transform the problem representation until known operators can close the gap from current state to goal state.
 
-In the 1972 ACM Turing Lecture [*The Humble Programmer*](https://dl.acm.org/doi/10.1145/355604.361591), Edsger W. Dijkstra states that human cognitive capacity is strictly bounded (George A. Miller's \$7 \pm 2\$ span). The primary challenge of software construction is mental complexity. The path to mastery over large-scale software is systematic separation of concerns:
+In the 1972 ACM Turing Lecture [*The Humble Programmer*](https://dl.acm.org/doi/10.1145/355604.361591), Edsger W. Dijkstra states that human cognitive capacity is strictly bounded (George A. Miller's $7 \pm 2$ span). The primary challenge of software construction is mental complexity. The path to mastery over large-scale software is systematic separation of concerns:
 
 > *"We know that a mental tool of the highest importance is the abstraction; its purpose is to enable us to consider a problem at a high level without being bogged down by its details... We must not forget that our primary purpose is to keep things manageable."* — Edsger W. Dijkstra (1972)
 
@@ -850,28 +850,28 @@ An engineering method is a bundled sequence of operations. When you split method
 
 ### 2.2. Problem state and epistemic overlay
 
-In Ariadne, an engineering problem at time \$t\$ is a **problem state** tuple \$\mathcal{S}\_t\$:
+In Ariadne, an engineering problem at time $t$ is a **problem state** tuple $\mathcal{S}_t$:
 
-\$\$\mathcal{S}\_t = \langle \mathcal{B}\_t, \mathcal{I}\_t, \mathcal{C}\_t, \mathcal{M}\_t, \mathcal{E}\_t \rangle\$\$
+$$\mathcal{S}_t = \langle \mathcal{B}_t, \mathcal{I}_t, \mathcal{C}_t, \mathcal{M}_t, \mathcal{E}_t \rangle$$
 
 Where:
 
-- **\$\mathcal{B}\_t\$ (Behavioral requirements):** Required observable inputs, events, state transitions, outputs, and performance bounds. Define them in the problem domain, not in implementation machinery ([Jackson, 2001](https://www.pearson.com/en-us/subject-catalog/p/problem-frames-analysing-and-structuring-software-development-problems/P200000003260)).
-- **\$\mathcal{I}\_t\$ (System invariants):** Non-negotiable correctness, safety, security, and consistency properties that must hold on all execution paths (linearizability, idempotency, data non-loss, authorization boundaries).
-- **\$\mathcal{C}\_t\$ (Contradictions and constraints):** Explicit clashes between mutually exclusive requirements or physical/operational resource limits (low latency \$\leftrightarrow\$ strict multi-region serializability; high release velocity \$\leftrightarrow\$ zero-defect regression tolerance) ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ); [Goldratt, 1990](https://www.toc-goldratt.com/en/product/what-is-this-thing-called-theory-of-constraints-and-how-should-it-be-implemented)).
-- **\$\mathcal{M}\_t\$ (Candidate mechanisms):** The active pool of candidate computational structures, architectural topologies, algorithms, data models, or protocol bindings.
-- **\$\mathcal{E}\_t\$ (Epistemic overlay graph):** The directed acyclic knowledge graph that tracks claims, hypotheses, evidence, assumptions, and validation dependencies:
+- **$\mathcal{B}_t$ (Behavioral requirements):** Required observable inputs, events, state transitions, outputs, and performance bounds. Define them in the problem domain, not in implementation machinery ([Jackson, 2001](https://www.pearson.com/en-us/subject-catalog/p/problem-frames-analysing-and-structuring-software-development-problems/P200000003260)).
+- **$\mathcal{I}_t$ (System invariants):** Non-negotiable correctness, safety, security, and consistency properties that must hold on all execution paths (linearizability, idempotency, data non-loss, authorization boundaries).
+- **$\mathcal{C}_t$ (Contradictions and constraints):** Explicit clashes between mutually exclusive requirements or physical/operational resource limits (low latency $\leftrightarrow$ strict multi-region serializability; high release velocity $\leftrightarrow$ zero-defect regression tolerance) ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ); [Goldratt, 1990](https://www.toc-goldratt.com/en/product/what-is-this-thing-called-theory-of-constraints-and-how-should-it-be-implemented)).
+- **$\mathcal{M}_t$ (Candidate mechanisms):** The active pool of candidate computational structures, architectural topologies, algorithms, data models, or protocol bindings.
+- **$\mathcal{E}_t$ (Epistemic overlay graph):** The directed acyclic knowledge graph that tracks claims, hypotheses, evidence, assumptions, and validation dependencies:
 
-\$\$\mathcal{E}\_t = \langle \mathcal{V}\_E, \mathcal{R}\_E \rangle\$\$
+$$\mathcal{E}_t = \langle \mathcal{V}_E, \mathcal{R}_E \rangle$$
 
-#### Node types (\$\mathcal{V}\_E\$)
+#### Node types ($\mathcal{V}_E$)
 
-Every node \$v \in \mathcal{V}\_E\$ has a typed identifier and a provenance label:
+Every node $v \in \mathcal{V}_E$ has a typed identifier and a provenance label:
 
 1. **`CLM-` (Claim):** A factual or derived proposition about system behavior, requirements, or architecture.
 2. **`ASM-` (Assumption):** An unverified working premise, accepted temporarily so that reasoning can continue.
 3. **`HYP-` (Causal hypothesis):** A testable, falsifiable proposition that explains the mechanism behind a defect, regression, or dynamic anomaly.
-4. **`CTR-` (Contradiction):** A formal parameter or requirement conflict where an improvement of parameter \$P_1\$ impairs parameter \$P_2\$.
+4. **`CTR-` (Contradiction):** A formal parameter or requirement conflict where an improvement of parameter $P_1$ impairs parameter $P_2$.
 5. **`UNK-` (Decision-significant unknown):** Missing empirical information. Resolution can change candidate selection or invalidate an architectural path.
 6. **`CAN-` (Candidate mechanism):** A structurally distinct solution variant that implements a required function.
 7. **`EVDREQ-` (Evidence request):** A concrete specification of an automated test, benchmark, trace capture, or formal proof required to verify or falsify a claim.
@@ -881,29 +881,29 @@ Every node \$v \in \mathcal{V}\_E\$ has a typed identifier and a provenance labe
 
 #### Provenance types
 
-Every node \$v \in \mathcal{V}\_E\$ has a provenance type \$\tau(v)\$:
+Every node $v \in \mathcal{V}_E$ has a provenance type $\tau(v)$:
 
-\$\$\tau(v) \in {\text{FACT}, \text{MEASURED}, \text{DERIVED}, \text{ASSUMED}, \text{PROPOSED}, \text{UNKNOWN}, \text{DECIDED}}\$\$
+$$\tau(v) \in \{\text{FACT}, \text{MEASURED}, \text{DERIVED}, \text{ASSUMED}, \text{PROPOSED}, \text{UNKNOWN}, \text{DECIDED}\}$$
 
-- \$\text{FACT}\$: Directly observed in the codebase or production runtime (for example, "PostgreSQL 15 is used", "column `user_id` is indexed").
-- \$\text{MEASURED}\$: Quantitatively measured through automated instrumentation (for example, "p99 query latency is 420 ms under 1,000 QPS").
-- \$\text{DERIVED}\$: Formally deduced from verified facts and proven lemmas.
-- \$\text{ASSUMED}\$: Speculative working premise. It carries risk. It requires downstream validation.
-- \$\text{PROPOSED}\$: A synthesized candidate mechanism or architectural transformation.
-- \$\text{UNKNOWN}\$: Explicitly acknowledged missing information.
-- \$\text{DECIDED}\$: Locked by a human architect, or verified through empirical falsification.
+- $\text{FACT}$: Directly observed in the codebase or production runtime (for example, "PostgreSQL 15 is used", "column `user_id` is indexed").
+- $\text{MEASURED}$: Quantitatively measured through automated instrumentation (for example, "p99 query latency is 420 ms under 1,000 QPS").
+- $\text{DERIVED}$: Formally deduced from verified facts and proven lemmas.
+- $\text{ASSUMED}$: Speculative working premise. It carries risk. It requires downstream validation.
+- $\text{PROPOSED}$: A synthesized candidate mechanism or architectural transformation.
+- $\text{UNKNOWN}$: Explicitly acknowledged missing information.
+- $\text{DECIDED}$: Locked by a human architect, or verified through empirical falsification.
 
-#### Relations (\$\mathcal{R}\_E\$)
+#### Relations ($\mathcal{R}_E$)
 
 Edges in the epistemic graph define semantic dependencies:
 
-\$\$\mathcal{R}\_E \subseteq \mathcal{V}\_E \times {\text{supports}, \text{contradicts}, \text{depends_on}, \text{falsifies}, \text{invalidates}} \times \mathcal{V}\_E\$\$
+$$\mathcal{R}_E \subseteq \mathcal{V}_E \times {\text{supports}, \text{contradicts}, \text{depends_on}, \text{falsifies}, \text{invalidates}} \times \mathcal{V}_E$$
 
-- \$u \xrightarrow{\text{supports}} v\$: Evidence or derivation \$u\$ increases the empirical justification of \$v\$.
-- \$u \xrightarrow{\text{contradicts}} v\$: Proposition \$u\$ is logically or physically incompatible with \$v\$.
-- \$u \xrightarrow{\text{depends_on}} v\$: The validity of \$u\$ requires the ongoing validity of premise \$v\$.
-- \$u \xrightarrow{\text{falsifies}} v\$: Empirical evidence result \$u\$ decisively disproves hypothesis or assumption \$v\$.
-- \$u \xrightarrow{\text{invalidates}} v\$: Invalidation of node \$u\$ triggers automatic downstream invalidation of candidate or decision \$v\$.
+- $u \xrightarrow{\text{supports}} v$: Evidence or derivation $u$ increases the empirical justification of $v$.
+- $u \xrightarrow{\text{contradicts}} v$: Proposition $u$ is logically or physically incompatible with $v$.
+- $u \xrightarrow{\text{depends_on}} v$: The validity of $u$ requires the ongoing validity of premise $v$.
+- $u \xrightarrow{\text{falsifies}} v$: Empirical evidence result $u$ decisively disproves hypothesis or assumption $v$.
+- $u \xrightarrow{\text{invalidates}} v$: Invalidation of node $u$ triggers automatic downstream invalidation of candidate or decision $v$.
 
 ``` mermaid
 graph TD
@@ -925,15 +925,15 @@ graph TD
 
 ### 2.3. Input-action-output model
 
-An **operation** \$\mathcal{O}*k\$ is a deterministic cognitive and structural transformer. It maps an input problem state \$\mathcal{S}*{\text{in}}\$ to a refined output problem state \$\mathcal{S}\_{\text{out}}\$:
+An **operation** $\mathcal{O}_k$ is a deterministic cognitive and structural transformer. It maps an input problem state $\mathcal{S}_{\text{in}}$ to a refined output problem state $\mathcal{S}_{\text{out}}$:
 
-\$\$\mathcal{O}*k: \mathcal{S}*{\text{in}} \xrightarrow{\mathcal{A}*k} \mathcal{S}*{\text{out}}\$\$
+$$\mathcal{O}_k: \mathcal{S}_{\text{in}} \xrightarrow{\mathcal{A}_k} \mathcal{S}_{\text{out}}$$
 
 Every operation has three components:
 
-1. **Input (\$\mathcal{S}\_{\text{in}}\$):** The precondition predicate \$\text{Pre}(\mathcal{O}\_k, \mathcal{S})\$. It names the active epistemic frontier, observed symptoms, unresolved uncertainties, or unrefined candidate mechanisms.
-2. **Action (\$\mathcal{A}\_k\$):** The cognitive or structural transformation applied to the problem model (functional decomposition, causal abduction, morphological synthesis, dependency inversion, system dynamics simulation).
-3. **Output (\$\mathcal{S}\_{\text{out}}\$):** The postcondition invariant \$\text{Post}(\mathcal{O}*k, \mathcal{S}*{\text{out}})\$. It requires verifiable, typed working artifacts and a reduction of epistemic entropy.
+1. **Input ($\mathcal{S}_{\text{in}}$):** The precondition predicate $\text{Pre}(\mathcal{O}_k, \mathcal{S})$. It names the active epistemic frontier, observed symptoms, unresolved uncertainties, or unrefined candidate mechanisms.
+2. **Action ($\mathcal{A}_k$):** The cognitive or structural transformation applied to the problem model (functional decomposition, causal abduction, morphological synthesis, dependency inversion, system dynamics simulation).
+3. **Output ($\mathcal{S}_{\text{out}}$):** The postcondition invariant $\text{Post}(\mathcal{O}_k, \mathcal{S}_{\text{out}})$. It requires verifiable, typed working artifacts and a reduction of epistemic entropy.
 
 <!-- -->
 
@@ -956,11 +956,11 @@ Every operation has three components:
 
 #### Evidence is monotonic. Belief is not.
 
-In software reasoning, empirical evidence accumulation is strictly monotonic. After a benchmark executes and logs a measurement, that historical trace \$\text{EVD-} k\$ remains an immutable empirical fact.
+In software reasoning, empirical evidence accumulation is strictly monotonic. After a benchmark executes and logs a measurement, that historical trace $\text{EVD-} k$ remains an immutable empirical fact.
 
-Architectural beliefs and hypotheses are **non-monotonic**. A new evidence node \$\text{EVD-}k\$ may falsify a foundational assumption \$\text{ASM-}01\$. Ariadne then applies **transitive invalidation**:
+Architectural beliefs and hypotheses are **non-monotonic**. A new evidence node $\text{EVD-}k$ may falsify a foundational assumption $\text{ASM-}01$. Ariadne then applies **transitive invalidation**:
 
-\$\$\forall v \in \mathcal{V}\_E, \quad \left( \exists u \in \mathcal{V}*E : \tau(u) = \text{FALSIFIED} \land v \in \text{Reach}*{\text{depends_on}}(u) \right) \implies \text{Status}(v) \leftarrow \text{INVALIDATED}\$\$
+$$\forall v \in \mathcal{V}_E, \quad \left( \exists u \in \mathcal{V}_E : \tau(u) = \text{FALSIFIED} \land v \in \text{Reach}_{\text{depends_on}}(u) \right) \implies \text{Status}(v) \leftarrow \text{INVALIDATED}$$
 
 Downstream candidate mechanisms (`CAN-`) or design decisions (`DEC-`) that rest on falsified premises are marked invalid. Ungrounded execution stops. Cognitive debt does not compound.
 
@@ -1038,16 +1038,16 @@ Nam P. Suh's **Axiomatic Design** ([Suh, 1990](https://global.oup.com/academic/p
 
 Operation 1 strips premature implementation anchoring ("we need Kafka," "we need a Redis cache," "we must rewrite in Go"). It isolates the observable behavioral delta that the software system must deliver. It sets non-negotiable correctness invariants and system boundaries before architectural capital is spent.
 
-#### Input uncertainty (\$\mathcal{U}\_1\$)
+#### Input uncertainty ($\mathcal{U}_1$)
 
 - **Anchoring ambiguity:** Problem statements mix customer needs with technical components.
 - **Boundary confusion:** The system boundary is unclear (client vs. API gateway vs. core service vs. database).
 - **Implicit invariants:** Unstated business constraints. If they are violated, a technically functioning system is still useless.
 
-#### Action (\$\mathcal{A}\_1\$)
+#### Action ($\mathcal{A}_1$)
 
-1. **Functional abstraction:** Express the required function as an active verb and a domain object. Strip technical nouns. Transform "Write an Elasticsearch pipeline" into "Deliver full-text search results matching query \$Q\$ with freshness \$\le 2\text{s}\$".
-2. **Behavioral invariant formulation:** Specify the contract with this template: \$\$\text{Under Conditions } \mathcal{C}, \text{ when Event } \mathcal{E} \text{ occurs, System delivers Outcome } \mathcal{O} \text{ measured as } \mathcal{M}, \text{ preserving Invariant } \mathcal{I}.\$\$
+1. **Functional abstraction:** Express the required function as an active verb and a domain object. Strip technical nouns. Transform "Write an Elasticsearch pipeline" into "Deliver full-text search results matching query $Q$ with freshness $\le 2\text{s}$".
+2. **Behavioral invariant formulation:** Specify the contract with this template: $$\text{Under Conditions } \mathcal{C}, \text{ when Event } \mathcal{E} \text{ occurs, System delivers Outcome } \mathcal{O} \text{ measured as } \mathcal{M}, \text{ preserving Invariant } \mathcal{I}.$$
 3. **Multi-perspective boundary projection:** Project the problem across 7 architectural viewpoints: End User, API Consumer, Data Auditor, Security Adversary, SRE/Operator, Maintainer, and Business Sponsor.
 
 #### Deliverable
@@ -1057,7 +1057,7 @@ A **Problem Framing Map** that contains:
 - Structured claim nodes (`CLM-`): Observable behavioral requirements.
 - Assumption nodes (`ASM-`): Presumed domain constraints.
 - Formal invariant definitions (`INV-`): Explicit mathematical or logical safety properties.
-- Success metric specifications: Quantitative bounds (for example, \$p99 \le 150\text{ms}\$, availability \$\ge 99.99%\$).
+- Success metric specifications: Quantitative bounds (for example, $p99 \le 150\text{ms}$, availability $\ge 99.99\%$).
 
 #### Human vs AI agent
 
@@ -1074,25 +1074,25 @@ A **Problem Framing Map** that contains:
 
 In [*What is this thing called Theory of Constraints and how should it be implemented?* (Goldratt, 1990)](https://www.toc-goldratt.com/en/product/what-is-this-thing-called-theory-of-constraints-and-how-should-it-be-implemented), Eliyahu M. Goldratt proved that the throughput of any complex system is dictated by a very small number of constraints (often exactly one). Optimizing non-bottlenecks creates a local illusion of progress. Work-in-process (WIP) and operational instability increase.
 
-In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller showed that breakthrough inventive solutions do not come from compromise or trade-off averaging. They come from formulating and resolving **system contradictions** (improve parameter \$A\$ without degrading parameter \$B\$) and **physical contradictions** (an element must have property \$P\$ to satisfy function 1, and property \$\neg P\$ to satisfy function 2).
+In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller showed that breakthrough inventive solutions do not come from compromise or trade-off averaging. They come from formulating and resolving **system contradictions** (improve parameter $A$ without degrading parameter $B$) and **physical contradictions** (an element must have property $P$ to satisfy function 1, and property $\neg P$ to satisfy function 2).
 
-Judea Pearl's [*Causality* (Pearl, 2009)](https://doi.org/10.1017/CBO9780511803161) distinguishes correlational observations from structural causal mechanisms with counterfactual interventions: \$P(Y \mid \text{do}(X)) \neq P(Y \mid X)\$.
+Judea Pearl's [*Causality* (Pearl, 2009)](https://doi.org/10.1017/CBO9780511803161) distinguishes correlational observations from structural causal mechanisms with counterfactual interventions: $P(Y \mid \text{do}(X)) \neq P(Y \mid X)$.
 
 #### Purpose
 
 Operation 2 moves past superficial symptoms ("the API is slow," "the release cycle is 2 weeks," "the database crashes under peak"). It finds the exact causal graph, the limiting bottleneck (Amdahl's Law, Universal Scalability Law), or the underlying contradiction that prevents the system from reaching its goal.
 
-#### Input uncertainty (\$\mathcal{U}\_2\$)
+#### Input uncertainty ($\mathcal{U}_2$)
 
 - **Symptom-cause mix:** An alarm or metric spike is treated as the root mechanism.
 - **Contradiction camouflage:** An artificial trade-off ("we must sacrifice consistency for performance") is accepted as an immutable physical law.
 - **Unexamined working assumptions:** Invisible dogmas ("all database queries must be transactional," "all microservices must communicate through HTTP").
 
-#### Action (\$\mathcal{A}\_2\$)
+#### Action ($\mathcal{A}_2$)
 
 1.  **Causal Graph Abduction**: Construct a directed acyclic causal chain from observed symptoms to root physical mechanisms, strictly annotating each edge with empirical proof or a differentiating falsification test.
 2.  **Bottleneck Isolation**: Apply queueing theory and Amdahl's Law to identify whether the limitation is serialized CPU, memory bandwidth, lock contention, network I/O, storage latency, or organizational approval serialized paths.
-3.  **Formal Contradiction Modeling**: Parameterize the conflict into a TRIZ/Ariadne contradiction: \$\$\text{Requirement } R_1 \implies \text{State } S_1 \implies \text{Improves Metric } M_1 \land \text{Degrades Metric } M_2 \text{ (violating } R_2 \text{)}.\$\$
+3.  **Formal Contradiction Modeling**: Parameterize the conflict into a TRIZ/Ariadne contradiction: $$\text{Requirement } R_1 \implies \text{State } S_1 \implies \text{Improves Metric } M_1 \land \text{Degrades Metric } M_2 \text{ (violating } R_2 \text{)}.$$
 
 <!-- -->
 
@@ -1151,24 +1151,24 @@ In software architecture, David L. Parnas ([Parnas, 1972](https://dl.acm.org/doi
 
 Operation 3 evolves an existing system's computational topology to remove bottlenecks and resolve contradictions. It avoids the "Second-System Effect" ([Brooks, 1975](https://en.wikipedia.org/wiki/The_Mythical_Man-Month)): costly, unguided ground-up rewrites.
 
-#### Input uncertainty (\$\mathcal{U}\_3\$)
+#### Input uncertainty ($\mathcal{U}_3$)
 
 - **Structural Rigidity**: Belief that the current component topology is fixed.
 - **Accidental Complexity**: Bloat caused by intermediary adapters, redundant caching layers, and unnecessary microservice hops.
 - **Resource Underutilization**: Failure to use built-in runtime, database, OS, or compiler capabilities.
 
-#### Action (\$\mathcal{A}\_3\$)
+#### Action ($\mathcal{A}_3$)
 
 Apply the five systematic software transformation operators:
 
-1.  **Trim / Eliminate**: Remove an intermediary layer, microservice, caching tier, DTO mapping, or distributed coordinator. For every trimmed component \$C\$, explicitly identify the recipient resource \$R\$ that absorbs its useful function \$F(C)\$.
+1.  **Trim / Eliminate**: Remove an intermediary layer, microservice, caching tier, DTO mapping, or distributed coordinator. For every trimmed component $C$, explicitly identify the recipient resource $R$ that absorbs its useful function $F(C)$.
 2.  **Split / Localize (Separation Principles)**:
     - *Separation in Time*: Batch processing vs. real-time ingest; lazy evaluation vs. eager precomputation.
     - *Separation in Space/State*: Command Query Responsibility Segregation (CQRS); hot memory vs. cold archival storage; single-writer partitioned state.
     - *Separation in Condition/Mode*: Normal execution path vs. degraded fallback mode; transactional path vs. audit log path.
     - *Separation across System Boundaries*: Moving validation to the client edge or offloading invariant checks to the database engine.
 3.  **Combine / Co-locate / Delegate**: Delegate custom distributed locking to database unique constraints; delegate scheduling to OS cron/systemd; delegate routing to eBPF/kernel primitives.
-4.  **Replace Mechanism**: Shift computational paradigm (for example, synchronous polling \$\to\$ event-driven push; mutable shared-memory locks \$\to\$ actor-based message passing; full snapshot copying \$\to\$ append-only Write-Ahead Log streaming).
+4.  **Replace Mechanism**: Shift computational paradigm (for example, synchronous polling $\to$ event-driven push; mutable shared-memory locks $\to$ actor-based message passing; full snapshot copying $\to$ append-only Write-Ahead Log streaming).
 5.  **Alter Execution Topology**: Reorder operations, execute speculatively, introduce backpressure, or pipeline sequential stages.
 
 #### Deliverable
@@ -1177,7 +1177,7 @@ A **Transformation Log** containing:
 
 - Candidate Mechanism nodes (`CAN-`): Formally describing the structural mutation.
 - Function Absorption Matrix: Mapping trimmed components to the surviving carriers of their functions.
-- Invariant Impact Assessment: Proof that the transformation does not violate \$\mathcal{I}\_t\$.
+- Invariant Impact Assessment: Proof that the transformation does not violate $\mathcal{I}_t$.
 
 #### Human vs AI agent
 
@@ -1200,21 +1200,21 @@ In software engineering, Nam P. Suh's **Axiomatic Design** ([Suh, 1990](https://
 
 Operation 4 expands the solution frontier across distinct design paradigms. The team must not evaluate only 5 minor variants of one implementation paradigm while it stays blind to better architectural classes.
 
-#### Input uncertainty (\$\mathcal{U}\_4\$)
+#### Input uncertainty ($\mathcal{U}_4$)
 
 - **Local Optimum Trap**: Being trapped within a single paradigm (for example, evaluating only relational SQL schemas when the problem is fundamentally graph-traversal or log-structured).
 - **Superficial Diversity**: Generating options that differ only by brand name (for example, Kafka vs. RabbitMQ vs. AWS SQS) rather than architectural mechanics (for example, durable append-only log vs. ephemeral broker-tracked queue vs. distributed ring buffer).
 
-#### Action (\$\mathcal{A}\_4\$)
+#### Action ($\mathcal{A}_4$)
 
-1.  **Identify Orthogonal Architectural Dimensions (\$\mathcal{D}\_1, \mathcal{D}\_2, \dots, \mathcal{D}\_k\$)**:
-    - *State Ownership*: Centralized Shared-Everything \$\mid\$ Domain-Partitioned \$\mid\$ Client-Owned \$\mid\$ Replicated Shared-Nothing.
-    - *Consistency Guarantees*: Linearizable (Raft/Paxos) \$\mid\$ Sequential \$\mid\$ Causal \$\mid\$ Eventual (CRDT).
-    - *Computation Placement*: Client-Side Edge \$\mid\$ Gateway/Proxy \$\mid\$ Core App Server \$\mid\$ Database Engine \$\mid\$ Asynchronous Worker.
-    - *Execution Timing*: Immediate Synchronous \$\mid\$ Buffered Asynchronous \$\mid\$ Lazy On-Demand \$\mid\$ Scheduled Batch.
-    - *Fault Recovery*: Crash-Stop / Fail-Fast \$\mid\$ Retry with Exponential Jitter \$\mid\$ Sagas / Compensating Transactions \$\mid\$ Circuit Breaking with Degraded Fallback.
-2.  **Synthesize Morphological Combinations**: Construct representative solution vectors: \$\$\vec{V}*j = \langle d*{1,a}, d\_{2,b}, \dots, d\_{k,m} \rangle \in \mathcal{D}\_1 \times \mathcal{D}\_2 \times \dots \times \mathcal{D}\_k\$\$
-3.  **Systematic Invariant Pruning**: Prune combinations that violate hard invariants \$\mathcal{I}\_t\$ or physical feasibility, leaving 3–5 structurally contrasting, viable candidate classes.
+1.  **Identify Orthogonal Architectural Dimensions ($\mathcal{D}_1, \mathcal{D}_2, \dots, \mathcal{D}_k$)**:
+    - *State Ownership*: Centralized Shared-Everything $\mid$ Domain-Partitioned $\mid$ Client-Owned $\mid$ Replicated Shared-Nothing.
+    - *Consistency Guarantees*: Linearizable (Raft/Paxos) $\mid$ Sequential $\mid$ Causal $\mid$ Eventual (CRDT).
+    - *Computation Placement*: Client-Side Edge $\mid$ Gateway/Proxy $\mid$ Core App Server $\mid$ Database Engine $\mid$ Asynchronous Worker.
+    - *Execution Timing*: Immediate Synchronous $\mid$ Buffered Asynchronous $\mid$ Lazy On-Demand $\mid$ Scheduled Batch.
+    - *Fault Recovery*: Crash-Stop / Fail-Fast $\mid$ Retry with Exponential Jitter $\mid$ Sagas / Compensating Transactions $\mid$ Circuit Breaking with Degraded Fallback.
+2.  **Synthesize Morphological Combinations**: Construct representative solution vectors: $$\vec{V}_j = \langle d_{1,a}, d_{2,b}, \dots, d_{k,m} \rangle \in \mathcal{D}_1 \times \mathcal{D}_2 \times \dots \times \mathcal{D}_k$$
+3.  **Systematic Invariant Pruning**: Prune combinations that violate hard invariants $\mathcal{I}_t$ or physical feasibility, leaving 3–5 structurally contrasting, viable candidate classes.
 
 <!-- -->
 
@@ -1259,15 +1259,15 @@ In systems engineering and decision theory ([Simon, 1969](https://mitpress.mit.e
 
 Operation 5 prevents two failures: architectural paralysis (endless speculative debate) and reckless blind implementation. It names the critical unknowns that block a sound decision. It then runs the cheapest empirical experiment (spike, benchmark, trace inspection) that can resolve them.
 
-#### Input uncertainty (\$\mathcal{U}\_5\$)
+#### Input uncertainty ($\mathcal{U}_5$)
 
 - **Decision-Significant Unknowns**: Missing factual metrics (for example, "Will this database engine support 50,000 range queries/sec on encrypted columns?").
 - **Vendor/Documentation Drift**: Discrepancies between official library documentation and actual runtime behavior under stress.
 - **Unverified Assumptions Masquerading as Facts**: Untested team beliefs about system performance or platform guarantees.
 
-#### Action (\$\mathcal{A}\_5\$)
+#### Action ($\mathcal{A}_5$)
 
-1.  **Formulate Decision-Significant Unknowns (`UNK-`)**: Frame questions strictly in terms of decision impact: \$\$\text{If } \text{Result} = X \implies \text{Select Candidate } A; \quad \text{If } \text{Result} = Y \implies \text{Select Candidate } B.\$\$
+1.  **Formulate Decision-Significant Unknowns (`UNK-`)**: Frame questions strictly in terms of decision impact: $$\text{If } \text{Result} = X \implies \text{Select Candidate } A; \quad \text{If } \text{Result} = Y \implies \text{Select Candidate } B.$$
 2.  **Cross-Domain Functional Isomorph Transfer**: Search for proven mechanisms in unrelated computational or physical domains that perform the identical abstract function (for example, borrowing log-structured merge trees from filesystems for high-throughput write ingestion; borrowing biological immune response algorithms for distributed anomaly detection).
 3.  **Design Minimal Falsification Spikes (`EVDREQ-`)**: Construct minimal, isolated, throwaway test programs designed specifically to stress the boundary condition and falsify the working assumption.
 4.  **Execute and Ingest Empirical Evidence (`EVD-`)**: Execute the spike, capture raw metrics/traces, and update the epistemic graph.
@@ -1300,15 +1300,15 @@ This is formalized in Nam P. Suh's **Axiomatic Design (Independence Axiom)** ([S
 
 #### Purpose
 
-Operation 6 makes independent business requirements evolve, deploy, and test independently. It exposes hidden dependency vectors. A change to requirement \$A\$ must not force changes across dozens of unrelated modules.
+Operation 6 makes independent business requirements evolve, deploy, and test independently. It exposes hidden dependency vectors. A change to requirement $A$ must not force changes across dozens of unrelated modules.
 
-#### Input uncertainty (\$\mathcal{U}\_6\$)
+#### Input uncertainty ($\mathcal{U}_6$)
 
 - **Invisible Coupling Vectors**: Coupling that exists outside static code imports—such as shared database tables, shared message schemas, implicit temporal sequencing, shared configuration files, or coordinated deployment requirements.
 - **Leaky Abstractions**: High-level business logic contaminated with low-level infrastructure, networking, or persistence concerns.
 - **Cascading Change Radius**: High uncertainty regarding the blast radius of modifying a core interface.
 
-#### Action (\$\mathcal{A}\_6\$)
+#### Action ($\mathcal{A}_6$)
 
 1.  **Full-Spectrum Dependency Mapping**: Map all 7 vectors of coupling across the candidate architecture:
     - *Source/Compile Coupling*: Direct imports, type references.
@@ -1323,7 +1323,7 @@ Operation 6 makes independent business requirements evolve, deploy, and test ind
     - Enforce Single-Writer Data Ownership (no shared database tables across boundaries).
     - Isolate volatile third-party APIs behind Anti-Corruption Layers (ACL).
     - Transform synchronous temporal coupling into asynchronous event notifications.
-3.  **Quantify Change Radius**: Calculate the fan-in, fan-out, and Instability Metric (\$I = \frac{\text{Fan-Out}}{\text{Fan-In} + \text{Fan-Out}}\$) for every boundary.
+3.  **Quantify Change Radius**: Calculate the fan-in, fan-out, and Instability Metric ($I = \frac{\text{Fan-Out}}{\text{Fan-In} + \text{Fan-Out}}$) for every boundary.
 
 <!-- -->
 
@@ -1359,19 +1359,19 @@ A **Dependency Matrix & Change Propagation Map** containing:
 
 In [*Thinking in Systems: A Primer* (Meadows, 2008)](https://www.chelseagreen.com/product/thinking-in-systems/) and [*Business Dynamics* (Sterman, 2000)](https://www.mheducation.com/highered/product/business-dynamics-systems-thinking-modeling-complex-world-sterman/M9780072389159.html), Donella H. Meadows and John D. Sterman demonstrated that complex systems are governed by non-linear dynamics: **stocks (accumulations), flows (rates of change), feedback loops (positive reinforcing and negative balancing), delays, and non-linear thresholds**.
 
-In software systems, queueing theory and **Little's Law** (\$L = \lambda W\$) dictate that when arrival rate \$\lambda\$ approaches service capacity \$\mu\$, queue depth \$L\$ and wait time \$W\$ explode non-linearly towards infinity. Furthermore, distributed systems exhibit **metastable failure modes** ([Huang et al., 2022](https://dl.acm.org/doi/10.1145/3477132.3483541); [Nygard, 2018](https://pragprog.com/titles/mnee2/release-it-second-edition/)), where a transient trigger puts the system into a permanent degraded state that sustains itself even after the trigger is removed (for example, retry storms, cache stampedes, garbage collection thrashing).
+In software systems, queueing theory and **Little's Law** ($L = \lambda W$) dictate that when arrival rate $\lambda$ approaches service capacity $\mu$, queue depth $L$ and wait time $W$ explode non-linearly towards infinity. Furthermore, distributed systems exhibit **metastable failure modes** ([Huang et al., 2022](https://dl.acm.org/doi/10.1145/3477132.3483541); [Nygard, 2018](https://pragprog.com/titles/mnee2/release-it-second-edition/)), where a transient trigger puts the system into a permanent degraded state that sustains itself even after the trigger is removed (for example, retry storms, cache stampedes, garbage collection thrashing).
 
 #### Purpose
 
 Operation 7 finds dynamic failure modes, resource accumulation leaks, concurrency races, and operational instabilities. Static code reviews and component block diagrams do not show these modes.
 
-#### Input uncertainty (\$\mathcal{U}\_7\$)
+#### Input uncertainty ($\mathcal{U}_7$)
 
 - **Dynamic Blindspots**: Ignoring what happens when a downstream dependency experiences a 500ms latency degradation.
 - **Metastable Collapse Vulnerability**: Unchecked retry loops, unbounded queues, and thundering herd vulnerabilities under sudden traffic surges.
 - **Transient State Hazards**: Data corruption or split-brain states occurring during cold starts, failovers, or rolling deployments.
 
-#### Action (\$\mathcal{A}\_7\$)
+#### Action ($\mathcal{A}_7$)
 
 1.  **Stock-and-Flow & Queueing Modeling**:
     - Model request queues, connection pools, thread pools, and memory buffers as explicit stocks.
@@ -1419,9 +1419,9 @@ A **System Dynamics and Load Behavior Map** containing:
 
 > **"Evaluate options by full engineering value, accounting for total lifecycle cost, operational overhead, transition risk, and ideality."**
 
-In TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the universal metric of system excellence is **Ideality** (\$I\$):
+In TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the universal metric of system excellence is **Ideality** ($I$):
 
-\$\$I = \frac{\sum \text{Useful Functions}}{\sum \text{Costs} + \sum \text{Harmful Effects}}\$\$
+$$I = \frac{\sum \text{Useful Functions}}{\sum \text{Costs} + \sum \text{Harmful Effects}}$$
 
 In Nam P. Suh's **Axiomatic Design (Information Axiom / Axiom 2)** ([Suh, 1990](https://global.oup.com/academic/product/the-principles-of-design-9780195043457)), among all designs that satisfy the functional independence requirement, the optimal design is the one with the **minimal information content** (that is, the simplest design with the highest probability of operational success and lowest entropy).
 
@@ -1431,13 +1431,13 @@ In multi-criteria decision analysis under uncertainty ([Simon, 1969](https://mit
 
 Operation 8 selects among competing candidate mechanisms (`CAN-`). The selection must be rigorous, transparent, and defensible. The chosen architecture must maximize long-term engineering value. Resume-driven development and short-term hacking are not the goal.
 
-#### Input uncertainty (\$\mathcal{U}\_8\$)
+#### Input uncertainty ($\mathcal{U}_8$)
 
 - **Hidden Lifecycle Costs**: Ignoring maintenance, observability, cloud infrastructure spend, security patching, and on-call paging burdens.
 - **Cognitive Overhead**: Introducing overly clever or esoteric technology stacks that the existing engineering organization cannot maintain.
 - **Unstated Trade-Offs**: Selecting a candidate without explicitly documenting the negative consequences accepted.
 
-#### Action (\$\mathcal{A}\_8\$)
+#### Action ($\mathcal{A}_8$)
 
 1.  **Multi-Attribute Utility & Ideality Scoring**: Evaluate surviving candidate mechanisms across 6 comprehensive value dimensions:
     - *Functional Delivery*: Completeness of required behavioral invariants.
@@ -1500,24 +1500,24 @@ Furthermore, in industrial software engineering, an architecture is only as good
 
 Operation 9 closes the loop. It proves that the synthesized mechanism satisfies required behavioral invariants in a running environment. It executes the production rollout without downtime, data loss, or irreversible failure.
 
-#### Input uncertainty (\$\mathcal{U}\_9\$)
+#### Input uncertainty ($\mathcal{U}_9$)
 
 - **Execution Divergence**: The subtle discrepancies between design models, unit tests, and live production runtimes.
 - **Migration & Cutover Risk**: Unverified assumptions about data volume, replication lag, backward compatibility, and schema lock times during live upgrades.
 - **Irreversibility Trap**: Deploying a change that cannot be rolled back if an anomaly is detected.
 
-#### Action (\$\mathcal{A}\_9\$)
+#### Action ($\mathcal{A}_9$)
 
 1.  **Multi-Tier Executable Verification Suite**:
     - *Invariant & Property-Based Tests*: Generate thousands of randomized inputs to falsify state machine invariants (QuickCheck / Hypothesis style).
     - *Mutation Testing*: Inject synthetic faults into the implementation to verify that test suites catch all mutations.
     - *Fault Injection & Chaos Testing*: Simulate network partitions, disk stalls, process crashes, and clock skews.
-    - *Performance & Load Benchmarks*: Verify that \$p99\$ and throughput invariants hold under production-scale load.
+    - *Performance & Load Benchmarks*: Verify that $p99$ and throughput invariants hold under production-scale load.
 2.  **Construct the Transition Architecture (`TRANS-`)**:
     - *Phase 1 (Expand)*: Deploy new schema/service in parallel; introduce dual-writing from old to new.
     - *Phase 2 (Reconcile & Backfill)*: Asynchronously backfill historical data; run continuous reconciliation jobs to verify data equality.
     - *Phase 3 (Dark Launch / Shadow Run)*: Route real production traffic reads/writes to the new system in shadow mode; verify outputs without returning to clients.
-    - *Phase 4 (Canary Switchover)*: Incrementally shift live traffic (1% \$\to\$ 10% \$\to\$ 100%) with automated rollback on SLO breach.
+    - *Phase 4 (Canary Switchover)*: Incrementally shift live traffic (1% $\to$ 10% $\to$ 100%) with automated rollback on SLO breach.
     - *Phase 5 (Contract)*: Remove legacy code paths, decommission old tables, and clean up temporary shims.
 
 ``` mermaid
@@ -1644,39 +1644,39 @@ graph TD
 
 ### 4.1. Operations (The Epistemic State Transformations)
 
-At the highest level, an **Operation** is a formal state transformation operator \$T: \mathcal{S} \to \mathcal{S}'\$ acting upon the **Epistemic State** of the engineering problem.
+At the highest level, an **Operation** is a formal state transformation operator $T: \mathcal{S} \to \mathcal{S}'$ acting upon the **Epistemic State** of the engineering problem.
 
-Formally, the Epistemic State \$\mathcal{S}\$ at any point in the engineering lifecycle is defined as an 11-tuple:
+Formally, the Epistemic State $\mathcal{S}$ at any point in the engineering lifecycle is defined as an 11-tuple:
 
-\$\$\mathcal{S} = \langle \mathcal{F}, \mathcal{M}, \mathcal{D}, \mathcal{A}, \mathcal{H}, \mathcal{C}, \mathcal{U}, \mathcal{K}, \mathcal{E}, \mathcal{T}, \mathcal{R} \rangle\$\$
+$$\mathcal{S} = \langle \mathcal{F}, \mathcal{M}, \mathcal{D}, \mathcal{A}, \mathcal{H}, \mathcal{C}, \mathcal{U}, \mathcal{K}, \mathcal{E}, \mathcal{T}, \mathcal{R} \rangle$$
 
 where:
 
-- \$\mathcal{F}\$ is the set of established, verified repository and environment **Facts** (`FACT`);
-- \$\mathcal{M}\$ is the set of quantitative, empirical **Measurements** (`MEASURED`);
-- \$\mathcal{D}\$ is the set of logically derived propositions from proven facts (`DERIVED`);
-- \$\mathcal{A}\$ is the set of explicit, unverified working **Assumptions** (`ASM-`);
-- \$\mathcal{H}\$ is the set of testable **Causal Hypotheses** (`HYP-`);
-- \$\mathcal{C}\$ is the set of identified technical and physical **Contradictions** (`CTR-`);
-- \$\mathcal{U}\$ is the set of **Decision-Significant Unknowns** (`UNK-`);
-- \$\mathcal{K}\$ is the set of generated **Candidate Mechanisms** (`CAN-`);
-- \$\mathcal{E}\$ is the set of formal **Evidence Requests** and **Evidence Results** (`EVDREQ-`, `EVD-`);
-- \$\mathcal{T}\$ is the set of temporary architectural **Transition Systems** (`TRANS-`);
-- \$\mathcal{R}\$ is the set of locked **Architectural Decisions** and Decision Records (`DEC-`).
+- $\mathcal{F}$ is the set of established, verified repository and environment **Facts** (`FACT`);
+- $\mathcal{M}$ is the set of quantitative, empirical **Measurements** (`MEASURED`);
+- $\mathcal{D}$ is the set of logically derived propositions from proven facts (`DERIVED`);
+- $\mathcal{A}$ is the set of explicit, unverified working **Assumptions** (`ASM-`);
+- $\mathcal{H}$ is the set of testable **Causal Hypotheses** (`HYP-`);
+- $\mathcal{C}$ is the set of identified technical and physical **Contradictions** (`CTR-`);
+- $\mathcal{U}$ is the set of **Decision-Significant Unknowns** (`UNK-`);
+- $\mathcal{K}$ is the set of generated **Candidate Mechanisms** (`CAN-`);
+- $\mathcal{E}$ is the set of formal **Evidence Requests** and **Evidence Results** (`EVDREQ-`, `EVD-`);
+- $\mathcal{T}$ is the set of temporary architectural **Transition Systems** (`TRANS-`);
+- $\mathcal{R}$ is the set of locked **Architectural Decisions** and Decision Records (`DEC-`).
 
 The nine operations do not correspond to chronological project phases (for example, "waterfall analysis" or "sprint planning"). Instead, they represent fundamental epistemic transformations invoked dynamically whenever a specific type of engineering uncertainty blocks progress:
 
 | Operation | Primary Epistemic Goal | Core Input State | Target Output State |
 |----|----|----|----|
-| **1. Frame and Model** | Eliminate solution-anchoring; define invariant boundary | Raw symptom, vague request, or feature mandate | Invariant-bounded behavioral delta \$\Delta B\$, explicit system scope, immutable constraints |
-| **2. Find Constraint / Cause** | Formulate falsifiable mechanism; isolate contradiction | Observable anomaly, failing SLO, or clashing requirements | Directed Causal Graph (\$\mathcal{H}\$), technical contradiction (\$\mathcal{C}\$), or binding bottleneck |
-| **3. Transform System** | Generate structural variants of existing system | Existing component topology, diagnosed constraint | Set of mutated topologies (\$\mathcal{K}\$) via elimination, separation, delegation, or reordering |
+| **1. Frame and Model** | Eliminate solution-anchoring; define invariant boundary | Raw symptom, vague request, or feature mandate | Invariant-bounded behavioral delta $\Delta B$, explicit system scope, immutable constraints |
+| **2. Find Constraint / Cause** | Formulate falsifiable mechanism; isolate contradiction | Observable anomaly, failing SLO, or clashing requirements | Directed Causal Graph ($\mathcal{H}$), technical contradiction ($\mathcal{C}$), or binding bottleneck |
+| **3. Transform System** | Generate structural variants of existing system | Existing component topology, diagnosed constraint | Set of mutated topologies ($\mathcal{K}$) via elimination, separation, delegation, or reordering |
 | **4. Explore Solution Space** | Span multi-dimensional architectural possibilities | Invariant boundary, performance/scale requirements | Morphological matrix spanning orthogonal dimensions; pruned candidate space |
-| **5. Expand Knowledge** | Eliminate decision-significant unknowns | Critical unknowns (\$\mathcal{U}\$), conflicting assumptions (\$\mathcal{A}\$) | Empirical evidence (\$\mathcal{E}\$, \$\mathcal{M}\$), converted facts (\$\mathcal{F}\$), falsified hypotheses |
+| **5. Expand Knowledge** | Eliminate decision-significant unknowns | Critical unknowns ($\mathcal{U}$), conflicting assumptions ($\mathcal{A}$) | Empirical evidence ($\mathcal{E}$, $\mathcal{M}$), converted facts ($\mathcal{F}$), falsified hypotheses |
 | **6. Structure Dependencies** | Align couplings with reasons for change | Structural dependency map, change frequency data | Decoupled interfaces, explicit invariant enforcement paths, minimized change radius |
 | **7. Model System Dynamics** | Expose temporal, load, queue, and failure behavior | Static architecture, workload profiles, SLA/SLO bounds | Stock-and-flow model, queue saturation bounds, feedback/retry loops, degradation modes |
-| **8. Determine Value & Select** | Rank candidates by total lifecycle cost and value | Candidate mechanisms (\$\mathcal{K}\$), empirical evidence (\$\mathcal{E}\$) | Pareto-ranked candidate, explicit trade-off justification, recorded review triggers |
-| **9. Verify & Transition** | Achieve empirical closure and safe production rollout | Selected candidate, existing production state | Automated executable verification suite, reversible transition architecture (\$\mathcal{T}\$), telemetry proof |
+| **8. Determine Value & Select** | Rank candidates by total lifecycle cost and value | Candidate mechanisms ($\mathcal{K}$), empirical evidence ($\mathcal{E}$) | Pareto-ranked candidate, explicit trade-off justification, recorded review triggers |
+| **9. Verify & Transition** | Achieve empirical closure and safe production rollout | Selected candidate, existing production state | Automated executable verification suite, reversible transition architecture ($\mathcal{T}$), telemetry proof |
 
 ------------------------------------------------------------------------
 
@@ -1790,9 +1790,9 @@ Software engineering reasoning cannot exist in a purely mental or informal textu
 
 Analytical artifacts serve as the externalized cognitive scaffolding for human engineers and AI agents. They record the precise provenance, dependencies, and rationale of every architectural proposition:
 
-1.  **Problem Passport (`FRAME-`)**: Formulates the required functional delta \$\Delta B\$, non-negotiable invariants, immutable vs. mutable constraints, and scope boundaries without naming implementation mechanisms.
+1.  **Problem Passport (`FRAME-`)**: Formulates the required functional delta $\Delta B$, non-negotiable invariants, immutable vs. mutable constraints, and scope boundaries without naming implementation mechanisms.
 2.  **Causal Hypothesis Graph (`HYP-`)**: A directed acyclic graph (DAG) connecting observed anomalies to hypothesized physical/computational causes, annotated with differentiating empirical checks.
-3.  **Morphological Solution Space Matrix (`CAN-`)**: A systematic grid decomposing an architectural problem into orthogonal dimensions (for example, State Partitioning \$\times\$ Synchronization Mechanism \$\times\$ Consistency Model) and tracking evaluated candidate combinations.
+3.  **Morphological Solution Space Matrix (`CAN-`)**: A systematic grid decomposing an architectural problem into orthogonal dimensions (for example, State Partitioning $\times$ Synchronization Mechanism $\times$ Consistency Model) and tracking evaluated candidate combinations.
 4.  **Assumption and Unknowns Registry (`ASM-`, `UNK-`)**: A typed ledger classifying every premise into `FACT` (directly observed), `MEASURED` (quantified via telemetry/benchmarks), `DERIVED` (logically proven), `ASSUMED` (unverified working hypothesis), or `UNKNOWN` (critical missing information).
 5.  **Architectural Decision Record (`DEC-`)**: A formal, immutable record capturing the chosen candidate mechanism, the resolved contradictions, the rejected alternatives with explicit rationale, the accepted operational risks, and the **review triggers** (the specific conditions that would invalidate the decision) ([Bass, Clements, & Kazman, 2021](https://www.pearson.com/en-us/subject-catalog/p/software-architecture-in-practice/P200000009477)).
 6.  **Transition and Rollback Plan (`TRANS-`)**: The explicit specification of intermediate transition mechanisms (dual-writing, backward-compatible schemas, traffic routing gates, and automated rollback thresholds).
@@ -1835,7 +1835,7 @@ The integration between analytical artifacts and executable evidence enables **T
                                                                       │ depends_on
                                                            [DEC-01: "Use CAN-02 for Search"]
 
-If an executable benchmark spike (`EVD-04`) reveals that under realistic query distributions the hit ratio is only \$42%\$, `ASM-01` is **falsified**. Through transitive invalidation:
+If an executable benchmark spike (`EVD-04`) reveals that under realistic query distributions the hit ratio is only $42\%$, `ASM-01` is **falsified**. Through transitive invalidation:
 
 1.  `ASM-01` status shifts from `ASSUMED` to `FALSIFIED`;
 2.  `CAN-02` is automatically invalidated;
@@ -1854,7 +1854,7 @@ These are **anti-metrics**. A 50-page design document that hides unverified assu
 
 A sound outcome is only the **unbroken chain of justification**:
 
-\$\$\text{Problem Model} \xrightarrow{\text{Falsifiable}} \text{Hypothesis} \xrightarrow{\text{Systematic}} \text{Transformation} \xrightarrow{\text{Executable}} \text{Check} \xrightarrow{\text{Empirical}} \text{Evidence} \xrightarrow{\text{Justified}} \text{Decision}\$\$
+$$\text{Problem Model} \xrightarrow{\text{Falsifiable}} \text{Hypothesis} \xrightarrow{\text{Systematic}} \text{Transformation} \xrightarrow{\text{Executable}} \text{Check} \xrightarrow{\text{Empirical}} \text{Evidence} \xrightarrow{\text{Justified}} \text{Decision}$$
 
 ``` mermaid
 flowchart LR
@@ -1997,8 +1997,8 @@ The correction is shared. The control differs. Humans need a review ritual that 
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Framing uncertainty, \$U_{\text{frame}}\$ | Uncertainty about required behavior, invariant boundaries, conditions, or success criteria. | The team cannot write a tool-neutral failing scenario such as “a revoked grant is rejected globally within 250 ms”; conflicting tickets and acceptance tests are the evidence. |
-| Behavioral delta, \$\Delta B = B_{\text{required}} - B_{\text{actual}}\$ | Difference between observed and required behavior under specified conditions. | Today a revoked principal succeeds for up to five minutes; required behavior is rejection within 250 ms. That measurable gap, not “missing Redis,” is the problem. |
+| Framing uncertainty, $U_{\text{frame}}$ | Uncertainty about required behavior, invariant boundaries, conditions, or success criteria. | The team cannot write a tool-neutral failing scenario such as “a revoked grant is rejected globally within 250 ms”; conflicting tickets and acceptance tests are the evidence. |
+| Behavioral delta, $\Delta B = B_{\text{required}} - B_{\text{actual}}$ | Difference between observed and required behavior under specified conditions. | Today a revoked principal succeeds for up to five minutes; required behavior is rejection within 250 ms. That measurable gap, not “missing Redis,” is the problem. |
 | Transitive invalidation | Invalidity propagates from a false upstream premise to dependent claims and artifacts. | If “five minutes of stale authorization is safe” is false, the cache design, tests, capacity plan, and rollout decision depending on it must all be reopened. |
 
 ## Why framing comes first
@@ -2038,7 +2038,7 @@ flowchart TD
     FrameNode ==> Op2 & Op3 & Op4 & Op6 & Op7 & Op9
 ```
 
-Operation 1 reduces **framing uncertainty** (\$U\_{\text{frame}}\$). This uncertainty exists when required behavior, invariants, or success criteria are incomplete, conflict with each other, or contain an implementation choice.
+Operation 1 reduces **framing uncertainty** ($U_{\text{frame}}$). This uncertainty exists when required behavior, invariants, or success criteria are incomplete, conflict with each other, or contain an implementation choice.
 
 Before you create candidate architectures (`CAN-`), causal hypotheses (`HYP-`), or verification suites (`VAL-`), create a **Problem Framing Map (`FRAME-`)**. If a later fact changes the frame, invalidate every dependent candidate, decision, test, and code change.
 
@@ -2062,10 +2062,10 @@ These statements are **solutions**, not problems. The named mechanism can be wro
 
 Good framing removes implementation names. It states the **observable behavioral delta**:
 
-- Not *"add Redis,"* but *"deliver read access to session state with \$p99 \< 5\text{ ms}\$ under 50,000 concurrent requests/sec without serving stale authorization grants."*
+- Not *"add Redis,"* but *"deliver read access to session state with $p99 < 5\text{ ms}$ under 50,000 concurrent requests/sec without serving stale authorization grants."*
 - Not *"split into microservices,"* but *"enable independent deployment and scaling of billing and catalog workflows such that a catalog outage cannot prevent transaction settlement."*
-- Not *"add Kafka,"* but *"decouple the rate of bursty telemetry ingestion (\$100\text{k events/sec}\$) from the batch analytical write rate (\$10\text{k events/sec}\$) with zero data loss during worker node restarts."*
-- Not *"rewrite in Rust,"* but *"eliminate tail-latency spikes exceeding \$50\text{ ms}\$ caused by garbage collection pauses during real-time order matching."*
+- Not *"add Kafka,"* but *"decouple the rate of bursty telemetry ingestion ($100\text{k events/sec}$) from the batch analytical write rate ($10\text{k events/sec}$) with zero data loss during worker node restarts."*
+- Not *"rewrite in Rust,"* but *"eliminate tail-latency spikes exceeding $50\text{ ms}$ caused by garbage collection pauses during real-time order matching."*
 
 ------------------------------------------------------------------------
 
@@ -2127,15 +2127,15 @@ In [*Problem Frames: Analysing and Structuring Software Development Problems* (A
 
 Jackson's core insight is the fundamental theorem of requirements engineering:
 
-\$\$\mathcal{D}, \mathcal{M} \vdash \mathcal{R}\$\$
+$$\mathcal{D}, \mathcal{M} \vdash \mathcal{R}$$
 
 Where:
 
-- \$\mathcal{D}\$ represents the known, immutable properties of the **Problem Domain** (for example, *"networks can drop packets,"* *"users can double-click buttons,"* *"clocks can drift"*).
-- \$\mathcal{M}\$ represents the behavioral specification of the **Machine** to be built.
-- \$\mathcal{R}\$ represents the customer's desired **Requirements** in the environment.
+- $\mathcal{D}$ represents the known, immutable properties of the **Problem Domain** (for example, *"networks can drop packets,"* *"users can double-click buttons,"* *"clocks can drift"*).
+- $\mathcal{M}$ represents the behavioral specification of the **Machine** to be built.
+- $\mathcal{R}$ represents the customer's desired **Requirements** in the environment.
 
-The engineer's task is not to describe the machine's internal mechanisms. The task is to specify a machine \$\mathcal{M}\$ such that, when it operates in the physical domain \$\mathcal{D}\$, the requirements \$\mathcal{R}\$ are mathematically entailed.
+The engineer's task is not to describe the machine's internal mechanisms. The task is to specify a machine $\mathcal{M}$ such that, when it operates in the physical domain $\mathcal{D}$, the requirements $\mathcal{R}$ are mathematically entailed.
 
 Jackson classified recurring software problems into canonical **problem frames**:
 
@@ -2145,7 +2145,7 @@ Jackson classified recurring software problems into canonical **problem frames**
 4.  **Workpieces**: The machine creates, modifies, and preserves structured information artifacts in response to user commands (for example, document editors, CAD tools, compilers).
 5.  **Transformation**: The machine reads input data files in a defined format and produces output data files in another format (for example, ETL pipelines, batch billing processors).
 
-Operation 1 applies Jackson's principle: **the problem lives in the domain; the solution lives in the machine**. Do not specify the machine (for example, *"use Redis"*) before you characterize domain properties \$\mathcal{D}\$ and requirement \$\mathcal{R}\$. That order violates the entailment relation.
+Operation 1 applies Jackson's principle: **the problem lives in the domain; the solution lives in the machine**. Do not specify the machine (for example, *"use Redis"*) before you characterize domain properties $\mathcal{D}$ and requirement $\mathcal{R}$. That order violates the entailment relation.
 
 ------------------------------------------------------------------------
 
@@ -2178,21 +2178,21 @@ Dijkstra states that separating **what** a program must achieve from **how** har
 
 In [*An Axiomatic Basis for Computer Programming* (CACM, 1969, DOI: 10.1145/363235.363259)](https://dl.acm.org/doi/10.1145/363235.363259), C. A. R. Hoare introduced axiomatic semantics with the Hoare Triple:
 
-\$\${P} ; \mathcal{C} ; {Q}\$\$
+$${P} ; \mathcal{C} ; {Q}$$
 
 Where:
 
-- \$P\$ is the **Precondition**: an assertion on the system state that must hold prior to execution.
-- \$\mathcal{C}\$ is the **Command / Program**: the computational execution.
-- \$Q\$ is the **Postcondition**: an assertion on the system state guaranteed to hold upon termination, provided \$P\$ held initially.
+- $P$ is the **Precondition**: an assertion on the system state that must hold prior to execution.
+- $\mathcal{C}$ is the **Command / Program**: the computational execution.
+- $Q$ is the **Postcondition**: an assertion on the system state guaranteed to hold upon termination, provided $P$ held initially.
 
 In Operation 1 (Technique 1.2), Hoare logic is the grammar for behavioral modeling. Do not describe an implementation narrative (*"the controller calls the payment gateway through HTTP and writes to the database"*). Frame the problem as a contract between system states:
 
-\$\${ \text{OrderState} = \text{UNPAID} \land \text{Balance} \ge \text{Amount} } ; \mathcal{S} ; { \text{OrderState} = \text{PAID} \land \text{Balance} = \text{Balance}\_{\text{prev}} - \text{Amount} \land \text{AuditLogExists} }\$\$
+$${ \text{OrderState} = \text{UNPAID} \land \text{Balance} \ge \text{Amount} } ; \mathcal{S} ; { \text{OrderState} = \text{PAID} \land \text{Balance} = \text{Balance}_{\text{prev}} - \text{Amount} \land \text{AuditLogExists} }$$
 
-Coupled with a **Global Invariant** \$\mathcal{I}\$ that must hold across all intermediate states:
+Coupled with a **Global Invariant** $\mathcal{I}$ that must hold across all intermediate states:
 
-\$\$\mathcal{I} \equiv \forall \text{order} \in \text{Orders}, ; \text{Count}(\text{Charges}(\text{order})) \le 1\$\$
+$$\mathcal{I} \equiv \forall \text{order} \in \text{Orders},\; \text{Count}(\text{Charges}(\text{order})) \le 1$$
 
 ------------------------------------------------------------------------
 
@@ -2202,8 +2202,8 @@ In [*Specifying Systems: The TLA+ Language and Tools for Hardware and Software E
 
 Lamport splits system correctness into two independent properties:
 
-1.  **Safety Properties** (*"nothing bad happens"*): Assertions that must hold in every reachable system state: \$\$\text{Init} \land \Box\[\text{Next}\]\_{\text{vars}} \implies \Box \text{Invariant}\$\$
-2.  **Liveness Properties** (*"something good eventually happens"*): Assertions that guaranteed progress will be made: \$\$\Box \Diamond \text{TargetState}\$\$
+1.  **Safety Properties** (*"nothing bad happens"*): Assertions that must hold in every reachable system state: $$\text{Init} \land \Box[\text{Next}]_{\text{vars}} \implies \Box \text{Invariant}$$
+2.  **Liveness Properties** (*"something good eventually happens"*): Assertions that guaranteed progress will be made: $$\Box \Diamond \text{TargetState}$$
 
 In Operation 1, framing must separate safety from liveness. A system that does nothing satisfies all safety invariants. A system that crashes on error satisfies safety but violates liveness. Framing must state both: which state transitions are forbidden (safety), and which state transitions must complete within bounded time (liveness).
 
@@ -2220,7 +2220,7 @@ They introduced the **Quality Attribute Scenario**, with six parts:
 3.  **Artifact**: The specific subsystem or boundary receiving the stimulus (for example, API Gateway, Ingestion Service).
 4.  **Environment**: The operational context (for example, normal steady-state, failover mode, network partition).
 5.  **Response**: The required observable reaction of the system (for example, accept valid requests, throttle excess, log rate-limit events).
-6.  **Response Measure**: The quantifiable, testable threshold of success (for example, \$p99 \text{ latency} \le 15\text{ ms}\$, zero dropped legitimate requests, 429 response issued in \$\< 1\text{ ms}\$).
+6.  **Response Measure**: The quantifiable, testable threshold of success (for example, $p99 \text{ latency} \le 15\text{ ms}$, zero dropped legitimate requests, 429 response issued in $< 1\text{ ms}$).
 
 Operation 1 uses this 6-part structure as the standard template for behavioral modeling. Ambiguous "non-functional requirements" become verifiable engineering contracts.
 
@@ -2316,16 +2316,16 @@ flowchart LR
 
 #### Formal Definition
 
-Let \$S\_{\text{raw}}\$ be a raw problem statement. The Functional Abstraction Operator \$\mathcal{F}*{\text{abstract}}\$ maps \$S*{\text{raw}}\$ to a pure functional tuple:
+Let $S_{\text{raw}}$ be a raw problem statement. The Functional Abstraction Operator $\mathcal{F}_{\text{abstract}}$ maps $S_{\text{raw}}$ to a pure functional tuple:
 
-\$\$\mathcal{F}*{\text{abstract}}(S*{\text{raw}}) = \langle \text{Verb}, \text{Object}, \text{Context}, \mathcal{I} \rangle\$\$
+$$\mathcal{F}_{\text{abstract}}(S_{\text{raw}}) = \langle \text{Verb}, \text{Object}, \text{Context}, \mathcal{I} \rangle$$
 
 Where:
 
-- \$\text{Verb}\$ is an active, technology-neutral action (for example, *isolate, synchronize, serialize, persist, transform, throttle*).
-- \$\text{Object}\$ is the core domain entity or information flow (for example, *financial transaction, analytical query, authorization token*).
-- \$\text{Context}\$ is the operational environment and load profile.
-- \$\mathcal{I}\$ is the set of non-negotiable invariants that must be preserved.
+- $\text{Verb}$ is an active, technology-neutral action (for example, *isolate, synchronize, serialize, persist, transform, throttle*).
+- $\text{Object}$ is the core domain entity or information flow (for example, *financial transaction, analytical query, authorization token*).
+- $\text{Context}$ is the operational environment and load profile.
+- $\mathcal{I}$ is the set of non-negotiable invariants that must be preserved.
 
 The transformation forbids concrete software components, libraries, database engines, network protocols, or infrastructure products in the functional statement.
 
@@ -2339,10 +2339,10 @@ The transformation forbids concrete software components, libraries, database eng
 
 | Raw Request (Solution-Coupled) | Extracted Implementation | Technology-Agnostic Function (Technique 1.1) |
 |----|----|----|
-| *"We need to add Redis caching to the user profile endpoint."* | In-memory key-value store (`Redis`) | **Deliver user profile read requests** with latency \$p99 \< 10\text{ ms}\$ under 20,000 RPS, while ensuring profile updates are reflected in subsequent reads within \$\le 500\text{ ms}\$. |
+| *"We need to add Redis caching to the user profile endpoint."* | In-memory key-value store (`Redis`) | **Deliver user profile read requests** with latency $p99 < 10\text{ ms}$ under 20,000 RPS, while ensuring profile updates are reflected in subsequent reads within $\le 500\text{ ms}$. |
 | *"We need to split the monolith into microservices to scale checkout."* | Distributed service decomposition | **Isolate checkout execution capacity** from non-critical browsing traffic such that peak catalog load cannot exhaust checkout compute or database connection pools. |
-| *"We need an Apache Kafka pipeline to stream clickstream events."* | Distributed commit log broker (`Kafka`) | **Buffer and ingest high-volume telemetry events** (\$100\text{k events/sec}\$) with zero data loss during downstream analytical database maintenance windows. |
-| *"We need to rewrite our image processor in Rust to fix memory leaks."* | Memory-safe systems language (`Rust`) | **Process image resizing jobs** with bounded heap memory footprint (\$\le 512\text{ MB}\$ per worker process) and deterministic execution time without process crashes. |
+| *"We need an Apache Kafka pipeline to stream clickstream events."* | Distributed commit log broker (`Kafka`) | **Buffer and ingest high-volume telemetry events** ($100\text{k events/sec}$) with zero data loss during downstream analytical database maintenance windows. |
+| *"We need to rewrite our image processor in Rust to fix memory leaks."* | Memory-safe systems language (`Rust`) | **Process image resizing jobs** with bounded heap memory footprint ($\le 512\text{ MB}$ per worker process) and deterministic execution time without process crashes. |
 
 ------------------------------------------------------------------------
 
@@ -2352,21 +2352,21 @@ The transformation forbids concrete software components, libraries, database eng
 
 Behavioral modeling states the system's operational contract as the **behavioral delta tuple**:
 
-\$\$\Delta \mathcal{B} = \langle \mathcal{B}*{\text{actual}}, \mathcal{B}*{\text{required}}, \mathcal{I}*{\text{safety}}, \mathcal{L}*{\text{liveness}}, \mathcal{M}\_{\text{metrics}} \rangle\$\$
+$$\Delta \mathcal{B} = \langle \mathcal{B}_{\text{actual}}, \mathcal{B}_{\text{required}}, \mathcal{I}_{\text{safety}}, \mathcal{L}_{\text{liveness}}, \mathcal{M}_{\text{metrics}} \rangle$$
 
 Where:
 
-- \$\mathcal{B}\_{\text{actual}}\$ is the empirically observed state transitions and failure modes under current conditions.
-- \$\mathcal{B}\_{\text{required}}\$ is the mandatory state transitions required under defined stimuli.
-- \$\mathcal{I}*{\text{safety}}\$ is the set of safety invariants: \$\forall s \in \text{ReachableStates}, ; \mathcal{I}*{\text{safety}}(s) = \text{True}\$.
-- \$\mathcal{L}\_{\text{liveness}}\$ is the set of liveness guarantees: \$\forall e \in \text{Stimuli}, ; \Diamond \text{Response}(e) = \text{True}\$ within bounded time \$T\$.
-- \$\mathcal{M}\_{\text{metrics}}\$ is the quantifiable vector of quality attribute thresholds.
+- $\mathcal{B}_{\text{actual}}$ is the empirically observed state transitions and failure modes under current conditions.
+- $\mathcal{B}_{\text{required}}$ is the mandatory state transitions required under defined stimuli.
+- $\mathcal{I}_{\text{safety}}$ is the set of safety invariants: $\forall s \in \text{ReachableStates},\; \mathcal{I}_{\text{safety}}(s) = \text{True}$.
+- $\mathcal{L}_{\text{liveness}}$ is the set of liveness guarantees: $\forall e \in \text{Stimuli},\; \Diamond \text{Response}(e) = \text{True}$ within bounded time $T$.
+- $\mathcal{M}_{\text{metrics}}$ is the quantifiable vector of quality attribute thresholds.
 
 #### Quality attribute scenario template
 
 Required behavior must use the 6-part Bass-Clements-Kazman scenario. The structure gives precision and operational falsifiability:
 
-\$\$\begin{aligned} \text{Scenario} = { &\text{Source: } \mathcal{S}*{\text{src}}, ; \text{Stimulus: } \mathcal{S}*{\text{stim}}, ; \text{Artifact: } \mathcal{A}*{\text{art}}, \\ &\text{Environment: } \mathcal{E}*{\text{env}}, ; \text{Response: } \mathcal{R}*{\text{resp}}, ; \text{Measure: } \mathcal{M}*{\text{meas}} } \end{aligned}\$\$
+$$\begin{aligned} \text{Scenario} = \{ &\text{Source: } \mathcal{S}_{\text{src}},\; \text{Stimulus: } \mathcal{S}_{\text{stim}},\; \text{Artifact: } \mathcal{A}_{\text{art}}, \\ &\text{Environment: } \mathcal{E}_{\text{env}},\; \text{Response: } \mathcal{R}_{\text{resp}},\; \text{Measure: } \mathcal{M}_{\text{meas}} \} \end{aligned}$$
 
 ``` mermaid
 flowchart TD
@@ -2481,7 +2481,7 @@ flowchart TB
 
 #### The Eight Architectural Boundary Levels
 
-1.  **Level 1: Sub-Function / Algorithm**: In-memory data structures, cache-line alignment, branch prediction, lock-free primitives, algorithmic complexity (\$O(N)\$ vs. \$O(\log N)\$).
+1.  **Level 1: Sub-Function / Algorithm**: In-memory data structures, cache-line alignment, branch prediction, lock-free primitives, algorithmic complexity ($O(N)$ vs. $O(\log N)$).
 2.  **Level 2: Module / Package**: Information hiding boundaries, class/struct responsibilities, domain entity boundaries, package-level dependency directions.
 3.  **Level 3: Process / Runtime**: Operating system process boundaries, thread pools, asynchronous event loops, memory heaps, garbage collection cycles, local disk I/O.
 4.  **Level 4: Service / Subsystem**: Network-isolated microservices, RPC/REST boundaries, inter-process communication (IPC), local service databases.
@@ -2531,7 +2531,7 @@ flowchart TD
 | Perspective | Primary Focus | Evaluative Question | Typical Invariant Generated |
 |----|----|----|----|
 | **1. End-User / Client** | Utility, latency, responsiveness, predictability | *"What happens when my network drops mid-request?"* | Requests must return deterministic status; duplicate clicks must never double-bill. |
-| **2. Domain / Data Owner** | Correctness, auditability, financial integrity | *"Can we prove every balance mutation is justified by an immutable ledger entry?"* | Double-entry bookkeeping invariant: \$\sum \text{Debits} = \sum \text{Credits}\$ across all transactions. |
+| **2. Domain / Data Owner** | Correctness, auditability, financial integrity | *"Can we prove every balance mutation is justified by an immutable ledger entry?"* | Double-entry bookkeeping invariant: $\sum \text{Debits} = \sum \text{Credits}$ across all transactions. |
 | **3. SRE / Operator** | Blast radius, observability, survivability | *"If this component crashes at 3:00 AM, how do we detect it, isolate it, and recover without data loss?"* | Component must export Prometheus health metrics; failure must degrade gracefully without taking down parent process. |
 | **4. Adversary / Threat Actor** | Exploitation, resource exhaustion, abuse | *"Can I craft concurrent requests with identical timestamps to bypass rate limits or steal balance?"* | All state transitions must enforce strict concurrency serialization or atomic conditional checks. |
 | **5. Downstream Dependent** | Contract stability, backpressure, predictability | *"If our service slows down, will the upstream flood us with retries and cause a cascading outage?"* | Upstream must implement exponential backoff with jitter and circuit breaking. |
@@ -2565,11 +2565,11 @@ Three real-world engineering problems show Operation 1 in use:
 
 ##### 2. Technique 1.2: Describe Required and Actual Behavior
 
-- **Actual Behavior (\$\mathcal{B}\_{\text{actual}}\$)**: Monthly analytical SQL queries execute `SUM()`, `AVG()`, and complex `JOIN` operations directly against the master OLTP `transactions` and `accounts` tables. Queries hold shared table locks and exhaust CPU and buffer cache memory, causing OLTP write transaction latency to spike from \$p99 = 12\text{ ms}\$ to \$p99 \> 8,500\text{ ms}\$, triggering HTTP 504 gateway timeouts.
-- **Required Behavior (\$\mathcal{B}\_{\text{required}}\$)**:
-  - *Quality Attribute Scenario*: Under peak financial month-end closing conditions (\$\mathcal{E}\$), when the finance department triggers 50 concurrent analytical reports (\$\mathcal{S}\$), the reporting engine (\$\mathcal{A}\$) must compute all aggregations (\$\mathcal{R}\$) within \$\le 30\text{ seconds}\$ with data freshness staleness \$\le 15\text{ minutes}\$ (\$\mathcal{M}\$), while primary OLTP write latency remains \$p99 \le 15\text{ ms}\$ (\$\mathcal{I}\$).
-- **Safety Invariant (\$\mathcal{I}\_{\text{safety}}\$)**: An analytical query must never acquire exclusive or shared table locks on the OLTP master database.
-- **Liveness Invariant (\$\mathcal{L}\_{\text{liveness}}\$)**: All initiated reports must complete or fail with explicit error within 60 seconds (no hung queries).
+- **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: Monthly analytical SQL queries execute `SUM()`, `AVG()`, and complex `JOIN` operations directly against the master OLTP `transactions` and `accounts` tables. Queries hold shared table locks and exhaust CPU and buffer cache memory, causing OLTP write transaction latency to spike from $p99 = 12\text{ ms}$ to $p99 > 8,500\text{ ms}$, triggering HTTP 504 gateway timeouts.
+- **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
+  - *Quality Attribute Scenario*: Under peak financial month-end closing conditions ($\mathcal{E}$), when the finance department triggers 50 concurrent analytical reports ($\mathcal{S}$), the reporting engine ($\mathcal{A}$) must compute all aggregations ($\mathcal{R}$) within $\le 30\text{ seconds}$ with data freshness staleness $\le 15\text{ minutes}$ ($\mathcal{M}$), while primary OLTP write latency remains $p99 \le 15\text{ ms}$ ($\mathcal{I}$).
+- **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: An analytical query must never acquire exclusive or shared table locks on the OLTP master database.
+- **Liveness Invariant ($\mathcal{L}_{\text{liveness}}$)**: All initiated reports must complete or fail with explicit error within 60 seconds (no hung queries).
 
 ##### 3. Technique 1.3: Shift the System Boundary
 
@@ -2581,7 +2581,7 @@ Three real-world engineering problems show Operation 1 in use:
 
 - *Finance Auditor*: Reports must reconcile exactly with ledger state at the cutoff timestamp.
 - *OLTP User / Customer*: Checkout and money transfer transactions must never fail or stall due to internal reporting activity.
-- *SRE / On-Call*: No complex distributed Kafka lag monitoring; replication failover must be automated; database CPU on primary must remain \$\< 60%\$.
+- *SRE / On-Call*: No complex distributed Kafka lag monitoring; replication failover must be automated; database CPU on primary must remain $< 60\%$.
 
 #### Resulting Problem Framing Map
 
@@ -2636,12 +2636,12 @@ Isolate analytical query compute from the transactional write path while maintai
 
 ##### 2. Technique 1.2: Describe Required and Actual Behavior
 
-- **Actual Behavior (\$\mathcal{B}\_{\text{actual}}\$)**: When an upstream network timeout occurs between the client and the API gateway, the mobile client automatically retries the checkout request. If the first request is still executing in a background worker, two concurrent threads invoke the payment gateway API with different internal transaction IDs, resulting in two distinct charges against the customer's credit card.
-- **Required Behavior (\$\mathcal{B}\_{\text{required}}\$)**:
-  - *Hoare Formulation*: \$\${ \text{OrderState} = \text{PENDING} \land \text{Attempts} \ge 1 } ; \mathcal{C} ; { \text{ChargesCount} = 1 \land \text{OrderState} = \text{PAID} }\$\$
-  - *Quality Attribute Scenario*: When a customer or client network retries a checkout request 5 times within 10 seconds (\$\mathcal{S}\$), the payment subsystem (\$\mathcal{A}\$) must process the payment exactly once (\$\mathcal{R}\$), returning the identical success receipt for all subsequent retries within \$\le 200\text{ ms}\$ (\$\mathcal{M}\$), while ensuring exactly one charge is submitted to the external gateway (\$\mathcal{I}\$).
-- **Safety Invariant (\$\mathcal{I}\_{\text{safety}}\$)**: \$\$\forall \text{order_id}, \quad \text{Count}(\text{SuccessfulCharges}(\text{order_id})) \le 1\$\$
-- **Liveness Invariant (\$\mathcal{L}\_{\text{liveness}}\$)**: Every submitted payment request must reach a terminal state (`SETTLED`, `REJECTED`, or `EXPIRED`) within 10 seconds.
+- **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: When an upstream network timeout occurs between the client and the API gateway, the mobile client automatically retries the checkout request. If the first request is still executing in a background worker, two concurrent threads invoke the payment gateway API with different internal transaction IDs, resulting in two distinct charges against the customer's credit card.
+- **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
+  - *Hoare Formulation*: $${ \text{OrderState} = \text{PENDING} \land \text{Attempts} \ge 1 } ; \mathcal{C} ; { \text{ChargesCount} = 1 \land \text{OrderState} = \text{PAID} }$$
+  - *Quality Attribute Scenario*: When a customer or client network retries a checkout request 5 times within 10 seconds ($\mathcal{S}$), the payment subsystem ($\mathcal{A}$) must process the payment exactly once ($\mathcal{R}$), returning the identical success receipt for all subsequent retries within $\le 200\text{ ms}$ ($\mathcal{M}$), while ensuring exactly one charge is submitted to the external gateway ($\mathcal{I}$).
+- **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: $$\forall \text{order_id}, \quad \text{Count}(\text{SuccessfulCharges}(\text{order_id})) \le 1$$
+- **Liveness Invariant ($\mathcal{L}_{\text{liveness}}$)**: Every submitted payment request must reach a terminal state (`SETTLED`, `REJECTED`, or `EXPIRED`) within 10 seconds.
 
 ##### 3. Technique 1.3: Shift the System Boundary
 
@@ -2731,11 +2731,11 @@ Guarantee that a customer checkout intention is settled at most once against the
 
 ##### 2. Technique 1.2: Describe Required and Actual Behavior
 
-- **Actual Behavior (\$\mathcal{B}\_{\text{actual}}\$)**: A rogue or misconfigured tenant generates a burst of 10,000 RPS. The API gateway admits all requests, exhausting backend thread pools and database connections. Legitimate tenants experience \$p99 \text{ latency} \> 15,000\text{ ms}\$ and widespread HTTP 503/504 errors (Noisy Neighbor problem).
-- **Required Behavior (\$\mathcal{B}\_{\text{required}}\$)**:
-  - *Quality Attribute Scenario*: Under a 50x traffic burst from Tenant A (\$\mathcal{S}\$ arriving at API Ingress \$\mathcal{A}\$ in peak environment \$\mathcal{E}\$), the rate limiting subsystem must throttle Tenant A's excess requests (\$\mathcal{R}\$) with HTTP 429 in \$\< 2\text{ ms}\$ (\$\mathcal{M}\$), while Tenant B's concurrent requests experience zero 429 errors and latency \$p99 \le 20\text{ ms}\$ (\$\mathcal{I}\$).
-- **Safety Invariant (\$\mathcal{I}\_{\text{safety}}\$)**: \$\$\forall \text{Tenant } T_i, \quad \text{TrafficBurst}(T_j) \implies \text{Throughput}(T_i) \ge \text{GuaranteedSLA}(T_i) \quad (i \neq j)\$\$
-- **Performance Invariant (\$\mathcal{I}\_{\text{perf}}\$)**: The rate-limiting mechanism itself must add \$\le 1.0\text{ ms}\$ overhead to the \$p99\$ latency of legitimate requests.
+- **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: A rogue or misconfigured tenant generates a burst of 10,000 RPS. The API gateway admits all requests, exhausting backend thread pools and database connections. Legitimate tenants experience $p99 \text{ latency} > 15,000\text{ ms}$ and widespread HTTP 503/504 errors (Noisy Neighbor problem).
+- **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
+  - *Quality Attribute Scenario*: Under a 50x traffic burst from Tenant A ($\mathcal{S}$ arriving at API Ingress $\mathcal{A}$ in peak environment $\mathcal{E}$), the rate limiting subsystem must throttle Tenant A's excess requests ($\mathcal{R}$) with HTTP 429 in $< 2\text{ ms}$ ($\mathcal{M}$), while Tenant B's concurrent requests experience zero 429 errors and latency $p99 \le 20\text{ ms}$ ($\mathcal{I}$).
+- **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: $$\forall \text{Tenant } T_i, \quad \text{TrafficBurst}(T_j) \implies \text{Throughput}(T_i) \ge \text{GuaranteedSLA}(T_i) \quad (i \neq j)$$
+- **Performance Invariant ($\mathcal{I}_{\text{perf}}$)**: The rate-limiting mechanism itself must add $\le 1.0\text{ ms}$ overhead to the $p99$ latency of legitimate requests.
 
 ##### 3. Technique 1.3: Shift the System Boundary
 
@@ -2912,9 +2912,9 @@ flowchart TD
 
 1.  **The Implementation Agnosticism Invariant**: The problem framing document (`FRAME-`) contains **zero proper nouns** referring to third-party software products, libraries, databases, cloud services, or network protocols (unless the integration with an existing external protocol is itself an immutable external constraint).
 2.  **The Bilateral Agreement Invariant**: Two independent engineers or agents can read `FRAME-` and propose **two fundamentally different architectural implementations** (for example, one in-memory, one database-centric) that both satisfy all stated acceptance criteria.
-3.  **The Measurable Falsifiability Invariant**: Every quality attribute scenario contains a quantifiable, testable metric threshold (\$\mathcal{M}\$) with explicit units (for example, milliseconds, requests/second, error percentage), eliminating all unquantified adjectives (*"fast," "scalable," "resilient"*).
+3.  **The Measurable Falsifiability Invariant**: Every quality attribute scenario contains a quantifiable, testable metric threshold ($\mathcal{M}$) with explicit units (for example, milliseconds, requests/second, error percentage), eliminating all unquantified adjectives (*"fast," "scalable," "resilient"*).
 4.  **The Boundary and Perspective Coverage Invariant**: All 8 architectural boundary levels and all 7 stakeholder perspectives have been explicitly evaluated, with resulting constraints recorded in the epistemic matrix.
-5.  **The Invariant Separation Invariant**: Hard safety invariants (\$\mathcal{I}*{\text{safety}}\$) are strictly isolated from liveness properties (\$\mathcal{L}*{\text{liveness}}\$) and mutable operational preferences.
+5.  **The Invariant Separation Invariant**: Hard safety invariants ($\mathcal{I}_{\text{safety}}$) are strictly isolated from liveness properties ($\mathcal{L}_{\text{liveness}}$) and mutable operational preferences.
 
 ------------------------------------------------------------------------
 
@@ -2959,7 +2959,7 @@ mindmap
 - **Symptom**: Requirements state the system must be *"highly available," "low-latency," "cloud-native," "performant,"* or *"secure."*
 - **Root Cause**: Intellectual laziness; avoiding the hard work of defining concrete failure bounds.
 - **Epistemic Fallout**: The requirement is unfalsifiable; no test or benchmark can prove whether the implementation passes or fails.
-- **Corrective Heuristic**: Replace every adjective with a 6-part Bass-Clements-Kazman Quality Attribute Scenario with explicit percentile bounds (for example, \$p99.9 \le 50\text{ ms}\$).
+- **Corrective Heuristic**: Replace every adjective with a 6-part Bass-Clements-Kazman Quality Attribute Scenario with explicit percentile bounds (for example, $p99.9 \le 50\text{ ms}$).
 
 #### Anti-Pattern 3: The False Invariant (Treating Accidental Architecture as Immutable Law)
 
@@ -2987,7 +2987,7 @@ mindmap
 - **Symptom**: The problem is framed as *"We need to send JSON over HTTP POST to /v1/orders"*.
 - **Root Cause**: Confusing the communication transport protocol with the underlying business contract and state transition.
 - **Epistemic Fallout**: Binds the system to synchronous REST semantics, preventing the adoption of event-driven, shared-memory, or batch-optimized mechanisms where appropriate.
-- **Corrective Heuristic**: Frame the interaction as a **Hoare State Transition** \${P} ; \mathcal{C} ; {Q}\$, independent of whether the trigger is HTTP, gRPC, an in-memory function call, or a database trigger.
+- **Corrective Heuristic**: Frame the interaction as a **Hoare State Transition** ${P} ; \mathcal{C} ; {Q}$, independent of whether the trigger is HTTP, gRPC, an in-memory function call, or a database trigger.
 
 ------------------------------------------------------------------------
 
@@ -3021,10 +3021,10 @@ Humans usually over-trust the slice of the system they can see. Agents over-trus
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Causal hypothesis, \$HYP\$ | A proposed mechanism that entails observable consequences under intervention. | “The account lock serializes writes” predicts that throughput is insensitive to more workers but improves when contention is partitioned; a load test supplies the evidence. |
+| Causal hypothesis, $HYP$ | A proposed mechanism that entails observable consequences under intervention. | “The account lock serializes writes” predicts that throughput is insensitive to more workers but improves when contention is partitioned; a load test supplies the evidence. |
 | Binding constraint | The element whose capacity limits end-to-end throughput at the current operating point. | The lock's service rate caps ledger commits; optimizing JSON serialization elsewhere changes CPU charts but not completed writes/s. |
-| Technical contradiction, \$TC\$ | Improving one parameter worsens another under the current mechanism. | More workers improve available parallelism but worsen lock contention. The incident is the trade-off made visible. |
-| Physical contradiction, \$PC\$ | One parameter must take incompatible values under different conditions. | Concurrency must be high across independent accounts and effectively one within a single account's ordered ledger. The architecture must separate those conditions. |
+| Technical contradiction, $TC$ | Improving one parameter worsens another under the current mechanism. | More workers improve available parallelism but worsen lock contention. The incident is the trade-off made visible. |
+| Physical contradiction, $PC$ | One parameter must take incompatible values under different conditions. | Concurrency must be high across independent accounts and effectively one within a single account's ordered ledger. The architecture must separate those conditions. |
 
 ## 1. Main Question and Purpose
 
@@ -3090,8 +3090,8 @@ flowchart TD
 
 In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller states that inventive problems arise when a system contains an unresolved **contradiction**. Altshuller identified two tiers of contradiction:
 
-1.  **Technical Contradiction (\$TC\$)**: An engineering trade-off where improving one desirable system parameter \$A\$ unconditionally deteriorates another parameter \$B\$ (for example, increasing telemetry granularity increases network and CPU overhead).
-2.  **Physical Contradiction (\$PC\$)**: A deeper, acute requirement where a single physical parameter \$P\$ must simultaneously exist in mutually exclusive states: \$P\$ must be \$S\$ under operating condition \$C_1\$, and \$P\$ must be \$\neg S\$ under operating condition \$C_2\$ (for example, a shared database connection pool must be infinitely large to handle burst traffic without queuing, and strictly small to prevent backend database resource exhaustion).
+1.  **Technical Contradiction ($TC$)**: An engineering trade-off where improving one desirable system parameter $A$ unconditionally deteriorates another parameter $B$ (for example, increasing telemetry granularity increases network and CPU overhead).
+2.  **Physical Contradiction ($PC$)**: A deeper, acute requirement where a single physical parameter $P$ must simultaneously exist in mutually exclusive states: $P$ must be $S$ under operating condition $C_1$, and $P$ must be $\neg S$ under operating condition $C_2$ (for example, a shared database connection pool must be infinitely large to handle burst traffic without queuing, and strictly small to prevent backend database resource exhaustion).
 
 Altshuller showed that conventional engineering relies on **compromise** (a mediocre midpoint where both requirements are partly lost). Inventive engineering **resolves the contradiction**. It eliminates the conflict through separation principles (separation in time, space, condition, or system structure).
 
@@ -3107,17 +3107,17 @@ In [*The Goal: A Process of Ongoing Improvement* (Goldratt, 1984)](https://www.t
 
 In [*Causality: Models, Reasoning, and Inference* (Pearl, 2009, 2nd ed., Cambridge University Press)](https://doi.org/10.1017/CBO9780511803161), Judea Pearl set the mathematical foundation of causal reasoning. Pearl formulated the **Causal Hierarchy (The Ladder of Causation)**:
 
-1.  **Layer 1: Association (\$P(y\|x)\$)** — Passive observation. Answering: *"What does symptom \$Y\$ tell us about metric \$X\$?"* (for example, correlation between error rate and CPU load).
-2.  **Layer 2: Intervention (\$P(y\|\text{do}(x))\$)** — Active manipulation. Answering: *"What will happen to response time \$Y\$ if we take action \$\text{do}(X)\$?"* (for example, what happens if we throttle ingestion traffic or inject network latency?).
-3.  **Layer 3: Counterfactuals (\$P(y_x\|x', y')\$)** — Retrospective reflection. Answering: *"Would the database crash have occurred if we had not executed the schema migration at 14:00?"*
+1.  **Layer 1: Association ($P(y\mid x)$)** — Passive observation. Answering: *"What does symptom $Y$ tell us about metric $X$?"* (for example, correlation between error rate and CPU load).
+2.  **Layer 2: Intervention ($P(y\mid \text{do}(x))$)** — Active manipulation. Answering: *"What will happen to response time $Y$ if we take action $\text{do}(X)$?"* (for example, what happens if we throttle ingestion traffic or inject network latency?).
+3.  **Layer 3: Counterfactuals ($P(y_x\mid x', y')$)** — Retrospective reflection. Answering: *"Would the database crash have occurred if we had not executed the schema migration at 14:00?"*
 
 Pearl showed that purely observational data (telemetry, APM traces, system logs) cannot resolve confounding variables. Observational data cannot distinguish correlation from causation without an explicit **Directed Acyclic Graph (DAG)** and structural interventions.
 
 ### 2.4. Gene Amdahl & Neil J. Gunther: Mathematical Physics of Software Bottlenecks
 
-In [*Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities* (Amdahl, 1967, AFIPS)](https://dl.acm.org/doi/10.1145/1465482.1465560), Gene Amdahl proved that the maximum speedup of a parallel system is strictly bounded by its non-parallelizable serial fraction \$\sigma\$.
+In [*Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities* (Amdahl, 1967, AFIPS)](https://dl.acm.org/doi/10.1145/1465482.1465560), Gene Amdahl proved that the maximum speedup of a parallel system is strictly bounded by its non-parallelizable serial fraction $\sigma$.
 
-In [*Guerrilla Capacity Planning: A Metric-Driven Approach* (Gunther, 2007)](https://www.perfdynamics.com/Manifesto/USLbook.html), Neil J. Gunther generalized Amdahl's Law into the **Universal Scalability Law (USL)**. USL adds the quadratic penalty of inter-node coherency and crosstalk (\$\kappa\$). USL is a closed-form equation. It predicts when adding concurrency or compute nodes will not only plateau, but cause **throughput collapse (retrograde scalability)**.
+In [*Guerrilla Capacity Planning: A Metric-Driven Approach* (Gunther, 2007)](https://www.perfdynamics.com/Manifesto/USLbook.html), Neil J. Gunther generalized Amdahl's Law into the **Universal Scalability Law (USL)**. USL adds the quadratic penalty of inter-node coherency and crosstalk ($\kappa$). USL is a closed-form equation. It predicts when adding concurrency or compute nodes will not only plateau, but cause **throughput collapse (retrograde scalability)**.
 
 ### 2.5. John Allspaw & Sidney Dekker: The Root Cause Fallacy in Complex Systems
 
@@ -3182,7 +3182,7 @@ flowchart LR
 
 Software architecture is governed by a canonical set of fundamental contradictions:
 
-| Contradiction ID | Parameter to Improve (\$P_A\$) | Parameter That Deteriorates (\$P_B\$) | Underlying Physical/Architectural Parameter (\$P\$) |
+| Contradiction ID | Parameter to Improve ($P_A$) | Parameter That Deteriorates ($P_B$) | Underlying Physical/Architectural Parameter ($P$) |
 |----|----|----|----|
 | **CTR-01** | Data Consistency (Linearizability) | Availability & Partition Tolerance | Centralized Coordination Lock |
 | **CTR-02** | Transaction Isolation (Serializable) | Transaction Throughput / Latency | Lock Duration / Multi-Version Concurrency Overhead |
@@ -3195,17 +3195,17 @@ Software architecture is governed by a canonical set of fundamental contradictio
 
 #### Mathematical Formulation of Contradictions
 
-A **Technical Contradiction (\$TC\$)** is formalized as an ordered pair of conflicting quality attribute vectors:
+A **Technical Contradiction ($TC$)** is formalized as an ordered pair of conflicting quality attribute vectors:
 
-\$\$TC = \langle \mathcal{Q}^+ \uparrow, \mathcal{Q}^- \downarrow \rangle\$\$
+$$TC = \langle \mathcal{Q}^+ \uparrow, \mathcal{Q}^- \downarrow \rangle$$
 
-Where \$\mathcal{Q}^+\$ is the set of quality attributes that improve under change \$\Delta M\$, and \$\mathcal{Q}^-\$ is the set of quality attributes that strictly deteriorate under \$\Delta M\$.
+Where $\mathcal{Q}^+$ is the set of quality attributes that improve under change $\Delta M$, and $\mathcal{Q}^-$ is the set of quality attributes that strictly deteriorate under $\Delta M$.
 
-A **Physical Contradiction (\$PC\$)** is formalized as a state-condition tuple over a specific computational or operational parameter \$P\$:
+A **Physical Contradiction ($PC$)** is formalized as a state-condition tuple over a specific computational or operational parameter $P$:
 
-\$\$PC(P) = \begin{cases} P = S & \text{under operational condition } \mathcal{C}\_1 \\ P = \neg S \text{ (or } \bar{S}\text{)} & \text{under operational condition } \mathcal{C}\_2 \end{cases}\$\$
+$$PC(P) = \begin{cases} P = S & \text{under operational condition } \mathcal{C}_1 \\ P = \neg S \text{ (or } \bar{S}\text{)} & \text{under operational condition } \mathcal{C}_2 \end{cases}$$
 
-Where \$\mathcal{C}\_1 \cap \mathcal{C}\_2 = \emptyset\$ represents the separation condition (for example, different phases of execution, different data classifications, or distinct network partitions).
+Where $\mathcal{C}_1 \cap \mathcal{C}_2 = \emptyset$ represents the separation condition (for example, different phases of execution, different data classifications, or distinct network partitions).
 
 ------------------------------------------------------------------------
 
@@ -3226,44 +3226,44 @@ graph LR
 
 #### Little's Law
 
-For any stable queuing system, the average number of concurrent requests in the system \$L\$ is equal to the long-term average effective arrival rate \$\lambda\$ multiplied by the average time a request spends in the system \$W\$:
+For any stable queuing system, the average number of concurrent requests in the system $L$ is equal to the long-term average effective arrival rate $\lambda$ multiplied by the average time a request spends in the system $W$:
 
-\$\$L = \lambda \cdot W\$\$
+$$L = \lambda \cdot W$$
 
-If a downstream dependency increases its response time \$W\$ from 50 ms to 500 ms while the incoming request rate \$\lambda\$ remains constant at 1,000 req/sec, the in-flight concurrency \$L\$ must expand from \$50\$ to \$500\$ concurrent requests. If the worker thread pool or connection pool is capped at \$100\$, queuing is mathematically guaranteed, leading to exponential latency spikes and eventual resource starvation.
+If a downstream dependency increases its response time $W$ from 50 ms to 500 ms while the incoming request rate $\lambda$ remains constant at 1,000 req/sec, the in-flight concurrency $L$ must expand from $50$ to $500$ concurrent requests. If the worker thread pool or connection pool is capped at $100$, queuing is mathematically guaranteed, leading to exponential latency spikes and eventual resource starvation.
 
 #### Amdahl's Law vs. Gunther's Universal Scalability Law (USL)
 
 ##### 1. Amdahl's Law (Contention Only)
 
-Amdahl's Law models the speedup \$S(N)\$ of a workload executed across \$N\$ parallel processing units:
+Amdahl's Law models the speedup $S(N)$ of a workload executed across $N$ parallel processing units:
 
-\$\$S(N) = \frac{N}{1 + \sigma(N - 1)}\$\$
+$$S(N) = \frac{N}{1 + \sigma(N - 1)}$$
 
 Where:
 
-- \$N\$ is the number of concurrent worker threads, CPU cores, or distributed nodes.
-- \$\sigma \in \[0, 1\]\$ is the **serialization fraction** (the proportion of execution time spent in strictly serial, non-parallelizable code paths such as mutex locks, write-ahead log appending, or global ID generation).
+- $N$ is the number of concurrent worker threads, CPU cores, or distributed nodes.
+- $\sigma \in [0, 1]$ is the **serialization fraction** (the proportion of execution time spent in strictly serial, non-parallelizable code paths such as mutex locks, write-ahead log appending, or global ID generation).
 
-As \$N \to \infty\$, Amdahl's Law asymptotically approaches a hard ceiling:
+As $N \to \infty$, Amdahl's Law asymptotically approaches a hard ceiling:
 
-\$\$\lim\_{N \to \infty} S(N) = \frac{1}{\sigma}\$\$
+$$\lim_{N \to \infty} S(N) = \frac{1}{\sigma}$$
 
-If only \$5%\$ of a request's processing is serialized (\$\sigma = 0.05\$), the maximum achievable speedup is strictly capped at \$20\times\$, regardless of whether \$100\$ or \$10,000\$ cores are allocated.
+If only $5\%$ of a request's processing is serialized ($\sigma = 0.05$), the maximum achievable speedup is strictly capped at $20\times$, regardless of whether $100$ or $10,000$ cores are allocated.
 
 ##### 2. Gunther's Universal Scalability Law (USL) (Contention + Coherency)
 
 Amdahl's Law fails to model distributed systems because it assumes that communication and coordination between parallel workers are free. In reality, distributed worker nodes must exchange state, invalidate caches, replicate logs, and reach consensus.
 
-Neil Gunther formulated the **Universal Scalability Law**, modeling system throughput \$\lambda(N)\$ as:
+Neil Gunther formulated the **Universal Scalability Law**, modeling system throughput $\lambda(N)$ as:
 
-\$\$\lambda(N) = \frac{\gamma \cdot N}{1 + \sigma(N - 1) + \kappa \cdot N(N - 1)}\$\$
+$$\lambda(N) = \frac{\gamma \cdot N}{1 + \sigma(N - 1) + \kappa \cdot N(N - 1)}$$
 
 Where:
 
-- \$\gamma\$ is the concurrency scale factor (throughput per worker at \$N=1\$, that is, baseline single-node performance).
-- \$\sigma\$ is the **contention / serialization coefficient** (time spent waiting in queue for shared serialized resources).
-- \$\kappa\$ is the **coherency / crosstalk coefficient** (the pairwise communication penalty incurred to maintain consistency across \$N\$ nodes, scaling with \$\frac{N(N-1)}{2} \approx \mathcal{O}(N^2)\$).
+- $\gamma$ is the concurrency scale factor (throughput per worker at $N=1$, that is, baseline single-node performance).
+- $\sigma$ is the **contention / serialization coefficient** (time spent waiting in queue for shared serialized resources).
+- $\kappa$ is the **coherency / crosstalk coefficient** (the pairwise communication penalty incurred to maintain consistency across $N$ nodes, scaling with $\frac{N(N-1)}{2} \approx \mathcal{O}(N^2)$).
 
 ##### 3. The Three Scalability Regimes
 
@@ -3284,19 +3284,19 @@ The USL reveals three fundamental regimes of software scalability:
        │         /
        └────────┴────────────────────────────────────────► Concurrency / Nodes (N)
 
-1.  **Linear Scalability (\$\sigma = 0, \kappa = 0\$)**: Perfect horizontal scaling: \$\lambda(N) = \gamma N\$.
-2.  **Sub-linear Asymptotic Plateau (\$\sigma \> 0, \kappa = 0\$)**: Governed by Amdahl's Law. Throughput plateaus at \$\lambda\_{\max} = \frac{\gamma}{\sigma}\$.
-3.  **Retrograde Scalability (\$\sigma \> 0, \kappa \> 0\$)**: Throughput reaches an optimal concurrency peak \$N^\*\$ and then **collapses catastrophically** due to inter-node coherency traffic (for example, distributed 2PC, gossip protocols, Redis cluster cross-slot lock contention).
+1.  **Linear Scalability ($\sigma = 0, \kappa = 0$)**: Perfect horizontal scaling: $\lambda(N) = \gamma N$.
+2.  **Sub-linear Asymptotic Plateau ($\sigma > 0, \kappa = 0$)**: Governed by Amdahl's Law. Throughput plateaus at $\lambda_{\max} = \frac{\gamma}{\sigma}$.
+3.  **Retrograde Scalability ($\sigma > 0, \kappa > 0$)**: Throughput reaches an optimal concurrency peak $N^\*$ and then **collapses catastrophically** due to inter-node coherency traffic (for example, distributed 2PC, gossip protocols, Redis cluster cross-slot lock contention).
 
-##### 4. Derivation of the Optimal Scaling Point (\$N^*\$) and Maximum Capacity (\$\lambda^*\$)
+##### 4. Derivation of the Optimal Scaling Point ($N^*$) and Maximum Capacity ($\lambda^*$)
 
-To find the exact point of maximum capacity \$N^\*\$, we take the first derivative of the USL equation with respect to \$N\$ and set it to zero:
+To find the exact point of maximum capacity $N^\*$, we take the first derivative of the USL equation with respect to $N$ and set it to zero:
 
-\$\$\frac{d\lambda}{dN} = 0 \implies N^\* = \sqrt{\frac{1 - \sigma}{\kappa}}\$\$
+$$\frac{d\lambda}{dN} = 0 \implies N^\* = \sqrt{\frac{1 - \sigma}{\kappa}}$$
 
-The maximum achievable throughput \$\lambda^\* = \lambda(N^\*)\$ is:
+The maximum achievable throughput $\lambda^\* = \lambda(N^\*)$ is:
 
-\$\$\lambda^\* = \frac{\gamma}{\sigma + 2\sqrt{\kappa(1 - \sigma)} - \kappa} \approx \frac{\gamma}{\sigma + 2\sqrt{\kappa}}\$\$
+$$\lambda^\* = \frac{\gamma}{\sigma + 2\sqrt{\kappa(1 - \sigma)} - \kappa} \approx \frac{\gamma}{\sigma + 2\sqrt{\kappa}}$$
 
 #### The Software Bottleneck Hierarchy
 
@@ -3318,9 +3318,9 @@ flowchart TD
 
 #### Abductive Causal Inference in Software
 
-Diagnosis is fundamentally an **abductive** reasoning process: given an observed anomaly or symptom \$Y\$ (for example, p99 latency spike), we infer the most probable underlying mechanism \$X\$ that produced \$Y\$.
+Diagnosis is fundamentally an **abductive** reasoning process: given an observed anomaly or symptom $Y$ (for example, p99 latency spike), we infer the most probable underlying mechanism $X$ that produced $Y$.
 
-However, human engineers and LLMs frequently fall prey to **symptomatic association**: assuming that because metric \$X\$ correlates with symptom \$Y\$, \$X\$ is the root cause.
+However, human engineers and LLMs frequently fall prey to **symptomatic association**: assuming that because metric $X$ correlates with symptom $Y$, $X$ is the root cause.
 
 ``` mermaid
 flowchart TD
@@ -3333,14 +3333,14 @@ flowchart TD
     end
 ```
 
-In Pearl's structural causal framework, failing to account for the common confounder \$U\$ leads an engineer to mistakenly "fix" CPU utilization (for example, by upgrading instance sizes), only to discover that HTTP 504 timeouts persist because the true causal path flows through connection pool exhaustion \$Z\$.
+In Pearl's structural causal framework, failing to account for the common confounder $U$ leads an engineer to mistakenly "fix" CPU utilization (for example, by upgrading instance sizes), only to discover that HTTP 504 timeouts persist because the true causal path flows through connection pool exhaustion $Z$.
 
 #### Goldratt's Current Reality Tree (CRT) Logic
 
 To eliminate cognitive bias, causal chains must be constructed using **Strict Necessity and Sufficiency Logic**:
 
-1.  **Sufficiency Test**: *"Is Cause \$A\$ alone sufficient to produce Effect \$B\$?"* If not, what co-existing condition \$C\$ is strictly required?
-2.  **Necessity Test**: *"Can Effect \$B\$ exist in the complete absence of Cause \$A\$?"*
+1.  **Sufficiency Test**: *"Is Cause $A$ alone sufficient to produce Effect $B$?"* If not, what co-existing condition $C$ is strictly required?
+2.  **Necessity Test**: *"Can Effect $B$ exist in the complete absence of Cause $A$?"*
 3.  **Clarity Test**: *"Is every intermediate step in the chain explicitly articulated without cognitive leaps?"*
 
 ``` mermaid
@@ -3361,21 +3361,21 @@ flowchart TD
     end
 ```
 
-#### Differentiating Falsification Tests (\$EVDREQ-\$)
+#### Differentiating Falsification Tests ($EVDREQ-$)
 
-When multiple competing hypotheses (\$HYP-01\$ vs. \$HYP-02\$) explain the observed symptoms, the engineer must not argue based on intuition. Instead, design a **Differentiating Falsification Experiment**:
+When multiple competing hypotheses ($HYP-01$ vs. $HYP-02$) explain the observed symptoms, the engineer must not argue based on intuition. Instead, design a **Differentiating Falsification Experiment**:
 
-An experiment \$E\$ with observable outcome \$O\$ is differentiating if and only if:
+An experiment $E$ with observable outcome $O$ is differentiating if and only if:
 
-\$\$P(O = \text{true} \mid HYP_1) \approx 1 \quad \land \quad P(O = \text{true} \mid HYP_2) \approx 0\$\$
+$$P(O = \text{true} \mid HYP_1) \approx 1 \quad \land \quad P(O = \text{true} \mid HYP_2) \approx 0$$
 
-If the test returns \$O = \text{false}\$, \$HYP_1\$ is decisively falsified and must be pruned from the epistemic graph via **Transitive Invalidation**.
+If the test returns $O = \text{false}$, $HYP_1$ is decisively falsified and must be pruned from the epistemic graph via **Transitive Invalidation**.
 
 ------------------------------------------------------------------------
 
 ### Technique 2.4. Uncover Hidden Assumptions
 
-#### The Nature of Tacit Architectural Premises (\$ASM-\$)
+#### The Nature of Tacit Architectural Premises ($ASM-$)
 
 Every software architecture is anchored by implicit assumptions accepted by the development team as immutable laws of nature. When system requirements evolve or load increases by an order of magnitude, these hidden assumptions transform into invisible constraints.
 
@@ -3432,30 +3432,30 @@ To uncover and dissolve tacit assumptions:
 
 An e-commerce platform's search and checkout recommendation service exhibits severe p99 latency degradation during promotional campaigns:
 
-- Single-instance p50 latency: \$12\text{ ms}\$ (Healthy).
-- Aggregated user-facing p50 latency: \$22\text{ ms}\$ (Healthy).
-- Aggregated user-facing p95 latency: \$185\text{ ms}\$ (Degraded).
-- Aggregated user-facing p99 latency: **\$1,450\text{ ms}\$** (Unacceptable SLA breach; timeout threshold is \$1,000\text{ ms}\$).
-- Aggregated user-facing p99.9 latency: **\$4,800\text{ ms}\$**.
+- Single-instance p50 latency: $12\text{ ms}$ (Healthy).
+- Aggregated user-facing p50 latency: $22\text{ ms}$ (Healthy).
+- Aggregated user-facing p95 latency: $185\text{ ms}$ (Degraded).
+- Aggregated user-facing p99 latency: **$1,450\text{ ms}$** (Unacceptable SLA breach; timeout threshold is $1,000\text{ ms}$).
+- Aggregated user-facing p99.9 latency: **$4,800\text{ ms}$**.
 
 #### 2. Naive Diagnostic Guess vs. Epistemic Investigation
 
 - **Naive Guess**: *"The recommendation microservice needs more CPU cores and a larger JVM heap."*
-- **Epistemic Diagnostic Path**: The gateway service executes an aggregation query that fans out in parallel to \$M = 40\$ backend microservices and worker partitions.
+- **Epistemic Diagnostic Path**: The gateway service executes an aggregation query that fans out in parallel to $M = 40$ backend microservices and worker partitions.
 
 #### 3. Mathematical Causal Modeling: The Fan-Out Tail Amplification Law
 
-Let \$p\$ be the probability that an individual downstream service takes longer than latency threshold \$T\$. The probability \$P\_{\text{slow}}\$ that an aggregate user request (requiring responses from **all** \$M\$ services) experiences a delay \$\> T\$ is:
+Let $p$ be the probability that an individual downstream service takes longer than latency threshold $T$. The probability $P_{\text{slow}}$ that an aggregate user request (requiring responses from **all** $M$ services) experiences a delay $> T$ is:
 
-\$\$P\_{\text{slow}}(M, p) = 1 - (1 - p)^M\$\$
+$$P_{\text{slow}}(M, p) = 1 - (1 - p)^M$$
 
-For \$M = 40\$ downstream requests:
+For $M = 40$ downstream requests:
 
-- If each individual service has a 99th percentile latency of \$p = 0.01\$ (\$1%\$ slow requests), the probability that the user-facing request is slow is:
+- If each individual service has a 99th percentile latency of $p = 0.01$ ($1\%$ slow requests), the probability that the user-facing request is slow is:
 
-\$\$P\_{\text{slow}} = 1 - (1 - 0.01)^{40} = 1 - (0.99)^{40} = 1 - 0.6689 = 33.11%\$\$
+$$P_{\text{slow}} = 1 - (1 - 0.01)^{40} = 1 - (0.99)^{40} = 1 - 0.6689 = 33.11\%$$
 
-**Result**: A \$1%\$ single-service p99 anomaly is amplified into a **\$33.1%\$ user-facing failure rate**. The p99 user request is not hitting the downstream p99; it is hitting the downstream **p99.975** tail!
+**Result**: A $1\%$ single-service p99 anomaly is amplified into a **$33.1\%$ user-facing failure rate**. The p99 user request is not hitting the downstream p99; it is hitting the downstream **p99.975** tail!
 
 #### 4. USL Coherency & Contention Analysis
 
@@ -3463,7 +3463,7 @@ Profiling the gateway under high load reveals:
 
 - Thread pool contention: Workers block on `Future.get()` or reactive backpressure queues.
 - Head-of-line blocking on shared HTTP/2 multiplexed TCP streams.
-- Gunther USL curve fitting yields \$\sigma = 0.038\$ and \$\kappa = 0.014\$, indicating that adding more gateway threads beyond \$N^\* = \sqrt{\frac{1-0.038}{0.014}} \approx 8.3\$ threads per core causes throughput collapse.
+- Gunther USL curve fitting yields $\sigma = 0.038$ and $\kappa = 0.014$, indicating that adding more gateway threads beyond $N^\* = \sqrt{\frac{1-0.038}{0.014}} \approx 8.3$ threads per core causes throughput collapse.
 
 ``` mermaid
 graph TD
@@ -3487,8 +3487,8 @@ graph TD
 
 #### 5. Epistemic Deliverable: Diagnostic Map `DIAG-01`
 
-- **`HYP-01`**: Latency is driven by the probabilistic tail of \$M=40\$ fan-out dependencies, compounded by synchronous blocking wait.
-- **`CTR-01` (Physical Contradiction)**: The gateway must wait for all 40 responses to ensure complete recommendation quality (\$C_1\$), and must NOT wait longer than 80 ms to ensure p99 SLA compliance (\$C_2\$).
+- **`HYP-01`**: Latency is driven by the probabilistic tail of $M=40$ fan-out dependencies, compounded by synchronous blocking wait.
+- **`CTR-01` (Physical Contradiction)**: The gateway must wait for all 40 responses to ensure complete recommendation quality ($C_1$), and must NOT wait longer than 80 ms to ensure p99 SLA compliance ($C_2$).
 - **Resolution Direction (Op 3/4)**: Hedged requests with speculative retries ([Dean & Barroso, 2013](https://doi.org/10.1145/2408776.2408794)), tie-breaking deadlines, and graceful degradation with partial results.
 
 ------------------------------------------------------------------------
@@ -3499,23 +3499,23 @@ graph TD
 
 A payment processing core handles balance updates across 5,000,000 accounts:
 
-- At \$N = 16\$ concurrent worker instances: Throughput = \$4,200\text{ TPS}\$, p99 Latency = \$45\text{ ms}\$.
-- At \$N = 32\$ concurrent worker instances: Throughput = \$6,100\text{ TPS}\$, p99 Latency = \$120\text{ ms}\$.
-- At \$N = 64\$ concurrent worker instances: Throughput = **\$2,800\text{ TPS}\$ (54% Drop!)**, p99 Latency = **\$1,850\text{ ms}\$**.
+- At $N = 16$ concurrent worker instances: Throughput = $4,200\text{ TPS}$, p99 Latency = $45\text{ ms}$.
+- At $N = 32$ concurrent worker instances: Throughput = $6,100\text{ TPS}$, p99 Latency = $120\text{ ms}$.
+- At $N = 64$ concurrent worker instances: Throughput = **$2,800\text{ TPS}$ (54% Drop!)**, p99 Latency = **$1,850\text{ ms}$**.
 
 #### 2. Bottleneck Analysis via Universal Scalability Law
 
 Plotting the empirical data against Gunther's USL:
 
-\$\$\lambda(N) = \frac{300 \cdot N}{1 + 0.02(N - 1) + 0.0035 \cdot N(N - 1)}\$\$
+$$\lambda(N) = \frac{300 \cdot N}{1 + 0.02(N - 1) + 0.0035 \cdot N(N - 1)}$$
 
-- Serialization coefficient: \$\sigma = 0.02\$ (\$2%\$ serialized locking).
-- Coherency coefficient: \$\kappa = 0.0035\$ (\$0.35%\$ pairwise distributed lock synchronization overhead via Redis/Redlock).
+- Serialization coefficient: $\sigma = 0.02$ ($2\%$ serialized locking).
+- Coherency coefficient: $\kappa = 0.0035$ ($0.35\%$ pairwise distributed lock synchronization overhead via Redis/Redlock).
 - Optimal concurrency peak:
 
-\$\$N^\* = \sqrt{\frac{1 - 0.02}{0.0035}} = \sqrt{\frac{0.98}{0.0035}} = \sqrt{280} \approx 16.73 \text{ nodes}\$\$
+$$N^\* = \sqrt{\frac{1 - 0.02}{0.0035}} = \sqrt{\frac{0.98}{0.0035}} = \sqrt{280} \approx 16.73 \text{ nodes}$$
 
-Scaling beyond \$17\$ nodes pushes the system directly into the **Retrograde Scalability Zone**, where nodes spend \$\> 70%\$ of their CPU cycles negotiating distributed lock leases, heartbeat renewals, and lock-wait retries.
+Scaling beyond $17$ nodes pushes the system directly into the **Retrograde Scalability Zone**, where nodes spend $> 70\%$ of their CPU cycles negotiating distributed lock leases, heartbeat renewals, and lock-wait retries.
 
 ``` mermaid
 graph TD
@@ -3535,11 +3535,11 @@ graph TD
 
 #### 3. Evaporating Cloud & Assumption Surfacing
 
-- **Objective (\$O\$)**: High-throughput, zero-overdraft ledger.
-- **Requirement 1 (\$R_1\$)**: Guarantee balance never drops below zero \$\implies\$ **Action 1 (\$P_1\$)**: Acquire exclusive lock on Account ID across all nodes.
-- **Requirement 2 (\$R_2\$)**: Scale horizontally with cluster size \$\implies\$ **Action 2 (\$P_2\$)**: Eliminate global coordination locks.
+- **Objective ($O$)**: High-throughput, zero-overdraft ledger.
+- **Requirement 1 ($R_1$)**: Guarantee balance never drops below zero $\implies$ **Action 1 ($P_1$)**: Acquire exclusive lock on Account ID across all nodes.
+- **Requirement 2 ($R_2$)**: Scale horizontally with cluster size $\implies$ **Action 2 ($P_2$)**: Eliminate global coordination locks.
 - **Surfaced Tacit Assumption (`ASM-01`)**: *"Account balance updates must be processed by arbitrary worker nodes on demand, requiring distributed locks to serialize access to the shared record."*
-- **Invalidation / Epistemic Breakthrough**: If accounts are deterministically partitioned to dedicated single-threaded worker actors (the LMAX Disruptor / Shared-Nothing Architecture), all balance updates for Account \$X\$ execute sequentially on a single core without any distributed locks (\$\kappa \to 0\$).
+- **Invalidation / Epistemic Breakthrough**: If accounts are deterministically partitioned to dedicated single-threaded worker actors (the LMAX Disruptor / Shared-Nothing Architecture), all balance updates for Account $X$ execute sequentially on a single core without any distributed locks ($\kappa \to 0$).
 
 ------------------------------------------------------------------------
 
@@ -3549,9 +3549,9 @@ graph TD
 
 A sports streaming platform experiences catastrophic backend database outages occurring periodically at the top of the hour (for example, 20:00:00 UTC):
 
-- Normal database CPU load: \$18%\$.
-- 20:00:01 UTC database CPU load: **\$100%\$ (Crash / Connection Pool Exhausted)**.
-- Cache hit ratio drops from \$99.4%\$ to \$42.1%\$ for a 5-second interval.
+- Normal database CPU load: $18\%$.
+- 20:00:01 UTC database CPU load: **$100\%$ (Crash / Connection Pool Exhausted)**.
+- Cache hit ratio drops from $99.4\%$ to $42.1\%$ for a 5-second interval.
 
 #### 2. Causal Chain & Current Reality Tree Analysis
 
@@ -3571,26 +3571,26 @@ flowchart TD
 
 #### 3. Physical Contradiction Formulation
 
-- **Parameter (\$P\$)**: Cache Time-To-Live (TTL).
+- **Parameter ($P$)**: Cache Time-To-Live (TTL).
 - **Physical Contradiction (`CTR-03`)**:
-  - TTL must be **short** (\$P = S\$) under condition \$\mathcal{C}\_1\$ (live game score is changing) to ensure data freshness.
-  - TTL must be **infinite / non-expiring** (\$P = \neg S\$) under condition \$\mathcal{C}\_2\$ (peak traffic surge) to prevent 10,000 concurrent workers from hitting the database simultaneously.
+  - TTL must be **short** ($P = S$) under condition $\mathcal{C}_1$ (live game score is changing) to ensure data freshness.
+  - TTL must be **infinite / non-expiring** ($P = \neg S$) under condition $\mathcal{C}_2$ (peak traffic surge) to prevent 10,000 concurrent workers from hitting the database simultaneously.
 
 #### 4. Theoretical & Mathematical Resolution: The XFetch Algorithm
 
 Rather than relying on naive fixed TTLs or heavy distributed mutexes, the optimal solution applies the **XFetch Probabilistic Early Expiration Algorithm** ([Vattani, Chierichetti, & Lowenstein, 2015](https://en.wikipedia.org/wiki/Consistent_hashing)):
 
-A worker reading cache key \$k\$ at time \$t\$ with compute computation time \$\delta\$ and remaining lifetime \$\text{TTL} = \text{expiry} - t\$ independently computes:
+A worker reading cache key $k$ at time $t$ with compute computation time $\delta$ and remaining lifetime $\text{TTL} = \text{expiry} - t$ independently computes:
 
-\$\$-\beta \cdot \delta \cdot \ln(\text{rand}()) \> \text{TTL}\$\$
+$$-\beta \cdot \delta \cdot \ln(\text{rand}()) > \text{TTL}$$
 
 Where:
 
-- \$\beta \> 0\$ is an aggressiveness parameter (typically \$\beta = 1.0\$).
-- \$\delta\$ is the measured duration required to recompute the value from the database.
-- \$\text{rand}() \sim \text{Uniform}(0, 1)\$.
+- $\beta > 0$ is an aggressiveness parameter (typically $\beta = 1.0$).
+- $\delta$ is the measured duration required to recompute the value from the database.
+- $\text{rand}() \sim \text{Uniform}(0, 1)$.
 
-As \$\text{TTL} \to 0\$, the probability of a worker proactively and asynchronously recomputing the cache in the background approaches \$1.0\$. Exactly **one** worker recomputes the cache slightly before it expires, while all other \$9,999\$ requests continue reading the valid cached value. The database experiences exactly \$1\$ query instead of \$10,000\$, completely eliminating the cache stampede.
+As $\text{TTL} \to 0$, the probability of a worker proactively and asynchronously recomputing the cache in the background approaches $1.0$. Exactly **one** worker recomputes the cache slightly before it expires, while all other $9,999$ requests continue reading the valid cached value. The database experiences exactly $1$ query instead of $10,000$, completely eliminating the cache stampede.
 
 ------------------------------------------------------------------------
 
@@ -3623,7 +3623,7 @@ flowchart TD
 
 #### 3. Epistemic Breakthrough
 
-The test suite duration (\$18\text{ minutes}\$) is an insignificant fraction (\$0.08%\$) of the 14-day lead time. The true system constraint is the **staging environment serialization bottleneck** caused by **coupled database schema migrations**.
+The test suite duration ($18\text{ minutes}$) is an insignificant fraction ($0.08\%$) of the 14-day lead time. The true system constraint is the **staging environment serialization bottleneck** caused by **coupled database schema migrations**.
 
 - **Surfaced Tacit Assumption (`ASM-04`)**: *"Database schema modifications must be deployed in lockstep with application code changes to maintain backward compatibility."*
 - **Resolution**: Adopting the **Expand-Contract (Parallel Change) Pattern** decouples schema changes from code deployments, allowing independent continuous delivery without staging locks.
@@ -3662,22 +3662,22 @@ flowchart TD
 ## 4. Bottleneck & Scalability Analysis (TOC / USL)
 
 - **Primary Constraint**: \[Hardware / OS / Runtime / Lock / Database / Network / Pipeline\]
-- **Amdahl Serial Fraction (\$\sigma\$)**: `0.042`
-- **Gunther Coherency Coefficient (\$\kappa\$)**: `0.0018`
-- **Optimal Concurrency Limit (\$N^\*\$)**: `23 worker threads/nodes`
-- **Current Operating Concurrency (\$N\$)**: `64 nodes` (Operating in Retrograde Collapse Zone!)
+- **Amdahl Serial Fraction ($\sigma$)**: `0.042`
+- **Gunther Coherency Coefficient ($\kappa$)**: `0.0018`
+- **Optimal Concurrency Limit ($N^\*$)**: `23 worker threads/nodes`
+- **Current Operating Concurrency ($N$)**: `64 nodes` (Operating in Retrograde Collapse Zone!)
 
 ## 5. Formal Contradiction Registry \[CTR-\]
 
 ### CTR-01: \[Contradiction Name\]
 
-- **Technical Contradiction (\$TC\$)**:
-  - Parameter to Improve (\$\mathcal{Q}^+\$): \[e.g., Data Freshness\]
-  - Parameter That Worsens (\$\mathcal{Q}^-\$): \[e.g., Database CPU Utilization\]
-- **Physical Contradiction (\$PC\$)**:
-  - Parameter \$P\$: \[e.g., Cache Lifetime\]
-  - Must be State \$S\$ (`Short / 0s`) under Condition \$\mathcal{C}\_1\$ (`When data is modified`)
-  - Must be State \$\neg S\$ (`Long / ∞`) under Condition \$\mathcal{C}\_2\$ (`During peak read traffic`)
+- **Technical Contradiction ($TC$)**:
+  - Parameter to Improve ($\mathcal{Q}^+$): \[e.g., Data Freshness\]
+  - Parameter That Worsens ($\mathcal{Q}^-$): \[e.g., Database CPU Utilization\]
+- **Physical Contradiction ($PC$)**:
+  - Parameter $P$: \[e.g., Cache Lifetime\]
+  - Must be State $S$ (`Short / 0s`) under Condition $\mathcal{C}_1$ (`When data is modified`)
+  - Must be State $\neg S$ (`Long / ∞`) under Condition $\mathcal{C}_2$ (`During peak read traffic`)
 - **Target Separation Principle**: \[Separation in Time / Space / Condition / Boundary\]
 
 ## 6. Surfaced Tacit Assumptions \[ASM-\]
@@ -3733,12 +3733,12 @@ flowchart TD
 
 ### 3. Conflating Correlation with Causation (Pearl's Collider/Confounder Bias)
 
-- **Error**: Observing that CPU spikes to \$99%\$ during high latency, and concluding that CPU is the bottleneck.
+- **Error**: Observing that CPU spikes to $99\%$ during high latency, and concluding that CPU is the bottleneck.
 - **Remedy**: Determine whether high CPU is the *cause* of the latency or a *common symptom* of a thread spin-lock loop caused by lock starvation.
 
 ### 4. Local Sub-Optimization of Non-Constraints (Goldratt)
 
-- **Error**: Spending three weeks optimizing a JSON serialization routine from \$4\text{ ms}\$ to \$1\text{ ms}\$, when the request spends \$450\text{ ms}\$ waiting for a database row lock.
+- **Error**: Spending three weeks optimizing a JSON serialization routine from $4\text{ ms}$ to $1\text{ ms}$, when the request spends $450\text{ ms}$ waiting for a database row lock.
 - **Remedy**: Calculate Amdahl's serial fraction and locate the single system constraint before optimizing any code.
 
 ### 5. The Anti-TRIZ Compromise Fallacy
@@ -3772,7 +3772,7 @@ The human correction is an incentives and review problem. The agent correction i
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Transformation operator, \$\tau\$ | A topology, ownership, timing, quantity, or mechanism change applied to the current system. | Replace the remote synchronous write with an existing database's bounded staging table; the diff in carriers and failure modes is the transformation. |
+| Transformation operator, $\tau$ | A topology, ownership, timing, quantity, or mechanism change applied to the current system. | Replace the remote synchronous write with an existing database's bounded staging table; the diff in carriers and failure modes is the transformation. |
 | Function carrier | The component or platform mechanism responsible for a required function. | If the broker is removed, the database or caller must absorb buffering, durability, or backpressure; an ownership map shows where the function went. |
 | Trimming | Elimination of a component with its function removed, delegated, or performed by the object itself. | Deleting a pass-through ingestion service is valid only if validation and partition routing are demonstrably carried elsewhere. |
 | Ideality | Useful effects relative to harmful effects and lifecycle cost. | A ten-second database-backed buffer may deliver the same burst tolerance with fewer pages, upgrades, schemas, and replay hazards than a broker platform. |
@@ -3825,15 +3825,15 @@ Systematic transformation in software engineering rests on theories of modularit
 
 ### 1.1. The Law of Ideality and Component Trimming
 
-In classical TRIZ, [Altshuller (1984) *Creativity as an Exact Science*](https://en.wikipedia.org/wiki/TRIZ) formulated the **Law of Increasing Ideality**: every technical system evolves toward increasing its degree of ideality (\$I\$), defined as the ratio of the sum of useful functions (\$\sum F_u\$) to the sum of harmful effects (\$\sum F_h\$) and resource expenditures (\$\sum C\$):
+In classical TRIZ, [Altshuller (1984) *Creativity as an Exact Science*](https://en.wikipedia.org/wiki/TRIZ) formulated the **Law of Increasing Ideality**: every technical system evolves toward increasing its degree of ideality ($I$), defined as the ratio of the sum of useful functions ($\sum F_u$) to the sum of harmful effects ($\sum F_h$) and resource expenditures ($\sum C$):
 
-\$\$I = \frac{\sum F_u}{\sum F_h + \sum C}\$\$
+$$I = \frac{\sum F_u}{\sum F_h + \sum C}$$
 
 In software engineering:
 
-- **Useful functions (\$\sum F_u\$):** Business capabilities, throughput, consistency guarantees, availability, data integrity.
-- **Harmful effects (\$\sum F_h\$):** Latency tail spikes, race conditions, memory leaks, security vulnerabilities, cascading failures, bugs.
-- **Resource expenditures (\$\sum C\$):** Compute cycles, memory footprint, network bandwidth, operational maintenance, cognitive load, codebase size.
+- **Useful functions ($\sum F_u$):** Business capabilities, throughput, consistency guarantees, availability, data integrity.
+- **Harmful effects ($\sum F_h$):** Latency tail spikes, race conditions, memory leaks, security vulnerabilities, cascading failures, bugs.
+- **Resource expenditures ($\sum C$):** Compute cycles, memory footprint, network bandwidth, operational maintenance, cognitive load, codebase size.
 
 The ultimate ideal system is an **Ideal Final Result (IFR)**: *the component itself does not exist (zero code, zero infrastructure, zero operational maintenance), yet its useful function is fully performed.* Operation 3 reaches ideality through **Trimming**: remove redundant modules, proxies, and layers. Move indispensable functions to existing host resources (the database engine, kernel, compiler, or client).
 
@@ -3861,7 +3861,7 @@ Transformation of state and communication topology relies on the foundational th
 
 ## 2. The Software Separation Principles
 
-Physical contradictions (a single parameter must exist in state \$A\$ and state \$\neg A\$ at the same time) appear in software as conflicting quality attributes. A system cannot be fully synchronized across all nodes and instantaneously available during network partitions ([Gilbert & Lynch, 2002](https://dl.acm.org/doi/10.1145/564585.564601)).
+Physical contradictions (a single parameter must exist in state $A$ and state $\neg A$ at the same time) appear in software as conflicting quality attributes. A system cannot be fully synchronized across all nodes and instantaneously available during network partitions ([Gilbert & Lynch, 2002](https://dl.acm.org/doi/10.1145/564585.564601)).
 
 Do not compromise (mediocre latency and fragile consistency). The **Software Separation Principles** resolve contradictions by separating the conflicting requirements along independent dimensions.
 
@@ -3885,7 +3885,7 @@ graph TD
 
 The conflicting requirements are satisfied in distinct temporal windows or lifecycle phases.
 
-- **Write-Ahead Logging (WAL) vs. Checkpointing:** Durability requires immediate disk persistence, but random B-tree updates are disk I/O bottlenecks. *Separation in Time* resolves this: writes are appended sequentially to the WAL immediately (\$t_0\$), while expensive random page flushes to tablespaces are deferred to asynchronous background checkpoints (\$t_1\$).
+- **Write-Ahead Logging (WAL) vs. Checkpointing:** Durability requires immediate disk persistence, but random B-tree updates are disk I/O bottlenecks. *Separation in Time* resolves this: writes are appended sequentially to the WAL immediately ($t_0$), while expensive random page flushes to tablespaces are deferred to asynchronous background checkpoints ($t_1$).
 - **OLTP vs. OLAP (Materialized Views & ETL):** Operational transactions require sub-millisecond execution without analytical query interference; analytical queries require deep aggregate scans. Transactions execute against row-oriented transactional tables in real-time, while data is transformed and loaded into columnar analytical engines (for example, ClickHouse, Snowflake) via continuous asynchronous change streams.
 - **Speculative Execution vs. Verification:** Fast path executes immediately based on predicted outcomes; validation occurs asynchronously, with rollback/compensation executed only upon conflict.
 
@@ -3902,7 +3902,7 @@ The conflicting requirements are satisfied in distinct memory addresses, storage
 The system switches its internal computational mechanism based on operational parameters, workload intensity, or environmental health.
 
 - **Adaptive Fast-Path / Slow-Path Execution:** Under uncontended conditions, lock-free compare-and-swap (CAS) operations execute instantaneously; under high contention, the algorithm dynamically switches to thread parking, backoff, or batched queue serialization.
-- **Adaptive Batching (for example, Nagle's Algorithm, Kafka Producer):** Under low throughput, messages are dispatched immediately to maintain low latency. When request arrival rate exceeds a threshold (\$\lambda \> \theta\$), the transport layer automatically coalesces messages into contiguous buffers to maximize network bandwidth and compression ratios.
+- **Adaptive Batching (for example, Nagle's Algorithm, Kafka Producer):** Under low throughput, messages are dispatched immediately to maintain low latency. When request arrival rate exceeds a threshold ($\lambda > \theta$), the transport layer automatically coalesces messages into contiguous buffers to maximize network bandwidth and compression ratios.
 - **Circuit Breakers and Graceful Degradation:** In nominal operating conditions, rich remote RPC calls are executed. If error rates exceed an SLO threshold, the client degrades gracefully to local heuristic fallbacks or cached snapshots without blocking calling threads.
 
 ### 2.4. Principle 4: Separation of Parts from the Whole (Micro vs. Macro Separation)
@@ -3963,7 +3963,7 @@ Trimming is the systematic elimination of an architectural component, layer, pro
 #### Concrete Targets for Software Trimming
 
 - **Pass-Through Microservices:** Services that merely validate and forward requests without executing distinct domain logic.
-- **Intermediate DTO / Mapping Layers:** Redundant translation layers (for example, Entity \$\rightarrow\$ Domain Model \$\rightarrow\$ DTO \$\rightarrow\$ View Model) where properties pass through unmodified.
+- **Intermediate DTO / Mapping Layers:** Redundant translation layers (for example, Entity $\rightarrow$ Domain Model $\rightarrow$ DTO $\rightarrow$ View Model) where properties pass through unmodified.
 - **Dedicated Caching Clusters:** External Redis/Memcached clusters when database buffer pools, memory-mapped tables, or in-process local caches (for example, Caffeine) satisfy latency SLOs with zero distributed cache invalidation bugs.
 - **Distributed Lock Managers (for example, ZooKeeper, Consul):** Replaced by atomic database operations (`UPDATE ... WHERE version = ?`) or partition-based single-writer architectures.
 - **Synchronous Distributed Orchestrators:** Replaced by choreographed asynchronous state progression or immutable event streams.
@@ -4166,7 +4166,7 @@ flowchart TD
 | **Two-Phase Commit (2PC)** | **Transactional Outbox + Idempotent Consumer** | Distributed lock holding, blocking coordinator failure | Eventual consistency window, out-of-order delivery |
 | **Distributed Pessimistic Locks** | **Key-Partitioned Single-Writer Thread** | Lock contention, deadlock detection overhead, network latency | Partition rebalancing complexity, hotspot susceptibility |
 | **In-Place DB Update** | **Append-Only Event Sourcing** | Lost historical state, destructive write races | Storage volume growth, query projection requirement |
-| **On-the-Fly Full Aggregation** | **Streaming Materialized Aggregation** | \$O(N)\$ query latency on large datasets | Stream processing state maintenance, replay complexity |
+| **On-the-Fly Full Aggregation** | **Streaming Materialized Aggregation** | $O(N)$ query latency on large datasets | Stream processing state maintenance, replay complexity |
 
 ------------------------------------------------------------------------
 
@@ -4188,13 +4188,13 @@ flowchart TD
 
 #### 1. Quantity Transformations
 
-- **Dynamic Micro-Batching:** Grouping \$N\$ discrete network I/O calls or database inserts into a single contiguous vector operation (`executemany` or multi-row `INSERT`), amortizing network round-trip time (RTT) and disk fsync overhead.
+- **Dynamic Micro-Batching:** Grouping $N$ discrete network I/O calls or database inserts into a single contiguous vector operation (`executemany` or multi-row `INSERT`), amortizing network round-trip time (RTT) and disk fsync overhead.
 - **Pipelining (for example, Redis Pipelining, HTTP/2 Multiplexing):** Transmitting multiple requests over a single connection without waiting for individual responses, saturating bandwidth capacity.
 
 #### 2. Order Transformations
 
 - **Out-of-Order Execution & Reconciliation:** Allowing concurrent operations to apply out of order using Conflict-Free Replicated Data Types (CRDTs) or monotonic lattices, eliminating synchronization barriers.
-- **Reverse Execution (Sagas):** Structuring failures not as complex distributed rollbacks, but as forward execution of pre-defined compensating actions (\$C_1, C_2, \dots, C_n\$).
+- **Reverse Execution (Sagas):** Structuring failures not as complex distributed rollbacks, but as forward execution of pre-defined compensating actions ($C_1, C_2, \dots, C_n$).
 
 #### 3. Time Transformations
 
@@ -4217,7 +4217,7 @@ flowchart TD
 A mission-critical PostgreSQL database holding 12 TB of transactional customer records executes a daily logical dump (`pg_dump`) to an AWS S3 bucket.
 
 - **Symptom:** Backup execution requires 14 hours, saturates disk I/O, spikes p99 query latencies from 15 ms to 2,400 ms, and causes connection pool exhaustion.
-- **Contradiction:** The backup must be comprehensive and frequent to ensure low Recovery Point Objective (RPO \$\le 5\$ minutes), but executing the backup consumes the very I/O bandwidth needed for production transactions.
+- **Contradiction:** The backup must be comprehensive and frequent to ensure low Recovery Point Objective (RPO $\le 5$ minutes), but executing the backup consumes the very I/O bandwidth needed for production transactions.
 
 ``` mermaid
 flowchart TD
@@ -4246,7 +4246,7 @@ flowchart TD
 #### Verification & Measurable Delta
 
 - Backup window reduced from 14 hours to 0 seconds of user-visible degradation.
-- Effective RPO improved from 24 hours to \$\< 1\$ second (streaming WAL).
+- Effective RPO improved from 24 hours to $< 1$ second (streaming WAL).
 - Storage cost reduced by 68% via differential block deduplication.
 
 ------------------------------------------------------------------------
@@ -4316,7 +4316,7 @@ void stream_file_zerocopy(int file_fd, int socket_fd, size_t file_size) {
 
 - CPU utilization dropped from 100% to 11% at identical 12 Gbps load.
 - Maximum network throughput reached 38.5 Gbps (96% of theoretical NIC line rate).
-- Context switches per second dropped by \$4.2\times 10^6\$.
+- Context switches per second dropped by $4.2\times 10^6$.
 
 ------------------------------------------------------------------------
 
@@ -4327,7 +4327,7 @@ void stream_file_zerocopy(int file_fd, int socket_fd, size_t file_size) {
 An e-commerce order checkout system must persist an `Order` entity to a PostgreSQL database and publish an `OrderCreated` event to an Apache Kafka cluster to trigger inventory reservation and billing.
 
 - **Symptom:** Periodic production anomalies occur where orders exist in PostgreSQL without corresponding Kafka events (inventory never reserved, customer unbilled), or Kafka events exist for orders that were rolled back due to DB deadlocks.
-- **Contradiction:** The application must ensure atomic consistency between two disparate storage engines (RDBMS and Kafka), but distributed two-phase commit (2PC/XA) is unsupported by Kafka and degrades transaction throughput by \$10\times\$.
+- **Contradiction:** The application must ensure atomic consistency between two disparate storage engines (RDBMS and Kafka), but distributed two-phase commit (2PC/XA) is unsupported by Kafka and degrades transaction throughput by $10\times$.
 
 ``` mermaid
 flowchart TD
@@ -4350,7 +4350,7 @@ flowchart TD
 1.  **Technique 3.1 (Trimming):** Trim the direct Kafka producer client code and retry loops from the synchronous request handling path.
 2.  **Technique 3.3 (Delegate to RDBMS Engine):** Delegate atomicity to PostgreSQL's native ACID transaction engine by writing the event payload into a local `outbox_table` within the same database transaction as the business entity.
 3.  **Technique 3.4 (Replace Mechanism):** Replace synchronous Dual-Writing with **Change Data Capture (CDC)** reading the PostgreSQL Write-Ahead Log (WAL) via logical decoding (`pgoutput`).
-4.  **Technique 3.5 (Change Time & Order):** Shift Kafka publication from synchronous inline execution (\$t_0\$) to asynchronous out-of-band streaming (\$t_1\$) with at-least-once delivery guarantees and idempotent consumers.
+4.  **Technique 3.5 (Change Time & Order):** Shift Kafka publication from synchronous inline execution ($t_0$) to asynchronous out-of-band streaming ($t_1$) with at-least-once delivery guarantees and idempotent consumers.
 
 #### Concrete Outbox DDL & CDC Schema
 
@@ -4437,10 +4437,10 @@ flowchart TD
 
 | Architectural Dimension | Fragmented Serverless (45 Lambdas) | Consolidated Resident Daemon | Performance / Cost Delta |
 |----|----|----|----|
-| **P99 Execution Latency** | 12,600 ms (Step Function hops + cold starts) | 68 ms (In-process pointer passing) | **\$185\times\$ speedup** |
+| **P99 Execution Latency** | 12,600 ms (Step Function hops + cold starts) | 68 ms (In-process pointer passing) | **$185\times$ speedup** |
 | **Network Boundary Transits** | 90 network hops per transaction | 2 network hops (Ingress + Database) | **97.7% reduction in hops** |
 | **Database Connections** | Spikes to 2,500+ (Requires AWS RDS Proxy) | 32 fixed, multiplexed connections | **Zero connection exhaustion** |
-| **Monthly Infrastructure Cost** | \$42,500 (Step Function transitions + Lambda) | \$3,400 (3 ECS Fargate Tasks) | **92% cost reduction** |
+| **Monthly Infrastructure Cost** | $42,500 (Step Function transitions + Lambda) | $3,400 (3 ECS Fargate Tasks) | **92% cost reduction** |
 | **Debugging / Tracing** | Distributed tracing across 45 log groups | Unified in-process structured logging | **Drastic cognitive reduction** |
 
 ------------------------------------------------------------------------
@@ -4576,13 +4576,13 @@ If after 5 transformation iterations no candidate resolves the diagnosed contrad
 
 Before advancing to [Operation 4 (Explore the Space of Architectures)](#operation-4-explore-the-space-of-architectures-and-implementations), verify that the transformation reasoning satisfies this checklist:
 
-- \[ \] **Functional Essence Isolated:** The transformation addresses the core required behavior identified in Operation 1, stripped of implementation bias.
-- \[ \] **Trimming Exhausted:** All non-essential proxies, intermediate DTOs, pass-through services, and redundant caches have been evaluated for elimination (Technique 3.1).
-- \[ \] **Separation Principles Applied:** The contradiction identified in Operation 2 has been analyzed through Separation in Time, Space, Condition, and Scale (Technique 3.2).
-- \[ \] **System Resources Leveraged:** Opportunities to delegate work to the database engine, OS kernel, compiler/type system, or network fabric have been investigated (Technique 3.3).
-- \[ \] **Mechanism Substituted:** Algorithmic and structural alternatives (polling \$\rightarrow\$ push, locking \$\rightarrow\$ single-writer, 2PC \$\rightarrow\$ outbox) have been explicitly formulated (Technique 3.4).
-- \[ \] **Computational Geometry Optimized:** Batching, pipelining, execution order, lazy evaluation, and process placement have been tuned (Technique 3.5).
-- \[ \] **Artifacts Emitted:** Transformation Log (`TRF-*`) and Candidate Mechanisms (`CAN-*`) are populated with explicit falsification checks.
+- [ ] **Functional Essence Isolated:** The transformation addresses the core required behavior identified in Operation 1, stripped of implementation bias.
+- [ ] **Trimming Exhausted:** All non-essential proxies, intermediate DTOs, pass-through services, and redundant caches have been evaluated for elimination (Technique 3.1).
+- [ ] **Separation Principles Applied:** The contradiction identified in Operation 2 has been analyzed through Separation in Time, Space, Condition, and Scale (Technique 3.2).
+- [ ] **System Resources Leveraged:** Opportunities to delegate work to the database engine, OS kernel, compiler/type system, or network fabric have been investigated (Technique 3.3).
+- [ ] **Mechanism Substituted:** Algorithmic and structural alternatives (polling $\rightarrow$ push, locking $\rightarrow$ single-writer, 2PC $\rightarrow$ outbox) have been explicitly formulated (Technique 3.4).
+- [ ] **Computational Geometry Optimized:** Batching, pipelining, execution order, lazy evaluation, and process placement have been tuned (Technique 3.5).
+- [ ] **Artifacts Emitted:** Transformation Log (`TRF-*`) and Candidate Mechanisms (`CAN-*`) are populated with explicit falsification checks.
 
 ------------------------------------------------------------------------
 
@@ -4603,9 +4603,9 @@ Humans prune too early by organizational feasibility. Agents converge too early 
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Morphological space, \$\mathcal{S}=D_1\times\cdots\times D_n\$ | Cartesian product of independently variable design dimensions. | Combine “global vs. regional authority,” “reservation vs. escrow,” and “sync vs. async reconciliation”; rows in `SPACE-*` make unexplored combinations visible. |
+| Morphological space, $\mathcal{S}=D_1\times\cdots\times D_n$ | Cartesian product of independently variable design dimensions. | Combine “global vs. regional authority,” “reservation vs. escrow,” and “sync vs. async reconciliation”; rows in `SPACE-*` make unexplored combinations visible. |
 | Orthogonality | Variation in one decision dimension does not merely rename or duplicate another. | Changing PostgreSQL to another SQL vendor is not orthogonal to global synchronous coordination; changing authority to regional quotas is. |
-| Candidate mechanism, \$CAN\$ | A coherent selection of dimension values with a causal account of how it preserves invariants. | “Regional escrow quotas with asynchronous rebalance” is a mechanism; “use Vendor X” is not until authority and failure behavior are specified. |
+| Candidate mechanism, $CAN$ | A coherent selection of dimension values with a causal account of how it preserves invariants. | “Regional escrow quotas with asynchronous rebalance” is a mechanism; “use Vendor X” is not until authority and failure behavior are specified. |
 | Constraint pruning | Removal of combinations that violate hard invariants or internal compatibility. | A design that can oversell beyond the bounded loss limit is removed before cost scoring, regardless of its latency. |
 
 ## 1. Main Question and Purpose
@@ -4682,7 +4682,7 @@ flowchart TD
     OP4 --> OUT
 ```
 
-**Operation 4 (Explore the Space of Architectures and Implementations)** finds, organizes, and filters architecture options. Put independent decisions in a **morphological field** (\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n\$). Check that one decision does not change an unrelated requirement. Apply distributed-system limits, such as **CAP** and **PACELC**. Remove options that cannot meet hard constraints. The remaining candidates (`CAN-*`) must use different operating principles. Do not keep candidates that differ only by vendor, library, or programming language.
+**Operation 4 (Explore the Space of Architectures and Implementations)** finds, organizes, and filters architecture options. Put independent decisions in a **morphological field** ($\mathcal{S} = D_1 \times D_2 \times \dots \times D_n$). Check that one decision does not change an unrelated requirement. Apply distributed-system limits, such as **CAP** and **PACELC**. Remove options that cannot meet hard constraints. The remaining candidates (`CAN-*`) must use different operating principles. Do not keep candidates that differ only by vendor, library, or programming language.
 
 ------------------------------------------------------------------------
 
@@ -4735,9 +4735,9 @@ classDiagram
 
 In [*Discovery, Invention, Research Through the Morphological Approach* (Zwicky, 1969, Macmillan)](https://books.google.com/books?id=m05RAAAAMAAJ), Fritz Zwicky described **General Morphological Analysis (GMA)**. GMA is a method to explore complex problems that do not have one numeric answer.
 
-Zwicky treated a complex system as a finite set of structural dimensions \$D_1, D_2, \dots, D_n\$. Give each dimension a small set of possible values: \$D_i = {v\_{i,1}, v\_{i,2}, \dots, v\_{i,k_i}}\$. The Cartesian product contains every combination:
+Zwicky treated a complex system as a finite set of structural dimensions $D_1, D_2, \dots, D_n$. Give each dimension a small set of possible values: $D_i = \{v_{i,1}, v_{i,2}, \dots, v_{i,k_i}\}$. The Cartesian product contains every combination:
 
-\$\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n\$\$
+$$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n$$
 
 People usually explore familiar combinations first and can miss valid alternatives. Zwicky used **Cross-Consistency Assessment (CCA)** to remove combinations that cannot work together. The result is a smaller set of valid options.
 
@@ -4745,27 +4745,27 @@ People usually explore familiar combinations first and can miss valid alternativ
 
 In [*The Principles of Design* (Suh, 1990, Oxford University Press)](https://global.oup.com/academic/product/the-principles-of-design-9780195043457), Nam P. Suh gave two rules for architecture design:
 
-1. **Independence axiom:** Keep functional requirements (\$\mathbf{FR}\$) independent. A change to one design parameter (\$\mathbf{DP}\$) must meet its requirement without changing other requirements.
+1. **Independence axiom:** Keep functional requirements ($\mathbf{FR}$) independent. A change to one design parameter ($\mathbf{DP}$) must meet its requirement without changing other requirements.
 2. **Information axiom:** If two designs meet the requirements, select the one with less information content. In practice, select the simpler design with fewer coupled parts.
 
-Mathematically, the relationship between the vector of Functional Requirements \$\mathbf{FR}\$ and Design Parameters \$\mathbf{DP}\$ is defined by the **Design Matrix** \$\[A\]\$:
+Mathematically, the relationship between the vector of Functional Requirements $\mathbf{FR}$ and Design Parameters $\mathbf{DP}$ is defined by the **Design Matrix** $[A]$:
 
-\$\$\mathbf{FR} = \[A\],\mathbf{DP} \iff \begin{bmatrix} FR_1 \\ FR_2 \\ \vdots \\ FR_m \end{bmatrix} = \begin{bmatrix} A\_{11} & A\_{12} & \dots & A\_{1n} \\ A\_{21} & A\_{22} & \dots & A\_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ A\_{m1} & A\_{m2} & \dots & A\_{mn} \end{bmatrix} \begin{bmatrix} DP_1 \\ DP_2 \\ \vdots \\ DP_n \end{bmatrix}\$\$
+$$\mathbf{FR} = [A],\mathbf{DP} \iff \begin{bmatrix} FR_1 \\ FR_2 \\ \vdots \\ FR_m \end{bmatrix} = \begin{bmatrix} A_{11} & A_{12} & \dots & A_{1n} \\ A_{21} & A_{22} & \dots & A_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ A_{m1} & A_{m2} & \dots & A_{mn} \end{bmatrix} \begin{bmatrix} DP_1 \\ DP_2 \\ \vdots \\ DP_n \end{bmatrix}$$
 
-Suh described three forms of \$\[A\]\$:
+Suh described three forms of $[A]$:
 
-- **Uncoupled design:** \$\[A\]\$ is diagonal (\$A\_{ij} = 0\$ for all \$i \neq j\$). One parameter meets one requirement. This is the ideal for a module.
-- **Decoupled design:** \$\[A\]\$ is triangular. The team can change parameters in a defined order without a cycle.
-- **Coupled design:** \$\[A\]\$ is full or arbitrary. A change to one parameter changes several requirements. This causes regression defects and makes the system hard to change. Operation 4 should remove such options where possible.
+- **Uncoupled design:** $[A]$ is diagonal ($A_{ij} = 0$ for all $i \neq j$). One parameter meets one requirement. This is the ideal for a module.
+- **Decoupled design:** $[A]$ is triangular. The team can change parameters in a defined order without a cycle.
+- **Coupled design:** $[A]$ is full or arbitrary. A change to one parameter changes several requirements. This causes regression defects and makes the system hard to change. Operation 4 should remove such options where possible.
 
 ### 2.3. Eric Brewer, Seth Gilbert & Nancy Lynch: The CAP Theorem and Distributed State Bounds
 
 In [*Towards Robust Distributed Systems* (Brewer, 2000, ACM PODC)](https://doi.org/10.1145/343477.343502) and [*CAP Twelve Years Later: How the "Rules" Have Changed* (Brewer, 2012, IEEE Computer)](https://doi.org/10.1109/MC.2012.37), Eric Brewer described a limit of distributed data systems. During a network partition, a system cannot give both **linearizable consistency** and **availability** for every request.
 
-[Gilbert and Lynch](https://doi.org/10.1145/564585.564601) proved this limit for asynchronous networks. When a partition (\$\mathcal{P}\$) occurs, a distributed state machine must choose one of these actions:
+[Gilbert and Lynch](https://doi.org/10.1145/564585.564601) proved this limit for asynchronous networks. When a partition ($\mathcal{P}$) occurs, a distributed state machine must choose one of these actions:
 
-1. Return an error or wait. This keeps linearizable consistency (\$CP\$).
-2. Return local state that can be stale or different. This keeps availability (\$AP\$).
+1. Return an error or wait. This keeps linearizable consistency ($CP$).
+2. Return local state that can be stale or different. This keeps availability ($AP$).
 
 Use CAP as a filter in Operation 4. Remove a candidate that claims that it can preserve linearizable consistency and return a successful response for every request across an untrusted network partition.
 
@@ -4775,7 +4775,7 @@ In [*Consistency Tradeoffs in Modern Distributed Database System Design: CAP is 
 
 Abadi formulated the **PACELC Theorem**, which models system behavior under both partition and nominal conditions:
 
-\$\$\text{If } \mathbf{P} \text{ (Partition)} \implies \text{choose between } \mathbf{A} \text{ (Availability) and } \mathbf{C} \text{ (Consistency)}; \quad \mathbf{E} \text{ (Else / Normal Operation)} \implies \text{choose between } \mathbf{L} \text{ (Latency) and } \mathbf{C} \text{ (Consistency)}.\$\$
+$$\text{If } \mathbf{P} \text{ (Partition)} \implies \text{choose between } \mathbf{A} \text{ (Availability) and } \mathbf{C} \text{ (Consistency)}; \quad \mathbf{E} \text{ (Else / Normal Operation)} \implies \text{choose between } \mathbf{L} \text{ (Latency) and } \mathbf{C} \text{ (Consistency)}.$$
 
                                       ┌───────────────────────────┐
                                       │   PACELC CLASSIFICATION   │
@@ -4803,7 +4803,7 @@ PACELC makes the normal-case trade-off explicit. Even when the network is health
 In [*Designing Data-Intensive Applications* (Kleppmann, 2017, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/), Martin Kleppmann describes complex data systems as **unbundled databases**. The system can separate:
 
 - **Primary records of truth:** Immutable, durable state changes in an append-only log or event stream.
-- **Derived state and materialized views:** Caches, search indexes, graph stores, and read replicas. They apply a defined function \$f(\text{log})\$ for a specific query.
+- **Derived state and materialized views:** Caches, search indexes, graph stores, and read replicas. They apply a defined function $f(\text{log})$ for a specific query.
 - **Change data capture (CDC) and stream processors:** Asynchronous pipelines that bring derived views toward the source state.
 
 This model lets Operation 4 separate storage, indexing, and synchronization decisions instead of treating the database as one indivisible component.
@@ -4853,77 +4853,77 @@ flowchart LR
 
 ### 3.1. The Morphological Field Equation
 
-Let an architectural problem model possess \$n\$ orthogonal design dimensions:
+Let an architectural problem model possess $n$ orthogonal design dimensions:
 
-\$\$\mathcal{D} = {D_1, D_2, \dots, D_n}\$\$
+$$\mathcal{D} = \{D_1, D_2, \dots, D_n\}$$
 
-Each dimension \$D_i\$ represents an independent architectural axis (for example, State Ownership, Consistency Guarantee, Concurrency Primitive, Storage Model) and is discretized into a finite set of \$k_i\$ mutually exclusive, concrete mechanisms:
+Each dimension $D_i$ represents an independent architectural axis (for example, State Ownership, Consistency Guarantee, Concurrency Primitive, Storage Model) and is discretized into a finite set of $k_i$ mutually exclusive, concrete mechanisms:
 
-\$\$D_i = {v\_{i,1}, v\_{i,2}, \dots, v\_{i,k_i}}, \quad \text{where } \|D_i\| = k_i \ge 2\$\$
+$$D_i = \{v_{i,1}, v_{i,2}, \dots, v_{i,k_i}\}, \quad \text{where } \|D_i\| = k_i \ge 2$$
 
-The **Full Theoretical Solution Space** \$\mathcal{S}\$ is the \$n\$-dimensional Cartesian product of all discrete values:
+The **Full Theoretical Solution Space** $\mathcal{S}$ is the $n$-dimensional Cartesian product of all discrete values:
 
-\$\$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n = \prod\_{i=1}^n D_i\$\$
+$$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n = \prod_{i=1}^n D_i$$
 
-A single candidate architecture \$s \in \mathcal{S}\$ is represented as an \$n\$-dimensional configuration vector:
+A single candidate architecture $s \in \mathcal{S}$ is represented as an $n$-dimensional configuration vector:
 
-\$\$s = (v\_{1,j_1}, v\_{2,j_2}, \dots, v\_{n,j_n}), \quad \text{where } v\_{i,j_i} \in D_i\$\$
+$$s = (v_{1,j_1}, v_{2,j_2}, \dots, v_{n,j_n}), \quad \text{where } v_{i,j_i} \in D_i$$
 
-The cardinality of the raw theoretical solution space \$\|\mathcal{S}\|\$ is:
+The cardinality of the raw theoretical solution space $\|\mathcal{S}\|$ is:
 
-\$\$\|\mathcal{S}\| = \prod\_{i=1}^n k_i\$\$
+$$\|\mathcal{S}\| = \prod_{i=1}^n k_i$$
 
-Even a modest design problem with \$n = 6\$ dimensions and an average of \$k = 4\$ options per dimension yields \$\|\mathcal{S}\| = 4^6 = 4,096\$ theoretical configurations.
+Even a modest design problem with $n = 6$ dimensions and an average of $k = 4$ options per dimension yields $\|\mathcal{S}\| = 4^6 = 4,096$ theoretical configurations.
 
 ### 3.2. Two-Tier Compatibility Matrix and Constraint Satisfaction
 
-The raw space \$\mathcal{S}\$ contains configurations that are physically impossible, logically contradictory, or in direct violation of mandatory system invariants. To filter these, Operation 4 applies a **Two-Tier Constraint Satisfaction Filter**:
+The raw space $\mathcal{S}$ contains configurations that are physically impossible, logically contradictory, or in direct violation of mandatory system invariants. To filter these, Operation 4 applies a **Two-Tier Constraint Satisfaction Filter**:
 
-#### Tier 1: Invariant & Physical Feasibility Filter (\$F\_{\text{inv}}\$)
+#### Tier 1: Invariant & Physical Feasibility Filter ($F_{\text{inv}}$)
 
-Let \$\mathcal{I} = {I_1, I_2, \dots, I_m}\$ be the set of non-negotiable safety, liveness, and hardware invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem). The unary predicate \$F\_{\text{inv}}(s)\$ evaluates whether candidate vector \$s\$ violates any hard invariant:
+Let $\mathcal{I} = \{I_1, I_2, \dots, I_m\}$ be the set of non-negotiable safety, liveness, and hardware invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem). The unary predicate $F_{\text{inv}}(s)$ evaluates whether candidate vector $s$ violates any hard invariant:
 
-\$\$F\_{\text{inv}}(s) = \begin{cases} 1 & \text{if } \forall I \in \mathcal{I}, , s \models I \\ 0 & \text{otherwise} \end{cases}\$\$
+$$F_{\text{inv}}(s) = \begin{cases} 1 & \text{if } \forall I \in \mathcal{I}, s \models I \\ 0 & \text{otherwise} \end{cases}$$
 
-*Example:* If invariant \$I\_{\text{audit}}\$ mandates "Zero data loss under total datacenter power loss," any vector assigning \$v\_{\text{durability}} = \text{In-Memory Only}\$ evaluates to \$F\_{\text{inv}}(s) = 0\$.
+*Example:* If invariant $I_{\text{audit}}$ mandates "Zero data loss under total datacenter power loss," any vector assigning $v_{\text{durability}} = \text{In-Memory Only}$ evaluates to $F_{\text{inv}}(s) = 0$.
 
-#### Tier 2: Binary Compatibility Matrix (\$C\$)
+#### Tier 2: Binary Compatibility Matrix ($C$)
 
-Cross-Consistency Assessment evaluates the pairwise compatibility of discrete mechanisms across distinct dimensions. For any two values \$v\_{i,a} \in D_i\$ and \$v\_{j,b} \in D_j\$ (\$i \neq j\$), the compatibility function is defined as:
+Cross-Consistency Assessment evaluates the pairwise compatibility of discrete mechanisms across distinct dimensions. For any two values $v_{i,a} \in D_i$ and $v_{j,b} \in D_j$ ($i \neq j$), the compatibility function is defined as:
 
-\$\$C(v\_{i,a}, v\_{j,b}) = \begin{cases} 1 & \text{if } v\_{i,a} \text{ and } v\_{j,b} \text{ are mutually compatible} \\ 0 & \text{if } v\_{i,a} \text{ and } v\_{j,b} \text{ are physically or logically contradictory} \end{cases}\$\$
+$$C(v_{i,a}, v_{j,b}) = \begin{cases} 1 & \text{if } v_{i,a} \text{ and } v_{j,b} \text{ are mutually compatible} \\ 0 & \text{if } v_{i,a} \text{ and } v_{j,b} \text{ are physically or logically contradictory} \end{cases}$$
 
-*Example:* Let \$v\_{1,1} = \text{Multi-Leader Asynchronous Replication}\$ (Dimension: State Ownership) and \$v\_{2,1} = \text{Strict Linearizable Reads}\$ (Dimension: Consistency Model). Under PACELC and network delay dynamics, \$C(v\_{1,1}, v\_{2,1}) = 0\$.
+*Example:* Let $v_{1,1} = \text{Multi-Leader Asynchronous Replication}$ (Dimension: State Ownership) and $v_{2,1} = \text{Strict Linearizable Reads}$ (Dimension: Consistency Model). Under PACELC and network delay dynamics, $C(v_{1,1}, v_{2,1}) = 0$.
 
-The **Admissible Solution Space** \$\mathcal{S}\_{\text{admissible}}\$ is the subset of configuration vectors that satisfy all system invariants and all pairwise compatibility constraints:
+The **Admissible Solution Space** $\mathcal{S}_{\text{admissible}}$ is the subset of configuration vectors that satisfy all system invariants and all pairwise compatibility constraints:
 
-\$\$\mathcal{S}*{\text{admissible}} = \left{ s \in \mathcal{S} ;\middle\|; F*{\text{inv}}(s) = 1 ;\land; \forall i, j \in {1, \dots, n} , (i \< j \implies C(s\[i\], s\[j\]) = 1) \right}\$\$
+$$\mathcal{S}_{\text{admissible}} = \left\{ s \in \mathcal{S} \middle| F_{\text{inv}}(s) = 1 \land \forall i, j \in \{1, \dots, n\}, (i < j \implies C(s[i], s[j]) = 1) \right\}$$
 
 ### 3.3. Axiomatic Decoupling Matrix Verification
 
-For every candidate vector \$s \in \mathcal{S}\_{\text{admissible}}\$, the candidate's structural modularity is verified against the system's Functional Requirements \$\mathbf{FR} = \[FR_1, FR_2, \dots, FR_m\]^T\$ using Suh's Design Matrix \$\[A_s\]\$:
+For every candidate vector $s \in \mathcal{S}_{\text{admissible}}$, the candidate's structural modularity is verified against the system's Functional Requirements $\mathbf{FR} = [FR_1, FR_2, \dots, FR_m]^T$ using Suh's Design Matrix $[A_s]$:
 
-\$\$\begin{bmatrix} FR_1 \\ FR_2 \\ \vdots \\ FR_m \end{bmatrix} = \begin{bmatrix} A\_{11} & A\_{12} & \dots & A\_{1n} \\ A\_{21} & A\_{22} & \dots & A\_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ A\_{m1} & A\_{m2} & \dots & A\_{mn} \end{bmatrix} \begin{bmatrix} DP_1(s) \\ DP_2(s) \\ \vdots \\ DP_n(s) \end{bmatrix}\$\$
+$$\begin{bmatrix} FR_1 \\ FR_2 \\ \vdots \\ FR_m \end{bmatrix} = \begin{bmatrix} A_{11} & A_{12} & \dots & A_{1n} \\ A_{21} & A_{22} & \dots & A_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ A_{m1} & A_{m2} & \dots & A_{mn} \end{bmatrix} \begin{bmatrix} DP_1(s) \\ DP_2(s) \\ \vdots \\ DP_n(s) \end{bmatrix}$$
 
-A candidate is accepted into the final candidate set (`CAN-*`) only if its design matrix \$\[A_s\]\$ is **Uncoupled** (diagonal) or **Decoupled** (triangular):
+A candidate is accepted into the final candidate set (`CAN-*`) only if its design matrix $[A_s]$ is **Uncoupled** (diagonal) or **Decoupled** (triangular):
 
-\$\$\text{Reorderable}(\[A_s\]) \in {\text{Diagonal}, \text{Triangular}}\$\$
+$$\text{Reorderable}([A_s]) \in \{\text{Diagonal}, \text{Triangular}\}$$
 
-If \$\[A_s\]\$ contains non-eliminable cross-functional feedback loops (coupled design), the candidate is flagged as an anti-pattern (Spaghetti Architecture) and pruned.
+If $[A_s]$ contains non-eliminable cross-functional feedback loops (coupled design), the candidate is flagged as an anti-pattern (Spaghetti Architecture) and pruned.
 
 ### 3.4. Candidate Vector Orthogonality Metric
 
-To ensure that surviving candidates represent genuinely distinct architectural classes rather than cosmetic clones, Operation 4 computes the **Normalized Hamming Distance** between any two candidate vectors \$s_a, s_b \in \mathcal{S}\_{\text{admissible}}\$:
+To ensure that surviving candidates represent genuinely distinct architectural classes rather than cosmetic clones, Operation 4 computes the **Normalized Hamming Distance** between any two candidate vectors $s_a, s_b \in \mathcal{S}_{\text{admissible}}$:
 
-\$\$d_H(s_a, s_b) = \frac{1}{n} \sum\_{i=1}^n \delta(s_a\[i\], s_b\[i\]), \quad \text{where } \delta(x, y) = \begin{cases} 0 & \text{if } x = y \\ 1 & \text{if } x \neq y \end{cases}\$\$
+$$d_H(s_a, s_b) = \frac{1}{n} \sum_{i=1}^n \delta(s_a[i], s_b[i]), \quad \text{where } \delta(x, y) = \begin{cases} 0 & \text{if } x = y \\ 1 & \text{if } x \neq y \end{cases}$$
 
 #### Diversity Rule:
 
-A proposed candidate set \$\mathcal{C} = {s_1, s_2, \dots, s_m}\$ satisfies the **Orthogonality Criterion** if and only if:
+A proposed candidate set $\mathcal{C} = \{s_1, s_2, \dots, s_m\}$ satisfies the **Orthogonality Criterion** if and only if:
 
-\$\$\forall a, b \in {1, \dots, m}, ; a \neq b \implies d_H(s_a, s_b) \ge \theta\_{\text{diversity}}\$\$
+$$\forall a, b \in \{1, \dots, m\},\; a \neq b \implies d_H(s_a, s_b) \ge \theta_{\text{diversity}}$$
 
-Where the diversity threshold \$\theta\_{\text{diversity}} \ge 0.50\$ (that is, any two architectural candidates must differ in at least 50% of their fundamental structural dimensions).
+Where the diversity threshold $\theta_{\text{diversity}} \ge 0.50$ (that is, any two architectural candidates must differ in at least 50% of their fundamental structural dimensions).
 
 ------------------------------------------------------------------------
 
@@ -4975,16 +4975,16 @@ To force the exploration engine out of local optima, Operation 4 applies four ma
 
 #### 1. Dimension Inversion (Orthogonal Parameter Inversion)
 
-For every dimension \$D_i\$, identify the conventional default value \$v\_{i,\text{default}}\$ and systematically force the evaluation of its structural polar opposite:
+For every dimension $D_i$, identify the conventional default value $v_{i,\text{default}}$ and systematically force the evaluation of its structural polar opposite:
 
-- If default is **Centralized Coordination** \$\implies\$ Force **Shared-Nothing Partitioning** or **Peer-to-Peer Gossip**.
-- If default is **Push-based Synchronous RPC** \$\implies\$ Force **Pull-based Asynchronous Batched Streaming** or **Shared-Memory Ring Buffers**.
-- If default is **Mutable In-Place Updates** \$\implies\$ Force **Immutable Append-Only Log with Deterministic State Machine Replay**.
-- If default is **Application-Layer Authorization** \$\implies\$ Force **Cryptographic Token Verification in OS Kernel (eBPF)** or **Hardware Enclave (SGX)**.
+- If default is **Centralized Coordination** $\implies$ Force **Shared-Nothing Partitioning** or **Peer-to-Peer Gossip**.
+- If default is **Push-based Synchronous RPC** $\implies$ Force **Pull-based Asynchronous Batched Streaming** or **Shared-Memory Ring Buffers**.
+- If default is **Mutable In-Place Updates** $\implies$ Force **Immutable Append-Only Log with Deterministic State Machine Replay**.
+- If default is **Application-Layer Authorization** $\implies$ Force **Cryptographic Token Verification in OS Kernel (eBPF)** or **Hardware Enclave (SGX)**.
 
 #### 2. Extreme Boundary Pushing (Stress-Testing the Extremes)
 
-Examine what happens when a system parameter is pushed to its absolute theoretical limit (\$0\$ or \$\infty\$):
+Examine what happens when a system parameter is pushed to its absolute theoretical limit ($0$ or $\infty$):
 
 - *Zero Network Round-Trips:* What if the client evaluates all business logic locally using embedded WebAssembly and synchronizes state via CRDTs?
 - *Zero Disk I/O on Critical Path:* What if all state mutations are held purely in battery-backed RAM (NVDIMM/PMEM) with background asynchronous checkpointing?
@@ -5236,15 +5236,15 @@ flowchart TD
 #### The Four Rules of Dimension Discovery:
 
 1.  **Rule of Exhaustive Functional Coverage:** Every mandatory system function identified in [Operation 1](#operation-1-frame-and-model-the-software-problem) must be governed by at least one dimension.
-2.  **Rule of Mutual Orthogonality (Suh Independence):** A dimension \$D_i\$ must represent an independent structural decision. If choosing a value in \$D_i\$ strictly dictates the value in \$D_j\$, then \$D_i\$ and \$D_j\$ are not orthogonal dimensions—they are coupled manifestations of a single underlying parameter and must be merged.
-3.  **Rule of Value Exclusivity:** Within a single dimension \$D_i\$, the discrete values \${v\_{i,1}, v\_{i,2}, \dots, v\_{i,k}}\$ must be mutually exclusive for a single component role (for example, a storage engine cannot be simultaneously pure B-Tree and pure Append-Only Log for the identical state partition).
+2.  **Rule of Mutual Orthogonality (Suh Independence):** A dimension $D_i$ must represent an independent structural decision. If choosing a value in $D_i$ strictly dictates the value in $D_j$, then $D_i$ and $D_j$ are not orthogonal dimensions—they are coupled manifestations of a single underlying parameter and must be merged.
+3.  **Rule of Value Exclusivity:** Within a single dimension $D_i$, the discrete values ${v_{i,1}, v_{i,2}, \dots, v_{i,k}}$ must be mutually exclusive for a single component role (for example, a storage engine cannot be simultaneously pure B-Tree and pure Append-Only Log for the identical state partition).
 4.  **Rule of Technology Neutrality:** Dimension values must specify **mechanisms**, not brand names (for example, specify "Partitioned Append-Only Commit Log," not "Kafka"; specify "Distributed Consensus State Machine," not "Raft/Consul").
 
 ------------------------------------------------------------------------
 
 ### Technique 4.3. Combine Branches into Candidates
 
-Once the Morphological Field is established, candidate architectures are synthesized by selecting one discrete value from each dimension to form a complete configuration vector \$s = (v_1, v_2, \dots, v_n)\$.
+Once the Morphological Field is established, candidate architectures are synthesized by selecting one discrete value from each dimension to form a complete configuration vector $s = (v_1, v_2, \dots, v_n)$.
 
 ``` mermaid
 flowchart TD
@@ -5316,9 +5316,9 @@ flowchart TD
 
 #### The Pruning Matrix Rules:
 
-- **Rule 1 (The CAP Partition Rule):** If network boundary = WAN or Untrusted Network, eliminate any vector containing \$(\text{Consistency} = \text{Linearizable}) \land (\text{Availability} = \text{Non-Blocking}) \land (\text{Partition Tolerance} = \text{Yes})\$.
-- **Rule 2 (The PACELC Latency Rule):** If latency SLO \$p99 \< 5\text{ ms}\$, eliminate any vector containing \$(\text{Write Replication} = \text{Synchronous Multi-Datacenter 2PC})\$.
-- **Rule 3 (The Durability Invariant Rule):** If invariant \$I\_{\text{zero_data_loss}} = \text{True}\$, eliminate any vector containing \$(\text{Durability} = \text{Async Memory Buffer without WAL})\$.
+- **Rule 1 (The CAP Partition Rule):** If network boundary = WAN or Untrusted Network, eliminate any vector containing $(\text{Consistency} = \text{Linearizable}) \land (\text{Availability} = \text{Non-Blocking}) \land (\text{Partition Tolerance} = \text{Yes})$.
+- **Rule 2 (The PACELC Latency Rule):** If latency SLO $p99 < 5\text{ ms}$, eliminate any vector containing $(\text{Write Replication} = \text{Synchronous Multi-Datacenter 2PC})$.
+- **Rule 3 (The Durability Invariant Rule):** If invariant $I_{\text{zero_data_loss}} = \text{True}$, eliminate any vector containing $(\text{Durability} = \text{Async Memory Buffer without WAL})$.
 - **Rule 4 (The Axiomatic Coupling Rule):** If altering state partitioning requires modifying client query schemas, data serialization formats, and routing proxies simultaneously, eliminate the vector as a coupled design.
 
 ------------------------------------------------------------------------
@@ -5333,7 +5333,7 @@ To demonstrate the mathematical rigor and practical execution of Operation 4, we
 
 #### Context & Problem Frame (`FRAME-INGEST-01`)
 
-A financial exchange requires a command ingestion subsystem capable of processing **500,000 order cancellations and placements per second** with **\$p99.9 \< 2\text{ ms}\$ tail latency**, strict **idempotency (zero duplicate execution)**, and **zero data loss** across node crashes.
+A financial exchange requires a command ingestion subsystem capable of processing **500,000 order cancellations and placements per second** with **$p99.9 < 2\text{ ms}$ tail latency**, strict **idempotency (zero duplicate execution)**, and **zero data loss** across node crashes.
 
 #### Step 1: Construct the Morphological Field
 
@@ -5361,15 +5361,15 @@ graph LR
     end
 ```
 
-| Dimension | Axis | Option 1 (\$v\_{i,1}\$) | Option 2 (\$v\_{i,2}\$) | Option 3 (\$v\_{i,3}\$) |
+| Dimension | Axis | Option 1 ($v_{i,1}$) | Option 2 ($v_{i,2}$) | Option 3 ($v_{i,3}$) |
 |----|----|----|----|----|
-| **\$D_1\$** | **Ingestion Protocol** | Sync HTTP/REST (`JSON`) | Bidirectional gRPC / Protobuf | Raw TCP with Binary Framing (`Zero-Copy`) |
-| **\$D_2\$** | **Concurrency & State Ownership** | Multi-Threaded Shared State (`Mutex/2PL`) | Key-Partitioned Single-Writer (`LMAX Core`) | Distributed Lock Manager (`Redis/Redlock`) |
-| **\$D_3\$** | **Deduplication Mechanism** | Centralized Database Unique Constraint | Partition-Local In-Memory Cache + Epoch | Sliding-Window Block-Compressed Bloom Filter |
-| **\$D_4\$** | **Durability & Persistence** | Synchronous RDBMS Transaction (`fsync`) | Local Sequential Append-Only WAL (`O_DIRECT`) | Distributed Quorum Log Append (`Raft/Paxos`) |
-| **\$D_5\$** | **Client Acknowledgment** | Immediate upon socket ingress | After sequential WAL append | After full order matching and execution |
+| **$D_1$** | **Ingestion Protocol** | Sync HTTP/REST (`JSON`) | Bidirectional gRPC / Protobuf | Raw TCP with Binary Framing (`Zero-Copy`) |
+| **$D_2$** | **Concurrency & State Ownership** | Multi-Threaded Shared State (`Mutex/2PL`) | Key-Partitioned Single-Writer (`LMAX Core`) | Distributed Lock Manager (`Redis/Redlock`) |
+| **$D_3$** | **Deduplication Mechanism** | Centralized Database Unique Constraint | Partition-Local In-Memory Cache + Epoch | Sliding-Window Block-Compressed Bloom Filter |
+| **$D_4$** | **Durability & Persistence** | Synchronous RDBMS Transaction (`fsync`) | Local Sequential Append-Only WAL (`O_DIRECT`) | Distributed Quorum Log Append (`Raft/Paxos`) |
+| **$D_5$** | **Client Acknowledgment** | Immediate upon socket ingress | After sequential WAL append | After full order matching and execution |
 
-\$\$\text{Raw Theoretical Space: } \|\mathcal{S}\| = 3 \times 3 \times 3 \times 3 \times 3 = 243 \text{ configurations}\$\$
+$$\text{Raw Theoretical Space: } \|\mathcal{S}\| = 3 \times 3 \times 3 \times 3 \times 3 = 243 \text{ configurations}$$
 
 #### Step 2: Binary Compatibility & Invariant Pruning Matrix
 
@@ -5382,10 +5382,10 @@ graph LR
 
 *Pruning Rationale:*
 
-- \$C(v\_{1,3}, v\_{2,1}) = 0\$: High-speed raw TCP zero-copy ingestion cannot scale on multi-threaded shared mutex contention (Gunther USL coherency collapse).
-- \$C(v\_{2,2}, v\_{4,1}) = 0\$: Single-writer thread pinned to a CPU core cannot execute synchronous blocking RDBMS JDBC/ODBC network calls.
-- \$F\_{\text{inv}}(v\_{4,1}) = 0\$: Synchronous RDBMS inserts yield max ~5,000 IOPS per disk; violates the 500,000 req/s throughput invariant by two orders of magnitude.
-- \$F\_{\text{inv}}(v\_{2,3}) = 0\$: Distributed lock over network incurs \$1\text{ ms}\$ minimum RTT; violates the \$p99.9 \< 2\text{ ms}\$ end-to-end latency budget.
+- $C(v_{1,3}, v_{2,1}) = 0$: High-speed raw TCP zero-copy ingestion cannot scale on multi-threaded shared mutex contention (Gunther USL coherency collapse).
+- $C(v_{2,2}, v_{4,1}) = 0$: Single-writer thread pinned to a CPU core cannot execute synchronous blocking RDBMS JDBC/ODBC network calls.
+- $F_{\text{inv}}(v_{4,1}) = 0$: Synchronous RDBMS inserts yield max ~5,000 IOPS per disk; violates the 500,000 req/s throughput invariant by two orders of magnitude.
+- $F_{\text{inv}}(v_{2,3}) = 0$: Distributed lock over network incurs $1\text{ ms}$ minimum RTT; violates the $p99.9 < 2\text{ ms}$ end-to-end latency budget.
 
 #### Step 3: Synthesis of Surviving Orthogonal Candidate Mechanisms
 
@@ -5416,13 +5416,13 @@ flowchart TD
 
 #### Step 4: Candidate Comparison Matrix
 
-| Candidate ID | Architecture Vector | Throughput Capacity | Tail Latency (\$p99.9\$) | Fault Recovery Time | Operational Complexity |
+| Candidate ID | Architecture Vector | Throughput Capacity | Tail Latency ($p99.9$) | Fault Recovery Time | Operational Complexity |
 |----|----|----|----|----|----|
-| **`CAN-INGEST-01`** | \$(v\_{1,3}, v\_{2,2}, v\_{3,2}, v\_{4,2}, v\_{5,2})\$ | \$\> 1,200,000\text{ req/s}\$ | \$0.15\text{ ms}\$ | \$1.2\text{ s}\$ (WAL Replay) | High (C++/Rust, Kernel tuning) |
-| **`CAN-INGEST-02`** | \$(v\_{1,2}, v\_{2,2}, v\_{3,3}, v\_{4,3}, v\_{5,2})\$ | \$\approx 450,000\text{ req/s}\$ | \$1.85\text{ ms}\$ | \$\< 0.1\text{ s}\$ (Raft Failover) | Medium (Erlang/Akka/Raft) |
-| **`CAN-INGEST-03`** | \$(v\_{1,1}, v\_{2,1}, v\_{3,2}, v\_{4,3}, v\_{5,1})\$ | \$\approx 150,000\text{ req/s}\$ | \$12.50\text{ ms}\$ | Instant (Stateless) | Low (Managed Cloud) |
+| **`CAN-INGEST-01`** | $(v_{1,3}, v_{2,2}, v_{3,2}, v_{4,2}, v_{5,2})$ | $> 1,200,000\text{ req/s}$ | $0.15\text{ ms}$ | $1.2\text{ s}$ (WAL Replay) | High (C++/Rust, Kernel tuning) |
+| **`CAN-INGEST-02`** | $(v_{1,2}, v_{2,2}, v_{3,3}, v_{4,3}, v_{5,2})$ | $\approx 450,000\text{ req/s}$ | $1.85\text{ ms}$ | $< 0.1\text{ s}$ (Raft Failover) | Medium (Erlang/Akka/Raft) |
+| **`CAN-INGEST-03`** | $(v_{1,1}, v_{2,1}, v_{3,2}, v_{4,3}, v_{5,1})$ | $\approx 150,000\text{ req/s}$ | $12.50\text{ ms}$ | Instant (Stateless) | Low (Managed Cloud) |
 
-*Decision Significance:* `CAN-INGEST-01` is selected for the core matching engine, while `CAN-INGEST-02` is selected for customer-facing order entry gateways. `CAN-INGEST-03` is falsified due to latency violation (\$12.5\text{ ms} \> 2\text{ ms}\$).
+*Decision Significance:* `CAN-INGEST-01` is selected for the core matching engine, while `CAN-INGEST-02` is selected for customer-facing order entry gateways. `CAN-INGEST-03` is falsified due to latency violation ($12.5\text{ ms} > 2\text{ ms}$).
 
 ------------------------------------------------------------------------
 
@@ -5432,7 +5432,7 @@ flowchart TD
 
 A global retail banking platform requires user account ledger replication across **three datacenters (US-East, EU-Central, AP-East)** with **WAN latency of 120 ms**.
 
-- **Invariants:** Zero balance overdrafts (Strict Financial Invariant), account balance queries must return in \$\< 10\text{ ms}\$ locally, system must withstand complete loss of any single datacenter without data corruption.
+- **Invariants:** Zero balance overdrafts (Strict Financial Invariant), account balance queries must return in $< 10\text{ ms}$ locally, system must withstand complete loss of any single datacenter without data corruption.
 
 #### Step 1: Construct the Morphological Field
 
@@ -5494,11 +5494,11 @@ flowchart TD
 
 #### Step 4: Axiomatic Design Evaluation
 
-\$\$\mathbf{FR} = \begin{bmatrix} FR_1: \text{Prevent Overdraft} \\ FR_2: \text{Local Read Latency } \< 10\text{ ms} \\ FR_3: \text{Datacenter Fault Tolerance} \end{bmatrix}\$\$
+$$\mathbf{FR} = \begin{bmatrix} FR_1: \text{Prevent Overdraft} \\ FR_2: \text{Local Read Latency } < 10\text{ ms} \\ FR_3: \text{Datacenter Fault Tolerance} \end{bmatrix}$$
 
-For `CAN-REPL-01` (Geo-Partitioned Home Region): \$\$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_3 \end{bmatrix} = \begin{bmatrix} A\_{11} & 0 & 0 \\ 0 & A\_{22} & 0 \\ 0 & 0 & A\_{33} \end{bmatrix} \begin{bmatrix} DP_1: \text{Home-Region Single Raft Leader} \\ DP_2: \text{Leader Lease Local Reads} \\ DP_3: \text{Cross-Region Raft Quorum} \end{bmatrix} \implies \mathbf{Uncoupled ; (Optimal)}\$\$
+For `CAN-REPL-01` (Geo-Partitioned Home Region): $$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_3 \end{bmatrix} = \begin{bmatrix} A_{11} & 0 & 0 \\ 0 & A_{22} & 0 \\ 0 & 0 & A_{33} \end{bmatrix} \begin{bmatrix} DP_1: \text{Home-Region Single Raft Leader} \\ DP_2: \text{Leader Lease Local Reads} \\ DP_3: \text{Cross-Region Raft Quorum} \end{bmatrix} \implies \mathbf{Uncoupled}\; (\text{Optimal})$$
 
-For `CAN-REPL-02` (Escrow Reservations): \$\$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_3 \end{bmatrix} = \begin{bmatrix} A\_{11} & 0 & 0 \\ A\_{21} & A\_{22} & 0 \\ 0 & 0 & A\_{33} \end{bmatrix} \begin{bmatrix} DP_1: \text{Bounded Escrow Limits} \\ DP_2: \text{Local Escrow Check} \\ DP_3: \text{Distributed Slice Redistribution} \end{bmatrix} \implies \mathbf{Decoupled ; (Viable)}\$\$
+For `CAN-REPL-02` (Escrow Reservations): $$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_3 \end{bmatrix} = \begin{bmatrix} A_{11} & 0 & 0 \\ A_{21} & A_{22} & 0 \\ 0 & 0 & A_{33} \end{bmatrix} \begin{bmatrix} DP_1: \text{Bounded Escrow Limits} \\ DP_2: \text{Local Escrow Check} \\ DP_3: \text{Distributed Slice Redistribution} \end{bmatrix} \implies \mathbf{Decoupled}\; (\text{Viable})$$
 
 ------------------------------------------------------------------------
 
@@ -5508,7 +5508,7 @@ For `CAN-REPL-02` (Escrow Reservations): \$\$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_
 
 An e-commerce marketplace receives **20,000 product updates per second** and serves **100,000 search queries per second** over a catalog of **50,000,000 items**.
 
-- **Invariants:** Document search visibility delay \$t\_{\text{visibility}} \< 1.0\text{ s}\$, search query response time \$p95 \< 25\text{ ms}\$, zero lost updates during index compaction.
+- **Invariants:** Document search visibility delay $t_{\text{visibility}} < 1.0\text{ s}$, search query response time $p95 < 25\text{ ms}$, zero lost updates during index compaction.
 
 #### Step 1: Morphological Field
 
@@ -5549,11 +5549,11 @@ flowchart TD
 
 #### Step 3: Candidate Trade-Off Map
 
-| Candidate | Freshness Latency (\$t\_{\text{vis}}\$) | Query \$p95\$ | RAM Footprint | Re-indexing Time |
+| Candidate | Freshness Latency ($t_{\text{vis}}$) | Query $p95$ | RAM Footprint | Re-indexing Time |
 |----|----|----|----|----|
-| **`CAN-SEARCH-01`** (CDC + Elasticsearch) | \$1.2 - 2.5\text{ s}\$ | \$22\text{ ms}\$ | \$128\text{ GB}\$ | \$4.5\text{ hours}\$ |
-| **`CAN-SEARCH-02`** (CDC + Embedded Tantivy) | \$0.2 - 0.5\text{ s}\$ | \$4.5\text{ ms}\$ | \$48\text{ GB}\$ | \$35\text{ minutes}\$ |
-| **`CAN-SEARCH-03`** (Hybrid Vector/Sparse) | \$0.8 - 1.5\text{ s}\$ | \$14\text{ ms}\$ | \$256\text{ GB}\$ (GPU VRAM) | \$2.0\text{ hours}\$ |
+| **`CAN-SEARCH-01`** (CDC + Elasticsearch) | $1.2 - 2.5\text{ s}$ | $22\text{ ms}$ | $128\text{ GB}$ | $4.5\text{ hours}$ |
+| **`CAN-SEARCH-02`** (CDC + Embedded Tantivy) | $0.2 - 0.5\text{ s}$ | $4.5\text{ ms}$ | $48\text{ GB}$ | $35\text{ minutes}$ |
+| **`CAN-SEARCH-03`** (Hybrid Vector/Sparse) | $0.8 - 1.5\text{ s}$ | $14\text{ ms}$ | $256\text{ GB}$ (GPU VRAM) | $2.0\text{ hours}$ |
 
 ------------------------------------------------------------------------
 
@@ -5567,12 +5567,12 @@ A global cloud infrastructure provider meters API, compute, and storage usage ac
 
 #### Step 1: Morphological Field
 
-| Dimension | Axis | Option 1 (\$v\_{i,1}\$) | Option 2 (\$v\_{i,2}\$) | Option 3 (\$v\_{i,3}\$) |
+| Dimension | Axis | Option 1 ($v_{i,1}$) | Option 2 ($v_{i,2}$) | Option 3 ($v_{i,3}$) |
 |----|----|----|----|----|
-| **\$D_1\$** | **Metering Ingestion** | Push API Gateway (`HTTP`) | Distributed Event Log (`Kafka`) | Client-Side Aggregation Agent (`UDP/gRPC`) |
-| **\$D_2\$** | **Aggregation Engine** | Real-Time Stream Windows (`Flink`) | Micro-Batch Worker (`Spark/DuckDB`) | In-Database Incremental View (`ClickHouse`) |
-| **\$D_3\$** | **Ledger State Model** | Mutable Account Balances (`UPDATE`) | Immutable Double-Entry Ledger (`Append-Only`) | State Machine Event Sourcing (`Snapshots`) |
-| **\$D_4\$** | **Quota Enforcement** | Synchronous Centralized Check | Local Credit-Lease Bucket at Gateway | Asynchronous Soft-Limit Alerting |
+| **$D_1$** | **Metering Ingestion** | Push API Gateway (`HTTP`) | Distributed Event Log (`Kafka`) | Client-Side Aggregation Agent (`UDP/gRPC`) |
+| **$D_2$** | **Aggregation Engine** | Real-Time Stream Windows (`Flink`) | Micro-Batch Worker (`Spark/DuckDB`) | In-Database Incremental View (`ClickHouse`) |
+| **$D_3$** | **Ledger State Model** | Mutable Account Balances (`UPDATE`) | Immutable Double-Entry Ledger (`Append-Only`) | State Machine Event Sourcing (`Snapshots`) |
+| **$D_4$** | **Quota Enforcement** | Synchronous Centralized Check | Local Credit-Lease Bucket at Gateway | Asynchronous Soft-Limit Alerting |
 
 #### Step 2: Synthesis and Candidate Vectors
 
@@ -5752,9 +5752,9 @@ flowchart TD
 
 ### Quantitative & Qualitative Stop Conditions:
 
-1.  **Structural Diversity Threshold (\$\theta\_{\text{diversity}} \ge 0.50\$):** The pairwise normalized Hamming distance between any two surviving candidate vectors must be \$\ge 0.50\$.
-2.  **Mechanistic Orthogonality:** No two candidates may share the same combination of state ownership model (\$D_1\$) and consistency guarantee (\$D_2\$). If two candidates differ only by library (for example, Kafka vs. Redpanda) or language (for example, Go vs. Rust), they must be collapsed into a single Candidate Mechanism.
-3.  **Decoupled Axiomatic Matrix:** Every surviving candidate must possess an uncoupled or decoupled design matrix \$\[A\]\$ with no non-eliminable circular feedback loops.
+1.  **Structural Diversity Threshold ($\theta_{\text{diversity}} \ge 0.50$):** The pairwise normalized Hamming distance between any two surviving candidate vectors must be $\ge 0.50$.
+2.  **Mechanistic Orthogonality:** No two candidates may share the same combination of state ownership model ($D_1$) and consistency guarantee ($D_2$). If two candidates differ only by library (for example, Kafka vs. Redpanda) or language (for example, Go vs. Rust), they must be collapsed into a single Candidate Mechanism.
+3.  **Decoupled Axiomatic Matrix:** Every surviving candidate must possess an uncoupled or decoupled design matrix $[A]$ with no non-eliminable circular feedback loops.
 4.  **Falsification Bounding:** Every candidate must be paired with at least one concrete **Evidence Request (`EVDREQ-`)** specifying a benchmark, proof, or test capable of decisively disproving its viability.
 
 ------------------------------------------------------------------------
@@ -5775,12 +5775,12 @@ graph TD
 ### 1. The Synonym Trap (Cosmetic Permutation)
 
 - **Defect:** Presenting "Option A: Java Spring Boot + PostgreSQL", "Option B: Go Fiber + MySQL", and "Option C: Node.js Fastify + MariaDB" as three distinct architectures.
-- **Correction:** Recognize that all three share the exact same configuration vector \$(v\_{\text{HTTP}}, v\_{\text{Centralized RDBMS}}, v\_{\text{Sync 2PL}}, v\_{\text{Stateless Compute}})\$. They represent **one** candidate. Force exploration into decentralized, log-centric, or single-writer paradigms.
+- **Correction:** Recognize that all three share the exact same configuration vector $(v_{\text{HTTP}}, v_{\text{Centralized RDBMS}}, v_{\text{Sync 2PL}}, v_{\text{Stateless Compute}})$. They represent **one** candidate. Force exploration into decentralized, log-centric, or single-writer paradigms.
 
 ### 2. Combinatorial Explosion Without Systematic Pruning
 
-- **Defect:** Expanding a 10-dimension morphological field into \$3^{10} = 59,049\$ raw combinations and attempting to evaluate all of them manually or in downstream operations.
-- **Correction:** Apply Tier-1 invariant filtering and Tier-2 binary compatibility matrices immediately during field construction to eliminate \$\> 98%\$ of unviable configurations.
+- **Defect:** Expanding a 10-dimension morphological field into $3^{10} = 59,049$ raw combinations and attempting to evaluate all of them manually or in downstream operations.
+- **Correction:** Apply Tier-1 invariant filtering and Tier-2 binary compatibility matrices immediately during field construction to eliminate $> 98\%$ of unviable configurations.
 
 ### 3. Invariant Conflation (False Constraints)
 
@@ -5795,7 +5795,7 @@ graph TD
 ### 5. Coupled Spaghetti Generation (Violating Suh's Independence Axiom)
 
 - **Defect:** Synthesizing candidate vectors where multiple functional requirements are inextricably entangled across shared mutable state, creating cascading failure modes.
-- **Correction:** Construct Suh's Design Matrix \$\[A\]\$. If \$\[A\]\$ is fully coupled, reject the candidate and re-partition boundaries along natural domain fault lines.
+- **Correction:** Construct Suh's Design Matrix $[A]$. If $[A]$ is fully coupled, reject the candidate and re-partition boundaries along natural domain fault lines.
 
 ------------------------------------------------------------------------
 
@@ -5816,9 +5816,9 @@ The human failure is often a search-cost and status calculation. The agent failu
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Decision-significant unknown, \$UNK\$ | Missing information whose possible values can change the preferred action. | Whether the deployed database can build the index without a blocking validation phase determines whether the candidate survives. |
-| Evidence request, \$EVDREQ\$ | A bounded procedure and expected observation designed to resolve or discriminate a claim. | “Clone the production schema on version 15.4, run the index build under 2k writes/s, and record lock waits and p99.” |
-| Expected value of information, \$EVOI\$ | Expected decision loss avoided by evidence minus the cost of obtaining it. | A ten-minute rehearsal is valuable when it can prevent a six-week dead-end; reading unrelated migration articles is not. |
+| Decision-significant unknown, $UNK$ | Missing information whose possible values can change the preferred action. | Whether the deployed database can build the index without a blocking validation phase determines whether the candidate survives. |
+| Evidence request, $EVDREQ$ | A bounded procedure and expected observation designed to resolve or discriminate a claim. | “Clone the production schema on version 15.4, run the index build under 2k writes/s, and record lock waits and p99.” |
+| Expected value of information, $EVOI$ | Expected decision loss avoided by evidence minus the cost of obtaining it. | A ten-minute rehearsal is valuable when it can prevent a six-week dead-end; reading unrelated migration articles is not. |
 | Transitive invalidation | Falsification of a premise invalidates dependent hypotheses, candidates, and decisions. | The unsupported online-build premise reopens the migration architecture and every rollout estimate derived from it. |
 
 ## 1. Why knowledge expansion comes first
@@ -5879,13 +5879,13 @@ Do not use Operation 5 for passive reading or open-ended research. First state t
 
 Every activation of Operation 5 must be governed by a strict operational calculus:
 
-\$\$\text{Actionable Knowledge} = \arg\min\_{E \in \mathcal{E}} \left{ \text{Cost}(E) ;\middle\|; \mathbb{P}\left(\text{Falsify}(\text{Hypothesis}) \mid E\right) \> 0 \right}\$\$
+$$\text{Actionable Knowledge} = \arg\min_{E \in \mathcal{E}} \left\{ \text{Cost}(E) \middle| \mathbb{P}\left(\text{Falsify}(\text{Hypothesis}) \mid E\right) > 0 \right\}$$
 
 Where:
 
-- \$\mathcal{E}\$ is the set of available epistemic procedures (code mining, git archaeology, AST analysis, telemetry queries, microbenchmarks, chaos experiments).
-- \$\text{Cost}(E)\$ is the total engineering, computational, and latency cost of executing the evidence gathering procedure \$E\$.
-- \$\text{Falsify}(\text{Hypothesis})\$ is the empirical disproof of a working premise, assumption, or candidate mechanism.
+- $\mathcal{E}$ is the set of available epistemic procedures (code mining, git archaeology, AST analysis, telemetry queries, microbenchmarks, chaos experiments).
+- $\text{Cost}(E)$ is the total engineering, computational, and latency cost of executing the evidence gathering procedure $E$.
+- $\text{Falsify}(\text{Hypothesis})$ is the empirical disproof of a working premise, assumption, or candidate mechanism.
 
 ------------------------------------------------------------------------
 
@@ -5951,7 +5951,7 @@ classDiagram
 
 In [*The Logic of Scientific Discovery* (Popper, 1959/1934)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper states that successful observations cannot prove an empirical hypothesis. A future observation can still fail. One reproducible counterexample can **falsify** a universal claim:
 
-\$\$\forall x , (P(x) \rightarrow Q(x)) \quad \text{is falsified by} \quad \exists x , (P(x) \land \neg Q(x))\$\$
+$$\forall x,\; (P(x) \rightarrow Q(x)) \quad \text{is falsified by} \quad \exists x , (P(x) \land \neg Q(x))$$
 
 In software engineering:
 
@@ -5972,7 +5972,7 @@ In [*The Sciences of the Artificial* (Simon, 1969, MIT Press)](https://mitpress.
 In [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), Ronald A. Howard defined the **expected value of information (EVOI)**. Use it to decide whether to obtain more information before a decision:
 
 - Information has value only if it can change the decision to a better one.
-- If a test cannot change the selected architecture, its \$\text{EVOI} = 0\$. Do not run it.
+- If a test cannot change the selected architecture, its $\text{EVOI} = 0$. Do not run it.
 - EVOI gives Operation 5 a stop condition. It prevents both unnecessary analysis and unsafe work with unknown facts.
 
 ### 3.4. John Allspaw: Observability, Cognitive Triaging, and Incident Epistemics
@@ -6044,40 +6044,40 @@ flowchart TD
 
 Let:
 
-- \$\Theta = {\theta_1, \theta_2, \dots, \theta_n}\$ be the state space of the true, unobserved system environment (for example, \$\theta_1 = \text{Multi-AZ network } p99 \le 2\text{ms}\$, \$\theta_2 = \text{Multi-AZ network } p99 \> 15\text{ms}\$).
-- \$P(\theta)\$ be the prior probability distribution over \$\Theta\$.
-- \$\mathcal{A} = {a_1, a_2, \dots, a_m}\$ be the set of mutually exclusive candidate architectural actions (for example, \$a_1 = \text{Synchronous Multi-Region Raft Consensus}\$, \$a_2 = \text{Asynchronous Conflict-Free Replicated Data Types (CRDTs)}\$).
-- \$U(a, \theta)\$ be the utility function mapping action \$a\$ in state \$\theta\$ to total system value (accounting for throughput, latency, implementation complexity, operational cost, and failure penalties).
+- $\Theta = \{\theta_1, \theta_2, \dots, \theta_n\}$ be the state space of the true, unobserved system environment (for example, $\theta_1 = \text{Multi-AZ network } p99 \le 2\text{ms}$, $\theta_2 = \text{Multi-AZ network } p99 > 15\text{ms}$).
+- $P(\theta)$ be the prior probability distribution over $\Theta$.
+- $\mathcal{A} = \{a_1, a_2, \dots, a_m\}$ be the set of mutually exclusive candidate architectural actions (for example, $a_1 = \text{Synchronous Multi-Region Raft Consensus}$, $a_2 = \text{Asynchronous Conflict-Free Replicated Data Types (CRDTs)}$).
+- $U(a, \theta)$ be the utility function mapping action $a$ in state $\theta$ to total system value (accounting for throughput, latency, implementation complexity, operational cost, and failure penalties).
 
 ### 4.2. Expected Value of Perfect Information (EVPI)
 
-The **Expected Value of Perfect Information (EVPI)** represents the absolute theoretical upper bound on what an engineering team should spend to eliminate all uncertainty regarding state \$\Theta\$.
+The **Expected Value of Perfect Information (EVPI)** represents the absolute theoretical upper bound on what an engineering team should spend to eliminate all uncertainty regarding state $\Theta$.
 
-1.  **Expected Utility without Additional Information:** \$\$\mathbb{E}\[U\_{\text{no info}}\] = \max\_{a \in \mathcal{A}} \sum\_{\theta \in \Theta} P(\theta) , U(a, \theta)\$\$
+1.  **Expected Utility without Additional Information:** $$\mathbb{E}[U_{\text{no info}}] = \max_{a \in \mathcal{A}} \sum_{\theta \in \Theta} P(\theta)\, U(a, \theta)$$
 
-2.  **Expected Utility with Perfect Information:** If a perfect oracle could reveal the true state \$\theta\$ with certainty, the engineer would select the optimal action for that specific state: \$\$\mathbb{E}\[U\_{\text{perfect info}}\] = \sum\_{\theta \in \Theta} P(\theta) \left( \max\_{a \in \mathcal{A}} U(a, \theta) \right)\$\$
+2.  **Expected Utility with Perfect Information:** If a perfect oracle could reveal the true state $\theta$ with certainty, the engineer would select the optimal action for that specific state: $$\mathbb{E}[U_{\text{perfect info}}] = \sum_{\theta \in \Theta} P(\theta) \left( \max_{a \in \mathcal{A}} U(a, \theta) \right)$$
 
-3.  **EVPI Formulation:** \$\$\text{EVPI} = \mathbb{E}\[U\_{\text{perfect info}}\] - \mathbb{E}\[U\_{\text{no info}}\] = \sum\_{\theta \in \Theta} P(\theta) \left( \max\_{a \in \mathcal{A}} U(a, \theta) \right) - \max\_{a \in \mathcal{A}} \sum\_{\theta \in \Theta} P(\theta) , U(a, \theta)\$\$
+3.  **EVPI Formulation:** $$\text{EVPI} = \mathbb{E}[U_{\text{perfect info}}] - \mathbb{E}[U_{\text{no info}}] = \sum_{\theta \in \Theta} P(\theta) \left( \max_{a \in \mathcal{A}} U(a, \theta) \right) - \max_{a \in \mathcal{A}} \sum_{\theta \in \Theta} P(\theta)\, U(a, \theta)$$
 
-\$\$\text{Theorem 1: } \text{EVPI} \ge 0. \quad \text{EVPI} = 0 \iff \arg\max\_{a \in \mathcal{A}} U(a, \theta) \text{ is identical for all } \theta \text{ where } P(\theta) \> 0.\$\$
+$$\text{Theorem 1: } \text{EVPI} \ge 0. \quad \text{EVPI} = 0 \iff \arg\max_{a \in \mathcal{A}} U(a, \theta) \text{ is identical for all } \theta \text{ where } P(\theta) > 0.$$
 
-*Engineering Interpretation:* If the same architectural candidate is optimal regardless of whether network latency is high or low, measuring network latency has an \$\text{EVPI} = 0\$. Conducting the measurement is engineering waste.
+*Engineering Interpretation:* If the same architectural candidate is optimal regardless of whether network latency is high or low, measuring network latency has an $\text{EVPI} = 0$. Conducting the measurement is engineering waste.
 
 ### 4.3. Expected Value of Imperfect / Sample Information (EVSI) & EVOI
 
 Real-world experiments (benchmarks, spikes, log samples) are noisy, imperfect information sources. Let:
 
-- \$E\$ be an empirical experiment yielding an observation \$y \in \mathcal{Y}\$ (for example, a 24-hour latency trace sample).
-- \$P(y \mid \theta)\$ be the likelihood function of observing outcome \$y\$ given true state \$\theta\$.
-- \$C(E)\$ be the total cost of designing, executing, and analyzing experiment \$E\$.
+- $E$ be an empirical experiment yielding an observation $y \in \mathcal{Y}$ (for example, a 24-hour latency trace sample).
+- $P(y \mid \theta)$ be the likelihood function of observing outcome $y$ given true state $\theta$.
+- $C(E)$ be the total cost of designing, executing, and analyzing experiment $E$.
 
-1.  **Bayesian Posterior Distribution:** Upon observing result \$y\$, the prior belief \$P(\theta)\$ is updated via Bayes' Theorem: \$\$P(\theta \mid y) = \frac{P(y \mid \theta) P(\theta)}{P(y)} = \frac{P(y \mid \theta) P(\theta)}{\sum\_{\theta' \in \Theta} P(y \mid \theta') P(\theta')}\$\$
+1.  **Bayesian Posterior Distribution:** Upon observing result $y$, the prior belief $P(\theta)$ is updated via Bayes' Theorem: $$P(\theta \mid y) = \frac{P(y \mid \theta) P(\theta)}{P(y)} = \frac{P(y \mid \theta) P(\theta)}{\sum_{\theta' \in \Theta} P(y \mid \theta') P(\theta')}$$
 
-2.  **Expected Value of Sample Information (EVSI):** \$\$\text{EVSI}(E) = \sum\_{y \in \mathcal{Y}} P(y) \left( \max\_{a \in \mathcal{A}} \sum\_{\theta \in \Theta} P(\theta \mid y) , U(a, \theta) \right) - \max\_{a \in \mathcal{A}} \sum\_{\theta \in \Theta} P(\theta) , U(a, \theta)\$\$
+2.  **Expected Value of Sample Information (EVSI):** $$\text{EVSI}(E) = \sum_{y \in \mathcal{Y}} P(y) \left( \max_{a \in \mathcal{A}} \sum_{\theta \in \Theta} P(\theta \mid y)\, U(a, \theta) \right) - \max_{a \in \mathcal{A}} \sum_{\theta \in \Theta} P(\theta)\, U(a, \theta)$$
 
-3.  **Expected Value of Information (EVOI):** The net economic value of the experiment after subtracting execution cost: \$\$\text{EVOI}(E) = \text{EVSI}(E) - C(E)\$\$
+3.  **Expected Value of Information (EVOI):** The net economic value of the experiment after subtracting execution cost: $$\text{EVOI}(E) = \text{EVSI}(E) - C(E)$$
 
-\$\$\text{Operational Decision Rule: Execute Experiment } E \iff \text{EVOI}(E) \> 0 \quad \text{and} \quad E = \arg\max\_{E' \in \mathcal{E}} \text{EVOI}(E')\$\$
+$$\text{Operational Decision Rule: Execute Experiment } E \iff \text{EVOI}(E) > 0 \quad \text{and} \quad E = \arg\max_{E' \in \mathcal{E}} \text{EVOI}(E')$$
 
 ------------------------------------------------------------------------
 
@@ -6153,10 +6153,10 @@ Engineers and AI agents must subject every proposed inquiry to the **Decision-Si
 
 | Type Code | Category | Epistemic Focus | Concrete Software Example | Falsification Criterion |
 |----|----|----|----|----|
-| `UNK-PARAM` | Quantitative Parameter | Throughput, latency percentiles, memory footprint, bandwidth, loss rates | What is the real-world \$p99.9\$ round-trip latency between AWS `us-east-1a` and `us-east-1b` under 40Gbps cross-AZ link saturation? | \$p99.9 \> 4.5\text{ ms}\$ invalidates synchronous multi-AZ write-ahead log replication. |
+| `UNK-PARAM` | Quantitative Parameter | Throughput, latency percentiles, memory footprint, bandwidth, loss rates | What is the real-world $p99.9$ round-trip latency between AWS `us-east-1a` and `us-east-1b` under 40Gbps cross-AZ link saturation? | $p99.9 > 4.5\text{ ms}$ invalidates synchronous multi-AZ write-ahead log replication. |
 | `UNK-INVAR` | Behavioral Invariant | State sequencing, concurrency safety, message ordering, idempotency | Does the legacy order processing service guarantee strict monotonic sequence IDs across database reconnects? | Duplicate or out-of-order sequence ID under reconnect invalidates downstream single-writer stream processing. |
-| `UNK-INTEG` | Platform / Cloud Semantics | Third-party APIs, managed database failover time, hypervisor noisy-neighbor jitter | Does AWS Aurora PostgreSQL drop existing read connections during automated multi-AZ master failover? | Connection drop duration \$\> 12\text{ s}\$ invalidates zero-downtime client failover assumption. |
-| `UNK-FEAS` | Algorithmic Feasibility | Feasibility of a mathematical or algorithmic optimization | Can a SIMD-vectorized JSON parser process 2GB/s per core on x86 AVX-512 without triggering CPU frequency throttling? | Core frequency drop \$\> 15%\$ or throughput \$\< 1.5\text{GB/s}\$ invalidates in-line parsing strategy. |
+| `UNK-INTEG` | Platform / Cloud Semantics | Third-party APIs, managed database failover time, hypervisor noisy-neighbor jitter | Does AWS Aurora PostgreSQL drop existing read connections during automated multi-AZ master failover? | Connection drop duration $> 12\text{ s}$ invalidates zero-downtime client failover assumption. |
+| `UNK-FEAS` | Algorithmic Feasibility | Feasibility of a mathematical or algorithmic optimization | Can a SIMD-vectorized JSON parser process 2GB/s per core on x86 AVX-512 without triggering CPU frequency throttling? | Core frequency drop $> 15\%$ or throughput $< 1.5\text{GB/s}$ invalidates in-line parsing strategy. |
 
 ------------------------------------------------------------------------
 
@@ -6206,7 +6206,7 @@ done | awk 'NF > 1 {for(i=1;i<=NF;i++) for(j=i+1;j<=NF;j++) print $i, $j}' | \
 git shortlog -sn --no-merges path/to/critical_module/
 ```
 
-*Epistemic Interpretation of Co-Change Coupling:* If `OrderBillingService.ts` and `InventoryAllocationService.ts` co-change in \$78%\$ of commits over 12 months, any architectural diagram claiming they are "independently deployable microservices" is empirically falsified. They constitute a single distributed monolith.
+*Epistemic Interpretation of Co-Change Coupling:* If `OrderBillingService.ts` and `InventoryAllocationService.ts` co-change in $78\%$ of commits over 12 months, any architectural diagram claiming they are "independently deployable microservices" is empirically falsified. They constitute a single distributed monolith.
 
 #### 5.2.2. AST Analysis and Static Call Graph Extraction
 
@@ -6352,10 +6352,10 @@ flowchart TD
 | Target Software Problem | Conflicting Invariant | Source Domain | Transferred Mechanism | Technical Implementation Details |
 |----|----|----|----|----|
 | **High-Frequency Routing / Feature Flags** | Sub-microsecond reads vs. atomic dynamic runtime updates without global read-write lock contention. | **Linux OS Kernel** | **Read-Copy-Update (RCU) & Epoch Reclamation** | Readers read lock-free through an atomic pointer. Writers create a modified clone of the data structure, perform an atomic pointer swap, and defer old memory reclamation until all active reader epochs conclude ([McKenney & Slingwine, 1998](https://en.wikipedia.org/wiki/Read-copy-update)). |
-| **Microservice Egress Backpressure** | Maximum throughput utilization vs. catastrophic downstream server crash under sudden traffic surges. | **TCP Networking Protocol** | **Additive Increase / Multiplicative Decrease (AIMD) & BBR Congestion Control** | The client tracks inflight RPC requests and round-trip latency. As long as RTT matches baseline, inflight limit increments linearly (\$W \leftarrow W + 1\$). Upon RTT spike or drop, inflight limit decreases multiplicatively (\$W \leftarrow W \times 0.7\$) ([Jacobson, 1988](https://doi.org/10.1145/52324.52356)). |
-| **Distributed Multi-Party Settlement** | Complete auditability and financial data consistency across asynchronous, unreliable microservices. | **Venetian Accounting (1494)** | **Double-Entry Ledger & Idempotent Journal Entries** | Eliminate mutable `account_balance` columns. Every operation is an immutable pair of balanced Debit/Credit entries (\$\sum \text{Debits} = \sum \text{Credits}\$). Balances are precomputed projections from the immutable transaction log ([Paccioli, 1494](https://en.wikipedia.org/wiki/Summa_de_arithmetica)). |
+| **Microservice Egress Backpressure** | Maximum throughput utilization vs. catastrophic downstream server crash under sudden traffic surges. | **TCP Networking Protocol** | **Additive Increase / Multiplicative Decrease (AIMD) & BBR Congestion Control** | The client tracks inflight RPC requests and round-trip latency. As long as RTT matches baseline, inflight limit increments linearly ($W \leftarrow W + 1$). Upon RTT spike or drop, inflight limit decreases multiplicatively ($W \leftarrow W \times 0.7$) ([Jacobson, 1988](https://doi.org/10.1145/52324.52356)). |
+| **Distributed Multi-Party Settlement** | Complete auditability and financial data consistency across asynchronous, unreliable microservices. | **Venetian Accounting (1494)** | **Double-Entry Ledger & Idempotent Journal Entries** | Eliminate mutable `account_balance` columns. Every operation is an immutable pair of balanced Debit/Credit entries ($\sum \text{Debits} = \sum \text{Credits}$). Balances are precomputed projections from the immutable transaction log ([Paccioli, 1494](https://en.wikipedia.org/wiki/Summa_de_arithmetica)). |
 | **High-Throughput In-Memory Queuing** | Multi-producer / multi-consumer thread coordination without CPU cache line bouncing and lock latency. | **CPU Memory Bus Architecture** | **Cache Line Padding & Ring Buffer Sequences (LMAX Disruptor)** | Ring buffer slots and atomic sequence counters are padded with 64 bytes of dummy variables to match CPU L1/L2 cache line sizes (64 bytes), completely eliminating **False Sharing** across CPU cores ([Thompson et al., 2011](https://lmax-exchange.github.io/disruptor/files/Disruptor-1.0.pdf)). |
-| **Distributed Node Liveness & Metadata** | Centralized heartbeat bottle-necking master node vs. stale membership detection across 10,000 nodes. | **Epidemiology & Viral Spread** | **Gossip Protocol (SWIM Membership)** | Nodes periodically exchange membership states with \$k\$ randomly chosen peers. Failure detection uses indirect ping probes through third-party nodes, achieving \$O(\log N)\$ message convergence with zero master bottlenecks ([Das et al., 2002](https://doi.org/10.1109/DSN.2002.1028914)). |
+| **Distributed Node Liveness & Metadata** | Centralized heartbeat bottle-necking master node vs. stale membership detection across 10,000 nodes. | **Epidemiology & Viral Spread** | **Gossip Protocol (SWIM Membership)** | Nodes periodically exchange membership states with $k$ randomly chosen peers. Failure detection uses indirect ping probes through third-party nodes, achieving $O(\log N)$ message convergence with zero master bottlenecks ([Das et al., 2002](https://doi.org/10.1109/DSN.2002.1028914)). |
 
 ------------------------------------------------------------------------
 
@@ -6403,7 +6403,7 @@ An **Epistemic Spike** is a minimal, disposable software artifact designed solel
 **Spike Design Rules:**
 
 1.  **Single Variable Isolation:** Only the parameter under investigation is varied; all other runtime variables (operating system, kernel parameters, hardware class) must remain fixed.
-2.  **Explicit Falsification Threshold:** The test harness must assert against the falsification threshold programmatically (for example, exit code 1 if \$p99 \> 5\text{ms}\$).
+2.  **Explicit Falsification Threshold:** The test harness must assert against the falsification threshold programmatically (for example, exit code 1 if $p99 > 5\text{ms}$).
 3.  **Correction for Coordinated Omission:** Load generators must use open-loop scheduling (Poisson or constant arrival times) rather than closed-loop request-response loops ([Gil Tene, 2015](https://www.infoq.com/presentations/latency-response-time/)).
 
 ------------------------------------------------------------------------
@@ -6417,12 +6417,12 @@ An **Epistemic Spike** is a minimal, disposable software artifact designed solel
 An engineering team is designing a mission-critical financial order-matching engine deployed across AWS Availability Zones (`us-east-1a`, `us-east-1b`, `us-east-1c`).
 
 - **Candidate Mechanism 1 (`CAN-01`):** Synchronous multi-AZ Raft consensus across three AZs for every order write (guaranteeing zero RPO data loss during an entire AZ failure).
-- **Candidate Mechanism 2 (`CAN-02`):** Asynchronous replication to secondary AZs with local in-memory NVMe journaling (sub-millisecond order processing, but theoretical \$10\text{ms}\$ RPO exposure during sudden AZ power loss).
+- **Candidate Mechanism 2 (`CAN-02`):** Asynchronous replication to secondary AZs with local in-memory NVMe journaling (sub-millisecond order processing, but theoretical $10\text{ms}$ RPO exposure during sudden AZ power loss).
 
 #### The Decision-Significant Unknown
 
-- **`UNK-01`:** What is the empirical \$p99.9\$ round-trip latency and jitter distribution of cross-AZ network packets under continuous 10Gbps cross-AZ link saturation?
-- **Decision Impact:** If cross-AZ network \$p99.9 \le 2.0\text{ ms}\$, `CAN-01` satisfies the non-negotiable business invariant of \$p99.9 \le 5.0\text{ ms}\$ total order latency. If cross-AZ network \$p99.9 \> 2.0\text{ ms}\$, `CAN-01` is mathematically unviable and must be pruned.
+- **`UNK-01`:** What is the empirical $p99.9$ round-trip latency and jitter distribution of cross-AZ network packets under continuous 10Gbps cross-AZ link saturation?
+- **Decision Impact:** If cross-AZ network $p99.9 \le 2.0\text{ ms}$, `CAN-01` satisfies the non-negotiable business invariant of $p99.9 \le 5.0\text{ ms}$ total order latency. If cross-AZ network $p99.9 > 2.0\text{ ms}$, `CAN-01` is mathematically unviable and must be pruned.
 
 #### Epistemic Experiment Harness (Go & eBPF)
 
@@ -6546,7 +6546,7 @@ pie title Latency Budget Breakdown for Synchronous Multi-AZ Write (p99.9 = 6.85m
     "Kernel TCP/IP Stack Processing" : 0.50
 ```
 
-- **Epistemic Update:** Hypothesis `HYP-01` (that synchronous multi-AZ Raft can sustain \$p99.9 \le 5.0\text{ ms}\$) is **FALSIFIED**.
+- **Epistemic Update:** Hypothesis `HYP-01` (that synchronous multi-AZ Raft can sustain $p99.9 \le 5.0\text{ ms}$) is **FALSIFIED**.
 - **Transitive Invalidation:** Candidate Mechanism `CAN-01` is eliminated.
 - **Architectural Shift:** The team pivots to `CAN-02` (in-region partitioned single-writer with local NVMe journal + asynchronous cross-AZ Raft replication pipeline), resolving the latency contradiction via **Separation in Space and Time**.
 
@@ -6645,13 +6645,13 @@ The team extracts 14 non-obvious business invariants into typed facts (`FACT-01`
 
 A global API gateway handles 2,000,000 requests/sec across 500 edge nodes. The system must enforce a global tenant rate-limit (for example, "Tenant X is limited to 50,000 req/sec globally").
 
-- **Attempted Solution 1:** Centralized Redis cluster. *Result:* Redis cluster CPU saturated by atomic `INCR` commands; network latency adds \$15\text{ms}\$ overhead to every HTTP request.
+- **Attempted Solution 1:** Centralized Redis cluster. *Result:* Redis cluster CPU saturated by atomic `INCR` commands; network latency adds $15\text{ms}$ overhead to every HTTP request.
 - **Attempted Solution 2:** Local node rate limits (Global Limit / 500 nodes). *Result:* Highly bursty and uneven traffic distribution causes false-positive `429 Too Many Requests` rejections on hot nodes while total global traffic is well below the limit.
 
 #### The Contradiction (`CTR-01`)
 
-- Parameter \$A\$ (Global Limit Accuracy) requires synchronous global state sharing.
-- Parameter \$B\$ (Sub-Millisecond Gateway Latency) forbids synchronous network calls to a central coordinator.
+- Parameter $A$ (Global Limit Accuracy) requires synchronous global state sharing.
+- Parameter $B$ (Sub-Millisecond Gateway Latency) forbids synchronous network calls to a central coordinator.
 
 #### Borrowing from Linux Kernel eBPF & TCP BBR Congestion Control
 
@@ -6682,9 +6682,9 @@ flowchart LR
 
 #### Technical Implementation Details
 
-1.  **Local Execution (Fast Path):** Every edge node evaluates incoming requests in pure memory (zero RPCs) against a local token bucket lease. Latency penalty: \$\< 5\mu\text{s}\$.
-2.  **Asynchronous Credit Renewal (Background Path):** Edge nodes run an asynchronous heartbeat loop every \$100\text{ms}\$. Nodes request credit blocks proportional to their recent arrival velocity (\$V\_{\text{node}} = \frac{\Delta \text{requests}}{\Delta t}\$).
-3.  **Graceful Decay:** If an edge node loses network connectivity to the Central Credit Authority, its local lease expires within \$300\text{ms}\$, safely preventing global over-allocation without blocking traffic.
+1.  **Local Execution (Fast Path):** Every edge node evaluates incoming requests in pure memory (zero RPCs) against a local token bucket lease. Latency penalty: $< 5\mu\text{s}$.
+2.  **Asynchronous Credit Renewal (Background Path):** Edge nodes run an asynchronous heartbeat loop every $100\text{ms}$. Nodes request credit blocks proportional to their recent arrival velocity ($V_{\text{node}} = \frac{\Delta \text{requests}}{\Delta t}$).
+3.  **Graceful Decay:** If an edge node loses network connectivity to the Central Credit Authority, its local lease expires within $300\text{ms}$, safely preventing global over-allocation without blocking traffic.
 
 ------------------------------------------------------------------------
 
@@ -6769,14 +6769,14 @@ public class DistributedCacheBenchmark {
 
 #### Results & Epistemic Verdict
 
-When measured without open-arrival correction (closed loop), the vendor client reported \$p99.9 = 0.85\text{ ms}\$. When measured with **Coordinated Omission Correction**, the true distribution was revealed:
+When measured without open-arrival correction (closed loop), the vendor client reported $p99.9 = 0.85\text{ ms}$. When measured with **Coordinated Omission Correction**, the true distribution was revealed:
 
 | Percentile | Vendor Claimed (Closed Loop) | True Empirical Measurement (Open Arrival) | Status |
 |----|----|----|----|
-| **\$p50\$** | \$0.22\text{ ms}\$ | \$0.24\text{ ms}\$ | PASS |
-| **\$p90\$** | \$0.45\text{ ms}\$ | \$0.58\text{ ms}\$ | PASS |
-| **\$p99\$** | \$0.78\text{ ms}\$ | \$14.20\text{ ms}\$ | **FAIL (GC Pause Spike)** |
-| **\$p99.9\$** | \$0.95\text{ ms}\$ | **\$86.50\text{ ms}\$** | **CRITICAL FAILURE** |
+| **$p50$** | $0.22\text{ ms}$ | $0.24\text{ ms}$ | PASS |
+| **$p90$** | $0.45\text{ ms}$ | $0.58\text{ ms}$ | PASS |
+| **$p99$** | $0.78\text{ ms}$ | $14.20\text{ ms}$ | **FAIL (GC Pause Spike)** |
+| **$p99.9$** | $0.95\text{ ms}$ | **$86.50\text{ ms}$** | **CRITICAL FAILURE** |
 
 *Epistemic Conclusion:* The vendor's internal thread synchronization triggers severe lock convoying when arrival rates exceed network buffer drain rates. The claim is **FALSIFIED**. The architecture team avoids an expensive multi-million dollar vendor contract and keeps their partitioned relational buffer architecture.
 
@@ -6876,9 +6876,9 @@ flowchart TD
 
 ### 8.1. The Four Formal Stop Conditions
 
-1.  **The Mathematical EVOI Stop Condition:** \$\$\text{EVOI}(E) = \mathbb{E}\[\text{Value with Information}\] - \mathbb{E}\[\text{Value without Information}\] - \text{Cost}(E) \le 0\$\$ When the cost of running another benchmark, trace query, or spike exceeds the financial or architectural benefit of reducing the remaining uncertainty, information gathering must stop immediately.
+1.  **The Mathematical EVOI Stop Condition:** $$\text{EVOI}(E) = \mathbb{E}[\text{Value with Information}] - \mathbb{E}[\text{Value without Information}] - \text{Cost}(E) \le 0$$ When the cost of running another benchmark, trace query, or spike exceeds the financial or architectural benefit of reducing the remaining uncertainty, information gathering must stop immediately.
 
-2.  **Decision Invariance:** If candidate mechanism \$A\$ has a higher expected utility than candidate mechanism \$B\$ across all remaining plausible states (\$\forall \theta \in \Theta\_{\text{plausible}}, U(A, \theta) \> U(B, \theta)\$), resolving the exact value of \$\theta\$ cannot change the decision. Stop immediately.
+2.  **Decision Invariance:** If candidate mechanism $A$ has a higher expected utility than candidate mechanism $B$ across all remaining plausible states ($\forall \theta \in \Theta_{\text{plausible}}, U(A, \theta) > U(B, \theta)$), resolving the exact value of $\theta$ cannot change the decision. Stop immediately.
 
 3.  **Satisficing Invariant Threshold:** When all non-negotiable safety and liveness invariants (for example, zero data loss, memory safety, legal compliance) are backed by empirical proof (`FACT` or `MEASURED`), and remaining uncertainties only affect secondary preferences (for example, whether CPU utilization is 35% vs 42%), further experimentation is unwarranted.
 
@@ -7020,14 +7020,14 @@ Humans tend to preserve social topology. Agents tend to mistake visible indirect
 |---|---|---|
 | Essential coupling | Dependency required by a domain invariant. | Settlement must know the authorized amount; removing that information changes the business rule. The contract should expose only that necessity. |
 | Accidental coupling | Dependency introduced by a replaceable implementation or coordination choice. | Notifications read tax fields from checkout's table and therefore require synchronized schema releases; no domain invariant requires the shared table. |
-| Change radius, \$R(M)\$ | Transitive set of artifacts, services, schemas, pipelines, and owners affected by changing mechanism \$M\$. | Git history and deployment records show that one tax-rule edit consistently touches twelve modules and five teams. |
+| Change radius, $R(M)$ | Transitive set of artifacts, services, schemas, pipelines, and owners affected by changing mechanism $M$. | Git history and deployment records show that one tax-rule edit consistently touches twelve modules and five teams. |
 | Design Structure Matrix | Matrix representation of dependency edges used to expose cycles and clusters. | A dense cyclic block predicts synchronized releases and tells the architect where a boundary claim is false. |
 
 ## Purpose and Main Question
 
 ### The role of dependency arrangement
 
-**Operation 6: Arrange Dependencies and Change Boundaries** governs the structural topology of software systems. [Operation 1](#operation-1-frame-and-model-the-software-problem) frames behavioral deltas. [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions and bottlenecks. [Operation 3](#operation-3-transform-the-existing-software-system) applies physical and structural transformations. Operation 6 resolves **structural and coupling uncertainty** (\$U\_{\text{dep}}\$).
+**Operation 6: Arrange Dependencies and Change Boundaries** governs the structural topology of software systems. [Operation 1](#operation-1-frame-and-model-the-software-problem) frames behavioral deltas. [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions and bottlenecks. [Operation 3](#operation-3-transform-the-existing-software-system) applies physical and structural transformations. Operation 6 resolves **structural and coupling uncertainty** ($U_{\text{dep}}$).
 
 ``` mermaid
 flowchart TD
@@ -7078,7 +7078,7 @@ Software architecture is not defined by deployment topology, microservice count,
 2. **The direction in which changes propagate** through the system
 3. **The isolation of volatility** behind stable, invariant contracts
 
-When an engineer or AI agent evaluates a system, the central question is not *"How many services exist?"* The question is: *"When requirement \$R_1\$ changes, what set of modules, databases, deployment pipelines, and teams must change, and does this set intersect with the carriers of independent requirement \$R_2\$?"*
+When an engineer or AI agent evaluates a system, the central question is not *"How many services exist?"* The question is: *"When requirement $R_1$ changes, what set of modules, databases, deployment pipelines, and teams must change, and does this set intersect with the carriers of independent requirement $R_2$?"*
 
 If a change to a tax calculation algorithm requires a change to the checkout UI, a redeploy of the notification service, or a migration of a shared database table, the system has **accidental coupling**. Operation 6 eliminates accidental coupling. It makes **essential coupling** explicit, minimal, and verified.
 
@@ -7088,7 +7088,7 @@ If a change to a tax calculation algorithm requires a change to the checkout UI,
 
 To structure dependencies effectively, an engineer must distinguish between two fundamental forms of coupling:
 
-\$\$\text{Coupling}*{\text{total}} = \text{Coupling}*{\text{essential}} + \text{Coupling}\_{\text{accidental}}\$\$
+$$\text{Coupling}_{\text{total}} = \text{Coupling}_{\text{essential}} + \text{Coupling}_{\text{accidental}}$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                ESSENTIAL VS. ACCIDENTAL COUPLING                                 │
@@ -7172,7 +7172,7 @@ classDiagram
 
 In his seminal paper [*On the Criteria To Be Used in Decomposing Systems into Modules* (CACM, 1972, DOI: 10.1145/361598.361623)](https://dl.acm.org/doi/10.1145/361598.361623), David L. Parnas contrasted two modularization strategies for a Keyword in Context (KWIC) index system:
 
-1.  **Decomposition by Flowchart / Processing Steps**: Subsystems correspond to execution phases (Input \$\to\$ Circular Shift \$\to\$ Alphabetize \$\to\$ Output).
+1.  **Decomposition by Flowchart / Processing Steps**: Subsystems correspond to execution phases (Input $\to$ Circular Shift $\to$ Alphabetize $\to$ Output).
 2.  **Decomposition by Information Hiding**: Each module encapsulates a **volatile design decision (a "secret")** that is likely to change independently of others.
 
 Parnas proved that flowchart-based decomposition creates widespread accidental coupling: every module requires direct knowledge of shared in-memory data representations. When the data representation changes, every module in the pipeline must be modified.
@@ -7201,24 +7201,24 @@ In [*Clean Architecture: A Craftsman's Guide to Software Structure and Design* (
 
 #### The Mathematical Calculus of the Main Sequence
 
-Let a component (package or module) \$K\$ possess:
+Let a component (package or module) $K$ possess:
 
-- \$C_a\$ (**Afferent Coupling**): Number of classes outside \$K\$ that depend on classes inside \$K\$ (incoming dependencies).
-- \$C_e\$ (**Efferent Coupling**): Number of classes inside \$K\$ that depend on classes outside \$K\$ (outgoing dependencies).
-- \$N_a\$: Number of abstract classes and interfaces in \$K\$.
-- \$N_c\$: Total number of classes and interfaces in \$K\$.
+- $C_a$ (**Afferent Coupling**): Number of classes outside $K$ that depend on classes inside $K$ (incoming dependencies).
+- $C_e$ (**Efferent Coupling**): Number of classes inside $K$ that depend on classes outside $K$ (outgoing dependencies).
+- $N_a$: Number of abstract classes and interfaces in $K$.
+- $N_c$: Total number of classes and interfaces in $K$.
 
 We define:
 
-\$\$\text{Instability } I = \frac{C_e}{C_a + C_e}, \quad I \in \[0, 1\]\$\$
+$$\text{Instability } I = \frac{C_e}{C_a + C_e}, \quad I \in [0, 1]$$
 
-- \$I = 0\$: Maximally stable component (heavy incoming dependencies, zero outgoing dependencies; for example, a core domain interface package).
-- \$I = 1\$: Maximally unstable component (zero incoming dependencies, heavy outgoing dependencies; for example, a top-level CLI or UI entry point).
+- $I = 0$: Maximally stable component (heavy incoming dependencies, zero outgoing dependencies; for example, a core domain interface package).
+- $I = 1$: Maximally unstable component (zero incoming dependencies, heavy outgoing dependencies; for example, a top-level CLI or UI entry point).
 
-\$\$\text{Abstractness } A = \frac{N_a}{N_c}, \quad A \in \[0, 1\]\$\$
+$$\text{Abstractness } A = \frac{N_a}{N_c}, \quad A \in [0, 1]$$
 
-- \$A = 0\$: Maximally concrete component (contains only executable implementations).
-- \$A = 1\$: Maximally abstract component (contains purely abstract interfaces).
+- $A = 0$: Maximally concrete component (contains only executable implementations).
+- $A = 1$: Maximally abstract component (contains purely abstract interfaces).
 
 <!-- -->
 
@@ -7241,13 +7241,13 @@ We define:
          0.0 (Stable)                       1.0 (Unstable)
                            Instability (I)
 
-The **Normalized Distance from the Main Sequence (\$D\$)** measures structural balance:
+The **Normalized Distance from the Main Sequence ($D$)** measures structural balance:
 
-\$\$D = \|A + I - 1\|, \quad D \in \[0, 1\]\$\$
+$$D = \|A + I - 1\|, \quad D \in [0, 1]$$
 
-- **Optimal Design (\$D \approx 0\$)**: The component sits on the Main Sequence. Highly stable components (\$I \to 0\$) are highly abstract (\$A \to 1\$), allowing them to be extended without modification. Highly unstable components (\$I \to 1\$) are concrete (\$A \to 0\$), making them easy to write and modify without breaking dependents.
-- **Zone of Pain (\$A \to 0, I \to 0 \implies D \to 1\$)**: The component is concrete, rigid, and heavily depended upon. Modifying it causes widespread breaking changes across the entire system (for example, a massive shared utility class or a monolithic database entity model).
-- **Zone of Uselessness (\$A \to 1, I \to 1 \implies D \to 1\$)**: The component contains abstract interfaces that nobody implements or depends on (pure architectural overhead and unnecessary indirection).
+- **Optimal Design ($D \approx 0$)**: The component sits on the Main Sequence. Highly stable components ($I \to 0$) are highly abstract ($A \to 1$), allowing them to be extended without modification. Highly unstable components ($I \to 1$) are concrete ($A \to 0$), making them easy to write and modify without breaking dependents.
+- **Zone of Pain ($A \to 0, I \to 0 \implies D \to 1$)**: The component is concrete, rigid, and heavily depended upon. Modifying it causes widespread breaking changes across the entire system (for example, a massive shared utility class or a monolithic database entity model).
+- **Zone of Uselessness ($A \to 1, I \to 1 \implies D \to 1$)**: The component contains abstract interfaces that nobody implements or depends on (pure architectural overhead and unnecessary indirection).
 
 ------------------------------------------------------------------------
 
@@ -7303,7 +7303,7 @@ In [*Design Rules: The Power of Modularity* (MIT Press, 2000)](https://mitpress.
 1.  **Visible Design Rules (Architecture, Interfaces, Standards)**: Decisions that affect multiple modules, established early and kept strictly stable.
 2.  **Hidden Design Parameters**: Decisions that affect only the interior of a single module, free to change and evolve without cross-system coordination.
 
-Baldwin and Clark formalized the **Design Structure Matrix (DSM)** as an \$N \times N\$ adjacency matrix representing inter-component dependencies, and proved that modularity creates **real options value**: the ability to modify, substitute, or discard a single module at low cost without destabilizing the rest of the enterprise system.
+Baldwin and Clark formalized the **Design Structure Matrix (DSM)** as an $N \times N$ adjacency matrix representing inter-component dependencies, and proved that modularity creates **real options value**: the ability to modify, substitute, or discard a single module at low cost without destabilizing the rest of the enterprise system.
 
 ------------------------------------------------------------------------
 
@@ -7311,7 +7311,7 @@ Baldwin and Clark formalized the **Design Structure Matrix (DSM)** as an \$N \ti
 
 In [*How Buildings Learn: What Happens After They're Built* (Viking, 1994)](https://www.penguinrandomhouse.com/books/292676/how-buildings-learn-by-stewart-brand/), Stewart Brand observed that buildings adapt successfully over decades because they are structured into distinct **Shearing Layers** that change at fundamentally different rates:
 
-- **Site** (Geological; centuries) \$\to\$ **Structure** (Foundation & Load-bearing; 30–300 years) \$\to\$ **Skin** (Exterior facade; 20 years) \$\to\$ **Services** (HVAC, plumbing, electrical; 7–15 years) \$\to\$ **Space Plan** (Interior walls, layout; 3 years) \$\to\$ **Stuff** (Furniture, appliances; daily).
+- **Site** (Geological; centuries) $\to$ **Structure** (Foundation & Load-bearing; 30–300 years) $\to$ **Skin** (Exterior facade; 20 years) $\to$ **Services** (HVAC, plumbing, electrical; 7–15 years) $\to$ **Space Plan** (Interior walls, layout; 3 years) $\to$ **Stuff** (Furniture, appliances; daily).
 
 <!-- -->
 
@@ -7397,7 +7397,7 @@ mindmap
 ### 2.1. Vector 1: Source Code & Compilation Coupling
 
 - **Mechanism**: Direct language-level references to concrete classes, static singletons, global functions, or shared monorepo packages.
-- **Failure Mode**: A change to a private field or method signature in package \$A\$ forces recompilation, relinking, or type-checking errors across packages \$B, C,\$ and \$D\$.
+- **Failure Mode**: A change to a private field or method signature in package $A$ forces recompilation, relinking, or type-checking errors across packages $B, C,$ and $D$.
 - **Mitigation**: Dependency Inversion Principle (DIP); consumer-defined interfaces; abstract factories; package boundary enforcement tools (for example, Nx, Bazel visibility rules, ArchUnit).
 
 ### 2.2. Vector 2: Data Model & Schema Coupling
@@ -7409,17 +7409,17 @@ mindmap
 ### 2.3. Vector 3: Database & Storage Coupling
 
 - **Mechanism**: Multiple services reading and writing directly to the same database tables, using cross-schema foreign keys, or sharing transactional locks.
-- **Failure Mode**: Team \$A\$ adds an index or renames a column in table `accounts` to optimize a search query, inadvertently deadlocking or crashing the batch billing job managed by Team \$B\$.
+- **Failure Mode**: Team $A$ adds an index or renames a column in table `accounts` to optimize a search query, inadvertently deadlocking or crashing the batch billing job managed by Team $B$.
 - **Mitigation**: Strict single-service data ownership; eliminating cross-service direct DB access; exposing data exclusively via APIs, Change Data Capture (CDC), or asynchronous event streams.
 
 ### 2.4. Vector 4: Temporal & Execution Coupling
 
-- **Mechanism**: Synchronous, blocking request-reply chains (\$A \to B \to C \to D\$) where service \$A\$ cannot complete its transaction until \$D\$ responds, or where operations must execute in a strict lockstep chronological window.
+- **Mechanism**: Synchronous, blocking request-reply chains ($A \to B \to C \to D$) where service $A$ cannot complete its transaction until $D$ responds, or where operations must execute in a strict lockstep chronological window.
 - **Failure Mode**: Latency summation and availability multiplication:
 
-\$\$A\_{\text{system}} = \prod\_{i=1}^N A_i, \quad \text{Latency}*{\text{total}} = \sum*{i=1}^N \text{Latency}\_i\$\$
+$$A_{\text{system}} = \prod_{i=1}^N A_i, \quad \text{Latency}_{\text{total}} = \sum_{i=1}^N \text{Latency}_i$$
 
-An outage or \$500\text{ ms}\$ latency degradation in service \$D\$ immediately cascades upward, exhausting thread pools in \$C, B,\$ and \$A\$.
+An outage or $500\text{ ms}$ latency degradation in service $D$ immediately cascades upward, exhausting thread pools in $C, B,$ and $A$.
 
 - **Mitigation**: Asynchronous messaging; transactional Outbox pattern; event-driven choreography; eventual consistency; fallback caching.
 
@@ -7432,7 +7432,7 @@ An outage or \$500\text{ ms}\$ latency degradation in service \$D\$ immediately 
 ### 2.6. Vector 6: Third-Party & Binary Dependency Coupling
 
 - **Mechanism**: Multiple internal modules depending on differing versions of a shared third-party library or native runtime binary (the "Diamond Dependency" problem).
-- **Failure Mode**: Upgrading library `lib-crypto` to patch a security vulnerability in Service \$A\$ breaks Service \$B\$ because a shared core utility requires an incompatible older version of the same library.
+- **Failure Mode**: Upgrading library `lib-crypto` to patch a security vulnerability in Service $A$ breaks Service $B$ because a shared core utility requires an incompatible older version of the same library.
 - **Mitigation**: Shading/vendoring; isolating third-party dependencies behind internal adapter interfaces; micro-packaging.
 
 ### 2.7. Vector 7: Infrastructure & Co-location Coupling
@@ -7485,10 +7485,10 @@ An outage or \$500\text{ ms}\$ latency degradation in service \$D\$ immediately 
 
 #### 3.1.1. Constructing the Design Structure Matrix (DSM)
 
-The **Design Structure Matrix (DSM)** is an \$N \times N\$ square matrix where rows and columns represent identical system components (modules, packages, or services).
+The **Design Structure Matrix (DSM)** is an $N \times N$ square matrix where rows and columns represent identical system components (modules, packages, or services).
 
-- An entry at row \$i\$, column \$j\$ (\$M\_{ij}\$) indicates that **Component \$i\$ depends on Component \$j\$**.
-- Diagonal elements (\$M\_{ii}\$) represent internal module cohesion.
+- An entry at row $i$, column $j$ ($M_{ij}$) indicates that **Component $i$ depends on Component $j$**.
+- Diagonal elements ($M_{ii}$) represent internal module cohesion.
 - **Feed-forward dependencies** (clean architecture) appear in the lower triangular matrix below the diagonal.
 - **Cyclic dependencies (architectural defects)** appear in the upper triangular matrix above the diagonal.
 
@@ -7514,7 +7514,7 @@ Through algorithmic **partitioning** (matrix reordering based on topological sor
         └─C [ .     1   .   .   . ]  <-- Unresolved feedback loop requiring DIP!
           D [ 1     .   1   .   . ]  (Layer 2: High-Level Application Orchestrator)
 
-Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extract an abstract interface \$I_A\$ from Component \$A\$. Now, Component \$C\$ depends on interface \$I_A\$, and Component \$A\$ implements \$I_A\$. The transformed matrix becomes purely lower-triangular:
+Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extract an abstract interface $I_A$ from Component $A$. Now, Component $C$ depends on interface $I_A$, and Component $A$ implements $I_A$. The transformed matrix becomes purely lower-triangular:
 
     Cycle-Free Lower-Triangular DSM
               E   IA   C   B   A   D
@@ -7527,7 +7527,7 @@ Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extra
 
 #### 3.1.3. Calculating Software Package Metrics
 
-For every module \$M_k\$ in the system, compute the structural metrics:
+For every module $M_k$ in the system, compute the structural metrics:
 
 ``` rust
 // Formal Metric Calculation in Rust
@@ -7556,15 +7556,15 @@ impl ComponentMetrics {
 
 #### 3.1.4. Quantifying the Change Radius (Blast Radius)
 
-The **Change Radius** \$R(M)\$ represents the expected number of components that must be inspected, tested, or modified when module \$M\$ undergoes an internal modification:
+The **Change Radius** $R(M)$ represents the expected number of components that must be inspected, tested, or modified when module $M$ undergoes an internal modification:
 
-\$\$R(M) = 1 + \sum\_{k \in \text{TransitiveDependents}(M)} P(\text{Propagation} \mid M \to D_k) \cdot \text{Impact}(D_k)\$\$
+$$R(M) = 1 + \sum_{k \in \text{TransitiveDependents}(M)} P(\text{Propagation} \mid M \to D_k) \cdot \text{Impact}(D_k)$$
 
 Where:
 
-- \$\text{TransitiveDependents}(M)\$ is the set of all upstream components that directly or transitively depend on \$M\$.
-- \$P(\text{Propagation} \mid M \to D_k)\$ is the probability that a change in \$M\$ breaks contract \$D_k\$ (bounded in \$\[0, 1\]\$; for concrete binary coupling \$P=1.0\$; for typed versioned APIs \$P \le 0.1\$).
-- \$\text{Impact}(D_k)\$ is the weight/cost of redeploying component \$D_k\$.
+- $\text{TransitiveDependents}(M)$ is the set of all upstream components that directly or transitively depend on $M$.
+- $P(\text{Propagation} \mid M \to D_k)$ is the probability that a change in $M$ breaks contract $D_k$ (bounded in $[0, 1]$; for concrete binary coupling $P=1.0$; for typed versioned APIs $P \le 0.1$).
+- $\text{Impact}(D_k)$ is the weight/cost of redeploying component $D_k$.
 
 ------------------------------------------------------------------------
 
@@ -7588,8 +7588,8 @@ Every software requirement must be mapped to the exact set of computational mech
 
 A **Ghost Dependency** occurs when two components have no explicit source code or network dependencies, but are coupled through hidden shared assumptions:
 
-- **Format Ghost Coupling**: Service \$A\$ writes an ISO-8601 timestamp string `2026-08-20T19:21:22Z` to a Redis key; Service \$B\$ parses it assuming exact millisecond precision `2026-08-20T19:21:22.000Z`. A change in \$A\$'s serializer breaks \$B\$ with zero compile-time warning.
-- **Order-of-Execution Ghost Coupling**: Service \$A\$ inserts a record into table `orders`; Service \$B\$ runs a cron job every 5 minutes assuming all orders older than 2 minutes have completed payment settlement.
+- **Format Ghost Coupling**: Service $A$ writes an ISO-8601 timestamp string `2026-08-20T19:21:22Z` to a Redis key; Service $B$ parses it assuming exact millisecond precision `2026-08-20T19:21:22.000Z`. A change in $A$'s serializer breaks $B$ with zero compile-time warning.
+- **Order-of-Execution Ghost Coupling**: Service $A$ inserts a record into table `orders`; Service $B$ runs a cron job every 5 minutes assuming all orders older than 2 minutes have completed payment settlement.
 
 ------------------------------------------------------------------------
 
@@ -7714,7 +7714,7 @@ if (user.role === 'FINANCE_MANAGER' || (user.role === 'AUDITOR' && record.status
 }
 ```
 
-When compliance regulations introduced a new role (*Regional Risk Officer*) with conditional spending limits based on geography and transaction history, the engineering team had to modify **84 distinct files** across 5 repositories. The change radius \$R(\text{Auth})\$ spanned almost the entire codebase.
+When compliance regulations introduced a new role (*Regional Risk Officer*) with conditional spending limits based on geography and transaction history, the engineering team had to modify **84 distinct files** across 5 repositories. The change radius $R(\text{Auth})$ spanned almost the entire codebase.
 
 #### Applying Operation 6
 
@@ -7770,7 +7770,7 @@ pub async fn enforce_policy(
 #### Outcome
 
 - **Change Radius Reduction**: Modifying compliance rules now requires changes to **1 file** (`authz.rego`) and **0 application redeployments**.
-- **Metric Shift**: \$R(\text{Auth})\$ dropped from \$84 \to 1\$. Instability and Abstractness normalized to the Main Sequence (\$D = 0.04\$).
+- **Metric Shift**: $R(\text{Auth})$ dropped from $84 \to 1$. Instability and Abstractness normalized to the Main Sequence ($D = 0.04$).
 
 ------------------------------------------------------------------------
 
@@ -7849,7 +7849,7 @@ CREATE TABLE order_outbox (
 
 #### Context & Symptom
 
-A B2B SaaS platform needed to split a monolithic `billing_address` field (string) into structured columns (`street`, `city`, `postal_code`, `country_iso`) in a database containing \$150\text{M}\$ records. A naive `ALTER TABLE` migration locked the table for 45 minutes, failing SLA guarantees.
+A B2B SaaS platform needed to split a monolithic `billing_address` field (string) into structured columns (`street`, `city`, `postal_code`, `country_iso`) in a database containing $150\text{M}$ records. A naive `ALTER TABLE` migration locked the table for 45 minutes, failing SLA guarantees.
 
 #### Applying Operation 6 (Expand/Contract Protocol)
 
@@ -8131,7 +8131,7 @@ graph TD
 ### Anti-Pattern 3: The "Common-Utils" Junk Drawer Library
 
 - **Symptom**: A single shared package (`company-common` or `shared-utils`) containing string helpers, database connection logic, auth middleware, and shared domain models, imported by every service in the enterprise.
-- **Why it fails**: Maximum Afferent Coupling (\$C_a \gg 50, I \approx 0, A \approx 0 \implies D \to 1.0\$). A bug fix or version bump in a utility function forces universal recompilation and redeployment across the enterprise.
+- **Why it fails**: Maximum Afferent Coupling ($C_a \gg 50, I \approx 0, A \approx 0 \implies D \to 1.0$). A bug fix or version bump in a utility function forces universal recompilation and redeployment across the enterprise.
 - **Correction**: Break the junk drawer into micro-libraries, inline trivial 5-line helpers, and isolate domain models into their respective bounded contexts.
 
 ### Anti-Pattern 4: Leaky Domain Models & Transitive DTO Bleed
@@ -8171,8 +8171,8 @@ Humans miss dynamics because operational evidence is fragmented over time; agent
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
-| Utilization, \$\rho=\lambda/\mu\$ | Ratio of arrival rate to service capacity. | When incoming and retried requests exceed completed requests, queue depth rises; latency explosion near \$\rho=1\$ appears before CPU necessarily reaches 100%. |
-| Stock-and-flow balance, \$dS/dt=\text{inflow}-\text{outflow}\$ | Evolution of accumulated work or resources over time. | \$S\$ is queued requests; even after the database recovers, the queue grows while retries plus new traffic exceed drain capacity. |
+| Utilization, $\rho=\lambda/\mu$ | Ratio of arrival rate to service capacity. | When incoming and retried requests exceed completed requests, queue depth rises; latency explosion near $\rho=1$ appears before CPU necessarily reaches 100%. |
+| Stock-and-flow balance, $dS/dt=\text{inflow}-\text{outflow}$ | Evolution of accumulated work or resources over time. | $S$ is queued requests; even after the database recovers, the queue grows while retries plus new traffic exceed drain capacity. |
 | Reinforcing feedback loop | A change produces effects that amplify the original change. | Slow responses cause retries; retries add load; added load causes slower responses. Trace counters should show retry traffic rising with latency. |
 | Metastability | A self-sustaining degraded state that persists after the initiating disturbance ends. | Database latency returns to normal but useful throughput does not because the retry/queue state keeps the service saturated. |
 
@@ -8180,7 +8180,7 @@ Humans miss dynamics because operational evidence is fragmented over time; agent
 
 ### The Epistemic Role of Dynamic Modeling
 
-In the Ariadne software reasoning layer, **Operation 7: Understand System Behavior Over Time and Under Load** governs the temporal, stateful, and non-linear physical realities of executing software systems. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes behavioral contracts, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses structural contradictions, and [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) defines static dependency topology, Operation 7 resolves **Dynamic and Temporal Uncertainty** (\$U\_{\text{dyn}}\$).
+In the Ariadne software reasoning layer, **Operation 7: Understand System Behavior Over Time and Under Load** governs the temporal, stateful, and non-linear physical realities of executing software systems. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes behavioral contracts, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses structural contradictions, and [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) defines static dependency topology, Operation 7 resolves **Dynamic and Temporal Uncertainty** ($U_{\text{dyn}}$).
 
 ``` mermaid
 flowchart TD
@@ -8221,7 +8221,7 @@ Static architectural representations—such as box-and-line deployment diagrams,
 In reality, running software is a continuous thermodynamic and physical process:
 
 1.  **Resources accumulate and deplete:** Incoming requests fill buffers; allocations consume heap space; connections occupy finite socket tables.
-2.  **Latencies compound non-linearly:** As utilization (\$\rho\$) approaches \$1.0\$, queueing delays do not scale linearly—they explode asymptotically toward infinity.
+2.  **Latencies compound non-linearly:** As utilization ($\rho$) approaches $1.0$, queueing delays do not scale linearly—they explode asymptotically toward infinity.
 3.  **Feedback loops dominate failure dynamics:** Errors trigger retries; retries amplify load; amplified load triggers cascading timeouts; timeouts induce total system collapse that persists even after the original perturbation ceases (**Metastable Failure**).
 4.  **Deployments and migrations are multi-phase transient states:** A system is rarely in a pure "v1" or "v2" state; during rollouts, multiple versions coexist, exchange incompatible serialized payloads, compete for shared database locks, and operate with cold, empty caches.
 
@@ -8237,7 +8237,7 @@ When evaluating an architecture or diagnosing an incident, an engineer must move
 
 - **Where are the accumulation points (stocks), and what happens when inflow exceeds outflow for 10 seconds? For 10 minutes? For 10 hours?**
 - **What positive (reinforcing) feedback loops exist that could turn a minor transient hiccup into an unrecoverable cascading collapse?**
-- **What are the non-linear cliffs where a 5% increase in throughput causes a 500% increase in \$p99\$ tail latency?**
+- **What are the non-linear cliffs where a 5% increase in throughput causes a 500% increase in $p99$ tail latency?**
 - **How does the system transition across lifecycle phases (cold start, cache warming, rolling upgrade, network partition recovery, graceful drain)?**
 
 ------------------------------------------------------------------------
@@ -8331,14 +8331,14 @@ classDiagram
 In [*Thinking in Systems: A Primer* (Meadows, 2008, Chelsea Green Publishing)](https://www.chelseagreen.com/product/thinking-in-systems/), Donella H. Meadows established the foundational grammar of dynamic systems:
 
 1.  **Stocks (Accumulations):** The memory of the system. Stocks represent physical or informational entities that accumulate over time (for example, in-flight HTTP requests, unprocessed Kafka records, database connections, dirty memory pages).
-2.  **Flows (Inflow & Outflow):** The rates of change that increase or decrease stocks over time (for example, arrival rate \$\lambda(t)\$, processing rate \$\mu(t)\$).
+2.  **Flows (Inflow & Outflow):** The rates of change that increase or decrease stocks over time (for example, arrival rate $\lambda(t)$, processing rate $\mu(t)$).
 3.  **Delays:** Information and physical delays between an action, its perception, and its effect. Meadows proved that **unaccounted-for delays in feedback loops are the primary cause of system oscillations and explosive instability**.
 4.  **Use Points:** Places in a system where a small shift in structure or policy produces massive, enduring changes in behavior. In software, use points include queue size limits, adaptive concurrency limits, and circuit breaker trip thresholds.
 
 > **Meadows's Stock Conservation Law**:\
 > A stock changes if and only if its inflow rate differs from its outflow rate:
 >
-> \$\$\frac{d S(t)}{dt} = \text{Inflow}(t) - \text{Outflow}(t), \quad S(t) = S(t_0) + \int\_{t_0}^t \Big(\text{Inflow}(\tau) - \text{Outflow}(\tau)\Big) d\tau\$\$
+> $$\frac{d S(t)}{dt} = \text{Inflow}(t) - \text{Outflow}(t), \quad S(t) = S(t_0) + \int_{t_0}^t \Big(\text{Inflow}(\tau) - \text{Outflow}(\tau)\Big) d\tau$$
 >
 > A system cannot be stabilized by manipulating policies at the boundary if the physical stock continues to accumulate faster than its outflow capacity.
 
@@ -8348,8 +8348,8 @@ In [*Thinking in Systems: A Primer* (Meadows, 2008, Chelsea Green Publishing)](h
 
 In [*Business Dynamics: Systems Thinking and Modeling for a Complex World* (Sterman, 2000, McGraw-Hill)](https://www.mheducation.com/highered/product/business-dynamics-systems-thinking-modeling-complex-world-sterman/M9780072389158.html), John D. Sterman formalized the mathematical simulation of feedback systems and introduced **Causal Loop Diagrams (CLD)**:
 
-- **Reinforcing Feedback Loops (\$R\$ or \$+\$):** Self-reinforcing positive feedback that amplifies disturbances, leading to exponential growth, runaway explosions, or catastrophic death spirals (for example, retry storms, memory leaks, connection exhaustion cascades).
-- **Balancing Feedback Loops (\$B\$ or \$-\$):** Goal-seeking negative feedback that opposes change and seeks an equilibrium state (for example, TCP congestion control, thread pool rate limiting, auto-scaling controllers).
+- **Reinforcing Feedback Loops ($R$ or $+$):** Self-reinforcing positive feedback that amplifies disturbances, leading to exponential growth, runaway explosions, or catastrophic death spirals (for example, retry storms, memory leaks, connection exhaustion cascades).
+- **Balancing Feedback Loops ($B$ or $-$):** Goal-seeking negative feedback that opposes change and seeks an equilibrium state (for example, TCP congestion control, thread pool rate limiting, auto-scaling controllers).
 - **Policy Resistance:** The tendency of complex systems to defeat attempts to improve them because interventions trigger compensatory feedback loops. (For example, increasing thread pool sizes to handle slow database queries causes database connection starvation, which makes queries even slower).
 
 ``` mermaid
@@ -8372,15 +8372,15 @@ flowchart LR
 
 ### 1.3. John D. C. Little: Little's Law and Invariant Flow Relations (1961)
 
-In [*A Proof for the Queuing Formula: \$L = \lambda W\$* (Little, 1961, Operations Research, DOI: 10.1287/opre.9.3.383)](https://doi.org/10.1287/opre.9.3.383), John D. C. Little proved the most fundamental invariant theorem of queueing theory:
+In [*A Proof for the Queuing Formula: $L = \lambda W$* (Little, 1961, Operations Research, DOI: 10.1287/opre.9.3.383)](https://doi.org/10.1287/opre.9.3.383), John D. C. Little proved the most fundamental invariant theorem of queueing theory:
 
-\$\$L = \lambda \cdot W\$\$
+$$L = \lambda \cdot W$$
 
 Where:
 
-- \$L\$ = Average number of requests/items inside the system (Concurrency / Work-in-Progress / Queue + In-Flight).
-- \$\lambda\$ = Long-term average arrival rate of requests entering the system.
-- \$W\$ = Average total time a request spends inside the system (Residence Time = Queue Wait Time + Service Time).
+- $L$ = Average number of requests/items inside the system (Concurrency / Work-in-Progress / Queue + In-Flight).
+- $\lambda$ = Long-term average arrival rate of requests entering the system.
+- $W$ = Average total time a request spends inside the system (Residence Time = Queue Wait Time + Service Time).
 
 <!-- -->
 
@@ -8405,20 +8405,20 @@ Where:
 
 ### 1.4. Leonard Kleinrock: Queuing Systems and the Non-Linear Utilization Cliff (1975)
 
-In [*Queueing Systems, Volume 1: Theory* (Kleinrock, 1975, Wiley)](https://www.wiley.com/en-us/Queueing+Systems%2C+Volume+1%3A+Theory-p-9780471491101), Leonard Kleinrock established the mathematical relationship between resource utilization (\$\rho\$) and response time in stochastic systems.
+In [*Queueing Systems, Volume 1: Theory* (Kleinrock, 1975, Wiley)](https://www.wiley.com/en-us/Queueing+Systems%2C+Volume+1%3A+Theory-p-9780471491101), Leonard Kleinrock established the mathematical relationship between resource utilization ($\rho$) and response time in stochastic systems.
 
-For an \$M/M/1\$ queue (Poisson arrivals at rate \$\lambda\$, exponential service times at mean rate \$\mu\$, single server), utilization is defined as \$\rho = \frac{\lambda}{\mu}\$. The expected number of items in the system (\$L\$) and average wait time in queue (\$W_q\$) are:
+For an $M/M/1$ queue (Poisson arrivals at rate $\lambda$, exponential service times at mean rate $\mu$, single server), utilization is defined as $\rho = \frac{\lambda}{\mu}$. The expected number of items in the system ($L$) and average wait time in queue ($W_q$) are:
 
-\$\$L = \frac{\rho}{1 - \rho}, \quad L_q = \frac{\rho^2}{1 - \rho}, \quad W_q = \frac{\rho}{\mu(1 - \rho)}\$\$
+$$L = \frac{\rho}{1 - \rho}, \quad L_q = \frac{\rho^2}{1 - \rho}, \quad W_q = \frac{\rho}{\mu(1 - \rho)}$$
 
-For general arrival and service distributions (\$G/G/1\$), **Kingman's Approximation Formula** governs mean queueing delay:
+For general arrival and service distributions ($G/G/1$), **Kingman's Approximation Formula** governs mean queueing delay:
 
-\$\$W_q \approx \left( \frac{\rho}{1 - \rho} \right) \cdot \left( \frac{C_a^2 + C_s^2}{2} \right) \cdot \frac{1}{\mu}\$\$
+$$W_q \approx \left( \frac{\rho}{1 - \rho} \right) \cdot \left( \frac{C_a^2 + C_s^2}{2} \right) \cdot \frac{1}{\mu}$$
 
 Where:
 
-- \$C_a = \frac{\sigma_a}{\mu_a}\$ is the coefficient of variation of inter-arrival times.
-- \$C_s = \frac{\sigma_s}{\mu_s}\$ is the coefficient of variation of service times.
+- $C_a = \frac{\sigma_a}{\mu_a}$ is the coefficient of variation of inter-arrival times.
+- $C_s = \frac{\sigma_s}{\mu_s}$ is the coefficient of variation of service times.
 
 <!-- -->
 
@@ -8438,7 +8438,7 @@ Where:
                                    Server Utilization (ρ)
 
 > **The Non-Linear Utilization Law**:\
-> As utilization \$\rho\$ exceeds \$0.70\$–\$0.80\$, queue wait time grows non-linearly. At \$\rho = 0.95\$, wait time is \$19\times\$ the service time; at \$\rho = 0.99\$, it is \$99\times\$. Any slight variance in arrival rate or service time (\$C_a^2 + C_s^2\$) immediately pushes the system over the queueing cliff into severe latency degradation.
+> As utilization $\rho$ exceeds $0.70$–$0.80$, queue wait time grows non-linearly. At $\rho = 0.95$, wait time is $19\times$ the service time; at $\rho = 0.99$, it is $99\times$. Any slight variance in arrival rate or service time ($C_a^2 + C_s^2$) immediately pushes the system over the queueing cliff into severe latency degradation.
 
 ------------------------------------------------------------------------
 
@@ -8505,12 +8505,12 @@ In [*Release It! Design and Deploy Production-Ready Software*, 2nd ed. (Nygard, 
 
 In [*Time, Clocks, and the Ordering of Events in a Distributed System* (Lamport, 1978, CACM, DOI: 10.1145/359545.359563)](https://dl.acm.org/doi/10.1145/359545.359563), Leslie Lamport proved that in distributed software systems, physical time cannot guarantee event ordering due to clock drift and relativistic network latencies.
 
-Lamport defined the **"Happened-Before" (\$\to\$) relation**:
+Lamport defined the **"Happened-Before" ($\to$) relation**:
 
-1.  If \$a\$ and \$b\$ are events in the same process, and \$a\$ occurs before \$b\$, then \$a \to b\$.
-2.  If \$a\$ is the sending of a message and \$b\$ is the receipt of the same message, then \$a \to b\$.
-3.  If \$a \to b\$ and \$b \to c\$, then \$a \to c\$ (transitivity).
-4.  If neither \$a \to b\$ nor \$b \to a\$, then events \$a\$ and \$b\$ are **concurrent** (\$a \parallel b\$).
+1.  If $a$ and $b$ are events in the same process, and $a$ occurs before $b$, then $a \to b$.
+2.  If $a$ is the sending of a message and $b$ is the receipt of the same message, then $a \to b$.
+3.  If $a \to b$ and $b \to c$, then $a \to c$ (transitivity).
+4.  If neither $a \to b$ nor $b \to a$, then events $a$ and $b$ are **concurrent** ($a \parallel b$).
 
 In dynamic modeling, Lamport ordering is essential for understanding **transient states during distributed rolling deployments, asynchronous event streaming, and out-of-order message delivery**.
 
@@ -8559,23 +8559,23 @@ Every software runtime is a network of interconnected **reservoirs (stocks)** an
 
 #### 1. The Fundamental Stock Differential Equation
 
-For any resource stock \$S(t)\$ with finite buffer capacity \$S\_{\max}\$:
+For any resource stock $S(t)$ with finite buffer capacity $S_{\max}$:
 
-\$\$\frac{d S(t)}{dt} = \text{Inflow}(t) - \text{Outflow}(t)\$\$
+$$\frac{d S(t)}{dt} = \text{Inflow}(t) - \text{Outflow}(t)$$
 
-\$\$S(t) = \min\left( S\_{\max}, ; \max\left( 0, ; S(t_0) + \int\_{t_0}^t \Big(\lambda(\tau) - \mu(\tau, S(\tau))\Big) d\tau \right) \right)\$\$
+$$S(t) = \min\left( S_{\max},\; \max\left( 0,\; S(t_0) + \int_{t_0}^t \Big(\lambda(\tau) - \mu(\tau, S(\tau))\Big) d\tau \right) \right)$$
 
 Where:
 
-- \$\lambda(t)\$ is the instantaneous arrival rate (inflow).
-- \$\mu(t, S(t))\$ is the instantaneous service rate (outflow), which frequently **degrades** as \$S(t)\$ increases due to lock contention, cache thrashing, or garbage collection overhead.
-- When \$S(t) = S\_{\max}\$, incoming requests are either dropped (Drop-Tail), rejected with backpressure (`429 Too Many Requests` / `503 Service Unavailable`), or block the upstream thread.
+- $\lambda(t)$ is the instantaneous arrival rate (inflow).
+- $\mu(t, S(t))$ is the instantaneous service rate (outflow), which frequently **degrades** as $S(t)$ increases due to lock contention, cache thrashing, or garbage collection overhead.
+- When $S(t) = S_{\max}$, incoming requests are either dropped (Drop-Tail), rejected with backpressure (`429 Too Many Requests` / `503 Service Unavailable`), or block the upstream thread.
 
 #### 2. The Software Stock Catalog
 
 When executing Technique 7.1, an engineer must audit and map every physical stock in the execution path:
 
-| Stock Name | Inflow Rate (\$\lambda\$) | Outflow Rate (\$\mu\$) | Capacity Limit (\$S\_{\max}\$) | Saturation Failure Mode |
+| Stock Name | Inflow Rate ($\lambda$) | Outflow Rate ($\mu$) | Capacity Limit ($S_{\max}$) | Saturation Failure Mode |
 |----|----|----|----|----|
 | **OS Socket Buffer** | Network packet arrival | Application `read()` syscall | TCP socket buffer `rmem` | TCP Window zero; packet drops |
 | **HTTP Worker Pool** | Incoming TCP connections | Completed HTTP requests | `max_connections` (for example, 1024) | Connection refused; gateway 502 |
@@ -8587,7 +8587,7 @@ When executing Technique 7.1, an engineer must audit and map every physical stoc
 
 #### 3. Backpressure Mechanics
 
-When \$\text{Inflow} \> \text{Outflow}\$, an unbounded queue does not solve the problem—it merely delays failure while consuming memory and increasing tail latency. Robust architectures implement **active backpressure**:
+When $\text{Inflow} > \text{Outflow}$, an unbounded queue does not solve the problem—it merely delays failure while consuming memory and increasing tail latency. Robust architectures implement **active backpressure**:
 
 ``` rust
 // Rust implementation of Reactive Flow Control with Bounded Channel & Drop Policy
@@ -8663,17 +8663,17 @@ flowchart TD
 
 #### 1. Formal Model of a Retry Storm
 
-Let \$R_0\$ be the base request arrival rate. Let \$p_e\$ be the error/timeout probability. If clients retry up to \$k\$ times without backoff:
+Let $R_0$ be the base request arrival rate. Let $p_e$ be the error/timeout probability. If clients retry up to $k$ times without backoff:
 
-\$\$\lambda\_{\text{total}} = R_0 \cdot \sum\_{i=0}^k (p_e)^i = R_0 \cdot \frac{1 - (p_e)^{k+1}}{1 - p_e}\$\$
+$$\lambda_{\text{total}} = R_0 \cdot \sum_{i=0}^k (p_e)^i = R_0 \cdot \frac{1 - (p_e)^{k+1}}{1 - p_e}$$
 
-If service latency \$W(t)\$ is a function of total arrival rate \$\lambda\_{\text{total}}\$, and \$p_e = \mathbb{P}(W(t) \> T\_{\text{timeout}})\$, then as \$\lambda\$ increases, \$p_e \to 1.0\$, and total load explodes to \$(k+1) \cdot R_0\$. A backend designed for \$10,000\text{ req/s}\$ suddenly receives \$40,000\text{ req/s}\$ exactly when it is least able to handle it.
+If service latency $W(t)$ is a function of total arrival rate $\lambda_{\text{total}}$, and $p_e = \mathbb{P}(W(t) > T_{\text{timeout}})$, then as $\lambda$ increases, $p_e \to 1.0$, and total load explodes to $(k+1) \cdot R_0$. A backend designed for $10,000\text{ req/s}$ suddenly receives $40,000\text{ req/s}$ exactly when it is least able to handle it.
 
 #### 2. Stabilizing Feedback Loops: Exponential Backoff with Full Jitter
 
-To break Reinforcing Loop \$R_1\$, clients must implement **Decorrelated Jittered Backoff**:
+To break Reinforcing Loop $R_1$, clients must implement **Decorrelated Jittered Backoff**:
 
-\$\$t\_{\text{sleep}} = \text{random}\Big(0, ; \min\left(t\_{\max}, ; t\_{\text{base}} \cdot 2^{\text{attempt}}\right)\Big)\$\$
+$$t_{\text{sleep}} = \text{random}\Big(0,\; \min\left(t_{\max},\; t_{\text{base}} \cdot 2^{\text{attempt}}\right)\Big)$$
 
 ``` python
 import random
@@ -8698,13 +8698,13 @@ def execute_with_jittered_backoff(operation, max_attempts=5, base_delay=0.1, max
 
 #### 1. Tail Latency Amplification in Distributed Microservices
 
-In a microservice architecture where a frontend API gateway fans out a request to \$N\$ independent downstream services in parallel, the total request latency is bounded by the **slowest** component:
+In a microservice architecture where a frontend API gateway fans out a request to $N$ independent downstream services in parallel, the total request latency is bounded by the **slowest** component:
 
-\$\$T\_{\text{request}} = \max\Big(T_1, T_2, \dots, T_N\Big)\$\$
+$$T_{\text{request}} = \max\Big(T_1, T_2, \dots, T_N\Big)$$
 
-If each downstream service has a \$p99\$ latency threshold (i.e. \$1%\$ of requests take \$\> 500\text{ ms}\$), the probability that the user experiences a \$\> 500\text{ ms}\$ response is:
+If each downstream service has a $p99$ latency threshold (i.e. $1\%$ of requests take $> 500\text{ ms}$), the probability that the user experiences a $> 500\text{ ms}$ response is:
 
-\$\$P(\text{Slow}) = 1 - (1 - 0.01)^N\$\$
+$$P(\text{Slow}) = 1 - (1 - 0.01)^N$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                               TAIL LATENCY FAN-OUT AMPLIFICATION                                 │
@@ -8718,7 +8718,7 @@ If each downstream service has a \$p99\$ latency threshold (i.e. \$1%\$ of reque
     │ N = 200                 │ 1.0%                                     │ 86.60%                      │
     └─────────────────────────┴──────────────────────────────────────────┴─────────────────────────────┘
 
-> **Implication:** At \$N=100\$, nearly two-thirds of all user requests experience tail latency degradation, even though \$99%\$ of all individual service calls are fast!
+> **Implication:** At $N=100$, nearly two-thirds of all user requests experience tail latency degradation, even though $99\%$ of all individual service calls are fast!
 
 #### 2. Transient Multi-Version Deployment Regimes
 
@@ -8748,9 +8748,9 @@ flowchart LR
 
 **Transient Hazards:**
 
-1.  **Serialization Deserialization Asymmetry:** Instance \$v2\$ writes a new Protobuf/JSON field; instance \$v1\$ receives it via Kafka, fails to parse it, and routes the message to a Dead Letter Queue.
-2.  **Schema Locking Clashes:** An `ALTER TABLE` executed by \$v2\$ takes an exclusive metadata lock, stalling all reads/writes from \$v1\$ instances and causing widespread thread exhaustion.
-3.  **Cold Cache Stampede on Restart:** As new \$v2\$ containers spin up with empty local in-memory caches, initial requests miss the cache simultaneously, hammering the primary database with an instantaneous \$100\times\$ read spike.
+1.  **Serialization Deserialization Asymmetry:** Instance $v2$ writes a new Protobuf/JSON field; instance $v1$ receives it via Kafka, fails to parse it, and routes the message to a Dead Letter Queue.
+2.  **Schema Locking Clashes:** An `ALTER TABLE` executed by $v2$ takes an exclusive metadata lock, stalling all reads/writes from $v1$ instances and causing widespread thread exhaustion.
+3.  **Cold Cache Stampede on Restart:** As new $v2$ containers spin up with empty local in-memory caches, initial requests miss the cache simultaneously, hammering the primary database with an instantaneous $100\times$ read spike.
 
 ------------------------------------------------------------------------
 
@@ -8770,17 +8770,17 @@ flowchart TD
 
 #### 1. Long-Term Data Accumulations & Performance Degradation
 
-- **PostgreSQL MVCC Tombstones:** High write/update volume creates dead tuples. If `VACUUM` cannot keep pace with inflow \$\lambda\_{\text{write}}\$, table bloat degrades index scan performance from \$O(\log N)\$ to \$O(N)\$ sequential page reads.
+- **PostgreSQL MVCC Tombstones:** High write/update volume creates dead tuples. If `VACUUM` cannot keep pace with inflow $\lambda_{\text{write}}$, table bloat degrades index scan performance from $O(\log N)$ to $O(N)$ sequential page reads.
 - **Kafka Log Segment Retention & Consumer Offsets:** Unconsumed partitions accumulate on broker disks until disk saturation trips broker read-only modes.
 - **Index Depth Growth:** B-Tree depth increases from 3 to 4 levels, turning 10-microsecond in-memory index traversals into multi-millisecond storage reads.
 
 #### 2. The Capacity Clock Calculus
 
-For every finite resource (disk space, auto-increment integer IDs, connection limits), calculate the **Time to Exhaustion (\$T\_{\text{exhaust}}\$)**:
+For every finite resource (disk space, auto-increment integer IDs, connection limits), calculate the **Time to Exhaustion ($T_{\text{exhaust}}$)**:
 
-\$\$T\_{\text{exhaust}} = \frac{S\_{\max} - S(t_0)}{\mathbb{E}\left\[\frac{dS}{dt}\right\]}\$\$
+$$T_{\text{exhaust}} = \frac{S_{\max} - S(t_0)}{\mathbb{E}\left[\frac{dS}{dt}\right]}$$
 
-If an audit table consumes \$50\text{ GB/month}\$ on a \$500\text{ GB}\$ volume with \$150\text{ GB}\$ used, \$T\_{\text{exhaust}} = \frac{500 - 150}{50} = 7\text{ months}\$. Operation 7 mandates establishing automated alerting at \$T\_{\text{exhaust}} \< 2\text{ months}\$ rather than reacting to static percentage thresholds.
+If an audit table consumes $50\text{ GB/month}$ on a $500\text{ GB}$ volume with $150\text{ GB}$ used, $T_{\text{exhaust}} = \frac{500 - 150}{50} = 7\text{ months}$. Operation 7 mandates establishing automated alerting at $T_{\text{exhaust}} < 2\text{ months}$ rather than reacting to static percentage thresholds.
 
 ------------------------------------------------------------------------
 
@@ -8792,7 +8792,7 @@ If an audit table consumes \$50\text{ GB/month}\$ on a \$500\text{ GB}\$ volume 
 
 #### Context & Architecture
 
-A global fintech platform processes credit card settlements via a distributed event pipeline. The ingestion tier receives authorization events from payment gateways at peak rates of \$\lambda = 15,000\text{ events/s}\$ and publishes them to a Kafka cluster. A fleet of 50 settlement worker nodes consumes events, validates merchant ledgers, and writes settlement records to a distributed SQL database.
+A global fintech platform processes credit card settlements via a distributed event pipeline. The ingestion tier receives authorization events from payment gateways at peak rates of $\lambda = 15,000\text{ events/s}$ and publishes them to a Kafka cluster. A fleet of 50 settlement worker nodes consumes events, validates merchant ledgers, and writes settlement records to a distributed SQL database.
 
 ``` mermaid
 flowchart LR
@@ -8804,10 +8804,10 @@ flowchart LR
 
 #### The Dynamic Failure Cascade
 
-1.  **The Inflow Surge:** During Black Friday, ingestion traffic surged from \$8,000\text{ req/s}\$ to \$\lambda = 18,000\text{ req/s}\$.
-2.  **The Accumulation:** Worker processing capacity was capped at \$\mu = 12,000\text{ req/s}\$ due to database transaction lock latency. The accumulation rate in Kafka was: \$\$\frac{dS}{dt} = 18,000 - 12,000 = 6,000\text{ messages/second} = 360,000\text{ messages/minute}\$\$
+1.  **The Inflow Surge:** During Black Friday, ingestion traffic surged from $8,000\text{ req/s}$ to $\lambda = 18,000\text{ req/s}$.
+2.  **The Accumulation:** Worker processing capacity was capped at $\mu = 12,000\text{ req/s}$ due to database transaction lock latency. The accumulation rate in Kafka was: $$\frac{dS}{dt} = 18,000 - 12,000 = 6,000\text{ messages/second} = 360,000\text{ messages/minute}$$
 3.  **The Poison Pill Shock:** A third-party gateway sent malformed payload records with negative settlement values. When worker threads encountered these records, an unhandled exception triggered an immediate consumer offset rollback. The worker re-read the identical poison record, throwing the exception again in an infinite tight loop.
-4.  **Throughput Collapse:** Outflow capacity \$\mu\$ collapsed from \$12,000\text{ req/s}\$ to \$150\text{ req/s}\$ as 48 of 50 workers became trapped in poison-pill crash loops.
+4.  **Throughput Collapse:** Outflow capacity $\mu$ collapsed from $12,000\text{ req/s}$ to $150\text{ req/s}$ as 48 of 50 workers became trapped in poison-pill crash loops.
 5.  **Kafka Lag Explosion:** Unprocessed queue lag grew to 28,000,000 messages within 90 minutes, violating the 15-minute settlement SLA.
 
 ``` mermaid
@@ -8833,7 +8833,7 @@ The team applied **Technique 7.1 (Flow Modeling & Bounded Queues)** and **Techni
 
 1.  **Dead Letter Queue (DLQ) with Bounded Non-Blocking Retry:** Malformed records are trapped via pattern matching, wrapped with error metadata, and routed to an isolated `payment-settlements-dlq` topic without blocking the partition consumer offset.
 2.  **Dynamic Flow Rate Limiting & Pushback:** Implemented client-side backpressure in Go workers using a leaky bucket rate limiter coupled with database health metrics.
-3.  **Partition-Aware Adaptive Worker Scaling:** Auto-scaled worker instances to match the 200 Kafka partitions, ensuring \$\mu\_{\max} = 200 \times 120 = 24,000\text{ req/s}\$, well above peak inflow.
+3.  **Partition-Aware Adaptive Worker Scaling:** Auto-scaled worker instances to match the 200 Kafka partitions, ensuring $\mu_{\max} = 200 \times 120 = 24,000\text{ req/s}$, well above peak inflow.
 
 ``` go
 // Go implementation of Non-Blocking Partition Processing with DLQ Isolation
@@ -8888,8 +8888,8 @@ func (p *ConsumerPipeline) ProcessMessage(ctx context.Context, msg KafkaMessage)
 
 #### Outcome
 
-- Kafka consumer lag during peak events remained bounded below \$50,000\$ messages (\$\< 3.5\text{ seconds}\$ residence time).
-- Poison pill records isolated within \$2\text{ milliseconds}\$; zero partition stalling.
+- Kafka consumer lag during peak events remained bounded below $50,000$ messages ($< 3.5\text{ seconds}$ residence time).
+- Poison pill records isolated within $2\text{ milliseconds}$; zero partition stalling.
 
 ------------------------------------------------------------------------
 
@@ -8897,7 +8897,7 @@ func (p *ConsumerPipeline) ProcessMessage(ctx context.Context, msg KafkaMessage)
 
 #### Context & Architecture
 
-A social networking platform serves user profile and friendship graph reads at \$800,000\text{ queries/s}\$. The read path employs a two-tier architecture: an in-memory Redis cluster (\$128\text{ nodes}\$) caching hot user profiles, backed by a distributed document database (Cassandra). Under steady-state conditions, the cache hit rate is \$98.5%\$, meaning Cassandra receives only \$12,000\text{ read queries/s}\$ (\$1.5%\$ of total traffic).
+A social networking platform serves user profile and friendship graph reads at $800,000\text{ queries/s}$. The read path employs a two-tier architecture: an in-memory Redis cluster ($128\text{ nodes}$) caching hot user profiles, backed by a distributed document database (Cassandra). Under steady-state conditions, the cache hit rate is $98.5\%$, meaning Cassandra receives only $12,000\text{ read queries/s}$ ($1.5\%$ of total traffic).
 
 ``` mermaid
 flowchart LR
@@ -8909,9 +8909,9 @@ flowchart LR
 #### The Metastable Collapse
 
 1.  **The Trigger:** A 20-second network switch flap partitioned 32 of the 128 Redis nodes from the API Gateway tier.
-2.  **The Cache Miss Shock:** Read requests routed to the partitioned nodes failed to read from cache, triggering immediate fallback to Cassandra. The miss rate jumped from \$1.5%\$ to \$26%\$, causing read inflow to Cassandra to surge from \$12,000\text{ req/s}\$ to: \$\$\lambda\_{\text{DB}} = 800,000 \times 0.26 = 208,000\text{ req/s}\$\$
-3.  **The Database Queue Cliff:** Cassandra's maximum read capacity was \$35,000\text{ req/s}\$. Utilization \$\rho = \frac{208,000}{35,000} = 5.94\$. Cassandra read latency exploded from \$4\text{ ms}\$ to \$\> 5,000\text{ ms}\$ (timeout threshold).
-4.  **The Client Retry Storm (Sustaining Mechanism):** Mobile and web clients were configured with an aggressive 3-retry policy with a fixed \$200\text{ ms}\$ unjittered backoff. Gateway servers timed out and retried. Total incoming traffic to the platform exploded to \$2,400,000\text{ req/s}\$.
+2.  **The Cache Miss Shock:** Read requests routed to the partitioned nodes failed to read from cache, triggering immediate fallback to Cassandra. The miss rate jumped from $1.5\%$ to $26\%$, causing read inflow to Cassandra to surge from $12,000\text{ req/s}$ to: $$\lambda_{\text{DB}} = 800,000 \times 0.26 = 208,000\text{ req/s}$$
+3.  **The Database Queue Cliff:** Cassandra's maximum read capacity was $35,000\text{ req/s}$. Utilization $\rho = \frac{208,000}{35,000} = 5.94$. Cassandra read latency exploded from $4\text{ ms}$ to $> 5,000\text{ ms}$ (timeout threshold).
+4.  **The Client Retry Storm (Sustaining Mechanism):** Mobile and web clients were configured with an aggressive 3-retry policy with a fixed $200\text{ ms}$ unjittered backoff. Gateway servers timed out and retried. Total incoming traffic to the platform exploded to $2,400,000\text{ req/s}$.
 5.  **The Metastable Trap:** Even after the network switch was repaired and all 128 Redis nodes were fully reachable, the system **could not recover**. The Redis nodes were empty (cold) for keys that had expired during the partition. Every incoming request missed Redis, hit the saturated Cassandra cluster, timed out, and triggered 3 retries. The system remained in total failure for 4 hours.
 
 <!-- -->
@@ -8946,13 +8946,13 @@ flowchart TD
     end
 ```
 
-#### 1. Probabilistic Early Cache Expiration (\$X\text{-Fetch}\$)
+#### 1. Probabilistic Early Cache Expiration ($X\text{-Fetch}$)
 
 To prevent cache stampedes when hot keys expire, the gateway calculates an early refresh probability based on remaining TTL and computation time:
 
-\$\$\text{ShouldRefresh} = -\beta \cdot \delta \cdot \ln(\text{random}(0, 1)) \> \text{RemainingTTL}\$\$
+$$\text{ShouldRefresh} = -\beta \cdot \delta \cdot \ln(\text{random}(0, 1)) > \text{RemainingTTL}$$
 
-Where \$\delta\$ is the time taken to compute/fetch from database, and \$\beta \> 0\$ is an aggressiveness multiplier.
+Where $\delta$ is the time taken to compute/fetch from database, and $\beta > 0$ is an aggressiveness multiplier.
 
 ``` python
 import math
@@ -8985,7 +8985,7 @@ class XFetchCache:
 #### Outcome
 
 - Zero cache stampedes during subsequent node restarts.
-- When chaos testing injected complete Redis cluster reboots, Cassandra load peaked at only \$22,000\text{ req/s}\$ (\$63%\$ of capacity); the system remained completely within its healthy equilibrium.
+- When chaos testing injected complete Redis cluster reboots, Cassandra load peaked at only $22,000\text{ req/s}$ ($63\%$ of capacity); the system remained completely within its healthy equilibrium.
 
 ------------------------------------------------------------------------
 
@@ -8995,7 +8995,7 @@ class XFetchCache:
 
 An e-commerce order management system runs on a Kubernetes cluster with 200 pod replicas. Orders are submitted via a GraphQL gateway, processed by the order service, and serialized into a PostgreSQL JSONB column and an Apache Kafka stream for downstream fulfillment.
 
-During a routine continuous deployment of version `v2.4.0`, a 45-minute canary rolling update was initiated (\$5%\$ increments every 2 minutes).
+During a routine continuous deployment of version `v2.4.0`, a 45-minute canary rolling update was initiated ($5\%$ increments every 2 minutes).
 
 ``` mermaid
 flowchart LR
@@ -9077,8 +9077,8 @@ impl OrderRecord {
 
 #### Outcome
 
-- Automated continuous integration pipeline now runs **Multi-Version Canary Matrix Tests**: tests spin up \$v\_{\text{current}}\$ and \$v\_{\text{next}}\$ in parallel against a shared test database and verify dual-read/dual-write invariants before deployment approval.
-- Zero rolling deployment deserialization incidents across \$\> 1,200\$ subsequent production releases.
+- Automated continuous integration pipeline now runs **Multi-Version Canary Matrix Tests**: tests spin up $v_{\text{current}}$ and $v_{\text{next}}$ in parallel against a shared test database and verify dual-read/dual-write invariants before deployment approval.
+- Zero rolling deployment deserialization incidents across $> 1,200$ subsequent production releases.
 
 ------------------------------------------------------------------------
 
@@ -9092,7 +9092,7 @@ A high-throughput banking API handles loan applications. The `apply_loan` endpoi
 2.  Calls an external credit rating bureau via synchronous HTTP REST API.
 3.  Commits the database transaction and writes an audit log.
 
-Under normal conditions, step 2 (credit bureau API) responds in \$80\text{ ms}\$. Total transaction duration is \$95\text{ ms}\$. The service runs with a database connection pool of \$S\_{\max} = 100\$ connections per node.
+Under normal conditions, step 2 (credit bureau API) responds in $80\text{ ms}$. Total transaction duration is $95\text{ ms}$. The service runs with a database connection pool of $S_{\max} = 100$ connections per node.
 
 ``` mermaid
 sequenceDiagram
@@ -9114,10 +9114,10 @@ sequenceDiagram
 
 #### The Dynamic Failure Cascade
 
-1.  **The External Latency Hiccup:** The credit bureau experienced an internal network slowdown, increasing its response time from \$80\text{ ms}\$ to \$4,500\text{ ms}\$ (\$56\times\$ increase).
-2.  **The Little's Law Concurrency Explosion:** Inflow traffic remained constant at \$\lambda = 200\text{ req/s}\$. By Little's Law (\$L = \lambda \cdot W\$), the required number of concurrent open transactions in the service exploded: \$\$L\_{\text{normal}} = 200 \times 0.095 = 19\text{ concurrent DB connections}\$\$ \$\$L\_{\text{slow}} = 200 \times 4.515 = 903\text{ concurrent DB connections}\$\$
-3.  **Connection Pool Starvation:** Within \$600\text{ ms}\$, all 100 connections in the pool were held open, completely idle, simply waiting for external HTTP socket reads.
-4.  **Cascading Exhaustion of Unrelated Endpoints:** Unrelated lightweight endpoints (for example, `get_account_balance`, which takes \$2\text{ ms}\$) could not acquire a database connection. The entire banking portal stopped serving all user traffic.
+1.  **The External Latency Hiccup:** The credit bureau experienced an internal network slowdown, increasing its response time from $80\text{ ms}$ to $4,500\text{ ms}$ ($56\times$ increase).
+2.  **The Little's Law Concurrency Explosion:** Inflow traffic remained constant at $\lambda = 200\text{ req/s}$. By Little's Law ($L = \lambda \cdot W$), the required number of concurrent open transactions in the service exploded: $$L_{\text{normal}} = 200 \times 0.095 = 19\text{ concurrent DB connections}$$ $$L_{\text{slow}} = 200 \times 4.515 = 903\text{ concurrent DB connections}$$
+3.  **Connection Pool Starvation:** Within $600\text{ ms}$, all 100 connections in the pool were held open, completely idle, simply waiting for external HTTP socket reads.
+4.  **Cascading Exhaustion of Unrelated Endpoints:** Unrelated lightweight endpoints (for example, `get_account_balance`, which takes $2\text{ ms}$) could not acquire a database connection. The entire banking portal stopped serving all user traffic.
 5.  **Thread Pool Exhaustion & Health Check Failure:** Incoming HTTP requests queued up in the web server worker pool, exhausting memory. The Kubernetes liveness probe (`/healthz`) timed out because all worker threads were blocked on connection pool acquisition. Kubernetes killed and restarted the pods, further exacerbating the connection storm upon reboot.
 
 #### Applying Operation 7
@@ -9144,8 +9144,8 @@ The team applied **Separation Principles across Time and Resources**:
 
 #### Outcome
 
-- Database connection hold time decreased from \$4,500\text{ ms}\$ to \$3.2\text{ ms}\$ (\$1,400\times\$ improvement in connection efficiency).
-- When external credit bureau latency degraded to \$10\text{ seconds}\$ during chaos injection tests, account balance reads and core banking operations experienced zero latency degradation.
+- Database connection hold time decreased from $4,500\text{ ms}$ to $3.2\text{ ms}$ ($1,400\times$ improvement in connection efficiency).
+- When external credit bureau latency degraded to $10\text{ seconds}$ during chaos injection tests, account balance reads and core banking operations experienced zero latency degradation.
 
 ------------------------------------------------------------------------
 
@@ -9285,31 +9285,31 @@ graph TD
 ### Anti-Pattern 1: The Unbounded In-Memory Queue
 
 - **Symptom**: Using unbounded channels (for example, `LinkedBlockingQueue` with no capacity limit in Java, or unbounded Go channels) to buffer incoming work.
-- **Why it fails**: Under overload (\$\lambda \> \mu\$), the queue does not prevent failure; it consumes all heap memory, triggers severe garbage collection pauses, multiplies residence time (\$W = L/\lambda\$), and eventually terminates the process via an Out-of-Memory (OOM) crash.
+- **Why it fails**: Under overload ($\lambda > \mu$), the queue does not prevent failure; it consumes all heap memory, triggers severe garbage collection pauses, multiplies residence time ($W = L/\lambda$), and eventually terminates the process via an Out-of-Memory (OOM) crash.
 - **Correction**: Enforce strict bounded queue limits with active backpressure (reject or shed at the edge).
 
 ### Anti-Pattern 2: The Constant-Interval Retry Loop
 
-- **Symptom**: Clients retry failed network calls at fixed, deterministic intervals (for example, every \$500\text{ ms}\$).
+- **Symptom**: Clients retry failed network calls at fixed, deterministic intervals (for example, every $500\text{ ms}$).
 - **Why it fails**: When an outage occurs, thousands of client retries synchronize into a single periodic shockwave (Thundering Herd), preventing the recovering backend from ever processing healthy requests.
 - **Correction**: Enforce **Exponential Backoff with Full Jitter** and hard retry budgets (maximum 1–2 retries).
 
 ### Anti-Pattern 3: The Static Cache Capacity Assumption
 
-- **Symptom**: Sizing backend databases to handle only cache-miss traffic (for example, \$2%\$ of load), assuming the cache will always be warm.
-- **Why it fails**: When cache nodes reboot, crash, or experience network partitions, the sudden \$50\times\$ surge in cache-miss traffic instantly destroys the database.
-- **Correction**: Implement probabilistic early expiration (\$X\text{-Fetch}\$), single-flight request coalescing, and ensure the database can shed excess read load gracefully.
+- **Symptom**: Sizing backend databases to handle only cache-miss traffic (for example, $2\%$ of load), assuming the cache will always be warm.
+- **Why it fails**: When cache nodes reboot, crash, or experience network partitions, the sudden $50\times$ surge in cache-miss traffic instantly destroys the database.
+- **Correction**: Implement probabilistic early expiration ($X\text{-Fetch}$), single-flight request coalescing, and ensure the database can shed excess read load gracefully.
 
 ### Anti-Pattern 4: Average-Latency Myopia
 
-- **Symptom**: Designing and alerting based solely on arithmetic mean latency (for example, "average response time is \$25\text{ ms}\$").
-- **Why it fails**: In distributed systems with parallel fan-out, a system with a \$25\text{ ms}\$ average can have a \$p99\$ of \$1,500\text{ ms}\$ and a \$p99.9\$ of \$8,000\text{ ms}\$. Tail latency drives user abandonment, timeout cascades, and connection pool starvation.
-- **Correction**: Track and optimize high-percentile distributions (\$p95, p99, p99.9\$) using high-dynamic-range histograms (HdrHistogram).
+- **Symptom**: Designing and alerting based solely on arithmetic mean latency (for example, "average response time is $25\text{ ms}$").
+- **Why it fails**: In distributed systems with parallel fan-out, a system with a $25\text{ ms}$ average can have a $p99$ of $1,500\text{ ms}$ and a $p99.9$ of $8,000\text{ ms}$. Tail latency drives user abandonment, timeout cascades, and connection pool starvation.
+- **Correction**: Track and optimize high-percentile distributions ($p95, p99, p99.9$) using high-dynamic-range histograms (HdrHistogram).
 
 ### Anti-Pattern 5: The Synchronous In-Transaction Network Call
 
 - **Symptom**: Executing third-party HTTP RPCs, email sending, or remote microservice calls inside an open relational database transaction (`BEGIN ... COMMIT`).
-- **Why it fails**: If the external service experiences a minor latency spike (\$100\text{ ms} \to 3\text{ s}\$), database connection hold time increases by \$30\times\$. Database connection pools exhaust in seconds, crashing all unrelated endpoints across the platform.
+- **Why it fails**: If the external service experiences a minor latency spike ($100\text{ ms} \to 3\text{ s}$), database connection hold time increases by $30\times$. Database connection pools exhaust in seconds, crashing all unrelated endpoints across the platform.
 - **Correction**: Move all remote network calls outside database transactions; use the **Transactional Outbox Pattern** for asynchronous side effects.
 
 ### Anti-Pattern 6: The Blind Metric Autoscaler
@@ -9338,7 +9338,7 @@ Humans use numbers to rationalize; agents use numbers to complete. Human governa
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
 | Non-compensatory constraint | A criterion whose violation disqualifies a candidate regardless of performance elsewhere. | Data residency failure cannot be offset by lower latency or cost; compliance evidence is a pass/fail gate. |
-| Pareto dominance | Candidate \$A\$ is no worse on every relevant dimension and strictly better on at least one. | If one option costs less, fails less, and is equally fast, the dominated option needs no weighted-score debate. |
+| Pareto dominance | Candidate $A$ is no worse on every relevant dimension and strictly better on at least one. | If one option costs less, fails less, and is equally fast, the dominated option needs no weighted-score debate. |
 | Engineering ideality | Ratio of useful function to harmful effects plus lifecycle cost. | Count not only request throughput, but pages, mutable state, migration work, lock-in, cognitive load, and retirement cost. |
 | Expected value of information | Value of resolving uncertainty before committing. | If two viable candidates exchange rank depending on an unknown write-amplification rate, benchmark that rate before selection. |
 
@@ -9346,7 +9346,7 @@ Humans use numbers to rationalize; agents use numbers to complete. Human governa
 
 ### The Epistemic Role of Value Determination and Selection
 
-In the Ariadne software reasoning layer, **Operation 8: Determine Engineering Value and Select** serves as the rational decision-making gateway of the engineering lifecycle. While [Operation 4](#operation-4-explore-the-space-of-architectures-and-implementations) generates structurally distinct candidate mechanisms (`CAN-*`), [Operation 5](#operation-5-expand-knowledge-and-obtain-missing-evidence) acquires empirical evidence (`EVD-*`), [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) structures boundaries and coupling, and [Operation 7](#operation-7-understand-system-behavior-over-time-and-under-load) models dynamic behavior under load, Operation 8 resolves **Value, Trade-off, and Selection Uncertainty** (\$U\_{\text{val}}\$).
+In the Ariadne software reasoning layer, **Operation 8: Determine Engineering Value and Select** serves as the rational decision-making gateway of the engineering lifecycle. While [Operation 4](#operation-4-explore-the-space-of-architectures-and-implementations) generates structurally distinct candidate mechanisms (`CAN-*`), [Operation 5](#operation-5-expand-knowledge-and-obtain-missing-evidence) acquires empirical evidence (`EVD-*`), [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) structures boundaries and coupling, and [Operation 7](#operation-7-understand-system-behavior-over-time-and-under-load) models dynamic behavior under load, Operation 8 resolves **Value, Trade-off, and Selection Uncertainty** ($U_{\text{val}}$).
 
 ``` mermaid
 flowchart TD
@@ -9411,7 +9411,7 @@ When evaluating candidate architectures or implementation strategies, an enginee
 
 To evaluate software mechanisms scientifically, we adapt the classical TRIZ Law of Ideality and Suh's Axiomatic Design Information Axiom into a unified software value formulation:
 
-\$\$\text{Engineering Value} \equiv \text{Ideality} = \frac{\text{Useful Domain Functions } (\sum F_u)}{\text{Collateral Harm & Vulnerability } (\sum F_h) + \text{Lifecycle Mechanism Cost } (\sum C)}\$\$
+$$\text{Engineering Value} \equiv \text{Ideality} = \frac{\text{Useful Domain Functions } (\sum F_u)}{\text{Collateral Harm & Vulnerability } (\sum F_h) + \text{Lifecycle Mechanism Cost } (\sum C)}$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                 THE SOFTWARE IDEALITY BALANCE                                    │
@@ -9495,9 +9495,9 @@ classDiagram
 
 In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Gordon and Breach, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller formulated the fundamental evolutionary law of technical systems: **The Law of Increasing Ideality**.
 
-The ideality \$I\$ of any technical system is defined as the ratio of its useful functions \$\sum F_u\$ to the sum of harmful side effects \$\sum F_h\$ and costs \$\sum C\$:
+The ideality $I$ of any technical system is defined as the ratio of its useful functions $\sum F_u$ to the sum of harmful side effects $\sum F_h$ and costs $\sum C$:
 
-\$\$I = \frac{\sum F_u}{\sum F_h + \sum C}\$\$
+$$I = \frac{\sum F_u}{\sum F_h + \sum C}$$
 
 Altshuller's profound insight was the concept of the **Ideal Final Result (IFR)**:
 
@@ -9520,17 +9520,17 @@ In [*The Principles of Design* (Oxford University Press, 1990)](https://global.o
 1.  **The Independence Axiom**: Maintain the independence of functional requirements (FRs).
 2.  **The Information Axiom**: Minimize the information content of the design.
 
-Suh defined **Information Content (\$I\$)** in terms of the probability of satisfying a given functional requirement within the specified design tolerance:
+Suh defined **Information Content ($I$)** in terms of the probability of satisfying a given functional requirement within the specified design tolerance:
 
-\$\$I = \log_2 \left( \frac{1}{P_s} \right) = -\log_2 P_s\$\$
+$$I = \log_2 \left( \frac{1}{P_s} \right) = -\log_2 P_s$$
 
-Where \$P_s\$ is the probability that the system's actual performance (the *System Range*) falls within the acceptable user requirements (the *Design Range*):
+Where $P_s$ is the probability that the system's actual performance (the *System Range*) falls within the acceptable user requirements (the *Design Range*):
 
-\$\$P_s = \int\_{\text{Design Range}} p\_{system}(x) , dx\$\$
+$$P_s = \int_{\text{Design Range}} p_{system}(x)\, dx$$
 
-For a system with \$m\$ independent functional requirements:
+For a system with $m$ independent functional requirements:
 
-\$\$I\_{\text{total}} = \sum\_{i=1}^m \log_2 \left( \frac{1}{P\_{s,i}} \right)\$\$
+$$I_{\text{total}} = \sum_{i=1}^m \log_2 \left( \frac{1}{P_{s,i}} \right)$$
 
       Probability
       Density p(x)
@@ -9548,8 +9548,8 @@ For a system with \$m\$ independent functional requirements:
 
 **Software Translation of the Information Axiom**:
 
-- A candidate architecture with high information content requires immense operational tuning, delicate timing, complex retry loops, and manual configuration just to remain inside its design range (\$P_s \ll 1 \implies I \gg 0\$).
-- A candidate with minimal information content satisfies its functional requirements naturally, with wide safety margins and robust tolerance to hardware jitter, network partitions, and traffic spikes (\$P_s \to 1 \implies I \to 0\$).
+- A candidate architecture with high information content requires immense operational tuning, delicate timing, complex retry loops, and manual configuration just to remain inside its design range ($P_s \ll 1 \implies I \gg 0$).
+- A candidate with minimal information content satisfies its functional requirements naturally, with wide safety margins and robust tolerance to hardware jitter, network partitions, and traffic spikes ($P_s \to 1 \implies I \to 0$).
 - **Selection Rule**: Between two candidates satisfying the Independence Axiom, always select the candidate with the **lowest total Information Content**.
 
 ------------------------------------------------------------------------
@@ -9562,24 +9562,24 @@ In [*Decisions with Multiple Objectives: Preferences and Value Trade-Offs* (Camb
 
 Keeney and Raiffa proved that multi-criteria decisions must strictly distinguish between:
 
-1.  **Non-Compensatory Screening (Constraints / Invariants)**: A deficiency in a critical attribute cannot be compensated for by superior performance in other attributes. If a candidate violates a hard security constraint, zero-data-loss guarantee, or regulatory compliance rule, its utility is identically zero (\$U = -\infty\$).
+1.  **Non-Compensatory Screening (Constraints / Invariants)**: A deficiency in a critical attribute cannot be compensated for by superior performance in other attributes. If a candidate violates a hard security constraint, zero-data-loss guarantee, or regulatory compliance rule, its utility is identically zero ($U = -\infty$).
 2.  **Compensatory Evaluation (Preferences / Trade-Offs)**: Across viable candidates, gains in one attribute (for example, lower p99 latency) can be traded off against losses in another (for example, higher cloud compute cost) according to a multi-attribute utility function:
 
-\$\$U(x_1, x_2, \dots, x_n) = \sum\_{i=1}^n w_i \cdot u_i(x_i) \quad \text{subject to } \sum w_i = 1\$\$
+$$U(x_1, x_2, \dots, x_n) = \sum_{i=1}^n w_i \cdot u_i(x_i) \quad \text{subject to } \sum w_i = 1$$
 
-Where \$u_i(x_i)\$ is the single-attribute utility function capturing non-linear risk preferences (for example, diminishing marginal utility of latency reductions below 5ms).
+Where $u_i(x_i)$ is the single-attribute utility function capturing non-linear risk preferences (for example, diminishing marginal utility of latency reductions below 5ms).
 
 #### The Pareto Dominance Criterion
 
-Let candidate \$A\$ and candidate \$B\$ be evaluated across \$n\$ preference attributes \$\vec{v} = \langle v_1, v_2, \dots, v_n \rangle\$ where higher values are preferred.
+Let candidate $A$ and candidate $B$ be evaluated across $n$ preference attributes $\vec{v} = \langle v_1, v_2, \dots, v_n \rangle$ where higher values are preferred.
 
-Candidate \$A\$ **dominates** candidate \$B\$ (\$A \succ B\$) if and only if:
+Candidate $A$ **dominates** candidate $B$ ($A \succ B$) if and only if:
 
-\$\$\forall i \in {1, \dots, n}, ; v_i(A) \ge v_i(B) \quad \land \quad \exists j \in {1, \dots, n}, ; v_j(A) \> v_j(B)\$\$
+$$\forall i \in \{1, \dots, n\},\; v_i(A) \ge v_i(B) \quad \land \quad \exists j \in \{1, \dots, n\},\; v_j(A) > v_j(B)$$
 
-The **Pareto Optimal Frontier (\$\mathcal{P}\$)** is the set of all non-dominated candidates:
+The **Pareto Optimal Frontier ($\mathcal{P}$)** is the set of all non-dominated candidates:
 
-\$\$\mathcal{P} = { A \in \mathcal{C} \mid \nexists B \in \mathcal{C} \text{ such that } B \succ A }\$\$
+$$\mathcal{P} = \{ A \in \mathcal{C} \mid \nexists B \in \mathcal{C} \text{ such that } B \succ A \}$$
 
 Any candidate strictly dominated by another candidate in the feasible set must be eliminated immediately.
 
@@ -9615,7 +9615,7 @@ In [*Rational Choice and the Structure of the Environment* (Psychological Review
 
 **Lexicographic Ordering in Software Selection**: Simon's framework establishes the **Lexicographic Screening Rule**:
 
-1.  Filter candidates by binary invariant satisfaction (\$INV_1, INV_2, \dots\$).
+1.  Filter candidates by binary invariant satisfaction ($INV_1, INV_2, \dots$).
 2.  Rank surviving candidates by the primary decision attribute (for example, Operational Simplicity / MTTR).
 3.  Use secondary attributes (for example, Infrastructure Cost, Development Velocity) only to break ties.
 
@@ -9653,7 +9653,7 @@ Key findings grounded in statistical rigor:
 1.  **The Four DORA Metrics**:
     - *Throughput*: Deployment Frequency (DF) and Lead Time for Changes (LT).
     - *Stability*: Change Failure Rate (CFR) and Mean Time to Restore/Recover (MTTR).
-2.  **Loosely Coupled Architecture is the Primary Predictor of Performance**: Teams that can deploy and test their services independently without cross-team coordination achieve \$208\times\$ higher deployment frequency and \$2600\times\$ faster recovery times.
+2.  **Loosely Coupled Architecture is the Primary Predictor of Performance**: Teams that can deploy and test their services independently without cross-team coordination achieve $208\times$ higher deployment frequency and $2600\times$ faster recovery times.
 3.  **Cognitive Load Limits Velocity**: Architectures that impose heavy cognitive load (complex orchestration, shared databases, distributed transactions) degrade both throughput and stability simultaneously.
 
 **Selection Rule**: An architectural candidate that couples deployment units or increases MTTR is inherently low-value, regardless of its theoretical peak throughput.
@@ -9664,14 +9664,14 @@ Key findings grounded in statistical rigor:
 
 Building upon Altshuller and Suh, we formulate the mathematical calculus of **Software Ideality**:
 
-\$\$I\_{\text{software}} = \frac{\sum\_{i=1}^u w\_{u,i} \cdot F\_{u,i}}{\sum\_{j=1}^h w\_{h,j} \cdot F\_{h,j} + \sum\_{k=1}^c w\_{c,k} \cdot C_k}\$\$
+$$I_{\text{software}} = \frac{\sum_{i=1}^u w_{u,i} \cdot F_{u,i}}{\sum_{j=1}^h w_{h,j} \cdot F_{h,j} + \sum_{k=1}^c w_{c,k} \cdot C_k}$$
 
 Where:
 
-- \$F\_{u,i}\$ represents the quantified score of useful domain capability \$i\$ (for example, throughput, elasticity, developer velocity).
-- \$F\_{h,j}\$ represents the quantified penalty of collateral harm \$j\$ (for example, blast radius, cognitive load, lock-in risk).
-- \$C_k\$ represents the quantified lifecycle cost component \$k\$ (for example, code maintenance, state synchronization, cloud infrastructure).
-- \$w\$ represents the dimensional scaling weights.
+- $F_{u,i}$ represents the quantified score of useful domain capability $i$ (for example, throughput, elasticity, developer velocity).
+- $F_{h,j}$ represents the quantified penalty of collateral harm $j$ (for example, blast radius, cognitive load, lock-in risk).
+- $C_k$ represents the quantified lifecycle cost component $k$ (for example, code maintenance, state synchronization, cloud infrastructure).
+- $w$ represents the dimensional scaling weights.
 
 ``` mermaid
 graph LR
@@ -9699,11 +9699,11 @@ graph LR
 
 ------------------------------------------------------------------------
 
-### 2.1. The Mechanism Cost Vector (\$\vec{C}\$)
+### 2.1. The Mechanism Cost Vector ($\vec{C}$)
 
 In software systems, the cost of an architectural mechanism is not simply the price of cloud hosting. The cost of a mechanism is an 6-dimensional vector:
 
-\$\$\vec{C} = \left\langle C\_{\text{code}}, ; C\_{\text{state}}, ; C\_{\text{infra}}, ; C\_{\text{ops}}, ; C\_{\text{cog}}, ; C\_{\text{trans}} \right\rangle\$\$
+$$\vec{C} = \left\langle C_{\text{code}},\; C_{\text{state}},\; C_{\text{infra}},\; C_{\text{ops}},\; C_{\text{cog}},\; C_{\text{trans}} \right\rangle$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                THE 6 DIMENSIONS OF MECHANISM COST                                │
@@ -9764,7 +9764,7 @@ In software systems, the cost of an architectural mechanism is not simply the pr
 
 The most catastrophic error in software selection is **compensatory averaging of non-negotiable invariants**.
 
-If a banking ledger requires strict linearizability (zero balance overdrafts under network partitions), an architecture that provides \$1,000,000\text{ ops/sec}\$ with eventual consistency is not "90% acceptable because its performance is so high"—**it is 0% acceptable because it violates a hard system invariant.**
+If a banking ledger requires strict linearizability (zero balance overdrafts under network partitions), an architecture that provides $1,000,000\text{ ops/sec}$ with eventual consistency is not "90% acceptable because its performance is so high"—**it is 0% acceptable because it violates a hard system invariant.**
 
 ``` mermaid
 flowchart TD
@@ -9782,16 +9782,16 @@ flowchart TD
 
 #### The Lexicographic Invariant Filter
 
-Let \$\mathcal{I} = { INV_1, INV_2, \dots, INV_k }\$ be the set of formal hard invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem).
+Let $\mathcal{I} = \{ INV_1, INV_2, \dots, INV_k \}$ be the set of formal hard invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem).
 
-For each candidate \$CAN_i\$:
+For each candidate $CAN_i$:
 
-\$\$\text{Viability}(CAN_i) = \prod\_{j=1}^k \mathbb{I}\left( CAN_i \models INV_j \right) \in {0, 1}\$\$
+$$\text{Viability}(CAN_i) = \prod_{j=1}^k \mathbb{I}\left( CAN_i \models INV_j \right) \in \{0, 1\}$$
 
-Where \$\mathbb{I}(\cdot)\$ is the indicator function:
+Where $\mathbb{I}(\cdot)$ is the indicator function:
 
-- If \$\text{Viability}(CAN_i) = 0\$, \$CAN_i\$ is instantly pruned from consideration.
-- Only candidates with \$\text{Viability}(CAN_i) = 1\$ proceed to preference optimization and Pareto ranking.
+- If $\text{Viability}(CAN_i) = 0$, $CAN_i$ is instantly pruned from consideration.
+- Only candidates with $\text{Viability}(CAN_i) = 1$ proceed to preference optimization and Pareto ranking.
 
 #### Invariant vs. Preference Taxonomy in Software
 
@@ -9815,16 +9815,16 @@ Once viable candidates are isolated, their **Total Cost of Ownership (TCO)** mus
 
 #### The TCO Cost Model Formulation
 
-\$\$\text{TCO}(CAN) = C\_{\text{dev}}(CAN) + C\_{\text{trans}}(CAN) + \sum\_{t=1}^T \frac{C\_{\text{infra}}(t) + C\_{\text{ops}}(t) + C\_{\text{maint}}(t)}{(1 + r)^t}\$\$
+$$\text{TCO}(CAN) = C_{\text{dev}}(CAN) + C_{\text{trans}}(CAN) + \sum_{t=1}^T \frac{C_{\text{infra}}(t) + C_{\text{ops}}(t) + C_{\text{maint}}(t)}{(1 + r)^t}$$
 
 Where:
 
-- \$C\_{\text{dev}}\$: Engineering person-hours to build and test the mechanism.
-- \$C\_{\text{trans}}\$: Engineering person-hours to migrate data, train staff, write runbooks, and execute cutover.
-- \$C\_{\text{infra}}(t)\$: Recurring cloud/hardware hosting, licensing, and network costs in year \$t\$.
-- \$C\_{\text{ops}}(t)\$: Operational labor cost of on-call support, incident remediation, patch management, and backups in year \$t\$.
-- \$C\_{\text{maint}}(t)\$: Software maintenance labor (dependency upgrades, bug fixes, performance tuning) in year \$t\$.
-- \$r\$: Discount rate (cost of capital).
+- $C_{\text{dev}}$: Engineering person-hours to build and test the mechanism.
+- $C_{\text{trans}}$: Engineering person-hours to migrate data, train staff, write runbooks, and execute cutover.
+- $C_{\text{infra}}(t)$: Recurring cloud/hardware hosting, licensing, and network costs in year $t$.
+- $C_{\text{ops}}(t)$: Operational labor cost of on-call support, incident remediation, patch management, and backups in year $t$.
+- $C_{\text{maint}}(t)$: Software maintenance labor (dependency upgrades, bug fixes, performance tuning) in year $t$.
+- $r$: Discount rate (cost of capital).
 
 #### The Mechanism Cost Matrix (`COST-MATRIX-*`)
 
@@ -9872,20 +9872,20 @@ mindmap
       Framework-Specific Annotations
 ```
 
-#### Quantifying the Blast Radius Metric (\$B_R\$)
+#### Quantifying the Blast Radius Metric ($B_R$)
 
-Let \$N\_{\text{total}}\$ be the total number of business capabilities or microservices in the system. Let \$N\_{\text{affected}}(M)\$ be the number of capabilities that experience downtime, latency degradation, or data inconsistency if mechanism \$M\$ fails:
+Let $N_{\text{total}}$ be the total number of business capabilities or microservices in the system. Let $N_{\text{affected}}(M)$ be the number of capabilities that experience downtime, latency degradation, or data inconsistency if mechanism $M$ fails:
 
-\$\$B_R(M) = \frac{N\_{\text{affected}}(M)}{N\_{\text{total}}} \in \[0, 1\]\$\$
+$$B_R(M) = \frac{N_{\text{affected}}(M)}{N_{\text{total}}} \in [0, 1]$$
 
-- **\$B_R \approx 0.0\$ (Isolated)**: Failure of the recommendation caching layer does not disrupt the checkout flow.
-- **\$B_R \to 1.0\$ (Systemic)**: A shared monolithic relational database or distributed consensus coordinator failure halts 100% of enterprise operations.
+- **$B_R \approx 0.0$ (Isolated)**: Failure of the recommendation caching layer does not disrupt the checkout flow.
+- **$B_R \to 1.0$ (Systemic)**: A shared monolithic relational database or distributed consensus coordinator failure halts 100% of enterprise operations.
 
-#### The Cognitive Load Score (\$C\_{\text{cog}}\$)
+#### The Cognitive Load Score ($C_{\text{cog}}$)
 
 Based on Sweller's Cognitive Load Theory and Team Topologies (Skelton & Pais, 2019):
 
-\$\$C\_{\text{cog}} = \text{Intrinsic Load} + \text{Extraneous Load} + \text{Germane Load}\$\$
+$$C_{\text{cog}} = \text{Intrinsic Load} + \text{Extraneous Load} + \text{Germane Load}$$
 
 In software selection:
 
@@ -9914,7 +9914,7 @@ The most dangerous anti-pattern in software architecture is **pseudo-precision**
 
 #### The Expected Value of Information (EVOI) Gate
 
-If Candidate A and Candidate B are both on the Pareto frontier, and Candidate A is superior if network latency \$L \< 15\text{ms}\$ while Candidate B is superior if \$L \ge 15\text{ms}\$:
+If Candidate A and Candidate B are both on the Pareto frontier, and Candidate A is superior if network latency $L < 15\text{ms}$ while Candidate B is superior if $L \ge 15\text{ms}$:
 
 ``` mermaid
 flowchart TD
@@ -9947,13 +9947,13 @@ Following Jeff Bezos's classic architectural taxonomy:
 
 #### 1. Context and Problem State
 
-A global payment platform processes \$50,000\text{ write transactions/sec}\$ at peak. The ledger must record immutable financial debits and credits across 10 million merchant accounts.
+A global payment platform processes $50,000\text{ write transactions/sec}$ at peak. The ledger must record immutable financial debits and credits across 10 million merchant accounts.
 
 #### 2. Hard Invariants (`INV-*`)
 
-- `INV-01 (Strict Serializability)`: Zero balance overdrafts under network partitions (\$P_s = 1.0\$).
-- `INV-02 (Zero Data Loss)`: Recovery Point Objective \$\text{RPO} = 0\$ (Multi-region synchronous persistence).
-- `INV-03 (Latency)`: p99 write latency \$\le 30\text{ ms}\$ within a geographic region.
+- `INV-01 (Strict Serializability)`: Zero balance overdrafts under network partitions ($P_s = 1.0$).
+- `INV-02 (Zero Data Loss)`: Recovery Point Objective $\text{RPO} = 0$ (Multi-region synchronous persistence).
+- `INV-03 (Latency)`: p99 write latency $\le 30\text{ ms}$ within a geographic region.
 
 #### 3. Candidate Mechanisms Explored (`CAN-*`)
 
@@ -9980,7 +9980,7 @@ A global payment platform processes \$50,000\text{ write transactions/sec}\$ at 
     │ VIABILITY & RANK:   │                  │ DISQUALIFIED*    │ PARETO RANK 2    │ PARETO RANK 1     │
     └─────────────────────┴──────────────────┴──────────────────┴──────────────────┴───────────────────┘
 
-*\*Note: CAN-01 fails INV-03 under multi-region WAN latency constraints (\$p99 = 58\text{ms} \> 30\text{ms}\$ measured in EVD-FIN-01).*
+*\*Note: CAN-01 fails INV-03 under multi-region WAN latency constraints ($p99 = 58\text{ms} > 30\text{ms}$ measured in EVD-FIN-01).*
 
 ``` mermaid
 graph TD
@@ -9998,7 +9998,7 @@ graph TD
 #### 5. Selection Rationale & Decision Record
 
 - **Selected**: `CAN-03` for the core transaction sequencing engine, paired with PostgreSQL read-only projections.
-- **Ideality Rationale**: `CAN-03` leverages natural domain partitioning (`merchant_id`). By processing transactions deterministically in single-threaded partition loops, it eliminates distributed locking entirely, achieving \$5\text{ms}\$ latency and \$B_R = 0.015\$ at \$34%\$ of the infrastructure cost of `CAN-01`.
+- **Ideality Rationale**: `CAN-03` leverages natural domain partitioning (`merchant_id`). By processing transactions deterministically in single-threaded partition loops, it eliminates distributed locking entirely, achieving $5\text{ms}$ latency and $B_R = 0.015$ at $34\%$ of the infrastructure cost of `CAN-01`.
 
 ------------------------------------------------------------------------
 
@@ -10059,7 +10059,7 @@ pub async fn order_fulfillment_workflow(ctx: WorkflowContext, order: OrderReques
 
 #### 4. Selection Justification
 
-`CAN-03` was selected despite requiring a dedicated Temporal cluster. The centralized state machine reduces custom compensation code by \$75%\$, eliminates distributed ghost state, and provides out-of-the-box auditability, reducing 3-year operational incident costs by \$\$60,000\$.
+`CAN-03` was selected despite requiring a dedicated Temporal cluster. The centralized state machine reduces custom compensation code by $75\%$, eliminates distributed ghost state, and provides out-of-the-box auditability, reducing 3-year operational incident costs by USD 60,000.
 
 ------------------------------------------------------------------------
 
@@ -10095,7 +10095,7 @@ A software engineering organization with 120 developers needs a standard solutio
 
 #### 4. Ideality Rationale
 
-`CAN-02` embodies the Ideal Final Result: rate limiting and authentication occur at the network boundary **before requests ever enter application space**. Application code contains zero lines of authentication boilerplate, reducing the blast radius of security vulnerabilities and cutting multi-service maintenance overhead by \$85%\$.
+`CAN-02` embodies the Ideal Final Result: rate limiting and authentication occur at the network boundary **before requests ever enter application space**. Application code contains zero lines of authentication boilerplate, reducing the blast radius of security vulnerabilities and cutting multi-service maintenance overhead by $85\%$.
 
 ------------------------------------------------------------------------
 
@@ -10226,14 +10226,14 @@ graph TD
 
 ### Anti-Pattern 1: The Weighted Checklist Fallacy (Pseudo-Precision Matrix)
 
-- **Symptom**: Constructing a spreadsheet with 20 criteria, assigning arbitrary weights (\$w_i = 0.05, 0.15\$), scoring technologies from 1 to 10, and declaring the option with 8.42 over 8.35 the winner.
+- **Symptom**: Constructing a spreadsheet with 20 criteria, assigning arbitrary weights ($w_i = 0.05, 0.15$), scoring technologies from 1 to 10, and declaring the option with 8.42 over 8.35 the winner.
 - **Why it fails**: It conflates hard constraints with preferences, hides massive epistemic uncertainty behind decimal arithmetic, and invites confirmation bias (tweaking weights until the favorite option wins).
 - **Correction**: Apply non-compensatory screening for hard invariants first, then map the surviving candidates onto a Pareto frontier.
 
 ### Anti-Pattern 2: Resume-Driven Architecture (RDA) & Technology Fashion
 
 - **Symptom**: Selecting a distributed microservices service mesh, GraphQL federation, and a distributed graph database for a CRUD application with 50 daily active users.
-- **Why it fails**: Drastically inflates mechanism cost (\$\sum C\$) and collateral harm (\$\sum F_h\$), destroying software ideality.
+- **Why it fails**: Drastically inflates mechanism cost ($\sum C$) and collateral harm ($\sum F_h$), destroying software ideality.
 - **Correction**: Enforce the Law of Ideality: maximize the ratio of useful function to mechanism overhead. Challenge every new infrastructure component with the Ideal Final Result.
 
 ### Anti-Pattern 3: Sunk Cost Escalation & The "We Already Built It" Trap
@@ -10242,16 +10242,16 @@ graph TD
 - **Why it fails**: Past expenditures are unrecoverable sunk costs. Economic decisions must be evaluated purely on future marginal TCO vs. future marginal utility.
 - **Correction**: Evaluate existing in-house mechanisms on equal footing with standard industry primitives in the TCO matrix.
 
-### Anti-Pattern 4: The Zero-Migration Fallacy (Ignoring \$C\_{\text{trans}}\$)
+### Anti-Pattern 4: The Zero-Migration Fallacy (Ignoring $C_{\text{trans}}$)
 
 - **Symptom**: Selecting a new database or framework because its steady-state operational characteristics look attractive, while completely ignoring the 12 months of dual-writing, data backfills, and cutover risks required to get there.
-- **Why it fails**: Transition cost (\$C\_{\text{trans}}\$) frequently exceeds the total 3-year operating savings of the new technology.
+- **Why it fails**: Transition cost ($C_{\text{trans}}$) frequently exceeds the total 3-year operating savings of the new technology.
 - **Correction**: Include explicit migration pipelines, dual-write overhead, and rollback plans in the total lifecycle cost equation.
 
 ### Anti-Pattern 5: The "Build vs. Buy" False Dilemma
 
 - **Symptom**: Assuming that "buying" a SaaS or managed service has zero engineering cost.
-- **Why it fails**: Integrating a third-party vendor introduces significant \$C\_{\text{code}}\$ (SDK wrappers, webhook handlers), high cognitive load (debugging black-box failures), and catastrophic lock-in harm (\$\sum F_h\$).
+- **Why it fails**: Integrating a third-party vendor introduces significant $C_{\text{code}}$ (SDK wrappers, webhook handlers), high cognitive load (debugging black-box failures), and catastrophic lock-in harm ($\sum F_h$).
 - **Correction**: Treat third-party vendor solutions as Candidate Mechanisms with their own explicit TCO vectors and blast radius assessments.
 
 ### Anti-Pattern 6: Local Efficiency Maximization (Suboptimization)
@@ -10280,15 +10280,15 @@ Humans underfund transition code because it is temporary; agents overlook it bec
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
 | Severe falsifying test | Test with high probability of failing when the claim is false. | A mixed-version rehearsal with old and new binaries is severe for compatibility; a new-version unit test is not. |
-| Target architecture, \$\mathcal{A}_{\text{target}}\$ | Desired steady-state system after migration. | Only `account_id` remains and all callers use it. This diagram says nothing about how running old callers survive the move. |
-| Transition architecture, \$\mathcal{A}_{\text{trans}}\$ | Temporary system that preserves invariants between current and target states. | Both columns coexist, writes remain compatible, backfill and parity checks run, traffic cuts over gradually, and the old path remains recoverable. |
-| Rollback invariant, \$I_{\text{rev}}(k)\$ | Property that guarantees safe reversal at transition phase \$k\$. | At every phase, all committed writes can still be read by the rollback version without loss or manual reconstruction. |
+| Target architecture, $\mathcal{A}_{\text{target}}$ | Desired steady-state system after migration. | Only `account_id` remains and all callers use it. This diagram says nothing about how running old callers survive the move. |
+| Transition architecture, $\mathcal{A}_{\text{trans}}$ | Temporary system that preserves invariants between current and target states. | Both columns coexist, writes remain compatible, backfill and parity checks run, traffic cuts over gradually, and the old path remains recoverable. |
+| Rollback invariant, $I_{\text{rev}}(k)$ | Property that guarantees safe reversal at transition phase $k$. | At every phase, all committed writes can still be read by the rollback version without loss or manual reconstruction. |
 
 ## Epistemic Purpose & Main Question
 
 ### The Epistemic Role of Verification and Safe Transition
 
-In the Ariadne Software Reasoning Layer, **Operation 9: Verify the Solution by Execution and Safely Execute the Transition** represents the empirical realization and operational proof of all preceding engineering reasoning. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes problem models, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions, [Operations 3–4](#operation-3-transform-the-existing-software-system) formulate candidate transformations, and [Operations 6–8](#operation-6-arrange-dependencies-and-change-boundaries) structure boundaries, dynamics, and multi-criteria selection, Operation 9 resolves **Execution, Transition, and Operational Uncertainty** (\$U\_{\text{exec}}, U\_{\text{trans}}, U\_{\text{ops}}\$).
+In the Ariadne Software Reasoning Layer, **Operation 9: Verify the Solution by Execution and Safely Execute the Transition** represents the empirical realization and operational proof of all preceding engineering reasoning. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes problem models, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions, [Operations 3–4](#operation-3-transform-the-existing-software-system) formulate candidate transformations, and [Operations 6–8](#operation-6-arrange-dependencies-and-change-boundaries) structure boundaries, dynamics, and multi-criteria selection, Operation 9 resolves **Execution, Transition, and Operational Uncertainty** ($U_{\text{exec}}, U_{\text{trans}}, U_{\text{ops}}$).
 
 ``` mermaid
 flowchart TD
@@ -10326,7 +10326,7 @@ flowchart TD
 
 Diagrams, meetings, and persuasive writing cannot prove that a software architecture works. Software systems change state over time. They run on hardware that can fail, over networks that can delay messages, and with data that can change.
 
-In Ariadne, every architecture change and bug fix is an **unproven causal hypothesis** (\$\mathcal{H}\$). Run a test that can falsify it. Then use a reversible transition that preserves data.
+In Ariadne, every architecture change and bug fix is an **unproven causal hypothesis** ($\mathcal{H}$). Run a test that can falsify it. Then use a reversible transition that preserves data.
 
 ------------------------------------------------------------------------
 
@@ -10345,9 +10345,9 @@ When an engineering team or AI agent evaluates a candidate, do not ask only *"Do
 
 ### The Dual Nature of Transition: Target Architecture vs. Transition Architecture
 
-Teams often confuse the **target architecture** (\$\mathcal{A}*{\text{target}}\$) with the **transition architecture** (\$\mathcal{A}*{\text{trans}}\$).
+Teams often confuse the **target architecture** ($\mathcal{A}_{\text{target}}$) with the **transition architecture** ($\mathcal{A}_{\text{trans}}$).
 
-\$\$\mathcal{A}*{\text{target}} \neq \mathcal{A}*{\text{trans}}\$\$
+$$\mathcal{A}_{\text{target}} \neq \mathcal{A}_{\text{trans}}$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                             TARGET VS. TRANSITION ARCHITECTURE                                   │
@@ -10365,7 +10365,7 @@ Teams often confuse the **target architecture** (\$\mathcal{A}*{\text{target}}\$
     │  - Rule: Must have an explicit decommissioning lifecycle to prevent permanent architectural rot.│
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-If an engineer designs only \$\mathcal{A}*{\text{target}}\$, the rollout can become a **big-bang migration**. A big-bang migration can require a maintenance window or schema lock, and it can be hard to reverse. Operation 9 requires \$\mathcal{A}*{\text{trans}}\$ as a separate deliverable with its own verification.
+If an engineer designs only $\mathcal{A}_{\text{target}}$, the rollout can become a **big-bang migration**. A big-bang migration can require a maintenance window or schema lock, and it can be hard to reverse. Operation 9 requires $\mathcal{A}_{\text{trans}}$ as a separate deliverable with its own verification.
 
 ------------------------------------------------------------------------
 
@@ -10440,17 +10440,17 @@ classDiagram
 
 In [*The Logic of Scientific Discovery* (Popper, 1959/1934, Routledge, DOI: 10.4324/9780203746639)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper established the fundamental asymmetry between verification (confirmation) and falsification:
 
-\$\$\forall x , (P(x) \rightarrow Q(x)) \quad \text{cannot be verified by any finite set of observations, but is falsified by} \quad \exists x , (P(x) \land \neg Q(x))\$\$
+$$\forall x,\; (P(x) \rightarrow Q(x)) \quad \text{cannot be verified by any finite set of observations, but is falsified by} \quad \exists x , (P(x) \land \neg Q(x))$$
 
 In software engineering terms:
 
 - Executing 1,000,000 successful transactions through a payment pipeline does not prove the absence of race conditions, deadlocks, or integer overflows.
 - A single reproducible concurrent interleaving that double-spends a balance decisively **falsifies** the correctness hypothesis.
-- **Severe Testing Principle:** A test provides genuine epistemic evidence in favor of a hypothesis \$\mathcal{H}\$ if and only if the test was designed such that the probability of failing the test if \$\mathcal{H}\$ is false is extremely high:
+- **Severe Testing Principle:** A test provides genuine epistemic evidence in favor of a hypothesis $\mathcal{H}$ if and only if the test was designed such that the probability of failing the test if $\mathcal{H}$ is false is extremely high:
 
-\$\$\mathbb{P}\left(\text{Test Fails} \mid \neg \mathcal{H}\right) \to 1\$\$
+$$\mathbb{P}\left(\text{Test Fails} \mid \neg \mathcal{H}\right) \to 1$$
 
-Testing only the "happy path" has \$\mathbb{P}\left(\text{Test Fails} \mid \neg \mathcal{H}\right) \approx 0\$, yielding zero epistemic value. Operation 9 mandates that all verification suites must be explicitly constructed as severe falsification attempts.
+Testing only the "happy path" has $\mathbb{P}\left(\text{Test Fails} \mid \neg \mathcal{H}\right) \approx 0$, yielding zero epistemic value. Operation 9 mandates that all verification suites must be explicitly constructed as severe falsification attempts.
 
 ------------------------------------------------------------------------
 
@@ -10472,12 +10472,12 @@ Dijkstra warned that even a small program has too many possible inputs for exhau
 
 In [*QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs* (ACM ICFP, 2000, DOI: 10.1145/351240.351266)](https://doi.org/10.1145/351240.351266), Koen Claessen and John Hughes introduced **property-based testing (PBT)**:
 
-- Instead of writing only unit tests with hand-made inputs \$x_1, x_2\$, define a property (an invariant) for the input domain:
+- Instead of writing only unit tests with hand-made inputs $x_1, x_2$, define a property (an invariant) for the input domain:
 
-\$\$\forall x \in \mathcal{D}, \quad \text{Invariant}(f(x)) \equiv \text{True}\$\$
+$$\forall x \in \mathcal{D}, \quad \text{Invariant}(f(x)) \equiv \text{True}$$
 
-- The test engine generates many pseudo-random inputs, with a bias toward boundary cases, across \$\mathcal{D}\$.
-- **Automated shrinking:** If input \$x\_{\text{fail}}\$ falsifies the property, the engine reduces it to a **minimal failing input** \$x\_{\text{min}} \subseteq x\_{\text{fail}}\$. For example, it can reduce an array of 5,000 items to `[0, -1]`.
+- The test engine generates many pseudo-random inputs, with a bias toward boundary cases, across $\mathcal{D}$.
+- **Automated shrinking:** If input $x_{\text{fail}}$ falsifies the property, the engine reduces it to a **minimal failing input** $x_{\text{min}} \subseteq x_{\text{fail}}$. For example, it can reduce an array of 5,000 items to `[0, -1]`.
 
 ------------------------------------------------------------------------
 
@@ -10488,11 +10488,11 @@ In [*Hints on Test Data Selection: Help for the Practicing Programmer* (IEEE Com
 - Line or branch coverage is not enough. A test can execute all code and still make no useful assertion.
 - Most defects are small changes, such as `<` instead of `<=`, `+` instead of `-`, an inverted Boolean, or an off-by-one index.
 - A test suite that detects simple mutations is also more likely to detect larger related defects.
-- **Mutation score (\$MS\$):**
+- **Mutation score ($MS$):**
 
-\$\$MS = \frac{\text{Mutants Killed}}{\text{Total Mutants} - \text{Equivalent Mutants}} \in \[0, 1\]\$\$
+$$MS = \frac{\text{Mutants Killed}}{\text{Total Mutants} - \text{Equivalent Mutants}} \in [0, 1]$$
 
-In Operation 9, a mutation score must meet the required threshold (\$MS \ge 0.85\$) before it supports the related claim.
+In Operation 9, a mutation score must meet the required threshold ($MS \ge 0.85$) before it supports the related claim.
 
 ------------------------------------------------------------------------
 
@@ -10516,7 +10516,7 @@ In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 201
     │     The test oracle must observe the corrupted output and assert failure (avoiding false passes).│
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-\$\$\text{Fault Exposed} \iff \text{Reachability} \land \text{Infection} \land \text{Propagation} \land \text{Revealability}\$\$
+$$\text{Fault Exposed} \iff \text{Reachability} \land \text{Infection} \land \text{Propagation} \land \text{Revealability}$$
 
 If one link is missing, the test does not expose the fault. For example, the program can overwrite an incorrect state before it returns, or the test can have no assertion.
 
@@ -10598,7 +10598,7 @@ Before executing any code modification or running a migration, the engineer or a
 
 #### 1. Problem Displacement Analysis
 
-A common failure of naive problem solving is **Problem Displacement** (curing a symptom in component \$A\$ by introducing an unmanaged failure mode in component \$B\$):
+A common failure of naive problem solving is **Problem Displacement** (curing a symptom in component $A$ by introducing an unmanaged failure mode in component $B$):
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                 PROBLEM DISPLACEMENT TAXONOMY                                   │
@@ -10629,15 +10629,15 @@ When a candidate mechanism is applied to resolve the primary contradiction (for 
 
 For every high-impact change, calculate the **Risk Priority Number (RPN)**:
 
-\$\$\text{RPN} = \text{Severity } (S) \times \text{Occurrence } (O) \times \text{Detection } (D)\$\$
+$$\text{RPN} = \text{Severity } (S) \times \text{Occurrence } (O) \times \text{Detection } (D)$$
 
-Where \$S, O, D \in \[1, 10\]\$:
+Where $S, O, D \in [1, 10]$:
 
-- **Severity (\$S\$):** Impact on business/data integrity (1 = unnoticeable cosmetic glitch, 10 = irreversible data loss or security breach).
-- **Occurrence (\$O\$):** Likelihood of the failure mode triggering under production traffic distributions (1 = virtually impossible, 10 = guaranteed under peak load).
-- **Detection (\$D\$):** Inability of current monitoring/tests to detect the failure before it impacts users (1 = immediate automated alert/rollback, 10 = silent data corruption undetected for weeks).
+- **Severity ($S$):** Impact on business/data integrity (1 = unnoticeable cosmetic glitch, 10 = irreversible data loss or security breach).
+- **Occurrence ($O$):** Likelihood of the failure mode triggering under production traffic distributions (1 = virtually impossible, 10 = guaranteed under peak load).
+- **Detection ($D$):** Inability of current monitoring/tests to detect the failure before it impacts users (1 = immediate automated alert/rollback, 10 = silent data corruption undetected for weeks).
 
-Any candidate change with \$\text{RPN} \> 120\$ or \$S \ge 9\$ cannot proceed without dedicated automated safeguards and pre-commit mitigation.
+Any candidate change with $\text{RPN} > 120$ or $S \ge 9$ cannot proceed without dedicated automated safeguards and pre-commit mitigation.
 
 ------------------------------------------------------------------------
 
@@ -10663,19 +10663,19 @@ In Ariadne, an assertion in an Architecture Decision Record (ADR) or pull reques
 |----|----|----|----|----|
 | **1** | **Deterministic Unit & State Tests** | Pure functional correctness, boundary conditions, edge values (`null`, empty, max int). | JUnit 5, pytest, Vitest, Go `testing` | Hermetic verification of local invariants. |
 | **2** | **Property-Based Testing (PBT)** | Algebraic properties: Commutativity, Idempotency, Invertibility, Round-trip serialization. | QuickCheck, Hypothesis, fast-check, Rapid | Discovery of counterexamples via automated shrinking. |
-| **3** | **Mutation Testing** | Test suite adequacy: Verify that tests fail when intentional faults are injected into code. | Pitest (JVM), Mutmut (Python), Stryker (JS/TS) | Mutation Score \$MS \ge 0.85\$; elimination of false-positive tests. |
+| **3** | **Mutation Testing** | Test suite adequacy: Verify that tests fail when intentional faults are injected into code. | Pitest (JVM), Mutmut (Python), Stryker (JS/TS) | Mutation Score $MS \ge 0.85$; elimination of false-positive tests. |
 | **4** | **Consumer-Driven Contract Tests** | Interface and schema compatibility across independently deployed services. | Pact, Spring Cloud Contract, Protobuf buf | Verification that producer changes do not break consumer assumptions. |
 | **5** | **Performance & Saturation Profiling** | Throughput (RPS), tail latency (p99/p99.9), memory leak detection, lock contention. | k6, Locust, async-profiler, Go pprof | Empirical proof of capacity, headroom, and resource bounds. |
-| **6** | **Shadow Traffic & Dark Launching** | Real-world traffic equivalence, unexpected payload handling, semantic parity. | Envoy Shadowing, Diffy, McRouter, custom proxy | Statistical parity proof (\$\Delta = 0.000%\$) against live production data. |
+| **6** | **Shadow Traffic & Dark Launching** | Real-world traffic equivalence, unexpected payload handling, semantic parity. | Envoy Shadowing, Diffy, McRouter, custom proxy | Statistical parity proof ($\Delta = 0.000\%$) against live production data. |
 | **7** | **Chaos Engineering & Fault Injection** | Resilience against network partitions, downstream timeouts, disk corruption, node death. | Chaos Mesh, LitmusChaos, Toxiproxy, Gremlin | Proof of graceful degradation, circuit breaker trip, and auto-recovery. |
 
 #### The Test Oracle Problem and Differential Testing
 
 When verifying complex legacy refactorings or algorithm replacements, constructing an explicit expected-output oracle is often impossible. Operation 9 resolves this via **Differential Testing (Dual-Run Oracle)**:
 
-\$\$\forall x \in \text{Traffic}*{\text{real}}, \quad \text{Assert}\left(\text{Oracle}*{\text{legacy}}(x) \equiv \text{Implementation}\_{\text{candidate}}(x)\right)\$\$
+$$\forall x \in \text{Traffic}_{\text{real}}, \quad \text{Assert}\left(\text{Oracle}_{\text{legacy}}(x) \equiv \text{Implementation}_{\text{candidate}}(x)\right)$$
 
-Instead of hand-coding test assertions, the legacy system serves as the reference oracle. Any divergence (\$\Delta \neq 0\$) is captured, logged to an anomaly database, and analyzed before cutover.
+Instead of hand-coding test assertions, the legacy system serves as the reference oracle. Any divergence ($\Delta \neq 0$) is captured, logged to an anomaly database, and analyzed before cutover.
 
 ------------------------------------------------------------------------
 
@@ -10726,7 +10726,7 @@ stateDiagram-v2
     │ - Rollback Strategy: Disable feature flag `ENABLE_DUAL_WRITE`.                                   │
     ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
     │ PHASE 3: BACKGROUND BACKFILL (Historical Data Reconciliation)                                    │
-    │ - Execute an idempotent batch worker to copy historical records created prior to $T_{\text{dual}}│
+    │ - Execute an idempotent batch worker to copy historical records created prior to $T_{\text{dual}}$│
     │ - Mechanics: Cursor-based pagination over immutable keys, chunked transactions, rate-limited to  │
     │   prevent database CPU/IOPS saturation.                                                          │
     │ - Invariant: Re-writing an already dual-written record must be an idempotent NO-OP or update.   │
@@ -10758,17 +10758,17 @@ stateDiagram-v2
     │ - Invariant: Zero dead code, zero obsolete configuration flags, zero zombie shims.               │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-#### The Five Rollback Readiness Invariants (\$\mathcal{I}\_1\$ to \$\mathcal{I}\_5\$)
+#### The Five Rollback Readiness Invariants ($\mathcal{I}_1$ to $\mathcal{I}_5$)
 
-At every phase \$k \in \[1, 5\]\$ of the transition system, the architecture must strictly satisfy the **Rollback Readiness Invariants**:
+At every phase $k \in [1, 5]$ of the transition system, the architecture must strictly satisfy the **Rollback Readiness Invariants**:
 
-\$\$\mathcal{I}*{\text{rev}} = \bigwedge*{j=1}^{5} \mathcal{I}\_j\$\$
+$$\mathcal{I}_{\text{rev}} = \bigwedge_{j=1}^{5} \mathcal{I}_j$$
 
-1.  **\$\mathcal{I}\_1\$ (Zero Data Loss):** Rolling back from Phase \$k\$ to Phase \$k-1\$ causes zero lost transactions, zero orphaned entities, and zero corrupted balances.
-2.  **\$\mathcal{I}\_2\$ (Bounded MTTR):** Rollback execution time \$T\_{\text{rollback}} \le 30 \text{ seconds}\$, achievable via a single configuration/flag toggle without requiring a cold application redeployment.
-3.  **\$\mathcal{I}\_3\$ (Symmetric Ingestion):** While in Phase 5 (Cutover), reverse-writing to legacy storage ensures the legacy database remains a valid, consistent standby until Phase 6 is explicitly approved.
-4.  **\$\mathcal{I}\_4\$ (Isolated Blast Radius):** Any failure in a shadow-read, dual-write, or parity assertion worker is strictly isolated via try/catch/circuit-breaker blocks and cannot fail the primary user transaction.
-5.  **\$\mathcal{I}\_5\$ (Deterministic Parity Oracle):** The divergence rate \$\delta\$ between legacy and target mechanisms is continuously measured and exported as a Prometheus/OpenTelemetry gauge.
+1.  **$\mathcal{I}_1$ (Zero Data Loss):** Rolling back from Phase $k$ to Phase $k-1$ causes zero lost transactions, zero orphaned entities, and zero corrupted balances.
+2.  **$\mathcal{I}_2$ (Bounded MTTR):** Rollback execution time $T_{\text{rollback}} \le 30 \text{ seconds}$, achievable via a single configuration/flag toggle without requiring a cold application redeployment.
+3.  **$\mathcal{I}_3$ (Symmetric Ingestion):** While in Phase 5 (Cutover), reverse-writing to legacy storage ensures the legacy database remains a valid, consistent standby until Phase 6 is explicitly approved.
+4.  **$\mathcal{I}_4$ (Isolated Blast Radius):** Any failure in a shadow-read, dual-write, or parity assertion worker is strictly isolated via try/catch/circuit-breaker blocks and cannot fail the primary user transaction.
+5.  **$\mathcal{I}_5$ (Deterministic Parity Oracle):** The divergence rate $\delta$ between legacy and target mechanisms is continuously measured and exported as a Prometheus/OpenTelemetry gauge.
 
 ------------------------------------------------------------------------
 
@@ -10778,9 +10778,9 @@ Verification does not terminate when a pull request is merged or when a deployme
 
 #### 1. SLI/SLO Canary Gates
 
-Every transition phase must be governed by automated canary analysis comparing the canary instance group (\$C\$) against the baseline instance group (\$B\$):
+Every transition phase must be governed by automated canary analysis comparing the canary instance group ($C$) against the baseline instance group ($B$):
 
-\$\$\text{Canary Gate Passed} \iff \left( \text{ErrorRate}(C) - \text{ErrorRate}(B) \< \epsilon \right) \land \left( p99(C) \le 1.05 \times p99(B) \right)\$\$
+$$\text{Canary Gate Passed} \iff \left( \text{ErrorRate}(C) - \text{ErrorRate}(B) < \epsilon \right) \land \left( p99(C) \le 1.05 \times p99(B) \right)$$
 
 Statistical significance is evaluated using non-parametric tests (such as the **Mann-Whitney U Test** or **Kolmogorov-Smirnov Test**) to prevent false alarms from transient network spikes while immediately catching true latency distribution shifts.
 
@@ -10788,9 +10788,9 @@ Statistical significance is evaluated using non-parametric tests (such as the **
 
 If any non-negotiable Service Level Objective (SLO) is breached during rollout, automated deployment controllers (for example, Argo Rollouts, Flagger) trigger an immediate, automated rollback without human triage:
 
-- **Trigger 1:** HTTP 5xx error rate \$\> 0.1%\$ over a 2-minute rolling window.
-- **Trigger 2:** Database connection pool saturation \$\> 85%\$ for \$\> 30\$ seconds.
-- **Trigger 3:** Parity divergence count \$\> 0\$ for non-idempotent financial mutations.
+- **Trigger 1:** HTTP 5xx error rate $> 0.1\%$ over a 2-minute rolling window.
+- **Trigger 2:** Database connection pool saturation $> 85\%$ for $> 30$ seconds.
+- **Trigger 3:** Parity divergence count $> 0$ for non-idempotent financial mutations.
 - **Trigger 4:** Downstream circuit breaker trip in any Tier-1 dependency.
 
 #### 3. Decommissioning Governance (Preventing Shim Rot)
@@ -10811,11 +10811,11 @@ Transition scaffolding that is left in the codebase permanently becomes technica
 
 #### Problem Context & Framing
 
-A high-throughput FinTech core banking platform processes \$3,500 \text{ writes/sec}\$ against a monolithic PostgreSQL `ledger_entries` table containing 50 million rows.
+A high-throughput FinTech core banking platform processes $3,500 \text{ writes/sec}$ against a monolithic PostgreSQL `ledger_entries` table containing 50 million rows.
 
-- **Legacy Schema Flaw:** The legacy table uses a single `BIGSERIAL` primary key and stores monetary amounts as `FLOAT8` (introducing floating-point rounding errors). Furthermore, the table lacks tenant-level partitioning, causing table bloat and query degradation (\$p99 \> 850\text{ms}\$).
+- **Legacy Schema Flaw:** The legacy table uses a single `BIGSERIAL` primary key and stores monetary amounts as `FLOAT8` (introducing floating-point rounding errors). Furthermore, the table lacks tenant-level partitioning, causing table bloat and query degradation ($p99 > 850\text{ms}$).
 - **Target Architecture:** A composite-partitioned table `ledger_entries_v2` partitioned by `(tenant_id, created_at_month)` using `NUMERIC(18, 4)` for exact fractional currency precision and UUIDv7 for time-ordered distributed primary keys.
-- **Constraint:** Zero downtime (\$99.999%\$ availability SLA), zero lost transactions, and absolute zero tolerance for balance discrepancies.
+- **Constraint:** Zero downtime ($99.999\%$ availability SLA), zero lost transactions, and absolute zero tolerance for balance discrepancies.
 
 ``` mermaid
 flowchart TD
@@ -10946,13 +10946,13 @@ async def backfill_ledger_chunk(cursor_id: int, chunk_size: int = 5000) -> int:
 
 A Kafka-based Change Data Capture (CDC) stream compares rows emitted by both tables.
 
-\$\$\text{Parity Invariant: } \forall t \in \text{Transactions}, \quad \text{amount}*{\text{v1}}(t) \equiv \text{amount}*{\text{v2}}(t) \land \text{currency}*{\text{v1}}(t) \equiv \text{currency}*{\text{v2}}(t)\$\$
+$$\text{Parity Invariant: } \forall t \in \text{Transactions}, \quad \text{amount}_{\text{v1}}(t) \equiv \text{amount}_{\text{v2}}(t) \land \text{currency}_{\text{v1}}(t) \equiv \text{currency}_{\text{v2}}(t)$$
 
 Over 72 hours and 250 million processed transactions, the Parity Auditor verified:
 
-- Total checked records: \$250,114,892\$
-- Mismatches: \$0\$ (\$\delta = 0.00000%\$)
-- \$p99\$ Shadow write latency: \$1.4\text{ms}\$
+- Total checked records: $250,114,892$
+- Mismatches: $0$ ($\delta = 0.00000\%$)
+- $p99$ Shadow write latency: $1.4\text{ms}$
 
 ##### Phase 5: Cutover (Authority Shift)
 
@@ -10963,7 +10963,7 @@ Via dynamic feature flag, read authority shifted to `ledger_entries_v2`. Write o
 - Reverse shadow-write disabled.
 - Application code pruned: removed legacy repository methods, dead-letter workers, and feature flags.
 - Legacy table dropped concurrently: `DROP TABLE ledger_entries;`.
-- **Result:** \$p99\$ query latency dropped from \$850\text{ms}\$ to \$18\text{ms}\$; zero downtime; zero data loss.
+- **Result:** $p99$ query latency dropped from $850\text{ms}$ to $18\text{ms}$; zero downtime; zero data loss.
 
 ------------------------------------------------------------------------
 
@@ -10973,8 +10973,8 @@ Via dynamic feature flag, read authority shifted to `ledger_entries_v2`. Write o
 
 An e-commerce platform with 40,000 search queries/sec redesigned its core relevance ranking engine:
 
-- **Legacy Engine:** Monolithic Lucene/BM25 text scoring written in Java (\$p99 = 45\text{ms}\$).
-- **Candidate Engine:** Vector-embedding ANN search with cross-encoder re-ranking written in Rust/ONNX (\$p99\$ budget \$\le 50\text{ms}\$).
+- **Legacy Engine:** Monolithic Lucene/BM25 text scoring written in Java ($p99 = 45\text{ms}$).
+- **Candidate Engine:** Vector-embedding ANN search with cross-encoder re-ranking written in Rust/ONNX ($p99$ budget $\le 50\text{ms}$).
 - **Uncertainty:** Will the Rust service handle peak query concurrency? Does the neural ranker return corrupted empty result sets for obscure lexical long-tail queries?
 
 ``` mermaid
@@ -10999,13 +10999,13 @@ flowchart LR
 
 1.  **Envoy Shadow Traffic Configuration:** Configured Envoy service proxy with `request_mirror_policies` to mirror 100% of incoming `/v1/search` traffic to the shadow cluster asynchronously. User responses are returned strictly by the Java engine; responses from the Rust engine are dropped by Envoy at the socket level.
 2.  **Differential Response Analyzer:** A dedicated comparator analyzed:
-    - **Semantic Equivalence:** Do vector results share at least \$80%\$ top-10 category overlap with BM25?
-    - **Empty Result Rate:** Did the candidate return 0 items when the legacy engine returned \$\>0\$ items?
-    - **Tail Latency Distribution:** Measured \$p50, p95, p99, p99.9\$ latencies under full production load.
+    - **Semantic Equivalence:** Do vector results share at least $80%$ top-10 category overlap with BM25?
+    - **Empty Result Rate:** Did the candidate return 0 items when the legacy engine returned $>0$ items?
+    - **Tail Latency Distribution:** Measured $p50, p95, p99, p99.9$ latencies under full production load.
 3.  **Falsification Findings during Shadowing:**
     - **Bug Discovered:** For queries containing special punctuation (for example, `"C++ books"` or `"M&M's"`), the tokenizer stripped characters and caused a panic in the vector embedding runtime, resulting in a silent 500 error on 0.04% of traffic.
     - **Resolution:** The defect was fixed and verified in shadow mode *before a single real user ever interacted with the new code*.
-4.  **Cutover:** After 7 days of 100% shadow traffic with \$0.000%\$ panics and verified \$p99 = 28\text{ms}\$, traffic was cut over seamlessly via weighted DNS routing.
+4.  **Cutover:** After 7 days of 100% shadow traffic with $0.000\%$ panics and verified $p99 = 28\text{ms}$, traffic was cut over seamlessly via weighted DNS routing.
 
 ------------------------------------------------------------------------
 
@@ -11091,11 +11091,11 @@ spec:
 
 #### Empirical Observations & Disproven Hypotheses
 
-1.  **Hypothesis 1 (Circuit Breaker):** "When the bank times out, the circuit breaker opens and returns `PaymentPending` in \$\< 500\text{ms}\$."
-    - **Result: FALSIFIED.** The HTTP client timeout was set to \$30\text{s}\$, but the thread pool size was only 50. Incoming requests saturated the pool in 4 seconds, causing `OrderService` health checks to fail, triggering a cascading crash of the entire payment pod cluster.
-    - **Remediation applied:** Reduced client timeout to \$2.5\text{s}\$, configured Hystrix/Resilience4j bulkhead thread pools with dedicated queue limits.
+1.  **Hypothesis 1 (Circuit Breaker):** "When the bank times out, the circuit breaker opens and returns `PaymentPending` in $< 500\text{ms}$."
+    - **Result: FALSIFIED.** The HTTP client timeout was set to $30\text{s}$, but the thread pool size was only 50. Incoming requests saturated the pool in 4 seconds, causing `OrderService` health checks to fail, triggering a cascading crash of the entire payment pod cluster.
+    - **Remediation applied:** Reduced client timeout to $2.5\text{s}$, configured Hystrix/Resilience4j bulkhead thread pools with dedicated queue limits.
 2.  **Hypothesis 2 (Idempotency under Network Partition):** "Retrying dropped authorizations will never double-charge a customer."
-    - **Result: VERIFIED.** 10,000 synthetic charge requests subjected to random network drops and retries produced exactly 10,000 ledger balance settlements with \$0\$ duplicate charges due to database-level unique idempotency keys.
+    - **Result: VERIFIED.** 10,000 synthetic charge requests subjected to random network drops and retries produced exactly 10,000 ledger balance settlements with $0$ duplicate charges due to database-level unique idempotency keys.
 
 ------------------------------------------------------------------------
 
@@ -11160,10 +11160,10 @@ spec:
 During a rollout of `v3.1.2`, an unindexed database query in the promotional discount calculator caused query times to scale quadratically with cart size:
 
 - **00:00:** Canary deployed to 5% traffic.
-- **00:45:** Canary \$p99\$ latency spiked to \$340\text{ms}\$ (breaching the \$120\text{ms}\$ threshold).
+- **00:45:** Canary $p99$ latency spiked to $340\text{ms}$ (breaching the $120\text{ms}$ threshold).
 - **01:15:** Second consecutive failure recorded by Prometheus Analysis Template.
-- **01:23:** Argo Rollouts aborted rollout, scaled canary replica weight to \$0%\$, and routed all ingress traffic back to baseline `v3.1.1`.
-- **Total Blast Radius:** \$0.02%\$ of active users experienced elevated latency for 83 seconds; zero transactions crashed; zero engineers woken up.
+- **01:23:** Argo Rollouts aborted rollout, scaled canary replica weight to $0\%$, and routed all ingress traffic back to baseline `v3.1.1`.
+- **Total Blast Radius:** $0.02\%$ of active users experienced elevated latency for 83 seconds; zero transactions crashed; zero engineers woken up.
 
 ------------------------------------------------------------------------
 
@@ -11184,7 +11184,7 @@ Every high-impact change must be accompanied by a formal Verification Card docum
 | **Target Hypothesis** | The core invariant or causal claim. | Pointer to `HYP-*` or `INV-*`. |
 | **Falsification Protocol** | The specific severe test designed to break the claim. | Executable test suite, chaos config, or shadow script. |
 | **Evidentiary Rung** | Level on the Evidentiary Ladder (1–7). | Must be Rung 2 or higher for architectural changes. |
-| **Pass/Fail Criteria** | Precise quantitative threshold for success. | E.g., \$\text{MS} \ge 0.85\$, \$\delta = 0.000%\$, \$p99 \le 50\text{ms}\$. |
+| **Pass/Fail Criteria** | Precise quantitative threshold for success. | E.g., $\text{MS} \ge 0.85$, $\delta = 0.000\%$, $p99 \le 50\text{ms}$. |
 | **Empirical Result** | Actual recorded metric from execution. | Link to test run artifact, APM trace, or log query. |
 | **Epistemic Verdict** | Final epistemic status update. | `CORROBORATED` or `FALSIFIED`. |
 
@@ -11266,10 +11266,10 @@ Operation 9 establishes the complete traceability chain connecting requirements 
 
 An engineering team or AI agent may conclude Operation 9 if and only if all five of the following conditions are satisfied:
 
-1.  **Evidentiary Sufficiency:** All high-risk hypotheses (`HYP-*`) associated with the selected candidate (`CAN-*`) have corresponding Verification Cards (`VAL-*`) with status `CORROBORATED` on Evidentiary Rung \$\ge 2\$.
-2.  **Mutation Testing Adequacy:** The test suite covering the modified domain boundaries achieves a Mutation Score \$MS \ge 0.85\$ (all critical first-order mutants killed).
-3.  **Transition Reversibility Proof:** The transition plan (`TRANS-*`) explicitly documents rollback mechanisms for Phases 1 through 5, satisfying the 5 Rollback Invariants (\$\mathcal{I}\_1\$ to \$\mathcal{I}\_5\$) with verified \$\text{MTTR} \le 30\text{s}\$.
-4.  **Empirical Parity Invariance:** In data/interface migrations, the shadow differential comparator demonstrates a parity divergence rate \$\delta \equiv 0.000%\$ over a continuous observation window under representative traffic.
+1.  **Evidentiary Sufficiency:** All high-risk hypotheses (`HYP-*`) associated with the selected candidate (`CAN-*`) have corresponding Verification Cards (`VAL-*`) with status `CORROBORATED` on Evidentiary Rung $\ge 2$.
+2.  **Mutation Testing Adequacy:** The test suite covering the modified domain boundaries achieves a Mutation Score $MS \ge 0.85$ (all critical first-order mutants killed).
+3.  **Transition Reversibility Proof:** The transition plan (`TRANS-*`) explicitly documents rollback mechanisms for Phases 1 through 5, satisfying the 5 Rollback Invariants ($\mathcal{I}_1$ to $\mathcal{I}_5$) with verified $\text{MTTR} \le 30\text{s}$.
+4.  **Empirical Parity Invariance:** In data/interface migrations, the shadow differential comparator demonstrates a parity divergence rate $\delta \equiv 0.000\%$ over a continuous observation window under representative traffic.
 5.  **Observability & Decommissioning Gate:** Telemetry alerts (SLI/SLO canary monitors) are active, automated rollback triggers are armed, and a decommissioning ticket exists to prune temporary transition scaffolding within 14 days.
 
 ------------------------------------------------------------------------
@@ -11317,7 +11317,7 @@ mindmap
 ### 1. The Big Bang Cutover Anti-Pattern
 
 - **Symptom:** Scheduling a 6-hour weekend maintenance window, taking the database offline, executing a massive schema transformation script, deploying new binaries, and switching DNS.
-- **Root Cause:** Failure to design the Transition Architecture (\$\mathcal{A}*{\text{trans}}\$) as a distinct system; attempting to jump directly from \$\mathcal{A}*{\text{initial}}\$ to \$\mathcal{A}\_{\text{target}}\$.
+- **Root Cause:** Failure to design the Transition Architecture ($\mathcal{A}_{\text{trans}}$) as a distinct system; attempting to jump directly from $\mathcal{A}_{\text{initial}}$ to $\mathcal{A}_{\text{target}}$.
 - **Systemic Hazard:** If a critical bug is discovered 4 hours into the maintenance window, rollback is complex or impossible, resulting in extended outages, corrupted data, and emergency hot-patching in production.
 - **Ariadne Correction:** Enforce the 7-Phase Expand/Contract Protocol. Eliminate all planned maintenance windows for software deployments.
 
@@ -11326,7 +11326,7 @@ mindmap
 - **Symptom:** Writing 500 unit tests that only verify that valid inputs produce expected outputs, achieving 95% line coverage while zero edge cases, network timeouts, or concurrent race conditions are tested.
 - **Root Cause:** Adopting an inductive "proof by example" mindset rather than a Popperian severe falsification methodology.
 - **Systemic Hazard:** The system crashes on Day 1 of production release when presented with long-tail unicode inputs, null pointers, or network latency spikes.
-- **Ariadne Correction:** Mandate Property-Based Testing (QuickCheck/Hypothesis) with automated shrinking and Mutation Testing (\$MS \ge 0.85\$).
+- **Ariadne Correction:** Mandate Property-Based Testing (QuickCheck/Hypothesis) with automated shrinking and Mutation Testing ($MS \ge 0.85$).
 
 ### 3. Shim Rot & Permanent Feature Flag Debt
 
@@ -11340,7 +11340,7 @@ mindmap
 - **Symptom:** Running an unthrottled `INSERT INTO new_table SELECT * FROM old_table;` migration script against a live production database.
 - **Root Cause:** Treating backfill as an offline script rather than a rate-limited background transition worker.
 - **Systemic Hazard:** Exclusive table locks, replication lag spikes, IOPS exhaustion, and connection pool starvation leading to a total site outage.
-- **Ariadne Correction:** Implement cursor-based pagination over immutable keys with chunk size limits (\$N \le 5000\$) and dynamic sleep intervals based on database CPU utilization.
+- **Ariadne Correction:** Implement cursor-based pagination over immutable keys with chunk size limits ($N \le 5000$) and dynamic sleep intervals based on database CPU utilization.
 
 ### 5. Shadow Traffic Side-Effect Pollution
 
@@ -11352,7 +11352,7 @@ mindmap
 ### 6. Untested Rollback Path (Asymmetric Write Corruption)
 
 - **Symptom:** Rolling back a canary deployment after 30 minutes of live traffic, only to find that data written by the canary during those 30 minutes cannot be read or processed by the old version.
-- **Root Cause:** Violating Rollback Invariant \$\mathcal{I}\_3\$ (Symmetric Ingestion); cutting over without maintaining reverse-compatibility dual-writing.
+- **Root Cause:** Violating Rollback Invariant $\mathcal{I}_3$ (Symmetric Ingestion); cutting over without maintaining reverse-compatibility dual-writing.
 - **Systemic Hazard:** Inability to roll back safely; engineering is trapped in a broken forward state.
 - **Ariadne Correction:** Maintain reverse dual-writing in Phase 5 until parity and stability are proven beyond doubt.
 
@@ -11366,7 +11366,7 @@ mindmap
 
 ### 6.1. The Epistemic Synthesis
 
-The Nine Operations of Systematic Inventive Thinking in Software Engineering do not constitute an ad-hoc taxonomy of software design tips, nor do they represent a linear project delivery methodology. They form an **epistemic reasoning engine** designed to systematically resolve **Engineering Uncertainty** (\$U\$) across the lifecycle of software systems.
+The Nine Operations of Systematic Inventive Thinking in Software Engineering do not constitute an ad-hoc taxonomy of software design tips, nor do they represent a linear project delivery methodology. They form an **epistemic reasoning engine** designed to systematically resolve **Engineering Uncertainty** ($U$) across the lifecycle of software systems.
 
 Software architecture and engineering problems are fundamentally cognitive struggles against complexity, incomplete knowledge, and competing constraints. When an engineering team fails, the failure rarely originates from an inability to write algorithmic code; it originates from epistemic errors:
 
@@ -11455,7 +11455,7 @@ In the Ariadne reasoning layer, software engineering is modeled as a directed ac
 
 #### Transitive Invalidation
 
-A central feature of the Ariadne epistemic engine is **Transitive Invalidation**. If an assumption `ASM-01` ("Database network roundtrip latency is \$\<1\text{ ms}\$ across availability zones") or a hypothesis `HYP-04` is proven false by empirical evidence `EVD-12` (`EVD-12 falsifies ASM-01`), all downstream candidate mechanisms (`CAN-02`), trade-off calculations (`VAL-03`), and decisions (`DEC-01`) that depend on that node are automatically marked **INVALIDATED** (\$N_i \xrightarrow{\text{depends_on}} N_j \land \text{State}(N_j) = \text{FALSIFIED} \implies \text{State}(N_i) \leftarrow \text{INVALIDATED}\$).
+A central feature of the Ariadne epistemic engine is **Transitive Invalidation**. If an assumption `ASM-01` ("Database network roundtrip latency is $<1\text{ ms}$ across availability zones") or a hypothesis `HYP-04` is proven false by empirical evidence `EVD-12` (`EVD-12 falsifies ASM-01`), all downstream candidate mechanisms (`CAN-02`), trade-off calculations (`VAL-03`), and decisions (`DEC-01`) that depend on that node are automatically marked **INVALIDATED** ($N_i \xrightarrow{\text{depends_on}} N_j \land \text{State}(N_j) = \text{FALSIFIED} \implies \text{State}(N_i) \leftarrow \text{INVALIDATED}$).
 
     [ ASM-01: AZ Latency < 1ms ] ◄─── (falsifies) ─── [ EVD-12: Ping p99 = 8.4ms ]
             │ (depends_on)                                      │
@@ -11477,8 +11477,8 @@ The Nine Operations operate under ten invariant axioms that govern software desi
 4.  **Axiom of Functional Preservation upon Component Elimination**: When a system mechanism or code unit is eliminated, its useful function must be explicitly redistributed to simpler, existing system carriers rather than abandoned or duplicated.
 5.  **Axiom of Non-Compromising Contradiction Resolution**: Architectural trade-offs must be resolved by separating conflicting requirements across time, state/space, operating conditions, or structural boundaries, rather than settling for compromise via arbitrary scoring weights.
 6.  **Axiom of Solution Space Divergence**: Solution generation must produce structurally distinct mechanism classes (for example, memory layout vs asynchronous streaming vs compile-time derivation), not minor syntactic variations of a single technology.
-7.  **Axiom of Orthogonal Change Propagation**: Module and service boundaries must encapsulate volatile design decisions, ensuring that independent axes of business or technological change result in localized code changes (\$R(M) \approx 1\$).
-8.  **Axiom of Dynamic Non-Linearity**: System fitness cannot be evaluated via static steady-state diagrams; mechanisms must be modeled across time, accounting for queue accumulations, latency percentiles (\$p99/p99.9\$), retry storms, and failure cascades.
+7.  **Axiom of Orthogonal Change Propagation**: Module and service boundaries must encapsulate volatile design decisions, ensuring that independent axes of business or technological change result in localized code changes ($R(M) \approx 1$).
+8.  **Axiom of Dynamic Non-Linearity**: System fitness cannot be evaluated via static steady-state diagrams; mechanisms must be modeled across time, accounting for queue accumulations, latency percentiles ($p99/p99.9$), retry storms, and failure cascades.
 9.  **Axiom of Total Lifecycle Ideality**: The engineering value of a solution is inversely proportional to the total lifecycle cost of ownership, cognitive load, mutable state entropy, and operational blast radius it introduces.
 10. **Axiom of Empirical Executability & Safe Transition**: Every architectural proposal is an unproven claim until validated by executable code in an isolated branch, and every deployment must possess an explicit, reversible transition architecture.
 
@@ -11740,9 +11740,9 @@ graph LR
 
 Performance contradictions in software engineering are governed by queueing theory, concurrency limits, and resource utilization bounds:
 
-- **Little's Law**: \$\$L = \lambda W\$\$ Where \$L\$ is the average number of requests in the system, \$\lambda\$ is the arrival rate (throughput), and \$W\$ is the average response time (latency).
-- **Kingman's Approximation for Heavy Traffic in \$G/G/1\$ Queues**: \$\$W_q \approx \left( \frac{\rho}{1 - \rho} \right) \left( \frac{C_a^2 + C_s^2}{2} \right) \frac{1}{\mu}\$\$ Where \$\rho = \lambda / \mu\$ is server utilization, \$C_a\$ is the coefficient of variation of inter-arrival times, \$C_s\$ is the coefficient of variation of service times, and \$\mu\$ is service rate. As utilization \$\rho \to 1\$, queueing delay \$W_q \to \infty\$.
-- **Gunther's Universal Scalability Law (USL)**: \$\$C(N) = \frac{N}{1 + \sigma (N - 1) + \kappa N (N - 1)}\$\$ Where \$N\$ is concurrent workers/nodes, \$\sigma\$ represents contention (serialization overhead, Amdahl's law), and \$\kappa\$ represents crosstalk (coherency delay, cross-node cache invalidation).
+- **Little's Law**: $$L = \lambda W$$ Where $L$ is the average number of requests in the system, $\lambda$ is the arrival rate (throughput), and $W$ is the average response time (latency).
+- **Kingman's Approximation for Heavy Traffic in $G/G/1$ Queues**: $$W_q \approx \left( \frac{\rho}{1 - \rho} \right) \left( \frac{C_a^2 + C_s^2}{2} \right) \frac{1}{\mu}$$ Where $\rho = \lambda / \mu$ is server utilization, $C_a$ is the coefficient of variation of inter-arrival times, $C_s$ is the coefficient of variation of service times, and $\mu$ is service rate. As utilization $\rho \to 1$, queueing delay $W_q \to \infty$.
+- **Gunther's Universal Scalability Law (USL)**: $$C(N) = \frac{N}{1 + \sigma (N - 1) + \kappa N (N - 1)}$$ Where $N$ is concurrent workers/nodes, $\sigma$ represents contention (serialization overhead, Amdahl's law), and $\kappa$ represents crosstalk (coherency delay, cross-node cache invalidation).
 
 #### 8.1.2. Systematic Contradiction Breakdown
 
@@ -11783,17 +11783,17 @@ flowchart TD
 
 - **Resolution of Clash 1 (Throughput vs Latency)**:
 
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Implement **Dynamic Adaptive Micro-Batching** (Nagle's algorithm generalized). Requests are buffered up to \$b\_{\text{max}}\$ items or flushed unconditionally when a timer \$\tau\_{\text{max}}\$ (for example, \$1\text{ ms}\$) expires. Under low load, latency is optimal (\$W \approx \tau\_{\text{max}}\$); under surge load, batching automatically engages to maximize throughput.
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Offload batching to OS kernel ring buffers via Linux `io_uring` or vectored I/O (`writev`), allowing application worker threads to process events individually while the storage controller receives aggregated blocks.
+  - **Separation in Time ($S_{\text{time}}$)**: Implement **Dynamic Adaptive Micro-Batching** (Nagle's algorithm generalized). Requests are buffered up to $b_{\text{max}}$ items or flushed unconditionally when a timer $\tau_{\text{max}}$ (for example, $1\text{ ms}$) expires. Under low load, latency is optimal ($W \approx \tau_{\text{max}}$); under surge load, batching automatically engages to maximize throughput.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Offload batching to OS kernel ring buffers via Linux `io_uring` or vectored I/O (`writev`), allowing application worker threads to process events individually while the storage controller receives aggregated blocks.
 
 - **Resolution of Clash 2 (Utilization vs Tail Latency)**:
 
-  - **Separation in Operating Mode (\$S\_{\text{mode}}\$)**: Implement **Adaptive Concurrency Limits** (CoDel / TCP Vegas algorithm for RPC). Under normal load (\$\rho \< 0.75\$), requests are processed concurrently. When gradient latency increases (\$L\_{\text{current}} / L\_{\text{baseline}} \> 1.5\$), the system switches to **controlled load-shedding mode**, immediately rejecting non-essential traffic with HTTP 429 rather than allowing queues to accumulate and destroy \$p99\$ response times.
-  - **Separation in State Ownership (\$S\_{\text{space}}\$)**: Partition threads into dedicated CPU cores with **Core-Pinned Work-Stealing Ring Buffers** (LMAX Disruptor pattern). Eliminates cross-core cache invalidation (\$\kappa \to 0\$ in USL) and lock contention.
+  - **Separation in Operating Mode ($S_{\text{mode}}$)**: Implement **Adaptive Concurrency Limits** (CoDel / TCP Vegas algorithm for RPC). Under normal load ($\rho < 0.75$), requests are processed concurrently. When gradient latency increases ($L_{\text{current}} / L_{\text{baseline}} > 1.5$), the system switches to **controlled load-shedding mode**, immediately rejecting non-essential traffic with HTTP 429 rather than allowing queues to accumulate and destroy $p99$ response times.
+  - **Separation in State Ownership ($S_{\text{space}}$)**: Partition threads into dedicated CPU cores with **Core-Pinned Work-Stealing Ring Buffers** (LMAX Disruptor pattern). Eliminates cross-core cache invalidation ($\kappa \to 0$ in USL) and lock contention.
 
 - **Resolution of Clash 3 (Cache Freshness vs Database Offload)**:
 
-  - **Separation in Time & State (\$S\_{\text{time}} + S\_{\text{space}}\$)**: Implement **Change Data Capture (CDC) Event-Driven Invalidation** (Debezium + Redis) combined with **Lease-Based Caching**. When a write occurs, the database WAL stream emits an invalidation event that asynchronously evicts the cache key. Concurrent cache misses acquire a short-lived cryptographic lease, ensuring that only one worker queries the database while other workers await the fresh warm value, eliminating cache stampedes.
+  - **Separation in Time & State ($S_{\text{time}} + S_{\text{space}}$)**: Implement **Change Data Capture (CDC) Event-Driven Invalidation** (Debezium + Redis) combined with **Lease-Based Caching**. When a write occurs, the database WAL stream emits an invalidation event that asynchronously evicts the cache key. Concurrent cache misses acquire a short-lived cryptographic lease, ensuring that only one worker queries the database while other workers await the fresh warm value, eliminating cache stampedes.
 
 ------------------------------------------------------------------------
 
@@ -11803,13 +11803,13 @@ flowchart TD
 
 Modifiability reflects the cost and ripple effect of changing software components:
 
-- **Change Radius \$R(M)\$**: \$\$R(M) = \frac{\|{ C_j \in \text{System} \mid \text{Change}(M) \implies \text{Modified}(C_j) }\|}{\|\text{System}\|}\$\$ Where \$M\$ is a module or requirement. An ideal modular design achieves \$R(M) \to \frac{1}{\|\text{System}\|}\$ (changes to \$M\$ affect only \$M\$).
+- **Change Radius $R(M)$**: $$R(M) = \frac{\left\| \{ C_j \in \text{System} \mid \text{Change}(M) \implies \text{Modified}(C_j) \} \right\|}{\|\text{System}\|}$$ Where $M$ is a module or requirement. An ideal modular design achieves $R(M) \to \frac{1}{\|\text{System}\|}$ (changes to $M$ affect only $M$).
 - **Martin's Package Metrics**:
-  - **Afferent Coupling (\$C_a\$)**: Number of external classes depending on this package.
-  - **Efferent Coupling (\$C_e\$)**: Number of external classes this package depends upon.
-  - **Instability (\$I\$)**: \$\$I = \frac{C_e}{C_a + C_e}, \quad I \in \[0, 1\]\$\$
-  - **Abstractness (\$A\$)**: Ratio of abstract classes/interfaces to total classes.
-  - **Distance from the Main Sequence (\$D\$)**: \$\$D = \|A + I - 1\|, \quad D \in \[0, 1\]\$\$ \$D = 0\$ represents an optimally balanced module (stable packages are abstract; unstable packages are concrete).
+  - **Afferent Coupling ($C_a$)**: Number of external classes depending on this package.
+  - **Efferent Coupling ($C_e$)**: Number of external classes this package depends upon.
+  - **Instability ($I$)**: $$I = \frac{C_e}{C_a + C_e}, \quad I \in [0, 1]$$
+  - **Abstractness ($A$)**: Ratio of abstract classes/interfaces to total classes.
+  - **Distance from the Main Sequence ($D$)**: $$D = \|A + I - 1\|, \quad D \in [0, 1]$$ $D = 0$ represents an optimally balanced module (stable packages are abstract; unstable packages are concrete).
 
 #### 8.2.2. Systematic Contradiction Breakdown
 
@@ -11851,17 +11851,17 @@ flowchart TD
 
 - **Resolution of Clash 1 (Abstraction vs Understandability)**:
 
-  - **Separation in State / Data Ownership (\$S\_{\text{space}}\$)**: Apply **Parnas Information Hiding**. Abstract *only* the specific volatile design secret (for example, the exact payment gateway vendor API or database dialect), while keeping all internal module business workflows concrete, procedural, and transparent. Do not introduce speculative abstractions for stable requirements.
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Use **Compile-Time Generics and Type Classes** (for example, Rust traits, Go interfaces) rather than runtime reflection and polymorphic class hierarchies. Contracts are strictly enforced at boundaries while code within the module remains flat and easily traceable.
+  - **Separation in State / Data Ownership ($S_{\text{space}}$)**: Apply **Parnas Information Hiding**. Abstract *only* the specific volatile design secret (for example, the exact payment gateway vendor API or database dialect), while keeping all internal module business workflows concrete, procedural, and transparent. Do not introduce speculative abstractions for stable requirements.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Use **Compile-Time Generics and Type Classes** (for example, Rust traits, Go interfaces) rather than runtime reflection and polymorphic class hierarchies. Contracts are strictly enforced at boundaries while code within the module remains flat and easily traceable.
 
 - **Resolution of Clash 2 (Independent Deployability vs Semantic Consistency)**:
 
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Enforce the **Expand/Contract (Parallel Run) Pattern** for all database migrations and API schemas. An API or schema is never modified in a breaking fashion; new fields are added as optional (*Expand*), traffic is shifted across multiple independent deployments, and obsolete fields are pruned only after all consumers have upgraded (*Contract*).
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Implement **Consumer-Driven Contract Testing** (for example, Pact, Buf Protobuf breaking-change detection) embedded into the CI pipeline. Integration compatibility is verified mathematically at build time before deployment, decoupling deployment schedules without sacrificing end-to-end semantic correctness.
+  - **Separation in Time ($S_{\text{time}}$)**: Enforce the **Expand/Contract (Parallel Run) Pattern** for all database migrations and API schemas. An API or schema is never modified in a breaking fashion; new fields are added as optional (*Expand*), traffic is shifted across multiple independent deployments, and obsolete fields are pruned only after all consumers have upgraded (*Contract*).
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Implement **Consumer-Driven Contract Testing** (for example, Pact, Buf Protobuf breaking-change detection) embedded into the CI pipeline. Integration compatibility is verified mathematically at build time before deployment, decoupling deployment schedules without sacrificing end-to-end semantic correctness.
 
 - **Resolution of Clash 3 (Extensibility vs Strict Encapsulation)**:
 
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Adopt a **Micro-Kernel / Sandboxed Plugin Architecture** using WebAssembly (WASM) or strictly typed gRPC extensions. Plugin authors extend behavior by implementing pure-function interface hooks, while internal domain aggregates remain completely encapsulated and memory-isolated.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Adopt a **Micro-Kernel / Sandboxed Plugin Architecture** using WebAssembly (WASM) or strictly typed gRPC extensions. Plugin authors extend behavior by implementing pure-function interface hooks, while internal domain aggregates remain completely encapsulated and memory-isolated.
 
 ------------------------------------------------------------------------
 
@@ -11871,13 +11871,13 @@ flowchart TD
 
 Reliability in distributed software systems is governed by probability theory and distributed consensus constraints:
 
-- **System Availability (\$A\$)**: \$\$A = \frac{\text{MTBF}}{\text{MTBF} + \text{MTTR}}\$\$ Where \$\text{MTBF}\$ is Mean Time Between Failures, and \$\text{MTTR}\$ is Mean Time to Recover. Reducing \$\text{MTTR}\$ to near-zero via automated rollback and self-healing yields higher availability than impossible attempts to make \$\text{MTBF} \to \infty\$.
+- **System Availability ($A$)**: $$A = \frac{\text{MTBF}}{\text{MTBF} + \text{MTTR}}$$ Where $\text{MTBF}$ is Mean Time Between Failures, and $\text{MTTR}$ is Mean Time to Recover. Reducing $\text{MTTR}$ to near-zero via automated rollback and self-healing yields higher availability than impossible attempts to make $\text{MTBF} \to \infty$.
 - **Series vs Parallel Reliability**:
-  - For \$n\$ independent components in series: \$R\_{\text{system}} = \prod\_{i=1}^n R_i\$.
-  - For \$n\$ redundant parallel components: \$R\_{\text{system}} = 1 - \prod\_{i=1}^n (1 - R_i)\$.
+  - For $n$ independent components in series: $R_{\text{system}} = \prod_{i=1}^n R_i$.
+  - For $n$ redundant parallel components: $R_{\text{system}} = 1 - \prod_{i=1}^n (1 - R_i)$.
 - **CAP Theorem & PACELC Formulation**:
-  - In a system that has partitions (\$P\$), one must choose between Availability (\$A\$) and Consistency (\$C\$).
-  - **Else (\$E\$)**, when the system is running normally without partitions, one must choose between Latency (\$L\$) and Consistency (\$C\$).
+  - In a system that has partitions ($P$), one must choose between Availability ($A$) and Consistency ($C$).
+  - **Else ($E$)**, when the system is running normally without partitions, one must choose between Latency ($L$) and Consistency ($C$).
 
 #### 8.3.2. Systematic Contradiction Breakdown
 
@@ -11920,18 +11920,18 @@ flowchart TD
 
 - **Resolution of Clash 1 (Consistency vs Availability under Partition)**:
 
-  - **Separation in State & Data Ownership (\$S\_{\text{space}}\$)**: Apply **Conflict-Free Replicated Data Types (CRDTs)** or **Single-Leader Partition Assignment per Tenant**. Commutative operations (for example, adding items to a shopping cart, counter increments) are accepted locally on any replica without cross-node locking and converge deterministically. For non-commutative invariants (for example, account balance transfer), partition ownership strictly by account ID so that consensus is localized to a single Raft group.
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Use **Saga Orchestration with Compensating Transactions** instead of distributed two-phase commits (2PC). Local transactions commit immediately at each step; if a downstream step fails, compensating transactions are scheduled asynchronously.
+  - **Separation in State & Data Ownership ($S_{\text{space}}$)**: Apply **Conflict-Free Replicated Data Types (CRDTs)** or **Single-Leader Partition Assignment per Tenant**. Commutative operations (for example, adding items to a shopping cart, counter increments) are accepted locally on any replica without cross-node locking and converge deterministically. For non-commutative invariants (for example, account balance transfer), partition ownership strictly by account ID so that consensus is localized to a single Raft group.
+  - **Separation in Time ($S_{\text{time}}$)**: Use **Saga Orchestration with Compensating Transactions** instead of distributed two-phase commits (2PC). Local transactions commit immediately at each step; if a downstream step fails, compensating transactions are scheduled asynchronously.
 
 - **Resolution of Clash 2 (Retryability vs Thundering Herd)**:
 
-  - **Separation in Operating Mode (\$S\_{\text{mode}}\$)**: Implement **Exponential Backoff with Full Jitter and Client Retry Budgets**: \$\$t\_{\text{sleep}} = \text{Uniform}\left(0, \min(t\_{\text{max}}, t\_{\text{base}} \cdot 2^{\text{attempt}})\right)\$\$ Clients maintain a token bucket where retries cannot exceed \$10%\$ of total request volume. When the downstream service fails, circuit breakers trip to *Open*, instantly returning a degraded fallback or cached response without generating network traffic.
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Divert persistently failing requests to an **Asynchronous Dead-Letter Queue (DLQ)** with exponential delayed re-drive, decoupling client error handling from live request thread execution.
+  - **Separation in Operating Mode ($S_{\text{mode}}$)**: Implement **Exponential Backoff with Full Jitter and Client Retry Budgets**: $$t_{\text{sleep}} = \text{Uniform}\left(0, \min(t_{\text{max}}, t_{\text{base}} \cdot 2^{\text{attempt}})\right)$$ Clients maintain a token bucket where retries cannot exceed $10\%$ of total request volume. When the downstream service fails, circuit breakers trip to *Open*, instantly returning a degraded fallback or cached response without generating network traffic.
+  - **Separation in Time ($S_{\text{time}}$)**: Divert persistently failing requests to an **Asynchronous Dead-Letter Queue (DLQ)** with exponential delayed re-drive, decoupling client error handling from live request thread execution.
 
 - **Resolution of Clash 3 (Durability vs Write Latency)**:
 
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Implement **Group Commit in Write-Ahead Logs (WAL)**. Individual application transactions write to an in-memory ring buffer; a dedicated background I/O thread flushes accumulated transactions in a single batched `fsync()` syscall, amortizing the physical disk latency across hundreds of concurrent requests.
-  - **Separation in State (\$S\_{\text{space}}\$)**: Use **Quorum-Replicated In-Memory State (Raft over NVMe/RAM)**. A write is acknowledged as durable as soon as it is committed to the memory of \$\lfloor n/2 \rfloor + 1\$ independent failure domains, eliminating synchronous disk flush latency from the critical path while guaranteeing zero data loss.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Implement **Group Commit in Write-Ahead Logs (WAL)**. Individual application transactions write to an in-memory ring buffer; a dedicated background I/O thread flushes accumulated transactions in a single batched `fsync()` syscall, amortizing the physical disk latency across hundreds of concurrent requests.
+  - **Separation in State ($S_{\text{space}}$)**: Use **Quorum-Replicated In-Memory State (Raft over NVMe/RAM)**. A write is acknowledged as durable as soon as it is committed to the memory of $\lfloor n/2 \rfloor + 1$ independent failure domains, eliminating synchronous disk flush latency from the critical path while guaranteeing zero data loss.
 
 ------------------------------------------------------------------------
 
@@ -11941,9 +11941,9 @@ flowchart TD
 
 Testability and diagnosability quantify the friction of verifying invariants and isolating runtime defects:
 
-- **Observability Signal-to-Noise Ratio (\$\text{SNR}\_{\text{obs}}\$)**: \$\$\text{SNR}\_{\text{obs}} = \frac{\text{Relevant Diagnostic Telemetry}}{\text{Background Logging Overhead} + \text{Alert Noise}}\$\$
-- **Test Suite Execution Time vs Defect Coverage**: \$\$T\_{\text{suite}} = \sum\_{i=1}^n t_i, \quad \text{Coverage} = \frac{\|\text{Exercised Invariants}\|}{\|\text{Total Invariants}\|}\$\$ The objective is to maximize Defect Coverage while holding \$T\_{\text{suite}} \le T\_{\text{threshold}}\$ (for example, \$\<5\text{ minutes}\$ for local CI loops).
-- **Flakiness Probability (\$P\_{\text{flake}}\$)**: \$\$P\_{\text{flake}}(\text{Suite}) = 1 - \prod\_{i=1}^n (1 - p\_{\text{flake}, i})\$\$ For a suite of 1,000 integration tests where each test has a tiny flakiness probability \$p = 0.001\$, the suite flakiness rate is \$P = 1 - (0.999)^{1000} \approx 63.2%\$.
+- **Observability Signal-to-Noise Ratio ($\text{SNR}_{\text{obs}}$)**: $$\text{SNR}_{\text{obs}} = \frac{\text{Relevant Diagnostic Telemetry}}{\text{Background Logging Overhead} + \text{Alert Noise}}$$
+- **Test Suite Execution Time vs Defect Coverage**: $$T_{\text{suite}} = \sum_{i=1}^n t_i, \quad \text{Coverage} = \frac{\|\text{Exercised Invariants}\|}{\|\text{Total Invariants}\|}$$ The objective is to maximize Defect Coverage while holding $T_{\text{suite}} \le T_{\text{threshold}}$ (for example, $<5\text{ minutes}$ for local CI loops).
+- **Flakiness Probability ($P_{\text{flake}}$)**: $$P_{\text{flake}}(\text{Suite}) = 1 - \prod_{i=1}^n (1 - p_{\text{flake}, i})$$ For a suite of 1,000 integration tests where each test has a tiny flakiness probability $p = 0.001$, the suite flakiness rate is $P = 1 - (0.999)^{1000} \approx 63.2\%$.
 
 #### 8.4.2. Systematic Contradiction Breakdown
 
@@ -11986,17 +11986,17 @@ flowchart TD
 
 - **Resolution of Clash 1 (Telemetry Depth vs Overhead & PII)**:
 
-  - **Separation in Operating Mode (\$S\_{\text{mode}}\$)**: Implement **Tail-Based Adaptive Tracing**. The application buffers span telemetry in a circular memory ring. If a request completes successfully within normal latency bounds, it is sampled at a low rate (\$0.01%\$). If the request encounters an HTTP \$5xx\$ error, database exception, or latency spike (\$\>p95\$), \$100%\$ of the complete trace and diagnostic spans are emitted to the telemetry collector.
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Offload metrics collection and continuous profiling to **Kernel eBPF Probes** (for example, Parca, Cilium), capturing stack traces without modifying application bytecode or incurring user-space runtime overhead. Embed an automated token-redaction filter at the logging boundary to cryptographically hash PII before persistence.
+  - **Separation in Operating Mode ($S_{\text{mode}}$)**: Implement **Tail-Based Adaptive Tracing**. The application buffers span telemetry in a circular memory ring. If a request completes successfully within normal latency bounds, it is sampled at a low rate ($0.01\%$). If the request encounters an HTTP $5xx$ error, database exception, or latency spike ($>p95$), $100\%$ of the complete trace and diagnostic spans are emitted to the telemetry collector.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Offload metrics collection and continuous profiling to **Kernel eBPF Probes** (for example, Parca, Cilium), capturing stack traces without modifying application bytecode or incurring user-space runtime overhead. Embed an automated token-redaction filter at the logging boundary to cryptographically hash PII before persistence.
 
 - **Resolution of Clash 2 (Environmental Fidelity vs Test Speed/Isolation)**:
 
-  - **Separation in State Ownership (\$S\_{\text{space}}\$)**: Use **Ephemeral Containerized Dependencies via Testcontainers and In-Memory SQLite/Embedded Storage**. Each test suite or test thread instantiates a completely isolated, lightweight database container bound to a dynamic ephemeral port. Zero state is shared across tests, reducing flakiness to \$P\_{\text{flake}} \to 0\$.
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Partition the test pyramid across the delivery pipeline: ultra-fast unit and property tests run pre-commit (\$\<10\text{ seconds}\$); consumer-driven contract tests run in PR CI (\$\<2\text{ minutes}\$); full-system synthetic canary verifications run post-merge in production shadow environments.
+  - **Separation in State Ownership ($S_{\text{space}}$)**: Use **Ephemeral Containerized Dependencies via Testcontainers and In-Memory SQLite/Embedded Storage**. Each test suite or test thread instantiates a completely isolated, lightweight database container bound to a dynamic ephemeral port. Zero state is shared across tests, reducing flakiness to $P_{\text{flake}} \to 0$.
+  - **Separation in Time ($S_{\text{time}}$)**: Partition the test pyramid across the delivery pipeline: ultra-fast unit and property tests run pre-commit ($<10\text{ seconds}$); consumer-driven contract tests run in PR CI ($<2\text{ minutes}$); full-system synthetic canary verifications run post-merge in production shadow environments.
 
 - **Resolution of Clash 3 (Deterministic Reproducibility vs Real-World Concurrency)**:
 
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Implement **Deterministic Simulation Testing (DST)** (FoundationDB / Antithesis pattern). The entire software system is compiled to execute on top of a simulated, single-threaded deterministic virtual hypervisor where time, network packet drops, disk delays, and thread context switches are driven by a pseudo-random seed. Any complex distributed race condition is \$100%\$ deterministically reproducible by replaying the exact seed.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Implement **Deterministic Simulation Testing (DST)** (FoundationDB / Antithesis pattern). The entire software system is compiled to execute on top of a simulated, single-threaded deterministic virtual hypervisor where time, network packet drops, disk delays, and thread context switches are driven by a pseudo-random seed. Any complex distributed race condition is $100\%$ deterministically reproducible by replaying the exact seed.
 
 ------------------------------------------------------------------------
 
@@ -12006,9 +12006,9 @@ flowchart TD
 
 Security contradictions are governed by access control models, cryptography, and information-theoretic privacy constraints:
 
-- **Saltzer-Schroeder Principle of Least Privilege**: \$\$\text{Privilege}(S) = \bigcap \text{Permissions Required for Valid Task}(S)\$\$
-- **Attack Surface Metric**: \$\$\text{AttackSurface} = \sum\_{i=1}^n w\_{\text{entry}} \cdot \text{EntryPoint}*i + \sum*{j=1}^m w\_{\text{channel}} \cdot \text{Channel}*j + \sum*{k=1}^p w\_{\text{data}} \cdot \text{UntrustedData}\_k\$\$
-- **Cryptographic Erasure (Crypto-Shredding) Invariant**: \$\$\text{Data}*{\text{plaintext}} = D_k(\text{Data}*{\text{ciphertext}}), \quad \text{Destroy}(k) \implies P(\text{Recover}(\text{Data}\_{\text{plaintext}})) \le \frac{1}{2^{256}}\$\$
+- **Saltzer-Schroeder Principle of Least Privilege**: $$\text{Privilege}(S) = \bigcap \text{Permissions Required for Valid Task}(S)$$
+- **Attack Surface Metric**: $$\text{AttackSurface} = \sum_{i=1}^n w_{\text{entry}} \cdot \text{EntryPoint}_i + \sum_{j=1}^m w_{\text{channel}} \cdot \text{Channel}_j + \sum_{k=1}^p w_{\text{data}} \cdot \text{UntrustedData}_k$$
+- **Cryptographic Erasure (Crypto-Shredding) Invariant**: $$\text{Data}_{\text{plaintext}} = D_k(\text{Data}_{\text{ciphertext}}), \quad \text{Destroy}(k) \implies P(\text{Recover}(\text{Data}_{\text{plaintext}})) \le \frac{1}{2^{256}}$$
 
 #### 8.5.2. Systematic Contradiction Breakdown
 
@@ -12050,16 +12050,16 @@ flowchart TD
 
 - **Resolution of Clash 1 (Zero Trust Authorization vs Latency/Velocity)**:
 
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Use **Short-Lived Cryptographic Capability Tokens (PASETO / Signed JWT)**. The identity provider issues a signed token containing user claims and tenant scopes valid for 60 seconds. Downstream microservices verify the cryptographic signature locally in microseconds using a cached public key without making remote authorization roundtrips.
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Embed a **Local WebAssembly Policy Engine (for example, Open Policy Agent / OPA)** as an in-process sidecar or library. Authorization policies are evaluated in memory against local cached state, eliminating network overhead while maintaining centralized policy management.
+  - **Separation in Time ($S_{\text{time}}$)**: Use **Short-Lived Cryptographic Capability Tokens (PASETO / Signed JWT)**. The identity provider issues a signed token containing user claims and tenant scopes valid for 60 seconds. Downstream microservices verify the cryptographic signature locally in microseconds using a cached public key without making remote authorization roundtrips.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Embed a **Local WebAssembly Policy Engine (for example, Open Policy Agent / OPA)** as an in-process sidecar or library. Authorization policies are evaluated in memory against local cached state, eliminating network overhead while maintaining centralized policy management.
 
 - **Resolution of Clash 2 (Immutable Audit Logs vs GDPR Privacy Erasure)**:
 
-  - **Separation in State Ownership (\$S\_{\text{space}}\$)**: Implement **Cryptographic Shredding (Crypto-Shredding)**. All Personally Identifiable Information (PII) is encrypted with a unique, per-user encryption key \$K\_{\text{user}}\$ before being written to the immutable event log. The immutable ledger stores only ciphertext. When a user requests deletion under GDPR/CCPA, the key \$K\_{\text{user}}\$ is permanently destroyed from the Key Management Service (KMS). The immutable log remains cryptographically intact and auditable, while the PII is mathematically rendered irreversible noise.
+  - **Separation in State Ownership ($S_{\text{space}}$)**: Implement **Cryptographic Shredding (Crypto-Shredding)**. All Personally Identifiable Information (PII) is encrypted with a unique, per-user encryption key $K_{\text{user}}$ before being written to the immutable event log. The immutable ledger stores only ciphertext. When a user requests deletion under GDPR/CCPA, the key $K_{\text{user}}$ is permanently destroyed from the Key Management Service (KMS). The immutable log remains cryptographically intact and auditable, while the PII is mathematically rendered irreversible noise.
 
 - **Resolution of Clash 3 (Deep Security Inspection vs Throughput)**:
 
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Offload TLS termination and layer-4/7 attack mitigation to **Kernel-Level TLS (kTLS) and eBPF XDP (eXpress Data Path)** on the network interface card (NIC). Malformed packets and volumetric DDoS floods are dropped directly in kernel driver space before allocating OS socket buffers or invoking user-space application code.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Offload TLS termination and layer-4/7 attack mitigation to **Kernel-Level TLS (kTLS) and eBPF XDP (eXpress Data Path)** on the network interface card (NIC). Malformed packets and volumetric DDoS floods are dropped directly in kernel driver space before allocating OS socket buffers or invoking user-space application code.
 
 ------------------------------------------------------------------------
 
@@ -12069,9 +12069,9 @@ flowchart TD
 
 Software economics governs the optimization of total engineering effort, infrastructure run-costs, and organizational velocity:
 
-- **Total Cost of Ownership (TCO)**: \$\$\text{TCO} = C\_{\text{dev}} + C\_{\text{infra}} + C\_{\text{ops}} + C\_{\text{maint}} + C\_{\text{transition}}\$\$ Where \$C\_{\text{maint}} + C\_{\text{ops}}\$ typically constitutes \$60\text{--}80%\$ of total lifetime software cost ([Boehm, 1981](https://en.wikipedia.org/wiki/Barry_Boehm)).
-- **Unit Economic Efficiency (\$\eta\_{\text{unit}}\$)**: \$\$\eta\_{\text{unit}} = \frac{\text{Delivered Business Value (Transactions)}}{\text{Cloud Infrastructure Spend (\$) } + \text{On-Call Engineering Hours}}\$\$
-- **Cognitive Load (\$CL\$)**: \$\$CL = \text{Intrinsic Load} + \text{Germane Load} + \text{Extraneous Architectural Load}\$\$ Minimizing Extraneous Load (convoluted deployment rituals, distributed tracing debugging, manual configuration) directly increases feature delivery velocity ([Forsgren, Humble & Kim, 2018](https://itrevolution.com/product/accelerate/)).
+- **Total Cost of Ownership (TCO)**: $$\text{TCO} = C_{\text{dev}} + C_{\text{infra}} + C_{\text{ops}} + C_{\text{maint}} + C_{\text{transition}}$$ Where $C_{\text{maint}} + C_{\text{ops}}$ typically constitutes $60\text{--}80\%$ of total lifetime software cost ([Boehm, 1981](https://en.wikipedia.org/wiki/Barry_Boehm)).
+- **Unit Economic Efficiency ($\eta_{\text{unit}}$)**: $$\eta_{\text{unit}} = \frac{\text{Delivered Business Value (Transactions)}}{\text{Cloud Infrastructure Spend (\$) } + \text{On-Call Engineering Hours}}$$
+- **Cognitive Load ($CL$)**: $$CL = \text{Intrinsic Load} + \text{Germane Load} + \text{Extraneous Architectural Load}$$ Minimizing Extraneous Load (convoluted deployment rituals, distributed tracing debugging, manual configuration) directly increases feature delivery velocity ([Forsgren, Humble & Kim, 2018](https://itrevolution.com/product/accelerate/)).
 
 #### 8.6.2. Systematic Contradiction Breakdown
 
@@ -12114,17 +12114,17 @@ flowchart TD
 
 - **Resolution of Clash 1 (Rapid Time-to-Market vs Lifecycle TCO)**:
 
-  - **Separation in Time (\$S\_{\text{time}}\$)**: Adopt the **Modular Monolith First with Transition Milestones** strategy. Build domain capabilities inside a single codebase with strict compile-time module boundaries (for example, Go internal packages, Rust workspace crates, Java modules) and independent database schemas. Ship to market in weeks without distributed system overhead (\$C\_{\text{ops}} \approx 0\$). If and when an individual module reaches independent scale thresholds, extract it into a standalone service with zero code refactoring.
-  - **Separation in State Ownership (\$S\_{\text{space}}\$)**: Enforce **Strict Schema Boundaries within Shared Database**. Modules never join across database tables; communication crosses explicit service interfaces. Preserves rapid initial deployment while preventing architectural coupling.
+  - **Separation in Time ($S_{\text{time}}$)**: Adopt the **Modular Monolith First with Transition Milestones** strategy. Build domain capabilities inside a single codebase with strict compile-time module boundaries (for example, Go internal packages, Rust workspace crates, Java modules) and independent database schemas. Ship to market in weeks without distributed system overhead ($C_{\text{ops}} \approx 0$). If and when an individual module reaches independent scale thresholds, extract it into a standalone service with zero code refactoring.
+  - **Separation in State Ownership ($S_{\text{space}}$)**: Enforce **Strict Schema Boundaries within Shared Database**. Modules never join across database tables; communication crosses explicit service interfaces. Preserves rapid initial deployment while preventing architectural coupling.
 
 - **Resolution of Clash 2 (Multi-Tenant Cloud Elasticity vs Cost Predictability)**:
 
-  - **Separation in Operating Mode (\$S\_{\text{mode}}\$)**: Implement **Tiered Multi-Tenant Scheduling**. Standard free/entry-tier tenants run on pooled, serverless multi-tenant worker nodes with strict cgroup CPU/memory limits and aggressive auto-scaling down to zero. High-margin enterprise tenants are dynamically routed to dedicated, reserved single-tenant instances with predictable flat-rate billing and strict noisy-neighbor isolation.
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Enforce **Row-Level Security (RLS) and Tenant Connection Pooling** at the database boundary, allowing thousands of tenants to share a single high-efficiency database cluster securely.
+  - **Separation in Operating Mode ($S_{\text{mode}}$)**: Implement **Tiered Multi-Tenant Scheduling**. Standard free/entry-tier tenants run on pooled, serverless multi-tenant worker nodes with strict cgroup CPU/memory limits and aggressive auto-scaling down to zero. High-margin enterprise tenants are dynamically routed to dedicated, reserved single-tenant instances with predictable flat-rate billing and strict noisy-neighbor isolation.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Enforce **Row-Level Security (RLS) and Tenant Connection Pooling** at the database boundary, allowing thousands of tenants to share a single high-efficiency database cluster securely.
 
 - **Resolution of Clash 3 (Managed SaaS vs Vendor Lock-In)**:
 
-  - **Separation across Boundary (\$S\_{\text{boundary}}\$)**: Apply **Hexagonal Architecture (Ports and Adapters)**. Domain logic interacts exclusively with abstract domain repository interfaces. The primary adapter connects to a high-productivity managed cloud service (for example, AWS DynamoDB, S3) for immediate time-to-market. A secondary open-source adapter (for example, PostgreSQL, MinIO) is maintained in CI tests. If cloud vendor margins become unfavorable at scale, switching the persistence layer requires changing only the boundary adapter without modifying a single line of business logic.
+  - **Separation across Boundary ($S_{\text{boundary}}$)**: Apply **Hexagonal Architecture (Ports and Adapters)**. Domain logic interacts exclusively with abstract domain repository interfaces. The primary adapter connects to a high-productivity managed cloud service (for example, AWS DynamoDB, S3) for immediate time-to-market. A secondary open-source adapter (for example, PostgreSQL, MinIO) is maintained in CI tests. If cloud vendor margins become unfavorable at scale, switching the persistence layer requires changing only the boundary adapter without modifying a single line of business logic.
 
 ------------------------------------------------------------------------
 
@@ -12186,7 +12186,7 @@ flowchart TD
 
 ## 9.1. Theoretical Foundations & Epistemic Motivation
 
-In classical engineering design and inventive problem solving, Genrich Altshuller ([Altshuller, 1984, *Creativity as an Exact Science*, Gordon and Breach Science Publishers, ISBN: 978-0677208206](https://en.wikipedia.org/wiki/TRIZ)) established that high-level inventive breakthroughs occur when an engineer maps a desired technical function \$F\$ to an invariant physical, chemical, or geometric effect (\$F \to E \to S\$), rather than engaging in random trial-and-error within a single product domain. In mechanical and civil systems, physical laws (for example, the piezoelectric effect, Bernoulli's principle, shape-memory alloys) act as stable, repeatable mechanisms that transform inputs into outputs under defined boundary conditions.
+In classical engineering design and inventive problem solving, Genrich Altshuller ([Altshuller, 1984, *Creativity as an Exact Science*, Gordon and Breach Science Publishers, ISBN: 978-0677208206](https://en.wikipedia.org/wiki/TRIZ)) established that high-level inventive breakthroughs occur when an engineer maps a desired technical function $F$ to an invariant physical, chemical, or geometric effect ($F \to E \to S$), rather than engaging in random trial-and-error within a single product domain. In mechanical and civil systems, physical laws (for example, the piezoelectric effect, Bernoulli's principle, shape-memory alloys) act as stable, repeatable mechanisms that transform inputs into outputs under defined boundary conditions.
 
 ``` mermaid
 flowchart LR
@@ -12218,17 +12218,17 @@ Frank Buschmann, Regine Meunier, Hans Rohnert, Peter Sommerlad, and Michael Stal
 
 In the Ariadne epistemic ontology, a **Computational Effect** is an invariant mapping from a functional requirement and operational boundary conditions to a formal algorithmic pattern, accompanied by its inherent resource costs, failure modes, and falsification methods:
 
-\$\$\mathcal{E} = \left\langle \mathcal{F}*{\text{req}}, , \mathcal{C}*{\text{ops}}, , \mathcal{M}*{\text{inv}}, , \mathcal{R}*{\text{cost}}, , \mathcal{H}*{\text{harm}}, , \mathcal{V}*{\text{verify}}, , \mathcal{T}\_{\text{carriers}} \right\rangle\$\$
+$$\mathcal{E} = \left\langle \mathcal{F}_{\text{req}}, \mathcal{C}_{\text{ops}}, \mathcal{M}_{\text{inv}}, \mathcal{R}_{\text{cost}}, \mathcal{H}_{\text{harm}}, \mathcal{V}_{\text{verify}}, \mathcal{T}_{\text{carriers}} \right\rangle$$
 
 Where:
 
-- \$\mathcal{F}\_{\text{req}}\$ is the **Required Function** (expressed as an implementation-agnostic verb-noun pair, for example, *"Deduplicate Ingestion Stream"*).
-- \$\mathcal{C}\_{\text{ops}}\$ is the set of **Operational Conditions & Invariants** (for example, *"Asynchronous network, clock drift \$\le 100\text{ ms}\$, partitioned storage"*).
-- \$\mathcal{M}\_{\text{inv}}\$ is the **Invariant Computational Mechanism** (for example, *"Two-Phase Locking with Deadlock Detection"*, *"Monotonic Version Clock Vectors"*).
-- \$\mathcal{R}\_{\text{cost}}\$ is the **Resource Cost Vector** (computational complexity \$\mathcal{O}(T)\$, memory \$\mathcal{O}(S)\$, network message complexity \$\mathcal{O}(M)\$, disk I/O, lock contention).
-- \$\mathcal{H}\_{\text{harm}}\$ is the **Harm & Failure Modes** (pathological edge cases, tail latency degradation, cascading failures, split-brain vulnerability).
-- \$\mathcal{V}\_{\text{verify}}\$ is the **Empirical Verification Method** (property-based invariant check, Jepsen fault injection, mutation kill suite, microbenchmark).
-- \$\mathcal{T}*{\text{carriers}}\$ is the set of **Concrete Technology Carriers** (specific databases, libraries, kernel primitives, or cloud services that instantiate \$\mathcal{M}*{\text{inv}}\$).
+- $\mathcal{F}_{\text{req}}$ is the **Required Function** (expressed as an implementation-agnostic verb-noun pair, for example, *"Deduplicate Ingestion Stream"*).
+- $\mathcal{C}_{\text{ops}}$ is the set of **Operational Conditions & Invariants** (for example, *"Asynchronous network, clock drift $\le 100\text{ ms}$, partitioned storage"*).
+- $\mathcal{M}_{\text{inv}}$ is the **Invariant Computational Mechanism** (for example, *"Two-Phase Locking with Deadlock Detection"*, *"Monotonic Version Clock Vectors"*).
+- $\mathcal{R}_{\text{cost}}$ is the **Resource Cost Vector** (computational complexity $\mathcal{O}(T)$, memory $\mathcal{O}(S)$, network message complexity $\mathcal{O}(M)$, disk I/O, lock contention).
+- $\mathcal{H}_{\text{harm}}$ is the **Harm & Failure Modes** (pathological edge cases, tail latency degradation, cascading failures, split-brain vulnerability).
+- $\mathcal{V}_{\text{verify}}$ is the **Empirical Verification Method** (property-based invariant check, Jepsen fault injection, mutation kill suite, microbenchmark).
+- $\mathcal{T}_{\text{carriers}}$ is the set of **Concrete Technology Carriers** (specific databases, libraries, kernel primitives, or cloud services that instantiate $\mathcal{M}_{\text{inv}}$).
 
 ------------------------------------------------------------------------
 
@@ -12244,12 +12244,12 @@ The following tables define the formal catalog across six fundamental computatio
     │ and output as a single execution, despite network retries and duplicate message deliveries.      │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
-| **EFF-DEDUP-01** | Single relational storage node; strict ACID transactional boundary; synchronous write. | **Unique Constraint Index on Natural/Synthetic Idempotency Key** | \$\mathcal{O}(\log N)\$ index write overhead; index storage memory. | Lock contention on hot keys; transaction aborts and retry storms under high concurrency. | Generative PBT: Concurrent concurrent inserts with identical key; assert exactly one success and zero duplicates. | PostgreSQL `UNIQUE` / `ON CONFLICT DO NOTHING`, MySQL Unique B-Tree, SQLite Unique. |
-| **EFF-DEDUP-02** | High-throughput streaming; approximate membership acceptable; false positives tolerable (\$p \le 0.01\$), false negatives intolerable (\$0%\$). | **Probabilistic Counting Filter (Bloom / Cuckoo Filter)** | \$\mathcal{O}(k)\$ bit operations; \$\approx 10\text{ bits/element}\$ in-memory; zero disk I/O. | False positives cause silent dropping of legitimate new events; cannot delete elements in standard Bloom. | Invariant test: Insert \$10^6\$ unique keys; assert false positive rate \$\le p\_{\text{target}}\$ and false negative count \$\equiv 0\$. | Redis `BF.ADD`, Guava `BloomFilter`, RocksDB Bloom Filter, Cuckoo Filter in Go/Rust. |
-| **EFF-DEDUP-03** | Distributed partitioned stream; out-of-order delivery within bounded window \$W\$; monotonically increasing sequence numbers. | **Sliding Window Sequence Tracking (High-Water Mark Bitmap)** | \$\mathcal{O}(1)\$ lookup; \$\mathcal{O}(W)\$ memory per partition; periodic checkpoint state. | Memory exhaustion if sequence gaps stall window progression; out-of-window late messages fail or duplicate. | Chaos test: Shuffle and duplicate stream events within window \$W\$; verify output sequence is strictly monotonic. | TCP sliding window, Apache Flink sequence deduplication, Kafka idempotent producer. |
-| **EFF-DEDUP-04** | Distributed asynchronous workers; mutable state machine; operations have natural commutativity. | **Conflict-Free Replicated Data Types (CRDTs) / Idempotent State Mutation** | \$\mathcal{O}(1)\$ computation; payload metadata overhead (for example, LWW timestamps, dot-contexts). | Clock skew causing Lost-World-Writes in LWW-CRDT; unbounded tombstone accumulation in state-based CRDTs. | Jepsen network partition test: Apply operations in arbitrary permutations; verify state convergence across all nodes. | Automerge, Yjs, Riak KV, Redis PN-Counters, DynamoDB atomic set operations. |
+| **EFF-DEDUP-01** | Single relational storage node; strict ACID transactional boundary; synchronous write. | **Unique Constraint Index on Natural/Synthetic Idempotency Key** | $\mathcal{O}(\log N)$ index write overhead; index storage memory. | Lock contention on hot keys; transaction aborts and retry storms under high concurrency. | Generative PBT: Concurrent concurrent inserts with identical key; assert exactly one success and zero duplicates. | PostgreSQL `UNIQUE` / `ON CONFLICT DO NOTHING`, MySQL Unique B-Tree, SQLite Unique. |
+| **EFF-DEDUP-02** | High-throughput streaming; approximate membership acceptable; false positives tolerable ($p \le 0.01$), false negatives intolerable ($0\%$). | **Probabilistic Counting Filter (Bloom / Cuckoo Filter)** | $\mathcal{O}(k)$ bit operations; $\approx 10\text{ bits/element}$ in-memory; zero disk I/O. | False positives cause silent dropping of legitimate new events; cannot delete elements in standard Bloom. | Invariant test: Insert $10^6$ unique keys; assert false positive rate $\le p_{\text{target}}$ and false negative count $\equiv 0$. | Redis `BF.ADD`, Guava `BloomFilter`, RocksDB Bloom Filter, Cuckoo Filter in Go/Rust. |
+| **EFF-DEDUP-03** | Distributed partitioned stream; out-of-order delivery within bounded window $W$; monotonically increasing sequence numbers. | **Sliding Window Sequence Tracking (High-Water Mark Bitmap)** | $\mathcal{O}(1)$ lookup; $\mathcal{O}(W)$ memory per partition; periodic checkpoint state. | Memory exhaustion if sequence gaps stall window progression; out-of-window late messages fail or duplicate. | Chaos test: Shuffle and duplicate stream events within window $W$; verify output sequence is strictly monotonic. | TCP sliding window, Apache Flink sequence deduplication, Kafka idempotent producer. |
+| **EFF-DEDUP-04** | Distributed asynchronous workers; mutable state machine; operations have natural commutativity. | **Conflict-Free Replicated Data Types (CRDTs) / Idempotent State Mutation** | $\mathcal{O}(1)$ computation; payload metadata overhead (for example, LWW timestamps, dot-contexts). | Clock skew causing Lost-World-Writes in LWW-CRDT; unbounded tombstone accumulation in state-based CRDTs. | Jepsen network partition test: Apply operations in arbitrary permutations; verify state convergence across all nodes. | Automerge, Yjs, Riak KV, Redis PN-Counters, DynamoDB atomic set operations. |
 | **EFF-DEDUP-05** | Distributed heterogeneous systems; multiple external side effects (for example, charging card + sending email). | **Transactional Outbox with Two-Phase Deduplication State Machine** | 2 storage writes per command; background polling / CDC lag. | "Dual-write" trap if outbox and state are not in single transaction; orphan side-effects if worker crashes post-action. | Mutation & Crash Injection: Kill worker immediately after external HTTP call before outbox ACK; verify replay safety. | Debezium CDC, MassTransit Outbox, Temporal Workflows, Postgres Outbox + Kafka Connect. |
 
 ------------------------------------------------------------------------
@@ -12262,11 +12262,11 @@ The following tables define the formal catalog across six fundamental computatio
     │ an asynchronous network subject to packet loss, delay, and node crash failures.                 │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
-| **EFF-COORD-01** | Homogeneous cluster; crash-recovery model; majority quorum alive (\$N = 2F+1\$). | **Replicated State Machine via Leader-Based Consensus (Raft / Paxos)** | \$\mathcal{O}(N)\$ RPCs per commit; synchronous disk flush on quorum; leader bottleneck. | Leader election storms during network instability; un-fenced stale leader reads (split-brain read anomaly). | Jepsen test suite: Partition leader into minority; assert linearizability of all committed state transitions. | etcd (Raft), HashiCorp Consul (Raft), Apache ZooKeeper (ZAB), CockroachDB (Multi-Raft). |
-| **EFF-COORD-02** | Ephemeral resource locking across distributed microservices; high acquisition frequency. | **Distributed Leasing with Monotonic Fencing Tokens** | \$\mathcal{O}(1)\$ network hop to lock manager; heartbeat network bandwidth. | Lock expiration during long GC pauses / disk stalls; split-brain execution if downstream resource ignores token. | Fencing token validation test: Inject 30s pause in lock holder; verify storage rejects writes with expired token. | Redis Redlock + Fencing Tokens, etcd Leases, ZooKeeper Ephemeral Sequential Nodes. |
-| **EFF-COORD-03** | Cross-database atomic transactions; heterogeneous resource managers; low contention. | **Two-Phase Commit (2PC) Protocol** | \$2\$ round-trips; \$3\$ disk writes per participant; holds locks across network round-trips. | Blocking protocol: Coordinator crash leaves all participants holding locks indefinitely (resource exhaustion). | Fault injection: Crash coordinator during *Prepare* phase; verify participants timeout safely without data corruption. | XA Transactions, Narayana, Atomikos, Postgres Distributed Transactions (`PREPARE TRANSACTION`). |
+| **EFF-COORD-01** | Homogeneous cluster; crash-recovery model; majority quorum alive ($N = 2F+1$). | **Replicated State Machine via Leader-Based Consensus (Raft / Paxos)** | $\mathcal{O}(N)$ RPCs per commit; synchronous disk flush on quorum; leader bottleneck. | Leader election storms during network instability; un-fenced stale leader reads (split-brain read anomaly). | Jepsen test suite: Partition leader into minority; assert linearizability of all committed state transitions. | etcd (Raft), HashiCorp Consul (Raft), Apache ZooKeeper (ZAB), CockroachDB (Multi-Raft). |
+| **EFF-COORD-02** | Ephemeral resource locking across distributed microservices; high acquisition frequency. | **Distributed Leasing with Monotonic Fencing Tokens** | $\mathcal{O}(1)$ network hop to lock manager; heartbeat network bandwidth. | Lock expiration during long GC pauses / disk stalls; split-brain execution if downstream resource ignores token. | Fencing token validation test: Inject 30s pause in lock holder; verify storage rejects writes with expired token. | Redis Redlock + Fencing Tokens, etcd Leases, ZooKeeper Ephemeral Sequential Nodes. |
+| **EFF-COORD-03** | Cross-database atomic transactions; heterogeneous resource managers; low contention. | **Two-Phase Commit (2PC) Protocol** | $2$ round-trips; $3$ disk writes per participant; holds locks across network round-trips. | Blocking protocol: Coordinator crash leaves all participants holding locks indefinitely (resource exhaustion). | Fault injection: Crash coordinator during *Prepare* phase; verify participants timeout safely without data corruption. | XA Transactions, Narayana, Atomikos, Postgres Distributed Transactions (`PREPARE TRANSACTION`). |
 | **EFF-COORD-04** | Distributed multi-agent or microservice task orchestration; long-running business workflows. | **Saga Pattern (Choreography or Orchestration) with Compensating Actions** | Storage for state machine log; asynchronous messaging overhead. | Semantic dirty reads between saga steps; failure in compensating transaction leaves system in inconsistent state. | Chaos test: Invalidate payment midway through booking saga; verify 100% of upstream inventory reservations compensate. | Temporal.io, AWS Step Functions, Zeebe / Camunda, MassTransit Saga State Machine. |
 
 ------------------------------------------------------------------------
@@ -12279,10 +12279,10 @@ The following tables define the formal catalog across six fundamental computatio
     │ low-latency memory, while managing consistency and cache invalidation.                          │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
-| **EFF-CACHE-01** | Read-heavy workload (\$R/W \> 100\$); stale data tolerable within bounded duration \$\Delta t\$. | **Time-To-Live (TTL) with Probabilistic Early Expiration (XFetch Algorithm)** | In-memory storage; lightweight floating-point computation on read. | Thundering herd / Cache stampede on cold start or hard expiry; stale reads during upstream emergency updates. | Benchmark under high concurrency: Expire key under 10k RPS; verify exactly one background recalculation occurs. | Redis TTL + XFetch, Varnish `stale-while-revalidate`, Cloudflare CDN caching. |
-| **EFF-CACHE-02** | Read-heavy workload; zero stale read tolerance (strict consistency required). | **Cache-Aside with Atomic Invalidation via Change Data Capture (CDC)** | Storage for cache cluster; CDC replication latency (\$\approx 10\text{–}100\text{ ms}\$). | Race condition: Concurrent DB write and cache read can overwrite cache with stale snapshot if uncoordinated. | Property test: Interleave concurrent writes and reads with randomized delays; assert cache never retains stale value. | Debezium + Redis Invalidation, Postgres `LISTEN/NOTIFY` + In-memory Cache, Memcached. |
+| **EFF-CACHE-01** | Read-heavy workload ($R/W > 100$); stale data tolerable within bounded duration $\Delta t$. | **Time-To-Live (TTL) with Probabilistic Early Expiration (XFetch Algorithm)** | In-memory storage; lightweight floating-point computation on read. | Thundering herd / Cache stampede on cold start or hard expiry; stale reads during upstream emergency updates. | Benchmark under high concurrency: Expire key under 10k RPS; verify exactly one background recalculation occurs. | Redis TTL + XFetch, Varnish `stale-while-revalidate`, Cloudflare CDN caching. |
+| **EFF-CACHE-02** | Read-heavy workload; zero stale read tolerance (strict consistency required). | **Cache-Aside with Atomic Invalidation via Change Data Capture (CDC)** | Storage for cache cluster; CDC replication latency ($\approx 10\text{–}100\text{ ms}$). | Race condition: Concurrent DB write and cache read can overwrite cache with stale snapshot if uncoordinated. | Property test: Interleave concurrent writes and reads with randomized delays; assert cache never retains stale value. | Debezium + Redis Invalidation, Postgres `LISTEN/NOTIFY` + In-memory Cache, Memcached. |
 | **EFF-CACHE-03** | Immutable or versioned assets; distributed edge clients; bandwidth optimization. | **Content-Addressable Caching (Hash-Based Invariant URLs)** | Storage for unique hash-addressed objects; zero invalidation compute. | Storage unbounded growth if garbage collection / compaction is missing; URL mutation ripples through callers. | Verification: Assert cache headers include `Cache-Control: public, max-age=31536000, immutable`; verify bit-parity. | Webpack/Vite asset hashing, IPFS, Git object store, Amazon S3 + CloudFront immutable assets. |
 | **EFF-CACHE-04** | Write-heavy bursty traffic; downstream database cannot sustain peak write IOPS. | **Write-Behind (Write-Back) Buffer with Coalescing & Periodic Flush** | RAM buffer; background worker threads; WAL storage for crash recovery. | Data loss window if host crashes before buffer flushes to durable storage; read-your-own-writes inconsistency. | Crash injection: Power-kill host under maximum write load; verify recovery log reconstructs all acknowledged writes. | Linux OS Page Cache, RocksDB MemTable + WAL, Redis Write-Back to Postgres, Kafka batch producer. |
 
@@ -12296,10 +12296,10 @@ The following tables define the formal catalog across six fundamental computatio
     │ minimize tail latency, prevent node hot-spots, and handle node churn gracefully.                │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
-| **EFF-ROUTE-01** | Stateful caching / sharded storage nodes; node additions and removals must minimize key remapping. | **Consistent Hashing with Virtual Nodes (Ketama Algorithm)** | \$\mathcal{O}(\log V)\$ lookup where \$V = N \times \text{tokens}\$; ring state memory in router. | Non-uniform distribution if virtual node count is too low; hot-key saturation on a single hash bucket. | Simulation: Add/remove \$10%\$ of nodes in a 100-node cluster; assert remapped keys \$\le \frac{K}{N+1} \times 1.1\$. | Amazon DynamoDB, Apache Cassandra token ring, Envoy Consistent Hash Router, libketama. |
-| **EFF-ROUTE-02** | Dynamic stateless worker pool; request processing times follow heavy-tailed distributions. | **Power of Two Random Choices (P2C) with Least-Loaded Selection** | \$2\$ probe RPCs / internal state checks per routing decision; \$\mathcal{O}(1)\$ complexity. | Router-worker state drift if load is measured via asynchronous heartbeats rather than active connections. | Simulation & Load test: Compare P2C vs. Round Robin under Weibull latency distribution; verify p99 latency reduction. | NGINX `least_conn`, Envoy P2C Load Balancer, Finagle client-side balancer. |
+| **EFF-ROUTE-01** | Stateful caching / sharded storage nodes; node additions and removals must minimize key remapping. | **Consistent Hashing with Virtual Nodes (Ketama Algorithm)** | $\mathcal{O}(\log V)$ lookup where $V = N \times \text{tokens}$; ring state memory in router. | Non-uniform distribution if virtual node count is too low; hot-key saturation on a single hash bucket. | Simulation: Add/remove $10\%$ of nodes in a 100-node cluster; assert remapped keys $\le \frac{K}{N+1} \times 1.1$. | Amazon DynamoDB, Apache Cassandra token ring, Envoy Consistent Hash Router, libketama. |
+| **EFF-ROUTE-02** | Dynamic stateless worker pool; request processing times follow heavy-tailed distributions. | **Power of Two Random Choices (P2C) with Least-Loaded Selection** | $2$ probe RPCs / internal state checks per routing decision; $\mathcal{O}(1)$ complexity. | Router-worker state drift if load is measured via asynchronous heartbeats rather than active connections. | Simulation & Load test: Compare P2C vs. Round Robin under Weibull latency distribution; verify p99 latency reduction. | NGINX `least_conn`, Envoy P2C Load Balancer, Finagle client-side balancer. |
 | **EFF-ROUTE-03** | Multi-tenant microservices; distinct tenancy tiers (enterprise vs. free-tier); strict blast radius isolation. | **Cell-Based Routing with Shuffle Sharding** | Extra routing hop / proxy layer; configuration matrix storage. | Combinatorial configuration complexity; cross-cell data access requires complex distributed queries. | Resilience test: Squelch/overload one tenant; assert zero SLA violation or packet drop across non-overlapping cells. | AWS API Gateway Shuffle Sharding, Cloudflare Cell Architecture, Stripe Cell-based infrastructure. |
 | **EFF-ROUTE-04** | Distributed clients; network path failures and BGP instability. | **Anycast BGP Routing to Closest Edge PoP** | BGP infrastructure; global IP allocation; complex external peering. | Route flapping during upstream ISP degradation; stateful TCP connections drop if BGP shifts mid-stream. | Edge latency telemetry: Measure p50/p99 connect times from 50 global vantage points during simulated PoP failure. | Cloudflare Anycast, AWS Global Accelerator, Google Cloud Anycast IP. |
 
@@ -12313,12 +12313,12 @@ The following tables define the formal catalog across six fundamental computatio
     │ while balancing the CAP/PACELC trade-offs between consistency, availability, and latency.       │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
 | **EFF-SYNC-01** | High concurrency; low write conflict probability; reads vastly outnumber writes. | **Multi-Version Concurrency Control (MVCC) with Optimistic Locking** | Storage overhead for tuple versions / undo logs; vacuum / compaction CPU overhead. | Write starvation under extreme contention; write skew anomalies under Snapshot Isolation. | Concurrency stress test: 50 threads mutating same record with CAS check; assert zero lost updates and clean retry handling. | PostgreSQL MVCC (`xmin`/`xmax`), MySQL InnoDB Undo Logs, CouchDB revision trees, Hibernate `@Version`. |
-| **EFF-SYNC-02** | Asynchronous multi-master replication; concurrent disconnected writes; causal tracking required. | **Vector Clocks / Version Vectors with Explicit Conflict Resolution** | \$\mathcal{O}(N)\$ space per object (where \$N\$ is number of actors); payload metadata bloat. | Vector clock explosion with dynamic actor sets; requires client-side or application-level conflict resolution. | Property-based concurrency test: Generate concurrent branched edits; verify causal order graph is strictly preserved. | Riak KV Vector Clocks, Amazon Dynamo (original), Git commit DAGs. |
+| **EFF-SYNC-02** | Asynchronous multi-master replication; concurrent disconnected writes; causal tracking required. | **Vector Clocks / Version Vectors with Explicit Conflict Resolution** | $\mathcal{O}(N)$ space per object (where $N$ is number of actors); payload metadata bloat. | Vector clock explosion with dynamic actor sets; requires client-side or application-level conflict resolution. | Property-based concurrency test: Generate concurrent branched edits; verify causal order graph is strictly preserved. | Riak KV Vector Clocks, Amazon Dynamo (original), Git commit DAGs. |
 | **EFF-SYNC-03** | Event-driven microservices; separate read (query) and write (command) models with distinct scaling needs. | **Command Query Responsibility Segregation (CQRS) with Event Sourcing** | High storage volume for append-only event stream; projection rebuilding compute. | Eventual consistency lag; read models serve stale data during projection lag; schema evolution of historical events. | Parity verification: Replay complete event log from offset 0; assert projection matches current read model state bit-for-bit. | EventStoreDB, Axon Framework, Kafka + Postgres Projections, Apache Pulsar. |
-| **EFF-SYNC-04** | Distributed multi-datacenter deployment; linearizable ACID transactions required globally. | **Synchronized Physical Time with TrueTime Unbounded Uncertainty Window** | Atomic clocks & GPS hardware in every datacenter; commit wait latency (\$2 \epsilon\$). | Stalling transactions if clock uncertainty \$\epsilon\$ exceeds threshold (\$\> 7\text{ ms}\$); hardware failure in time sync. | Jepsen test suite on distributed transactions: Inject clock drift; verify strict serializability of cross-region updates. | Google Cloud Spanner (TrueTime), CockroachDB (Hybrid Logical Clocks), YugabyteDB. |
+| **EFF-SYNC-04** | Distributed multi-datacenter deployment; linearizable ACID transactions required globally. | **Synchronized Physical Time with TrueTime Unbounded Uncertainty Window** | Atomic clocks & GPS hardware in every datacenter; commit wait latency ($2 \epsilon$). | Stalling transactions if clock uncertainty $\epsilon$ exceeds threshold ($> 7\text{ ms}$); hardware failure in time sync. | Jepsen test suite on distributed transactions: Inject clock drift; verify strict serializability of cross-region updates. | Google Cloud Spanner (TrueTime), CockroachDB (Hybrid Logical Clocks), YugabyteDB. |
 
 ------------------------------------------------------------------------
 
@@ -12330,11 +12330,11 @@ The following tables define the formal catalog across six fundamental computatio
     │ from escalating into systemic, cascading outages across the entire distributed system.           │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-| ID | Operational Conditions (\$\mathcal{C}\_{\text{ops}}\$) | Invariant Mechanism (\$\mathcal{M}\_{\text{inv}}\$) | Resource Cost (\$\mathcal{R}\_{\text{cost}}\$) | Harm & Failure Modes (\$\mathcal{H}\_{\text{harm}}\$) | Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$) | Concrete Technology Carriers (\$\mathcal{T}\_{\text{carriers}}\$) |
+| ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
-| **EFF-ISOL-01** | Multi-service call graph; downstream dependency experiences intermittent latency or total failure. | **Circuit Breaker with Tri-State Automaton (Closed, Open, Half-Open)** | \$\mathcal{O}(1)\$ in-memory atomic counter; negligible latency overhead. | Premature tripping on transient network blips; recovery delay if probe interval is too conservative. | Fault injection: Inject \$100%\$ HTTP 500s into downstream; assert circuit opens in \$\le 5\$ errors and stops outbound traffic. | Resilience4j, Netflix Hystrix (legacy), Envoy Circuit Breaker, Polly (.NET), Istio. |
+| **EFF-ISOL-01** | Multi-service call graph; downstream dependency experiences intermittent latency or total failure. | **Circuit Breaker with Tri-State Automaton (Closed, Open, Half-Open)** | $\mathcal{O}(1)$ in-memory atomic counter; negligible latency overhead. | Premature tripping on transient network blips; recovery delay if probe interval is too conservative. | Fault injection: Inject $100\%$ HTTP 500s into downstream; assert circuit opens in $\le 5$ errors and stops outbound traffic. | Resilience4j, Netflix Hystrix (legacy), Envoy Circuit Breaker, Polly (.NET), Istio. |
 | **EFF-ISOL-02** | Shared process / worker pool servicing heterogeneous operations with disparate latency profiles. | **Bulkhead Isolation (Dedicated Thread/Connection Pools per Dependency)** | Memory overhead for independent thread stacks and queue buffers. | Thread pool starvation if queue sizing is uncalibrated; resource fragmentation across underutilized pools. | Stress test: Exhaust thread pool for Service A; assert Service B executes at baseline throughput with zero queuing. | Resilience4j Bulkhead, Go Worker Pool per endpoint, NGINX connection limits. |
-| **EFF-ISOL-03** | Upstream traffic spikes exceeding system throughput capacity; downstream must protect SLA. | **Token Bucket / Leaky Bucket Rate Limiting with Dynamic Shedding** | Redis or local memory atomic counters; clock check overhead. | Legitimate client requests rejected (HTTP 429) during burst; synchronization lag in distributed rate limiters. | Load burst test: Send \$5\times\$ capacity in 100ms; verify system accepts exact burst limit and sheds remainder cleanly. | Envoy Global Rate Limiter, Redis `ratelimit`, Cloudflare WAF Rate Limiting, NGINX `limit_req`. |
+| **EFF-ISOL-03** | Upstream traffic spikes exceeding system throughput capacity; downstream must protect SLA. | **Token Bucket / Leaky Bucket Rate Limiting with Dynamic Shedding** | Redis or local memory atomic counters; clock check overhead. | Legitimate client requests rejected (HTTP 429) during burst; synchronization lag in distributed rate limiters. | Load burst test: Send $5\times$ capacity in 100ms; verify system accepts exact burst limit and sheds remainder cleanly. | Envoy Global Rate Limiter, Redis `ratelimit`, Cloudflare WAF Rate Limiting, NGINX `limit_req`. |
 | **EFF-ISOL-04** | Distributed network calls subject to packet drops and transient hiccups. | **Exponential Backoff with Full Jitter and Retry Budgets** | Client-side timer state; thread sleep or async delay scheduler. | Retry storm / Thundering herd if jitter is missing; exhaust client timeouts if max retry count is unbounded. | Simulation: Measure aggregate request volume to failing service; verify full jitter flattens retry spikes into uniform load. | AWS SDK Retry Strategy, gRPC Retry Policy, Polly, custom exponential backoff loops. |
 
 ------------------------------------------------------------------------
@@ -12371,9 +12371,9 @@ flowchart TD
 
 When an AI agent explores candidate solutions:
 
-1.  It queries the database by function (\$\mathcal{F}*{\text{req}}\$) and operational conditions (\$\mathcal{C}*{\text{ops}}\$).
-2.  It generates candidate nodes (`CAN-*`) instantiated with the corresponding invariant mechanism (\$\mathcal{M}*{\text{inv}}\$), resource costs (\$\mathcal{R}*{\text{cost}}\$), and potential harms (\$\mathcal{H}\_{\text{harm}}\$).
-3.  It automatically derives formal **Evidence Requests (`EVDREQ-*`)** directly from the **Empirical Verification Method (\$\mathcal{V}\_{\text{verify}}\$)** field, ensuring that no candidate is selected without an executable, severe falsification test.
+1.  It queries the database by function ($\mathcal{F}_{\text{req}}$) and operational conditions ($\mathcal{C}_{\text{ops}}$).
+2.  It generates candidate nodes (`CAN-*`) instantiated with the corresponding invariant mechanism ($\mathcal{M}_{\text{inv}}$), resource costs ($\mathcal{R}_{\text{cost}}$), and potential harms ($\mathcal{H}_{\text{harm}}$).
+3.  It automatically derives formal **Evidence Requests (`EVDREQ-*`)** directly from the **Empirical Verification Method ($\mathcal{V}_{\text{verify}}$)** field, ensuring that no candidate is selected without an executable, severe falsification test.
 
 ------------------------------------------------------------------------
 
@@ -12383,7 +12383,7 @@ When an AI agent explores candidate solutions:
 
 In classical TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the law of increasing Ideality dictates that an engineering system evolves toward delivering maximum useful function while minimizing cost and harm:
 
-\$\$I = \frac{\sum F\_{\text{useful}}}{\sum C\_{\text{cost}} + \sum H\_{\text{harm}}} \to \infty\$\$
+$$I = \frac{\sum F_{\text{useful}}}{\sum C_{\text{cost}} + \sum H_{\text{harm}}} \to \infty$$
 
 The most powerful operator for increasing ideality is **Trimming**: the complete elimination of a physical component from the system while ensuring its useful function is either no longer necessary or successfully redistributed to remaining system elements or the surrounding environment.
 
@@ -12412,18 +12412,18 @@ flowchart TD
 
 In [*Code Quality: The Open Source Perspective* (Spinellis, 2006, Addison-Wesley, ISBN: 978-0321166074)](https://www.spinellis.gr/codequality/), Diomidis Spinellis demonstrated that software code and architectural services are not assets; **they are liabilities**. Every line of code, every microservice boundary, and every external state store incurs an ongoing marginal cost:
 
-\$\$C\_{\text{lifecycle}}(t) = C\_{\text{build}} + \int_0^t \Big( C\_{\text{ops}}(\tau) + C\_{\text{patch}}(\tau) + C\_{\text{dep}}(\tau) + C\_{\text{cog}}(\tau) + \lambda \cdot C\_{\text{defect}}(\tau) \Big) , d\tau\$\$
+$$C_{\text{lifecycle}}(t) = C_{\text{build}} + \int_0^t \Big( C_{\text{ops}}(\tau) + C_{\text{patch}}(\tau) + C_{\text{dep}}(\tau) + C_{\text{cog}}(\tau) + \lambda \cdot C_{\text{defect}}(\tau) \Big)\, d\tau$$
 
 Where:
 
-- \$C\_{\text{build}}\$ is the one-time initial implementation cost.
-- \$C\_{\text{ops}}(\tau)\$ is the operational cost (hosting, compute, monitoring, alerting, telemetry ingestion).
-- \$C\_{\text{patch}}(\tau)\$ is the dependency maintenance cost (security patches, breaking runtime upgrades, library deprecations).
-- \$C\_{\text{dep}}(\tau)\$ is the architectural coupling cost (schema migrations, contract renegotiations, dual-version shims).
-- \$C\_{\text{cog}}(\tau)\$ is the cognitive load imposed on every developer and agent who must understand, navigate, and test the component.
-- \$\lambda \cdot C\_{\text{defect}}(\tau)\$ is the expected defect and incident cost (since defect probability \$\mathbb{P}(\text{Defect}) \propto \text{State Space} \times \text{Cyclomatic Complexity}\$).
+- $C_{\text{build}}$ is the one-time initial implementation cost.
+- $C_{\text{ops}}(\tau)$ is the operational cost (hosting, compute, monitoring, alerting, telemetry ingestion).
+- $C_{\text{patch}}(\tau)$ is the dependency maintenance cost (security patches, breaking runtime upgrades, library deprecations).
+- $C_{\text{dep}}(\tau)$ is the architectural coupling cost (schema migrations, contract renegotiations, dual-version shims).
+- $C_{\text{cog}}(\tau)$ is the cognitive load imposed on every developer and agent who must understand, navigate, and test the component.
+- $\lambda \cdot C_{\text{defect}}(\tau)$ is the expected defect and incident cost (since defect probability $\mathbb{P}(\text{Defect}) \propto \text{State Space} \times \text{Cyclomatic Complexity}$).
 
-When a software component is eliminated, \$C\_{\text{build}}\$ is a sunk cost, but the entire integral \$\int_t^\infty (\dots) , d\tau\$ drops to **identically zero**. Trimming is the only software engineering operation that delivers **compounding positive returns over infinite time horizons**.
+When a software component is eliminated, $C_{\text{build}}$ is a sunk cost, but the entire integral $\int_t^\infty (\dots)\, d\tau$ drops to **identically zero**. Trimming is the only software engineering operation that delivers **compounding positive returns over infinite time horizons**.
 
 ------------------------------------------------------------------------
 
@@ -12461,22 +12461,22 @@ flowchart TD
     Rule4 -- No --> Keep["Retain Component C<br/>(Essential Mechanism)"]
 ```
 
-### Rule 1: Eliminate the Function (\$F\$ is Obsolete)
+### Rule 1: Eliminate the Function ($F$ is Obsolete)
 
 - **Condition:** The business requirement or historical technical constraint that necessitated the component no longer exists.
 - **Software Example:** Deleting custom polyfills or browser-compatibility shims once legacy browsers are deprecated; removing custom batching workers once database connection pooling is natively handled by the driver.
 
-### Rule 2: The Object Performs the Function on Itself (\$O \to F\$)
+### Rule 2: The Object Performs the Function on Itself ($O \to F$)
 
 - **Condition:** The recipient of the function possesses sufficient computational capacity, state, or context to execute the function directly.
 - **Software Example:** Eliminating a centralized date-formatting or input-validation microservice and performing validation and formatting directly within the client/browser runtime or edge proxy.
 
-### Rule 3: Another Existing Component or Platform Carrier Absorbs the Function (\$B \to F\$)
+### Rule 3: Another Existing Component or Platform Carrier Absorbs the Function ($B \to F$)
 
 - **Condition:** An existing infrastructure component (for example, the relational database, the operating system kernel, the web server, the compiler) can perform the function with marginal additional resource cost.
 - **Software Example:** Eliminating a custom Redis-based deduplication daemon by using PostgreSQL's native `INSERT ... ON CONFLICT DO NOTHING` with a unique index.
 
-### Rule 4: Eliminate the Object of the Function (\$O\$ is Removed)
+### Rule 4: Eliminate the Object of the Function ($O$ is Removed)
 
 - **Condition:** The state or entity upon which the component operates is restructured or eliminated entirely.
 - **Software Example:** Eliminating a complex cache-invalidation service by replacing mutable shared database records with an append-only, immutable event stream where data is never updated in-place.
@@ -12535,7 +12535,7 @@ sequenceDiagram
 
 1.  **Characterize:** Construct characterization tests capturing 100% of the legacy component's observable input-output invariants.
 2.  **Shadow:** Provision the new function carrier (for example, DB index, in-process call) and route traffic in parallel (shadow execution).
-3.  **Assert Parity:** Run dark-launch traffic until parity diff is identically \$0.000%\$ across \$\ge 10^6\$ transactions.
+3.  **Assert Parity:** Run dark-launch traffic until parity diff is identically $0.000\%$ across $\ge 10^6$ transactions.
 4.  **Cutover:** Flip traffic to the target carrier via runtime feature flag with instant rollback capability.
 5.  **Excise:** Delete the legacy code, configuration files, and infrastructure provisioning manifests.
 6.  **Ground:** Verify in runtime APM that latency, memory, error rates, and cloud spend have decreased.
@@ -12599,9 +12599,9 @@ The agent must never guess a function signature, interface contract, or data str
 
 The agent must map the structural change radius prior to editing:
 
-- **Afferent Coupling (\$C_a\$):** Enumerate every module that depends on the target component (who will break if this changes?).
-- **Efferent Coupling (\$C_e\$):** Enumerate every module the target component depends on (what hidden dependencies are being dragged along?).
-- **Instability Metric:** \$I = \frac{C_e}{C_a + C_e}\$. High instability indicates components that must not be depended upon by core domain logic.
+- **Afferent Coupling ($C_a$):** Enumerate every module that depends on the target component (who will break if this changes?).
+- **Efferent Coupling ($C_e$):** Enumerate every module the target component depends on (what hidden dependencies are being dragged along?).
+- **Instability Metric:** $I = \frac{C_e}{C_a + C_e}$. High instability indicates components that must not be depended upon by core domain logic.
 
 ### Layer 3: Persistence & State Grounding (Schemas & Migrations)
 
@@ -12615,7 +12615,7 @@ The agent must inspect the physical data layer:
 
 The agent must analyze version control history:
 
-- **Code Churn Analysis:** \$\text{Hotspot Score} = \text{Cyclomatic Complexity} \times \text{Commit Frequency}\$. Focus refactoring on high-churn, high-defect files.
+- **Code Churn Analysis:** $\text{Hotspot Score} = \text{Cyclomatic Complexity} \times \text{Commit Frequency}$. Focus refactoring on high-churn, high-defect files.
 - **Temporal Coupling (Co-Change):** Identify files that are consistently modified in the same commit across historical pull requests, exposing hidden architectural couplings invisible to static import analyzers.
 
 ### Layer 5: Dynamic & Telemetry Grounding (OpenTelemetry & APM)
@@ -12646,7 +12646,7 @@ The following table specifies the concrete CLI commands and inspection mechanism
 
 ## 12.1. Theoretical Foundations & The Cognitive Pathology of Solution Bias
 
-In [*Creativity as an Exact Science* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Altshuller warned against the primary cognitive trap of inventors: **Problem Displacement**. When an engineer devises a solution to eliminate Contradiction \$A\$, they frequently celebrate the victory while blinding themselves to the fact that their mechanism has merely shifted the friction into Secondary Contradiction \$B\$ elsewhere in the system.
+In [*Creativity as an Exact Science* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Altshuller warned against the primary cognitive trap of inventors: **Problem Displacement**. When an engineer devises a solution to eliminate Contradiction $A$, they frequently celebrate the victory while blinding themselves to the fact that their mechanism has merely shifted the friction into Secondary Contradiction $B$ elsewhere in the system.
 
 In [*The Field Guide to Understanding 'Human Error'* (Dekker, 2014)](https://www.routledge.com/The-Field-Guide-to-Understanding-Human-Error/Dekker/p/book/9781472439055), Dekker analyzes how systemic failures arise from **Drift into Failure**: complex systems incrementally trade off safety margins, operational resilience, and verification rigor to satisfy local optimization goals (for example, speed of feature delivery, microbenchmark optimization).
 
@@ -12699,7 +12699,7 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
     │ 7. TELEMETRY CONFABULATION: Is the design justified by synthetic mean metrics masking bursts?    │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-### Vector 1: Complexity Displacement (Code \$\to\$ Ops / Infrastructure)
+### Vector 1: Complexity Displacement (Code $\to$ Ops / Infrastructure)
 
 - **The Trap:** The developer or agent eliminates complex in-process concurrency logic by introducing an external message broker, three microservices, a distributed cache, and a service mesh. The application code looks "clean," but the operational complexity, failure modes, and debugging difficulty have increased by an order of magnitude.
 - **Reviewer Attack:** *"Does the total system complexity (code + infrastructure + deployment topology + telemetry) decrease, or did we merely export in-process complexity into distributed network failure modes?"*
@@ -12715,29 +12715,29 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
 
 - **The Trap:** The agent claims to have resolved a contradiction between write latency and consistency by switching from linearizable transactions to eventual consistency, without proving that the business domain can tolerate stale reads or lost updates.
 - **Reviewer Attack:** *"Did we genuinely resolve the physical/computational contradiction via inventive separation, or did we covertly redefine the problem by abandoning a non-negotiable invariant?"*
-- **Falsification Check:** Audit the Problem Framing Invariants (`FRAME-`); verify that all hard constraints remain \$100%\$ satisfied.
+- **Falsification Check:** Audit the Problem Framing Invariants (`FRAME-`); verify that all hard constraints remain $100\%$ satisfied.
 
 ### Vector 4: Fragility Shift & Cascading Failure Potential
 
 - **The Trap:** A synchronous timeout is replaced with an asynchronous retry loop with exponential backoff. While this eliminates immediate timeout errors, under downstream brownout conditions, the retries accumulate and trigger a catastrophic **Retry Storm (Thundering Herd)** that obliterates downstream recovery.
 - **Reviewer Attack:** *"Under steady-state degradation or downstream saturation, does this mechanism fail fast and isolate the blast radius, or does it amplify load and propagate failure upstream?"*
-- **Falsification Check:** Simulate downstream latency increase from \$10\text{ ms}\$ to \$2000\text{ ms}\$; verify that upstream memory, thread pools, and retry queues remain strictly bounded.
+- **Falsification Check:** Simulate downstream latency increase from $10\text{ ms}$ to $2000\text{ ms}$; verify that upstream memory, thread pools, and retry queues remain strictly bounded.
 
 ### Vector 5: Unbudgeted Transition & Migration Impossibility
 
-- **The Trap:** The agent presents an elegant target architecture (\$\mathcal{A}*{\text{target}}\$) with a pristine relational schema and clean domain boundaries, but provides no viable, zero-downtime transition architecture (\$\mathcal{A}*{\text{trans}}\$) to migrate 50 million legacy records without service downtime.
+- **The Trap:** The agent presents an elegant target architecture ($\mathcal{A}_{\text{target}}$) with a pristine relational schema and clean domain boundaries, but provides no viable, zero-downtime transition architecture ($\mathcal{A}_{\text{trans}}$) to migrate 50 million legacy records without service downtime.
 - **Reviewer Attack:** *"Can we deploy this change incrementally without a maintenance window, dual-write safely during transition, assert parity, and roll back instantly at any second?"*
 - **Falsification Check:** Inspect the Transition Plan (`TRANS-`); verify the presence of an Expand/Contract schema migration and an explicit backward-compatibility shim.
 
 ### Vector 6: Unverified Resource & Phantom Capability
 
-- **The Trap:** The proposed architecture assumes that the database supports transactional DDL, that the filesystem guarantees atomic writes, that network round-trips across availability zones are \$\< 1\text{ ms}\$, or that a third-party API has infinite rate limits.
+- **The Trap:** The proposed architecture assumes that the database supports transactional DDL, that the filesystem guarantees atomic writes, that network round-trips across availability zones are $< 1\text{ ms}$, or that a third-party API has infinite rate limits.
 - **Reviewer Attack:** *"Which specific claims in this candidate mechanism are marked as `ASSUMED` or `PROPOSED` rather than `FACT` or `MEASURED`, and what is the cost if that assumption is false?"*
 - **Falsification Check:** Require empirical measurement (`EVDREQ-`) before decision locking; run microbenchmark on target infrastructure.
 
 ### Vector 7: Telemetry Confabulation & Mean-Value Fallacy
 
-- **The Trap:** The agent validates performance using average response times (for example, *"Mean latency is 15 ms"*), concealing the fact that the 99th percentile tail latency has spiked to \$850\text{ ms}\$ due to garbage collection pauses or lock contention.
+- **The Trap:** The agent validates performance using average response times (for example, *"Mean latency is 15 ms"*), concealing the fact that the 99th percentile tail latency has spiked to $850\text{ ms}$ due to garbage collection pauses or lock contention.
 - **Reviewer Attack:** *"Are our performance and reliability claims evaluated across high-percentile distributions (p95, p99, p99.9), burst traffic, and cold-start phases, or are they masked by synthetic steady-state averages?"*
 - **Falsification Check:** Generate heavy-tailed (Weibull/Pareto) traffic distributions; inspect p99.9 latency and queue depth histograms.
 
@@ -12904,7 +12904,7 @@ When an engineering effort stalls or produces catastrophic failures in productio
 5.  **Accidental Coupling Cascade:** Deploying changes whose change radius ripples uncontrollably across domain boundaries;
 6.  **Dynamic Myopia:** Validating steady-state happy paths while ignoring non-linear queue accumulations, retry storms, and transient migration states.
 
-The **Nine Operations of Systematic Inventive Thinking** do not constitute an alternative project management framework. They form an **Uncertainty Router** (\$\mathcal{R}\_{\text{epistemic}}\$): a state-space control mechanism that evaluates the current topology of knowledge, missing evidence, and contradiction vectors, and dynamically selects the next optimal cognitive or empirical operation.
+The **Nine Operations of Systematic Inventive Thinking** do not constitute an alternative project management framework. They form an **Uncertainty Router** ($\mathcal{R}_{\text{epistemic}}$): a state-space control mechanism that evaluates the current topology of knowledge, missing evidence, and contradiction vectors, and dynamically selects the next optimal cognitive or empirical operation.
 
 ------------------------------------------------------------------------
 
@@ -12940,24 +12940,24 @@ In [*Accelerate: The Science of Lean Software and DevOps* (Forsgren, Humble & Ki
 
 ## 13.3. Formalization of the Epistemic Uncertainty State Space
 
-In the Ariadne framework, an engineering problem at any discrete instant \$t\$ is represented by a formal **Epistemic State** \$\mathcal{S}\_t\$:
+In the Ariadne framework, an engineering problem at any discrete instant $t$ is represented by a formal **Epistemic State** $\mathcal{S}_t$:
 
-\$\$\mathcal{S}\_t = \left\langle \mathcal{K}\_t, , \mathbf{U}\_t, , \mathcal{G}\_t, , \mathcal{C}\_t \right\rangle\$\$
+$$\mathcal{S}_t = \left\langle \mathcal{K}_t, \mathbf{U}_t, \mathcal{G}_t, \mathcal{C}_t \right\rangle$$
 
 Where:
 
-1.  \$\mathcal{K}\_t\$ is the **Knowledge Base**, comprising verified empirical facts (\$\text{FACT}\$), quantitative measurements (\$\text{MEASURED}\$), logical deductions (\$\text{DERIVED}\$), and provisionally accepted working premises (\$\text{ASSUMED}\$).
-2.  \$\mathbf{U}*t \in \[0, 1\]^9\$ is the **Engineering Uncertainty Vector**, measuring the remaining epistemic entropy across the nine operational dimensions: \$\$\mathbf{U}*t = \left\langle U*{\text{frame}}, , U*{\text{diag}}, , U\_{\text{trans}}, , U\_{\text{space}}, , U\_{\text{know}}, , U\_{\text{dep}}, , U\_{\text{dyn}}, , U\_{\text{val}}, , U\_{\text{ver}} \right\rangle\$\$
-3.  \$\mathcal{G}\_t = (\mathcal{V}\_t, \mathcal{E}\_t)\$ is the **Typed Epistemic Dependency Graph** (DAG), where vertices \$\mathcal{V}\_t\$ are typed nodes (`CLM-`, `HYP-`, `CTR-`, `UNK-`, `CAN-`, `DEP-`, `DYN-`, `VAL-`, `TRANS-`, `DEC-`) and edges \$\mathcal{E}\_t\$ represent formal epistemic relationships: \$\$\mathcal{E}\_t \subseteq \mathcal{V}\_t \times \mathcal{V}\_t \times {\text{supports}, , \text{contradicts}, , \text{depends_on}, , \text{falsifies}, , \text{invalidates}}\$\$
-4.  \$\mathcal{C}\_t\$ is the set of active **Hard Invariants and Boundary Constraints** (for example, zero data loss under single-node crash, strict linearizability on financial balance, \$p99 \< 50\text{ ms}\$).
+1.  $\mathcal{K}_t$ is the **Knowledge Base**, comprising verified empirical facts ($\text{FACT}$), quantitative measurements ($\text{MEASURED}$), logical deductions ($\text{DERIVED}$), and provisionally accepted working premises ($\text{ASSUMED}$).
+2.  $\mathbf{U}_t \in [0, 1]^9$ is the **Engineering Uncertainty Vector**, measuring the remaining epistemic entropy across the nine operational dimensions: $$\mathbf{U}_t = \left\langle U_{\text{frame}}, U_{\text{diag}}, U_{\text{trans}}, U_{\text{space}}, U_{\text{know}}, U_{\text{dep}}, U_{\text{dyn}}, U_{\text{val}}, U_{\text{ver}} \right\rangle$$
+3.  $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ is the **Typed Epistemic Dependency Graph** (DAG), where vertices $\mathcal{V}_t$ are typed nodes (`CLM-`, `HYP-`, `CTR-`, `UNK-`, `CAN-`, `DEP-`, `DYN-`, `VAL-`, `TRANS-`, `DEC-`) and edges $\mathcal{E}_t$ represent formal epistemic relationships: $$\mathcal{E}_t \subseteq \mathcal{V}_t \times \mathcal{V}_t \times {\text{supports}, \text{contradicts}, \text{depends_on}, \text{falsifies}, \text{invalidates}}$$
+4.  $\mathcal{C}_t$ is the set of active **Hard Invariants and Boundary Constraints** (for example, zero data loss under single-node crash, strict linearizability on financial balance, $p99 < 50\text{ ms}$).
 
 ### 13.3.1. Operational State Transitions
 
-A **Reasoning Operation** \$\mathcal{O}\_k\$ (where \$k \in {1, 2, \dots, 9}\$) acts as a state transformation operator:
+A **Reasoning Operation** $\mathcal{O}_k$ (where $k \in \{1, 2, \dots, 9\}$) acts as a state transformation operator:
 
-\$\$\mathcal{S}\_{t+1} = \mathcal{O}\_k\left(\mathcal{S}*t, , \Delta*{\text{input}}\right)\$\$
+$$\mathcal{S}_{t+1} = \mathcal{O}_k\left(\mathcal{S}_t, \Delta_{\text{input}}\right)$$
 
-The execution of \$\mathcal{O}*k\$ consumes an input delta \$\Delta*{\text{input}}\$ (for example, telemetry logs, prototype test results, code graph analysis), performs a structured transformation on the problem representation, updates the knowledge base \$\mathcal{K}*{t+1}\$, appends new typed nodes and edges to \$\mathcal{G}*{t+1}\$, and reduces one or more components of the uncertainty vector \$\mathbf{U}\_{t+1}\$.
+The execution of $\mathcal{O}_k$ consumes an input delta $\Delta_{\text{input}}$ (for example, telemetry logs, prototype test results, code graph analysis), performs a structured transformation on the problem representation, updates the knowledge base $\mathcal{K}_{t+1}$, appends new typed nodes and edges to $\mathcal{G}_{t+1}$, and reduces one or more components of the uncertainty vector $\mathbf{U}_{t+1}$.
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │                                EPISTEMIC STATE TRANSITION MATRIX                                 │
@@ -13007,13 +13007,13 @@ stateDiagram-v2
 
 In formal logic and truth maintenance systems ([Doyle, 1979, *A Truth Maintenance System*, Artificial Intelligence, DOI: 10.1016/0004-3702(79)90008-0](https://doi.org/10.1016/0004-3702%2879%2990008-0)90008-0)), when a foundational premise is retracted, all beliefs derived from that premise must be systematically revised.
 
-In the Ariadne epistemic graph \$\mathcal{G}\_t\$, if an empirical verification result \$\text{EVD-08}\$ falsifies a foundational assumption \$\text{ASM-02}\$ (for example, *"Cloud provider network latency across availability zones is strictly \$\< 1\text{ ms}\$"*):
+In the Ariadne epistemic graph $\mathcal{G}_t$, if an empirical verification result $\text{EVD-08}$ falsifies a foundational assumption $\text{ASM-02}$ (for example, *"Cloud provider network latency across availability zones is strictly $< 1\text{ ms}$"*):
 
-\$\$\text{State}(\text{ASM-02}) \leftarrow \text{FALSIFIED}\$\$
+$$\text{State}(\text{ASM-02}) \leftarrow \text{FALSIFIED}$$
 
 The router executes recursive transitive invalidation down the directed subgraph:
 
-\$\$\forall v \in \mathcal{V}\_t \quad \text{such that} \quad v \xrightarrow{\text{depends_on}^+} \text{ASM-02} \implies \text{State}(v) \leftarrow \text{INVALIDATED}\$\$
+$$\forall v \in \mathcal{V}_t \quad \text{such that} \quad v \xrightarrow{\text{depends_on}^+} \text{ASM-02} \implies \text{State}(v) \leftarrow \text{INVALIDATED}$$
 
     [ ASM-02: AZ Latency < 1ms ] ◄── (falsified_by) ── [ EVD-08: Ping p99 = 8.4ms ]
             │ (depends_on)                                      │
@@ -13026,7 +13026,7 @@ The router executes recursive transitive invalidation down the directed subgraph
             ▼                                                   │ (triggers invalidation)
     [ DEC-04: Lockstep Distributed Commit ] ──────► [ State: INVALIDATED ]
 
-When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt. It detects that \$U\_{\text{space}}\$ and \$U\_{\text{diag}}\$ have sharply increased due to the collapse of Candidate 1, and immediately routes execution back to **Step 4 (Explore Space)** or **Step 2 (Diagnose Mechanism)** to synthesize asynchronous or partition-tolerant candidate mechanisms (for example, Saga with compensating transactions, or CRDT-based state replication).
+When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt. It detects that $U_{\text{space}}$ and $U_{\text{diag}}$ have sharply increased due to the collapse of Candidate 1, and immediately routes execution back to **Step 4 (Explore Space)** or **Step 2 (Diagnose Mechanism)** to synthesize asynchronous or partition-tolerant candidate mechanisms (for example, Saga with compensating transactions, or CRDT-based state replication).
 
 ------------------------------------------------------------------------
 
@@ -13058,7 +13058,7 @@ When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt
 
 When an engineer or autonomous software agent encounters an unfamiliar, highly ambiguous, or mission-critical software engineering problem, following an ad-hoc path leads to cognitive fixation, premature optimization, or unverified architectural bets.
 
-The **Primary Route** defines the canonical ten-step trajectory (Step 0 through Step 9) designed to navigate from maximum ambiguity (\$\mathbf{U}\_0 \approx \mathbf{1}\$) to an empirically validated, safely transitioned target system (\$\mathbf{U}\_n \approx \mathbf{0}\$).
+The **Primary Route** defines the canonical ten-step trajectory (Step 0 through Step 9) designed to navigate from maximum ambiguity ($\mathbf{U}_0 \approx \mathbf{1}$) to an empirically validated, safely transitioned target system ($\mathbf{U}_n \approx \mathbf{0}$).
 
 ``` mermaid
 flowchart TD
@@ -13089,7 +13089,7 @@ Classify the decision according to the **Type 1 / Type 2 Reversibility Taxonomy*
 ### 2. Formal Input Preconditions
 
 - Initial trigger: bug report, performance regression alert, new product capability requirement, or architectural modernization mandate.
-- Epistemic state: \$\mathcal{S}\_0 = \langle \mathcal{K}\_0, \mathbf{U}\_0, \mathcal{G}\_0 = \emptyset, \mathcal{C}\_0 \rangle\$.
+- Epistemic state: $\mathcal{S}_0 = \langle \mathcal{K}_0, \mathbf{U}_0, \mathcal{G}_0 = \emptyset, \mathcal{C}_0 \rangle$.
 
 ### 3. Cognitive Transformation
 
@@ -13133,7 +13133,7 @@ Isolate the **required observable behavioral delta** of the system, completely d
 Apply the four framing techniques (Section 1):
 
 1.  **Technique 1.1 (Separate Function from Implementation):** Replace technology names with implementation-agnostic verb-noun pairs (for example, *"Prevent concurrent over-allocation of scarce inventory items"* instead of *"Add Redis Redlock"*).
-2.  **Technique 1.2 (Define Required vs. Actual Behavior):** Use the strict behavioral template: \$\$\text{Under Conditions } \mathcal{C}, \text{ When Event } \mathcal{E} \text{ Occurs, System Must Deliver } \mathcal{O} \text{ Within Time } \mathcal{T}, \text{ Without Violating Invariant } \mathcal{I}.\$\$
+2.  **Technique 1.2 (Define Required vs. Actual Behavior):** Use the strict behavioral template: $$\text{Under Conditions } \mathcal{C}, \text{ When Event } \mathcal{E} \text{ Occurs, System Must Deliver } \mathcal{O} \text{ Within Time } \mathcal{T}, \text{ Without Violating Invariant } \mathcal{I}.$$
 3.  **Technique 1.3 (Shift System Boundaries):** Evaluate function placement across function, module, service, data tier, edge CDN, client application, and organizational process.
 4.  **Technique 1.4 (Shift Stakeholder Perspectives):** Frame behavior through the lenses of the end-user, data owner, security adversary, SRE operator, and downstream consumer.
 
@@ -13155,7 +13155,7 @@ Apply the four framing techniques (Section 1):
 ### 5. Verification Gates & Stop Conditions
 
 - **Gate 1.1:** Zero technology brands or specific libraries appear in the problem definition.
-- **Gate 1.2:** Invariants (\$\mathcal{I}\$) are mathematically or contractually testable.
+- **Gate 1.2:** Invariants ($\mathcal{I}$) are mathematically or contractually testable.
 - **Gate 1.3:** Two independent engineers or agents agree on what constitutes success without knowing the implementation.
 
 ------------------------------------------------------------------------
@@ -13175,9 +13175,9 @@ If the task involves a defect, regression, performance bottleneck, or unexplaina
 
 Apply the diagnosis and contradiction techniques (Section 2):
 
-1.  **Technique 2.1 (Identify Contradictions):** Formulate the clash between two required quality attributes: \$\$\text{Improving Parameter } P_1 \text{ (for example, Global Consistency)} \implies \text{Degrades Parameter } P_2 \text{ (for example, Checkout Latency / Availability)}.\$\$
+1.  **Technique 2.1 (Identify Contradictions):** Formulate the clash between two required quality attributes: $$\text{Improving Parameter } P_1 \text{ (for example, Global Consistency)} \implies \text{Degrades Parameter } P_2 \text{ (for example, Checkout Latency / Availability)}.$$
 2.  **Technique 2.2 (Locate Limiting Bottleneck):** Identify whether the constraint is CPU execution, memory allocation, network round-trip delays, database lock serialization, or connection pool contention.
-3.  **Technique 2.3 (Construct Causal Chain):** Map \$\text{Observation} \to \text{Mechanism} \to \text{Root Physical Cause}\$.
+3.  **Technique 2.3 (Construct Causal Chain):** Map $\text{Observation} \to \text{Mechanism} \to \text{Root Physical Cause}$.
 4.  **Technique 2.4 (Expose Hidden Assumptions):** Expose unexamined beliefs that artificially force the trade-off.
 
 ### 4. Produced Typed Epistemic Artifacts
@@ -13225,7 +13225,7 @@ flowchart TD
 
 ### 3. Cognitive Transformation
 
-1.  Inspect the decision dependency chain: For every open question, evaluate its **Information Value**: \$\$\text{If Knowledge } K \text{ is resolved as } X \implies \text{Choose Candidate } A; \quad \text{If } Y \implies \text{Choose Candidate } B.\$\$ If resolving \$K\$ does not change the choice of candidate, \$K\$ is a *decision-insignificant unknown* and must be discarded.
+1.  Inspect the decision dependency chain: For every open question, evaluate its **Information Value**: $$\text{If Knowledge } K \text{ is resolved as } X \implies \text{Choose Candidate } A; \quad \text{If } Y \implies \text{Choose Candidate } B.$$ If resolving $K$ does not change the choice of candidate, $K$ is a *decision-insignificant unknown* and must be discarded.
 2.  If critical parameters are unknown (for example, actual cross-region network packet loss under peak load, lock contention duration), generate an **Evidence Request** (`EVDREQ-`) and invoke **Operation 5 (Expand Knowledge)** before designing architectures.
 3.  If parameters are known but all proposed architectures are minor variations of a single vendor product, proceed to **Step 4 (Candidate Generation)**.
 
@@ -13253,7 +13253,7 @@ flowchart TD
 
 ### 1. Objective & Semantic Boundary
 
-Construct a set of **mutually distinct architectural candidates** (\$\text{CAN-01}, \text{CAN-02}, \dots\$) that inhabit fundamentally different regions of the computational design space. Prohibit the generation of superficial variations (for example, swapping Postgres for MySQL, or Kafka for RabbitMQ) under the guise of distinct architectures.
+Construct a set of **mutually distinct architectural candidates** ($\text{CAN-01}, \text{CAN-02}, \dots$) that inhabit fundamentally different regions of the computational design space. Prohibit the generation of superficial variations (for example, swapping Postgres for MySQL, or Kafka for RabbitMQ) under the guise of distinct architectures.
 
 ### 2. Formal Input Preconditions
 
@@ -13266,10 +13266,10 @@ Construct a set of **mutually distinct architectural candidates** (\$\text{CAN-0
 Apply the inventive transformation and morphological exploration techniques (Sections 3 and 4):
 
 1.  **Apply the Four Software Separation Principles (Section 8):**
-    - **Separation in Time (\$S\_{\text{time}}\$):** Shift synchronous coordination to asynchronous post-checkout reconciliation or speculative pre-allocation.
-    - **Separation in State/Data Ownership (\$S\_{\text{space}}\$):** Partition inventory ownership by geographic region, tenant, or SKU tier.
-    - **Separation in Operating Condition/Mode (\$S\_{\text{mode}}\$):** Use low-overhead local counters when stock is high (\$\>100\$ units); switch dynamically to strict distributed consensus when stock drops below threshold (\$\le 10\$ units).
-    - **Separation across Structural Boundaries (\$S\_{\text{boundary}}\$):** Move inventory locking from the database tier into an in-memory single-writer partition at the edge.
+    - **Separation in Time ($S_{\text{time}}$):** Shift synchronous coordination to asynchronous post-checkout reconciliation or speculative pre-allocation.
+    - **Separation in State/Data Ownership ($S_{\text{space}}$):** Partition inventory ownership by geographic region, tenant, or SKU tier.
+    - **Separation in Operating Condition/Mode ($S_{\text{mode}}$):** Use low-overhead local counters when stock is high ($>100$ units); switch dynamically to strict distributed consensus when stock drops below threshold ($\le 10$ units).
+    - **Separation across Structural Boundaries ($S_{\text{boundary}}$):** Move inventory locking from the database tier into an in-memory single-writer partition at the edge.
 2.  **Apply Component Elimination (Technique 3.1):** Eliminate dedicated distributed lock clusters and evaluate whether database constraints or partitioned event logs can absorb the coordination function.
 3.  **Construct Morphological Matrix (Technique 4.2):** Cross state ownership, consistency models, coordination timing, and communication protocols.
 
@@ -13323,7 +13323,7 @@ Apply the dependency structuring techniques (Section 6):
 
 1.  **Technique 6.1 (Build Dependency & Contract Map):** Map direct calls, shared database tables, shared DTOs, temporal execution ordering, and deployment pipeline dependencies.
 2.  **Technique 6.2 (Link Requirements to Mechanisms):** Ensure that the business reason to change inventory rules does not propagate into checkout UI controllers or payment billing gateways.
-3.  **Calculate Change Radius Metric (\$R_M\$):** \$\$R_M = \frac{\text{Number of Modules / Schemas Modified}}{\text{Number of Independent Business Requirements Altered}}\$\$ A sound architecture maintains \$R_M \approx 1\$.
+3.  **Calculate Change Radius Metric ($R_M$):** $$R_M = \frac{\text{Number of Modules / Schemas Modified}}{\text{Number of Independent Business Requirements Altered}}$$ A sound architecture maintains $R_M \approx 1$.
 
 ### 4. Produced Typed Epistemic Artifacts
 
@@ -13344,7 +13344,7 @@ Apply the dependency structuring techniques (Section 6):
 
 ### 5. Verification Gates & Stop Conditions
 
-- **Gate 5.1:** Candidates with unconstrained change radius (\$R_M \> 3\$) or hidden distributed state coupling are flagged with architectural risk warnings.
+- **Gate 5.1:** Candidates with unconstrained change radius ($R_M > 3$) or hidden distributed state coupling are flagged with architectural risk warnings.
 - **Gate 5.2:** Data ownership boundaries adhere strictly to single-writer principles.
 
 ------------------------------------------------------------------------
@@ -13353,7 +13353,7 @@ Apply the dependency structuring techniques (Section 6):
 
 ### 1. Objective & Semantic Boundary
 
-Subject each candidate to non-linear dynamic scrutiny across time, high concurrent load, tail latency percentiles (\$p99/p99.9\$), resource accumulations, and cascading partial failure modes. Static architecture diagrams are strictly insufficient.
+Subject each candidate to non-linear dynamic scrutiny across time, high concurrent load, tail latency percentiles ($p99/p99.9$), resource accumulations, and cascading partial failure modes. Static architecture diagrams are strictly insufficient.
 
 ### 2. Formal Input Preconditions
 
@@ -13364,8 +13364,8 @@ Subject each candidate to non-linear dynamic scrutiny across time, high concurre
 
 Apply the system dynamics modeling techniques (Section 7):
 
-1.  **Technique 7.1 (Model Accumulations and Rates):** Formulate the fundamental balance equations for queues, database connection pools, memory buffers, and in-flight transactions: \$\$\frac{d(\text{Queue_Size})}{dt} = \text{Inflow_Rate}(t) - \text{Outflow_Rate}(t)\$\$
-2.  **Technique 7.2 (Model Destructive Feedback Loops):** Map reinforcing failure loops: \$\$\text{Latency Spikes} \xrightarrow{+} \text{Client Retries} \xrightarrow{+} \text{Server Queue Growth} \xrightarrow{+} \text{Thread Exhaustion} \xrightarrow{+} \text{Total Outage}.\$\$
+1.  **Technique 7.1 (Model Accumulations and Rates):** Formulate the fundamental balance equations for queues, database connection pools, memory buffers, and in-flight transactions: $$\frac{d(\text{Queue_Size})}{dt} = \text{Inflow_Rate}(t) - \text{Outflow_Rate}(t)$$
+2.  **Technique 7.2 (Model Destructive Feedback Loops):** Map reinforcing failure loops: $$\text{Latency Spikes} \xrightarrow{+} \text{Client Retries} \xrightarrow{+} \text{Server Queue Growth} \xrightarrow{+} \text{Thread Exhaustion} \xrightarrow{+} \text{Total Outage}.$$
 3.  **Technique 7.3 (Model Transient Operating Modes):** Analyze cold starts, cache stampedes, database failovers, and dual-version protocol coexistence during rolling deployments.
 
 ### 4. Produced Typed Epistemic Artifacts
@@ -13387,9 +13387,9 @@ flowchart LR
     end
 ```
 
-- **CAN-01 Dynamic Risk:** Under WAN partition, Raft heartbeat loss triggers election storm; all global checkouts freeze. Recovery takes \$45\text{ s}\$ post-heal due to log compaction catch-up.
-- **CAN-02 Dynamic Risk:** Quota exhaustion in EU while US has surplus. If rebalancing queue lags (\$\> 5\text{ s}\$), EU users receive false "Out of Stock" (false negative) while 200 units sit idle in US. Balancing loop required: exponential backoff quota requests.
-- **CAN-03 Dynamic Risk:** Mode switch boundary creates a sharp latency cliff: request \$N=21\$ takes \$2\text{ ms}\$, request \$N=20\$ takes \$180\text{ ms}\$. Concurrent requests at the boundary can race, triggering duplicate master delegations.
+- **CAN-01 Dynamic Risk:** Under WAN partition, Raft heartbeat loss triggers election storm; all global checkouts freeze. Recovery takes $45\text{ s}$ post-heal due to log compaction catch-up.
+- **CAN-02 Dynamic Risk:** Quota exhaustion in EU while US has surplus. If rebalancing queue lags ($> 5\text{ s}$), EU users receive false "Out of Stock" (false negative) while 200 units sit idle in US. Balancing loop required: exponential backoff quota requests.
+- **CAN-03 Dynamic Risk:** Mode switch boundary creates a sharp latency cliff: request $N=21$ takes $2\text{ ms}$, request $N=20$ takes $180\text{ ms}$. Concurrent requests at the boundary can race, triggering duplicate master delegations.
 
 <!-- -->
 
@@ -13434,7 +13434,7 @@ flowchart LR
 
 ### 5. Verification Gates & Stop Conditions
 
-- **Gate 7.1:** The differentiating experiment is designed to be executable in \$\< 2\$ days of engineering effort.
+- **Gate 7.1:** The differentiating experiment is designed to be executable in $< 2$ days of engineering effort.
 - **Gate 7.2:** Explicit success/failure thresholds are committed in writing *before* executing the experiment.
 
 ------------------------------------------------------------------------
@@ -13504,7 +13504,7 @@ flowchart LR
 
 ### 1. Objective & Semantic Boundary
 
-Design and execute the **Transition System** (\$\mathcal{T}\_{\text{sys}}\$) as a dedicated, temporary architectural artifact. Safely migrate from the legacy system state to the validated target architecture without downtime, data corruption, or irreversible cutovers.
+Design and execute the **Transition System** ($\mathcal{T}_{\text{sys}}$) as a dedicated, temporary architectural artifact. Safely migrate from the legacy system state to the validated target architecture without downtime, data corruption, or irreversible cutovers.
 
 ``` mermaid
 flowchart LR
@@ -13529,11 +13529,11 @@ Apply the safe transition and continuous observation techniques (Section 9):
     - Phase 1: Expand schema (add new tables/columns with backward-compatible defaults);
     - Phase 2: Dual-writing / Change Data Capture (stream legacy writes into new partitioned quota engine);
     - Phase 3: Parity validation (verify that shadow quota calculations match legacy counters bit-for-bit);
-    - Phase 4: Dark launch / Canary rollout via dynamic feature flags (\$1% \to 5% \to 25% \to 100%\$);
+    - Phase 4: Dark launch / Canary rollout via dynamic feature flags ($1% \to 5% \to 25% \to 100%$);
     - Phase 5: Complete cutover of write authority;
     - Phase 6: Contract schema (remove legacy locks, temporary RPC shims, and dual-writing adapters);
     - Phase 7: Post-release observation via SLO dashboards.
-2.  **Technique 9.4 (Anchor Results with Continuous Observability):** Establish SLI alerts and automated rollback triggers (for example, if error rate exceeds \$0.05%\$, instantly revert feature flag to legacy engine).
+2.  **Technique 9.4 (Anchor Results with Continuous Observability):** Establish SLI alerts and automated rollback triggers (for example, if error rate exceeds $0.05\%$, instantly revert feature flag to legacy engine).
 
 ### 4. Produced Typed Epistemic Artifacts
 
@@ -13564,11 +13564,11 @@ Apply the safe transition and continuous observation techniques (Section 9):
 
 When an engineer or AI agent works through a complex software task, multiple uncertainties compete simultaneously for cognitive and computational effort:
 
-- *"Is our framing too narrow?"* (\$U\_{\text{frame}}\$)
-- *"Do we really understand why the database slows down at 2 AM?"* (\$U\_{\text{diag}}\$)
-- *"Should we benchmark three different messaging libraries?"* (\$U\_{\text{know}}\$)
-- *"Will our microservice boundaries create deployment coupling?"* (\$U\_{\text{dep}}\$)
-- *"How will the cache react to a thundering herd?"* (\$U\_{\text{dyn}}\$)
+- *"Is our framing too narrow?"* ($U_{\text{frame}}$)
+- *"Do we really understand why the database slows down at 2 AM?"* ($U_{\text{diag}}$)
+- *"Should we benchmark three different messaging libraries?"* ($U_{\text{know}}$)
+- *"Will our microservice boundaries create deployment coupling?"* ($U_{\text{dep}}$)
+- *"How will the cache react to a thundering herd?"* ($U_{\text{dyn}}$)
 
 Addressing these questions haphazardly leads to immense wasted motion. The governing heuristic of the Ariadne reasoning layer is the **Principle of Highest-Cost Uncertainty**:
 
@@ -13578,56 +13578,56 @@ Addressing these questions haphazardly leads to immense wasted motion. The gover
 
 ## 15.2. Mathematical Formalization: Expected Value of Information (EVOI)
 
-Grounding the selection process in Ronald A. Howard's [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), let \$\Theta\$ denote the set of possible true states of the software environment (for example, actual network latency distribution, true database bottleneck mechanism, actual user concurrency patterns).
+Grounding the selection process in Ronald A. Howard's [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), let $\Theta$ denote the set of possible true states of the software environment (for example, actual network latency distribution, true database bottleneck mechanism, actual user concurrency patterns).
 
-Let \$\mathcal{D}\$ be the set of possible architectural commitments or design choices (\$d \in \mathcal{D}\$).
+Let $\mathcal{D}$ be the set of possible architectural commitments or design choices ($d \in \mathcal{D}$).
 
-The net lifecycle value of choosing decision \$d\$ when the true system state is \$\theta \in \Theta\$ is denoted by the utility function:
+The net lifecycle value of choosing decision $d$ when the true system state is $\theta \in \Theta$ is denoted by the utility function:
 
-\$\$V(d, \theta) = \text{Useful_Effect}(d, \theta) - \text{Lifecycle_Cost}(d, \theta) - \text{Harm}(d, \theta)\$\$
+$$V(d, \theta) = \text{Useful_Effect}(d, \theta) - \text{Lifecycle_Cost}(d, \theta) - \text{Harm}(d, \theta)$$
 
 ### 1. Value Under Current Uncertainty (Prior State)
 
-Without executing a new reasoning or verification operation, the engineer must choose the decision \$d^\*\$ that maximizes expected value under the prior probability distribution \$P(\theta)\$:
+Without executing a new reasoning or verification operation, the engineer must choose the decision $d^\*$ that maximizes expected value under the prior probability distribution $P(\theta)$:
 
-\$\$V\_{\text{prior}} = \max\_{d \in \mathcal{D}} \mathbb{E}*{\theta \sim P(\theta)} \left\[ V(d, \theta) \right\] = \max*{d \in \mathcal{D}} \sum\_{\theta \in \Theta} P(\theta) , V(d, \theta)\$\$
+$$V_{\text{prior}} = \max_{d \in \mathcal{D}} \mathbb{E}_{\theta \sim P(\theta)} \left[ V(d, \theta) \right] = \max_{d \in \mathcal{D}} \sum_{\theta \in \Theta} P(\theta)\, V(d, \theta)$$
 
-### 2. Value After Executing Operation \$\mathcal{O}\_k\$ (Posterior State)
+### 2. Value After Executing Operation $\mathcal{O}_k$ (Posterior State)
 
-Suppose we execute an operation \$\mathcal{O}\_k\$ (for example, a microbenchmark spike, a causal diagnosis trace, or a dependency audit) at an engineering/computational cost \$C(\mathcal{O}\_k)\$.
+Suppose we execute an operation $\mathcal{O}_k$ (for example, a microbenchmark spike, a causal diagnosis trace, or a dependency audit) at an engineering/computational cost $C(\mathcal{O}_k)$.
 
-The operation produces an empirical evidence outcome \$\mathcal{E} \in \Omega\_{\mathcal{E}}\$ with marginal probability \$P(\mathcal{E})\$. Upon observing \$\mathcal{E}\$, the belief distribution is updated via Bayes' rule to the posterior \$P(\theta \| \mathcal{E})\$.
+The operation produces an empirical evidence outcome $\mathcal{E} \in \Omega_{\mathcal{E}}$ with marginal probability $P(\mathcal{E})$. Upon observing $\mathcal{E}$, the belief distribution is updated via Bayes' rule to the posterior $P(\theta \mid \mathcal{E})$.
 
-The optimal decision chosen *after* observing \$\mathcal{E}\$ is \$d^\**{\mathcal{E}} = \arg\max*{d \in \mathcal{D}} \mathbb{E}\_{\theta \| \mathcal{E}} \[V(d, \theta)\]\$.
+The optimal decision chosen *after* observing $\mathcal{E}$ is $d^\*_{\mathcal{E}} = \arg\max_{d \in \mathcal{D}} \mathbb{E}_{\theta \mid \mathcal{E}} [V(d, \theta)]$.
 
-The expected value across all possible outcomes of operation \$\mathcal{O}\_k\$ is:
+The expected value across all possible outcomes of operation $\mathcal{O}_k$ is:
 
-\$\$V\_{\text{post}}(\mathcal{O}*k) = \sum*{\mathcal{E} \in \Omega\_{\mathcal{E}}} P(\mathcal{E}) \left\[ \max\_{d \in \mathcal{D}} \sum\_{\theta \in \Theta} P(\theta \| \mathcal{E}) , V(d, \theta) \right\]\$\$
+$$V_{\text{post}}(\mathcal{O}_k) = \sum_{\mathcal{E} \in \Omega_{\mathcal{E}}} P(\mathcal{E}) \left[ \max_{d \in \mathcal{D}} \sum_{\theta \in \Theta} P(\theta \mid \mathcal{E})\, V(d, \theta) \right]$$
 
 ### 3. Net Expected Value of Information (EVOI)
 
-The **Net Expected Value of Information** of operation \$\mathcal{O}\_k\$ is the expected value gained by updating the decision, minus the operational cost of performing the check:
+The **Net Expected Value of Information** of operation $\mathcal{O}_k$ is the expected value gained by updating the decision, minus the operational cost of performing the check:
 
-\$\$\text{EVOI}(\mathcal{O}*k) = V*{\text{post}}(\mathcal{O}*k) - V*{\text{prior}} - C(\mathcal{O}\_k)\$\$
+$$\text{EVOI}(\mathcal{O}_k) = V_{\text{post}}(\mathcal{O}_k) - V_{\text{prior}} - C(\mathcal{O}_k)$$
 
-\$\$\text{EVOI}(\mathcal{O}*k) = \sum*{\mathcal{E}} P(\mathcal{E}) \max\_{d} \mathbb{E}*{\theta\|\mathcal{E}}\[V(d,\theta)\] - \max*{d} \mathbb{E}\_{\theta}\[V(d,\theta)\] - C(\mathcal{O}\_k)\$\$
+$$\text{EVOI}(\mathcal{O}_k) = \sum_{\mathcal{E}} P(\mathcal{E}) \max_{d} \mathbb{E}_{\theta\mid\mathcal{E}}[V(d,\theta)] - \max_{d} \mathbb{E}_{\theta}[V(d,\theta)] - C(\mathcal{O}_k)$$
 
 ### 4. Optimal Operation Dispatch Rule
 
-The uncertainty router selects the next operation \$\mathcal{O}^\*\$ that maximizes net EVOI:
+The uncertainty router selects the next operation $\mathcal{O}^\*$ that maximizes net EVOI:
 
-\$\$\mathcal{O}^\* = \arg\max\_{\mathcal{O}\_k \in {\mathcal{O}\_1, \dots, \mathcal{O}\_9}} \text{EVOI}(\mathcal{O}\_k)\$\$
+$$\mathcal{O}^\* = \arg\max_{\mathcal{O}_k \in \{\mathcal{O}_1, \dots, \mathcal{O}_9\}} \text{EVOI}(\mathcal{O}_k)$$
 
-If \$\max_k \text{EVOI}(\mathcal{O}\_k) \le 0\$, no further empirical investigation is economically justified: the system should immediately commit to the best prior decision \$d^\*\$ and proceed to implementation.
+If $\max_k \text{EVOI}(\mathcal{O}_k) \le 0$, no further empirical investigation is economically justified: the system should immediately commit to the best prior decision $d^\*$ and proceed to implementation.
 
-### 5. Practical Cost-of-Uncertainty Ratio (\$\mathcal{R}\_{\text{unc}}\$)
+### 5. Practical Cost-of-Uncertainty Ratio ($\mathcal{R}_{\text{unc}}$)
 
 For rapid heuristic estimation by human architects or AI agents, the EVOI formulation simplifies to the **Cost-of-Uncertainty Ratio**:
 
-\$\$\mathcal{R}\_{\text{unc}}(\mathcal{U}\_i) = \frac{P(\text{Error} \mid \mathcal{U}\_i) \times \text{Cost}(\text{Error} \mid \mathcal{U}\_i)}{\text{Cost}(\text{Executing Verification for } \mathcal{U}\_i)}\$\$
+$$\mathcal{R}_{\text{unc}}(\mathcal{U}_i) = \frac{P(\text{Error} \mid \mathcal{U}_i) \times \text{Cost}(\text{Error} \mid \mathcal{U}_i)}{\text{Cost}(\text{Executing Verification for } \mathcal{U}_i)}$$
 
-- If an unverified assumption has a \$30%\$ chance of being wrong, would cause a \$\$200,000\$ architectural rewrite in production, and can be verified by a 2-hour benchmark spike (\$\$200\$ compute/time cost): \$\$\mathcal{R}\_{\text{unc}} = \frac{0.30 \times 200,000}{200} = 300 \quad (\text{Extremely High Priority} \implies \text{Dispatch Op 5 / Op 8 immediately}).\$\$
-- If an unverified detail has a \$10%\$ chance of error, would cause a minor 1-hour refactor (\$\$100\$), but requires a 3-day load test setup (\$\$2,400\$): \$\$\mathcal{R}\_{\text{unc}} = \frac{0.10 \times 100}{2400} = 0.004 \quad (\text{Negative EVOI} \implies \text{Do not test; accept working assumption}).\$\$
+- If an unverified assumption has a 30% chance of being wrong, would cause a USD 200,000 architectural rewrite in production, and can be verified by a 2-hour benchmark spike (USD 200 compute/time cost): $$\mathcal{R}_{\text{unc}} = \frac{0.30 \times 200,000}{200} = 300 \quad (\text{Extremely High Priority} \implies \text{Dispatch Op 5 / Op 8 immediately}).$$
+- If an unverified detail has a 10% chance of error, would cause a minor 1-hour refactor (USD 100), but requires a 3-day load test setup (USD 2,400): $$\mathcal{R}_{\text{unc}} = \frac{0.10 \times 100}{2400} = 0.004 \quad (\text{Negative EVOI} \implies \text{Do not test; accept working assumption}).$$
 
 ------------------------------------------------------------------------
 
@@ -13739,14 +13739,14 @@ For rapid heuristic estimation by human architects or AI agents, the EVOI formul
 
 ### 16.2.1. Scope, Boundary, and Trigger Conditions
 
-Fast Mode is designated for **Type 2 ("Two-Way Door") decisions**—modifications whose blast radius is strictly contained within a single process, module, or local component, and whose effects can be rolled back in \$\<1\text{ commit}\$ without data loss or service disruption.
+Fast Mode is designated for **Type 2 ("Two-Way Door") decisions**—modifications whose blast radius is strictly contained within a single process, module, or local component, and whose effects can be rolled back in $<1\text{ commit}$ without data loss or service disruption.
 
 **Trigger Conditions:**
 
-1.  Scope is bounded to \$\le 2\$ local files or a single class/function;
+1.  Scope is bounded to $\le 2$ local files or a single class/function;
 2.  Zero changes to persistent database schemas, wire protocols, or public API contracts;
 3.  Zero asynchronous distributed side effects (e.g., no cross-service event publishing);
-4.  Total rollback time \$T\_{\text{rollback}} \< 5\text{ minutes}\$.
+4.  Total rollback time $T_{\text{rollback}} < 5\text{ minutes}$.
 
 ### 16.2.2. Streamlined 6-Step Epistemic Workflow
 
@@ -13767,15 +13767,15 @@ Even in Fast Mode, unstructured "trial-and-error code thrashing" is prohibited. 
 
 ### 16.2.3. Concrete Fast Mode Walkthrough: In-Memory Token Bucket Leak
 
-- **Observed Symptom:** A high-throughput REST API gateway experiences gradual memory growth and eventual \$OOM\$ crash under burst traffic.
-- **Step 1 (Required Behavior):** Rate-limiter must enforce \$\le 1000\text{ req/sec}\$ per API key while maintaining bounded memory footprint \$\le 50\text{ MB}\$ under \$10^6\$ ephemeral client keys.
-- **Step 2 (Primary Cause):** The rate-limiter allocates a state struct in a hash map for every incoming IP/key but never evicts inactive keys, causing monotonic heap accumulation (\$\mathcal{O}(N\_{\text{unique_keys}})\$).
+- **Observed Symptom:** A high-throughput REST API gateway experiences gradual memory growth and eventual $OOM$ crash under burst traffic.
+- **Step 1 (Required Behavior):** Rate-limiter must enforce $\le 1000\text{ req/sec}$ per API key while maintaining bounded memory footprint $\le 50\text{ MB}$ under $10^6$ ephemeral client keys.
+- **Step 2 (Primary Cause):** The rate-limiter allocates a state struct in a hash map for every incoming IP/key but never evicts inactive keys, causing monotonic heap accumulation ($\mathcal{O}(N_{\text{unique_keys}})$).
 - **Step 3 (3 Distinct Mechanisms):**
-  1.  *Mechanism A (Active Eviction):* Background goroutine periodically scans hash map and deletes keys idle for \$\>60\text{ s}\$.
-  2.  *Mechanism B (Bounded LRU / Clock Cache):* Replace unbounded map with a fixed-size concurrent LRU cache (capacity \$100\text{k}\$ entries) with tail eviction.
+  1.  *Mechanism A (Active Eviction):* Background goroutine periodically scans hash map and deletes keys idle for $>60\text{ s}$.
+  2.  *Mechanism B (Bounded LRU / Clock Cache):* Replace unbounded map with a fixed-size concurrent LRU cache (capacity $100\text{k}$ entries) with tail eviction.
   3.  *Mechanism C (Stateless Window Hashing):* Use a ring buffer of atomic rolling counters indexed by `hash(key) % SLOTS`, accepting probabilistic collision under extreme cardinality.
 - **Step 4 (Resource Reuse):** Mechanism B reuses existing in-repository `pkg/cache/lru.go`; zero new dependencies.
-- **Step 5 (Minimal Invariant Test):** Unit test instantiates rate limiter with capacity \$1000\$, pushes \$10^5\$ randomized keys, and asserts memory allocations \$\le 1.2\times \text{baseline}\$ and capacity never exceeds \$1000\$.
+- **Step 5 (Minimal Invariant Test):** Unit test instantiates rate limiter with capacity $1000$, pushes $10^5$ randomized keys, and asserts memory allocations $\le 1.2\times \text{baseline}$ and capacity never exceeds $1000$.
 - **Step 6 (Rollback Check):** Changes isolated to `ratelimit.go`; zero persistent state; rollback is a single `git revert`.
 
 ------------------------------------------------------------------------
@@ -13788,7 +13788,7 @@ Standard Mode is designated for substantial feature implementations, internal ar
 
 **Trigger Conditions:**
 
-1.  Multi-module change radius (\$\>2\$ packages or services);
+1.  Multi-module change radius ($>2$ packages or services);
 2.  Introduction of new data models or non-breaking database schema additions;
 3.  Changes to internal RPC contracts, event payloads, or component lifecycles;
 4.  Modest operational risk requiring structured transition planning (e.g., dual-writing, feature flagging).
@@ -13815,13 +13815,13 @@ Standard Mode mandates the creation and validation of the core Ariadne artifact 
 ### 16.3.3. Concrete Standard Mode Walkthrough: Synchronous Ingestion to Outbox Migration
 
 - **Context:** An e-commerce checkout service synchronously calls an external payment provider and inventory service inside a relational database transaction. Under network jitter, database connection pools exhaust, cascading into full site outages.
-- **Task Passport:** Invariant: A customer order must never be committed without guaranteed inventory decrement and payment authorization; p99 checkout response time must remain \$\<300\text{ ms}\$ regardless of external partner latency.
-- **Causal Map:** `HYP-01`: Holding database transaction locks open across network HTTP calls causes connection pool starvation when upstream latency spikes from \$50\text{ ms}\$ to \$2000\text{ ms}\$. `EVD-01` confirms \$100%\$ pool saturation during partner degradation.
+- **Task Passport:** Invariant: A customer order must never be committed without guaranteed inventory decrement and payment authorization; p99 checkout response time must remain $<300\text{ ms}$ regardless of external partner latency.
+- **Causal Map:** `HYP-01`: Holding database transaction locks open across network HTTP calls causes connection pool starvation when upstream latency spikes from $50\text{ ms}$ to $2000\text{ ms}$. `EVD-01` confirms $100\%$ pool saturation during partner degradation.
 - **Candidate Exploration:**
   - `CAN-01`: Distributed 2-Phase Commit (XA) across DB and partner microservice.
   - `CAN-02`: Transactional Outbox Pattern with Change Data Capture (CDC) and idempotent asynchronous worker dispatch.
   - `CAN-03`: SAGA Orchestration state machine using Temporal.io.
-- **Dependency & Dynamics Analysis:** `CAN-02` breaks synchronous temporal coupling, reducing database transaction duration from \$\mathcal{O}(T\_{\text{network}})\$ to \$\mathcal{O}(T\_{\text{disk_write}} \approx 1.2\text{ ms})\$. Queue accumulation is handled in Kafka; backpressure prevents database starvation.
+- **Dependency & Dynamics Analysis:** `CAN-02` breaks synchronous temporal coupling, reducing database transaction duration from $\mathcal{O}(T_{\text{network}})$ to $\mathcal{O}(T_{\text{disk_write}} \approx 1.2\text{ ms})$. Queue accumulation is handled in Kafka; backpressure prevents database starvation.
 - **Transition Plan:**
   1.  *Phase 1 (Expand):* Add `outbox_events` table; write order and outbox event in single DB transaction.
   2.  *Phase 2 (Dual-Run):* Background worker reads outbox and emits events; existing synchronous call remains active behind a feature flag for shadow comparison.
@@ -13876,12 +13876,12 @@ The following matrix establishes the operational rules, artifact budgets, and tr
 | Governance Dimension | Fast Mode | Standard Mode | Deep Mode |
 |----|----|----|----|
 | **Primary Domain** | Bug fixes, local optimizations, non-breaking internal edits. | Feature additions, architectural refactoring, internal schemas. | Distributed consensus, financial transactions, core data storage. |
-| **Reversibility (\$\mathcal{R}\$)** | Fully reversible (\$\<1\$ commit, \$\<5\$ min). | Reversible via feature flag or migration rollback (\$\<1\$ hour). | Irreversible or high-cost rollback (\$\>24\$ hours, data migration). |
-| **Blast Radius** | Single function, class, or module (\$\le 2\$ files). | Subsystem or multi-module bounded service. | Enterprise-wide, multi-service, or external client-facing. |
+| **Reversibility ($\mathcal{R}$)** | Fully reversible ($<1$ commit, $<5$ min). | Reversible via feature flag or migration rollback ($<1$ hour). | Irreversible or high-cost rollback ($>24$ hours, data migration). |
+| **Blast Radius** | Single function, class, or module ($\le 2$ files). | Subsystem or multi-module bounded service. | Enterprise-wide, multi-service, or external client-facing. |
 | **Mandatory Artifacts** | Inline Micro-Passport, 3 Mechanisms, Invariant Test. | Task Passport, Causal Map, Solution Space, Dep/Dyn Matrix, ADR. | Complete Epistemic Graph, Formal Invariants, Chaos Receipts, ADR. |
 | **Agent Roles Deployed** | Single Implementation Agent + Invariant Check. | Framing, Diagnostic, Exploration, Architecture, Verification. | Full 8-Agent Epistemic Role Architecture (including Adversarial). |
 | **Evidentiary Rungs** | Rungs 1–3 (Static, Types, Unit Tests). | Rungs 1–7 (Static through Integration & Load Benchmarks). | Rungs 1–10 (Full ladder including Chaos, Canary & Telemetry). |
-| **Token Budget (LLM)** | \$\le 4\text{k}\$ tokens. | \$15\text{k} - 40\text{k}\$ tokens. | \$\ge 100\text{k}\$ tokens (multi-agent distributed runs). |
+| **Token Budget (LLM)** | $\le 4\text{k}$ tokens. | $15\text{k} - 40\text{k}$ tokens. | $\ge 100\text{k}$ tokens (multi-agent distributed runs). |
 | **Escalation Triggers** | Discovered hidden state, cross-service dependency. | Discovered distributed race condition, data corruption risk. | Irreversible schema lockup, split-brain anomaly under partition. |
 
 ------------------------------------------------------------------------
@@ -13931,7 +13931,7 @@ flowchart TD
 
 ### 1. Framing Agent
 
-- **Epistemic Responsibility:** Transform vague, solution-polluted user directives into an implementation-agnostic **Problem Passport** (\$\mathcal{F}*{\text{req}}, \mathcal{I}*{\text{inv}}, \mathcal{B}\_{\text{scope}}\$).
+- **Epistemic Responsibility:** Transform vague, solution-polluted user directives into an implementation-agnostic **Problem Passport** ($\mathcal{F}_{\text{req}}, \mathcal{I}_{\text{inv}}, \mathcal{B}_{\text{scope}}$).
 - **Prohibited Actions:** Must never suggest code, frameworks, databases, or specific algorithmic libraries.
 - **Key Deliverables:** Implementation-agnostic functional requirements, non-negotiable invariants, success metrics, system boundary passport.
 
@@ -13943,7 +13943,7 @@ flowchart TD
 
 ### 3. Exploration Agent
 
-- **Epistemic Responsibility:** Apply the 36 Systematic Inventive Thinking techniques and morphological analysis to generate \$\ge 3\$ structurally distinct candidate mechanisms (`CAN-`). Enforces the Law of Ideality by prioritizing in-system resource reuse.
+- **Epistemic Responsibility:** Apply the 36 Systematic Inventive Thinking techniques and morphological analysis to generate $\ge 3$ structurally distinct candidate mechanisms (`CAN-`). Enforces the Law of Ideality by prioritizing in-system resource reuse.
 - **Prohibited Actions:** Must never generate minor variations of a single architectural paradigm (e.g., offering three different message brokers is a single candidate class, not three).
 - **Key Deliverables:** Solution Space Morphological Matrix, Candidate Mechanism Specifications (`CAN-01`, `CAN-02`, `CAN-03`).
 
@@ -14047,7 +14047,7 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
 
 ### 17.3.2. Example Typed Envelope Exchange
 
-#### Diagnostic Agent \$\to\$ Verification Agent (Evidence Request)
+#### Diagnostic Agent $\to$ Verification Agent (Evidence Request)
 
 ``` json
 {
@@ -14070,7 +14070,7 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
 }
 ```
 
-#### Verification Agent \$\to\$ Diagnostic Agent (Evidence Result)
+#### Verification Agent $\to$ Diagnostic Agent (Evidence Result)
 
 ``` json
 {
@@ -14108,7 +14108,7 @@ In human committees and poorly designed multi-agent systems, consensus is often 
 The Ariadne multi-agent layer implements **Popperian Empirical Consensus**:
 
 1.  **The Falsification Sovereign Rule:** A single reproducible empirical evidence node (`EVD-` with provenance `MEASURED` or `FACT`) decisively overrules any number of `ASSUMED` or `PROPOSED` claims.
-2.  **State Transition to Locked:** A candidate mechanism `CAN-k` is promoted to a locked decision `DEC-j` if and only if: \$\$\forall \mathcal{I} \in \text{Invariants}, \quad \text{Corroborated}(\mathcal{I}, \text{CAN-k}) = \text{TRUE}\$\$ \$\$\forall \mathcal{H} \in \text{AdversarialAttacks}, \quad \text{Falsified}(\mathcal{H}, \text{CAN-k}) = \text{FALSE}\$\$ \$\$\forall u \in \text{Ancestors}(\text{CAN-k}), \quad \text{State}(u) \neq \text{INVALIDATED}\$\$
+2.  **State Transition to Locked:** A candidate mechanism `CAN-k` is promoted to a locked decision `DEC-j` if and only if: $$\forall \mathcal{I} \in \text{Invariants}, \quad \text{Corroborated}(\mathcal{I}, \text{CAN-k}) = \text{TRUE}$$ $$\forall \mathcal{H} \in \text{AdversarialAttacks}, \quad \text{Falsified}(\mathcal{H}, \text{CAN-k}) = \text{FALSE}$$ $$\forall u \in \text{Ancestors}(\text{CAN-k}), \quad \text{State}(u) \neq \text{INVALIDATED}$$
 
 ------------------------------------------------------------------------
 
@@ -14154,41 +14154,41 @@ flowchart LR
     │ `DECIDED` │ $\mathbf{L}$ │ Locked architectural decision recorded in an immutable ADR.          │
     └───────────┴──────────────┴───────────────────────────────────────────────────────────────────────┘
 
-### 1. `FACT` (\$\mathbf{F}\$)
+### 1. `FACT` ($\mathbf{F}$)
 
 - **Definition:** An assertion whose truth value is directly verifiable by inspecting static artifacts in the repository, compiler AST, dependency locks, or operating system invariants.
 - **Examples:** `"File src/auth/token.go implements the TokenValidator interface"`; `"PostgreSQL 16 is the target production engine"`.
 - **Verification Method:** Static file read, AST parser, compiler type check.
 
-### 2. `MEASURED` (\$\mathbf{M}\$)
+### 2. `MEASURED` ($\mathbf{M}$)
 
 - **Definition:** A quantitative proposition derived from the execution of a test, microbenchmark, load test, or runtime profiling under documented, reproducible conditions.
 - **Examples:** `"p99 memory allocation is 4.2 MB per request at 10,000 RPS"`; `"Disk fsync latency p99 is 11.4 ms on EBS gp3"`.
 - **Verification Method:** Benchmark stdout, profiler flamegraph, Prometheus metric capture.
 
-### 3. `DERIVED` (\$\mathbf{D}\$)
+### 3. `DERIVED` ($\mathbf{D}$)
 
-- **Definition:** A proposition obtained via mathematical calculation, formal deduction, or algorithmic analysis where all input premises have provenance \$\mathbf{F}\$ or \$\mathbf{M}\$.
+- **Definition:** A proposition obtained via mathematical calculation, formal deduction, or algorithmic analysis where all input premises have provenance $\mathbf{F}$ or $\mathbf{M}$.
 - **Examples:** `"Network bandwidth requirement is 80 MB/s (10,000 RPS × 8 KB payload)"`; `"Little's Law implies concurrency L = 10,000 RPS × 0.05 s = 500 in-flight requests"`.
 - **Verification Method:** Proof derivation check, dimensional analysis.
 
-### 4. `ASSUMED` (\$\mathbf{A}\$)
+### 4. `ASSUMED` ($\mathbf{A}$)
 
 - **Definition:** A working premise adopted provisionally to continue architectural exploration in the absence of complete empirical data.
 - **Examples:** `"We assume client network latency across availability zones is < 2 ms"`; `"We assume write traffic will not exceed 500 RPS during Black Friday"`.
-- **Epistemic Constraint:** An `ASSUMED` node can never serve as justifying evidence for a locked decision (\$\mathbf{L}\$) in Standard or Deep mode.
+- **Epistemic Constraint:** An `ASSUMED` node can never serve as justifying evidence for a locked decision ($\mathbf{L}$) in Standard or Deep mode.
 
-### 5. `PROPOSED` (\$\mathbf{P}\$)
+### 5. `PROPOSED` ($\mathbf{P}$)
 
 - **Definition:** A candidate mechanism, architectural transformation, or refactoring strategy currently under investigation.
 - **Examples:** `"CAN-02: Use consistent hashing with virtual nodes to distribute cache partitions"`.
 
-### 6. `UNKNOWN` (\$\mathbf{U}\$)
+### 6. `UNKNOWN` ($\mathbf{U}$)
 
 - **Definition:** An explicitly acknowledged gap in engineering knowledge that directly impacts the viability of a candidate mechanism.
 - **Examples:** `"UNK-03: What is the maximum lock hold time of PostgreSQL pg_repack during active table reorganization?"`.
 
-### 7. `DECIDED` (\$\mathbf{L}\$)
+### 7. `DECIDED` ($\mathbf{L}$)
 
 - **Definition:** An architectural decision locked in an Architecture Decision Record (ADR), backed by empirical evidence, passing all non-negotiable invariants, and signed off by the epistemic gatekeeper.
 
@@ -14196,34 +14196,34 @@ flowchart LR
 
 ## 18.3. Formal Provenance Algebra & Derivation Rules
 
-Let \$\mathcal{P} = {\mathbf{U}, \mathbf{A}, \mathbf{P}, \mathbf{D}, \mathbf{M}, \mathbf{F}, \mathbf{L}}\$ be the set of provenance types, partially ordered as a lattice \$\langle \mathcal{P}, \sqsubseteq \rangle\$:
+Let $\mathcal{P} = \{\mathbf{U}, \mathbf{A}, \mathbf{P}, \mathbf{D}, \mathbf{M}, \mathbf{F}, \mathbf{L}\}$ be the set of provenance types, partially ordered as a lattice $\langle \mathcal{P}, \sqsubseteq \rangle$:
 
-\$\$\mathbf{U} \sqsubset \mathbf{A} \sqsubset \mathbf{P} \sqsubset \mathbf{D} \sqsubset \mathbf{M} \sqsubset \mathbf{F} \sqsubset \mathbf{L}\$\$
+$$\mathbf{U} \sqsubset \mathbf{A} \sqsubset \mathbf{P} \sqsubset \mathbf{D} \sqsubset \mathbf{M} \sqsubset \mathbf{F} \sqsubset \mathbf{L}$$
 
 ### 18.3.1. The Weakest-Precondition Propagation Rule
 
-When a new claim \$C\$ is derived from a set of antecedent nodes \${A_1, A_2, \dots, A_n}\$ via logical or mathematical deduction (\$A_1 \land A_2 \land \dots \land A_n \vdash C\$), the provenance of \$C\$ is bounded by the **weakest antecedent in the epistemic chain**:
+When a new claim $C$ is derived from a set of antecedent nodes ${A_1, A_2, \dots, A_n}$ via logical or mathematical deduction ($A_1 \land A_2 \land \dots \land A_n \vdash C$), the provenance of $C$ is bounded by the **weakest antecedent in the epistemic chain**:
 
-\$\$\text{Prov}(C) = \begin{cases} \mathbf{DERIVED}, & \text{if } \forall i, ; \text{Prov}(A_i) \in {\mathbf{F}, \mathbf{M}, \mathbf{D}} \\ \mathbf{ASSUMED}, & \text{if } \exists k \text{ such that } \text{Prov}(A_k) = \mathbf{A} \land \forall i, ; \text{Prov}(A_i) \sqsupseteq \mathbf{A} \\ \mathbf{UNKNOWN}, & \text{if } \exists k \text{ such that } \text{Prov}(A_k) = \mathbf{U} \end{cases}\$\$
+$$\text{Prov}(C) = \begin{cases} \mathbf{DERIVED}, & \text{if } \forall i,\; \text{Prov}(A_i) \in \{\mathbf{F}, \mathbf{M}, \mathbf{D}\} \\ \mathbf{ASSUMED}, & \text{if } \exists k \text{ such that } \text{Prov}(A_k) = \mathbf{A} \land \forall i,\; \text{Prov}(A_i) \sqsupseteq \mathbf{A} \\ \mathbf{UNKNOWN}, & \text{if } \exists k \text{ such that } \text{Prov}(A_k) = \mathbf{U} \end{cases}$$
 
-> **Epistemic Invariant:** A logical deduction that uses even a single unverified assumption (\$\mathbf{A}\$) is itself strictly \$\mathbf{ASSUMED}\$. It cannot be promoted to \$\mathbf{DERIVED}\$ until that assumption is corroborated into a \$\mathbf{FACT}\$ or \$\mathbf{MEASURED}\$ node.
+> **Epistemic Invariant:** A logical deduction that uses even a single unverified assumption ($\mathbf{A}$) is itself strictly $\mathbf{ASSUMED}$. It cannot be promoted to $\mathbf{DERIVED}$ until that assumption is corroborated into a $\mathbf{FACT}$ or $\mathbf{MEASURED}$ node.
 
 ### 18.3.2. Concrete Derivation Rules
 
-\$\$\frac{\text{FACT}(A) \quad \text{FACT}(B) \quad A \land B \implies C}{\text{DERIVED}(C)} \quad \[\text{Rule 1: Pure Fact Deduction}\]\$\$
+$$\frac{\text{FACT}(A) \quad \text{FACT}(B) \quad A \land B \implies C}{\text{DERIVED}(C)} \quad [\text{Rule 1: Pure Fact Deduction}]$$
 
-\$\$\frac{\text{FACT}(A) \quad \text{ASSUMED}(B) \quad A \land B \implies C}{\text{ASSUMED}(C)} \quad \[\text{Rule 2: Assumption Contamination}\]\$\$
+$$\frac{\text{FACT}(A) \quad \text{ASSUMED}(B) \quad A \land B \implies C}{\text{ASSUMED}(C)} \quad [\text{Rule 2: Assumption Contamination}]$$
 
-\$\$\frac{\text{MEASURED}(E, M) \quad \text{Invariant}(I) \quad M \models I}{\text{FACT}(\text{Invariant Holds in } E)} \quad \[\text{Rule 3: Empirical Corroboration}\]\$\$
+$$\frac{\text{MEASURED}(E, M) \quad \text{Invariant}(I) \quad M \models I}{\text{FACT}(\text{Invariant Holds in } E)} \quad [\text{Rule 3: Empirical Corroboration}]$$
 
 ------------------------------------------------------------------------
 
 ## 18.4. Automatic Transitive Invalidation
 
-Let the Epistemic State be modeled as a Directed Acyclic Graph \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$, where \$\mathcal{V}\$ is the set of typed nodes and \$\mathcal{E}\$ represents directed semantic relationships:
+Let the Epistemic State be modeled as a Directed Acyclic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, where $\mathcal{V}$ is the set of typed nodes and $\mathcal{E}$ represents directed semantic relationships:
 
-- \$(u, v) \in \mathcal{E}\_{\text{depends_on}} \iff u \text{ logically depends on the validity of } v\$;
-- \$(u, v) \in \mathcal{E}\_{\text{falsifies}} \iff u \text{ empirically disproves } v\$.
+- $(u, v) \in \mathcal{E}_{\text{depends_on}} \iff u \text{ logically depends on the validity of } v$;
+- $(u, v) \in \mathcal{E}_{\text{falsifies}} \iff u \text{ empirically disproves } v$.
 
 ``` mermaid
 flowchart TD
@@ -14244,12 +14244,12 @@ flowchart TD
 
 ### 18.4.1. Formal Invalidation Propagation Algorithm
 
-When an empirical evidence node \$e \in \mathcal{V}\$ is recorded such that \$(e, v) \in \mathcal{E}\_{\text{falsifies}}\$ with \$\text{Prov}(e) \in {\mathbf{M}, \mathbf{F}}\$:
+When an empirical evidence node $e \in \mathcal{V}$ is recorded such that $(e, v) \in \mathcal{E}_{\text{falsifies}}$ with $\text{Prov}(e) \in \{\mathbf{M}, \mathbf{F}\}$:
 
-1.  **Direct Falsification:** Set \$\text{State}(v) \leftarrow \text{FALSIFIED}\$.
-2.  **Transitive Invalidation Set Construction:** Compute the topological reachability set of all downstream dependent nodes: \$\$\text{Reach}(v) = { u \in \mathcal{V} \mid u \rightsquigarrow\_{\mathcal{E}\_{\text{depends_on}}} v }\$\$
-3.  **Cascade State Update:** \$\forall u \in \text{Reach}(v)\$: \$\$\text{State}(u) \leftarrow \text{INVALIDATED}\$\$ \$\$\text{InvalidationPath}(u) \leftarrow \text{InvalidationPath}(u) \cup { v \leftarrow e }\$\$
-4.  **Active Branch Termination:** If an active implementation agent is working in a git worktree tied to any \$u \in \text{Reach}(v)\$, the orchestrator immediately halts the subagent process and signals: \$\$\text{SIG_ABORT}(\text{Worktree}\_u, \text{Reason} = \text{"Upstream premise } v \text{ falsified by } e\text{"})\$\$
+1.  **Direct Falsification:** Set $\text{State}(v) \leftarrow \text{FALSIFIED}$.
+2.  **Transitive Invalidation Set Construction:** Compute the topological reachability set of all downstream dependent nodes: $$\text{Reach}(v) = \{ u \in \mathcal{V} \mid u \rightsquigarrow_{\mathcal{E}_{\text{depends_on}}} v \}$$
+3.  **Cascade State Update:** $\forall u \in \text{Reach}(v)$: $$\text{State}(u) \leftarrow \text{INVALIDATED}$$ $$\text{InvalidationPath}(u) \leftarrow \text{InvalidationPath}(u) \cup \{ v \leftarrow e \}$$
+4.  **Active Branch Termination:** If an active implementation agent is working in a git worktree tied to any $u \in \text{Reach}(v)$, the orchestrator immediately halts the subagent process and signals: $$\text{SIG_ABORT}(\text{Worktree}_u, \text{Reason} = \text{"Upstream premise } v \text{ falsified by } e\text{"})$$
 
 ------------------------------------------------------------------------
 
@@ -14308,7 +14308,7 @@ flowchart BT
 ### Rung 1: Static Plausibility & Architectural Coherence
 
 - **Mechanism:** Formal inspection of architectural models, sequence diagrams, and interface declarations against foundational invariants (e.g., CAP theorem, causality constraints).
-- **Epistemic Output:** Rejection of impossible designs (e.g., synchronous cross-region ACID transactions with \$\<5\text{ ms}\$ latency).
+- **Epistemic Output:** Rejection of impossible designs (e.g., synchronous cross-region ACID transactions with $<5\text{ ms}$ latency).
 
 ### Rung 2: Compilation & Static Type Checking
 
@@ -14317,18 +14317,18 @@ flowchart BT
 
 ### Rung 3: Example-Based Unit Testing
 
-- **Mechanism:** Deterministic execution of discrete functions with fixed input-output assertions (\$f(x_0) = y_0\$).
+- **Mechanism:** Deterministic execution of discrete functions with fixed input-output assertions ($f(x_0) = y_0$).
 - **Epistemic Output:** Regression protection for known edge cases, off-by-one errors, and explicit business logic branches.
 
 ### Rung 4: Property-Based & Generative Testing (PBT)
 
-- **Mechanism:** Algorithmic generation of \$10^4 - 10^6\$ pseudorandom inputs verifying parameterized algebraic properties: \$\$\forall x \in \text{Domain}, \quad \text{Invariant}(f(x)) \equiv \text{TRUE}\$\$
+- **Mechanism:** Algorithmic generation of $10^4 - 10^6$ pseudorandom inputs verifying parameterized algebraic properties: $$\forall x \in \text{Domain}, \quad \text{Invariant}(f(x)) \equiv \text{TRUE}$$
 - **Stateful PBT:** Generates randomized sequences of state-machine actions (e.g., concurrent push/pop/delete) and compares against an abstract sequential model, automatically shrinking failing traces to minimal reproducing examples.
 
 ### Rung 5: Mutation Testing
 
 - **Mechanism:** Automated mutation engine (e.g., Mutmut, Stryker, Pitest) injects deliberate syntactic mutations (inverting conditionals, altering arithmetic operators, deleting statements) into production code and runs the test suite.
-- **Epistemic Output:** Calculates the **Mutation Score Indicator (MSI)**: \$\$\text{MSI} = \frac{\text{Mutants Killed}}{\text{Total Mutants Generated}} \times 100%\$\$ A test suite with \$100%\$ code coverage but \$\text{MSI} \< 70%\$ is exposed as tautological.
+- **Epistemic Output:** Calculates the **Mutation Score Indicator (MSI)**: $$\text{MSI} = \frac{\text{Mutants Killed}}{\text{Total Mutants Generated}} \times 100\%$$ A test suite with $100\%$ code coverage but $\text{MSI} < 70\%$ is exposed as tautological.
 
 ### Rung 6: Integration & Consumer-Driven Contract Testing
 
@@ -14338,11 +14338,11 @@ flowchart BT
 ### Rung 7: Load, Stress & Latency Benchmark Testing
 
 - **Mechanism:** Synthetic load drivers (k6, vegeta, JMeter) saturate the system under stepped, sustained, and spike traffic patterns while recording high-resolution HDR histograms.
-- **Epistemic Output:** Verifies throughput scaling limits, memory leak absence under load, and enforces strict latency percentiles: \$\$\mathcal{P}(\text{Latency} \le T\_{\text{SLA}}) \ge 0.999\$\$
+- **Epistemic Output:** Verifies throughput scaling limits, memory leak absence under load, and enforces strict latency percentiles: $$\mathcal{P}(\text{Latency} \le T_{\text{SLA}}) \ge 0.999$$
 
 ### Rung 8: Fault Injection & Chaos Testing
 
-- **Mechanism:** Deliberate, automated fault injection during active load: dropping TCP packets, introducing \$500\text{ ms}\$ artificial network delay, partitioning database replicas, issuing `SIGKILL` to cluster leaders, and injecting disk I/O errors (Jepsen, Chaos Mesh).
+- **Mechanism:** Deliberate, automated fault injection during active load: dropping TCP packets, introducing $500\text{ ms}$ artificial network delay, partitioning database replicas, issuing `SIGKILL` to cluster leaders, and injecting disk I/O errors (Jepsen, Chaos Mesh).
 - **Epistemic Output:** Empirical proof that the system satisfies safety invariants (no data corruption, no split-brain writes, linearizable state transitions) under catastrophic operational turbulence.
 
 ### Rung 9: Canary & Dark Launching (Shadow Traffic)
@@ -14352,30 +14352,30 @@ flowchart BT
 
 ### Rung 10: Production Observability & Telemetry Grounding
 
-- **Mechanism:** Continuous monitoring of Service Level Indicators (SLIs), distributed open-telemetry traces, and error budget burn rates post-deployment over extended time windows (\$\ge 14\text{ days}\$).
+- **Mechanism:** Continuous monitoring of Service Level Indicators (SLIs), distributed open-telemetry traces, and error budget burn rates post-deployment over extended time windows ($\ge 14\text{ days}$).
 - **Epistemic Output:** Conclusive proof that the system sustained its required ideality, performance, and stability in the live production supersystem.
 
 ------------------------------------------------------------------------
 
 ## 19.3. Rung Selection Matrix & Confidence Metric
 
-| Depth Mode | Mandatory Rungs | Optional / High-Risk Rungs | Minimum Mutation Score (\$\text{MSI}\$) |
+| Depth Mode | Mandatory Rungs | Optional / High-Risk Rungs | Minimum Mutation Score ($\text{MSI}$) |
 |----|----|----|----|
-| **Fast Mode** | Rungs 1, 2, 3 | Rung 4 (Property-based for complex algorithms) | \$\ge 60%\$ (on modified lines) |
-| **Standard Mode** | Rungs 1, 2, 3, 4, 6, 7 | Rungs 5, 8, 9 | \$\ge 80%\$ |
-| **Deep Mode** | Rungs 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 | Formal TLA+ Proof (where applicable) | \$\ge 90%\$ |
+| **Fast Mode** | Rungs 1, 2, 3 | Rung 4 (Property-based for complex algorithms) | $\ge 60\%$ (on modified lines) |
+| **Standard Mode** | Rungs 1, 2, 3, 4, 6, 7 | Rungs 5, 8, 9 | $\ge 80\%$ |
+| **Deep Mode** | Rungs 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 | Formal TLA+ Proof (where applicable) | $\ge 90\%$ |
 
 ### Formal Epistemic Confidence Metric
 
-The cumulative confidence score \$\mathcal{C}(\text{CAN}\_k) \in \[0.0, 1.0\]\$ of an engineering candidate is calculated as a weighted sum over verified rungs:
+The cumulative confidence score $\mathcal{C}(\text{CAN}_k) \in [0.0, 1.0]$ of an engineering candidate is calculated as a weighted sum over verified rungs:
 
-\$\$\mathcal{C}(\text{CAN}*k) = \sum*{r=1}^{10} w_r \cdot \mathbb{I}(r) \cdot \mu(r)\$\$
+$$\mathcal{C}(\text{CAN}_k) = \sum_{r=1}^{10} w_r \cdot \mathbb{I}(r) \cdot \mu(r)$$
 
 Where:
 
-- \$w_r\$ is the normalized weight of Rung \$r\$ (\$\sum w_r = 1.0\$, with higher rungs weighted exponentially: \$w\_{1..3} = 0.05\$, \$w\_{4..6} = 0.10\$, \$w\_{7..8} = 0.15\$, \$w\_{9..10} = 0.20\$);
-- \$\mathbb{I}(r) \in {0, 1}\$ indicates whether Rung \$r\$ was executed and passed;
-- \$\mu(r) \in \[0.0, 1.0\]\$ is the execution quality factor (e.g., for Rung 5, \$\mu(5) = \text{MSI}\$; for Rung 8, \$\mu(8) = \text{Chaos Scenarios Passed} / \text{Total Injected}\$).
+- $w_r$ is the normalized weight of Rung $r$ ($\sum w_r = 1.0$, with higher rungs weighted exponentially: $w_{1..3} = 0.05$, $w_{4..6} = 0.10$, $w_{7..8} = 0.15$, $w_{9..10} = 0.20$);
+- $\mathbb{I}(r) \in \{0, 1\}$ indicates whether Rung $r$ was executed and passed;
+- $\mu(r) \in [0.0, 1.0]$ is the execution quality factor (e.g., for Rung 5, $\mu(5) = \text{MSI}$; for Rung 8, $\mu(8) = \text{Chaos Scenarios Passed} / \text{Total Injected}$).
 
 ------------------------------------------------------------------------
 
@@ -14387,7 +14387,7 @@ In undisciplined engineering workflows, a task is frequently declared "done" whe
 
 Every task must pass the **Epistemic Gatekeeper Function**:
 
-\$\$\Phi(\text{Task}) = \bigwedge\_{i=1}^{11} \mathcal{I}\_i(\text{Task}) \equiv \mathbf{TRUE}\$\$
+$$\Phi(\text{Task}) = \bigwedge_{i=1}^{11} \mathcal{I}_i(\text{Task}) \equiv \mathbf{TRUE}$$
 
     ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
     │ THE 11 FORMAL TASK COMPLETION INVARIANTS                                                         │
@@ -14411,47 +14411,47 @@ Every task must pass the **Epistemic Gatekeeper Function**:
 
 ## 20.2. Exhaustive Specification of the 11 Invariants
 
-### Invariant 1: Behavioral Decoupling (\$\mathcal{I}\_1\$)
+### Invariant 1: Behavioral Decoupling ($\mathcal{I}_1$)
 
 - **Formal Statement:** The problem statement and acceptance criteria must be formulated purely in terms of observable system behavior, inputs, outputs, states, and non-negotiable invariants, without containing any reference to concrete libraries, databases, frameworks, or vendor carriers.
-- **Violation Condition:** Task description contains statements like *"Add Redis cache"* or *"Migrate table to MongoDB"* instead of *"Ensure p99 read latency \$\<5\text{ ms}\$ under 50,000 RPS"*.
+- **Violation Condition:** Task description contains statements like *"Add Redis cache"* or *"Migrate table to MongoDB"* instead of *"Ensure p99 read latency $<5\text{ ms}$ under 50,000 RPS"*.
 
-### Invariant 2: Empirical Grounding (\$\mathcal{I}\_2\$)
+### Invariant 2: Empirical Grounding ($\mathcal{I}_2$)
 
-- **Formal Statement:** The diagnostic explanation or constraint identification must be justified by at least one evidence node (`EVD-`) with provenance `MEASURED` (\$\mathbf{M}\$) or `FACT` (\$\mathbf{F}\$).
+- **Formal Statement:** The diagnostic explanation or constraint identification must be justified by at least one evidence node (`EVD-`) with provenance `MEASURED` ($\mathbf{M}$) or `FACT` ($\mathbf{F}$).
 - **Violation Condition:** Engineering interventions applied to unproven theoretical guesses or anecdotal developer intuition without profiling data or reproduction receipts.
 
-### Invariant 3: Morphological Exploration (\$\mathcal{I}\_3\$)
+### Invariant 3: Morphological Exploration ($\mathcal{I}_3$)
 
 - **Formal Statement:** For Standard and Deep mode tasks, at least three structurally distinct candidate mechanism classes (`CAN-`) must be formally generated, characterized, and compared in a morphological matrix.
 - **Violation Condition:** Comparing three minor variations of a single technology (e.g., RabbitMQ vs. Kafka vs. Pulsar) while ignoring alternative paradigms (e.g., in-database polling, synchronous batching, client-side pagination).
 
-### Invariant 4: Decision-Significant Unknown Resolution (\$\mathcal{I}\_4\$)
+### Invariant 4: Decision-Significant Unknown Resolution ($\mathcal{I}_4$)
 
 - **Formal Statement:** No decision-significant unknown node (`UNK-`) with an estimated failure impact cost exceeding the verification cost may remain unresolved prior to decision locking. All residual unknowns must be explicitly logged as accepted risks in the ADR.
 - **Violation Condition:** Locking a distributed architectural choice while an `UNK-` node regarding cross-AZ latency or cloud provider throttling limits remains unmeasured.
 
-### Invariant 5: Structural Boundary Integrity (\$\mathcal{I}\_5\$)
+### Invariant 5: Structural Boundary Integrity ($\mathcal{I}_5$)
 
 - **Formal Statement:** The applied change must not introduce circular package dependencies, violate information hiding ([Parnas, 1972](https://doi.org/10.1145/361598.361623)), leak private domain state across service boundaries, or expand the change radius beyond the budget documented in the Task Passport.
 - **Violation Condition:** Modifying an internal database schema requires coordinating simultaneous code releases across three independent microservices.
 
-### Invariant 6: Dynamic Stability Under Load (\$\mathcal{I}\_6\$)
+### Invariant 6: Dynamic Stability Under Load ($\mathcal{I}_6$)
 
-- **Formal Statement:** The system dynamics model must prove that queue accumulations, memory buffers, client retry loops, and thread pools remain mathematically bounded under peak load (\$10\times\$ baseline) and during downstream dependency outages.
-- **Violation Condition:** Unbounded in-memory retry queues that trigger Out-Of-Memory (\$OOM\$) crashes during downstream partner outages.
+- **Formal Statement:** The system dynamics model must prove that queue accumulations, memory buffers, client retry loops, and thread pools remain mathematically bounded under peak load ($10\times$ baseline) and during downstream dependency outages.
+- **Violation Condition:** Unbounded in-memory retry queues that trigger Out-Of-Memory ($OOM$) crashes during downstream partner outages.
 
-### Invariant 7: Multi-Attribute Selection Justification (\$\mathcal{I}\_7\$)
+### Invariant 7: Multi-Attribute Selection Justification ($\mathcal{I}_7$)
 
-- **Formal Statement:** The selection of the winning candidate must be documented in a multi-attribute utility matrix evaluating initial implementation cost, operational maintenance overhead, failure blast radius, transition complexity, and the TRIZ Ideality Ratio (\$\sum \text{Useful} / (\sum \text{Cost} + \sum \text{Harm})\$).
+- **Formal Statement:** The selection of the winning candidate must be documented in a multi-attribute utility matrix evaluating initial implementation cost, operational maintenance overhead, failure blast radius, transition complexity, and the TRIZ Ideality Ratio ($\sum \text{Useful} / (\sum \text{Cost} + \sum \text{Harm})$).
 - **Violation Condition:** Choosing a technology solely because it is novel or popular, without documenting evaluated trade-offs.
 
-### Invariant 8: Rung-Appropriate Executable Verification (\$\mathcal{I}\_8\$)
+### Invariant 8: Rung-Appropriate Executable Verification ($\mathcal{I}_8$)
 
 - **Formal Statement:** The implementation must successfully execute all mandatory rungs of the Evidentiary Ladder designated for the task's depth mode, producing reproducible machine-readable execution digests (test outputs, mutation kill scores, benchmark histograms).
 - **Violation Condition:** Merging a Deep Mode distributed transaction mechanism with only example-based unit tests and zero chaos or property-based test receipts.
 
-### Invariant 9: Expand-Contract Transition Safety (\$\mathcal{I}\_9\$)
+### Invariant 9: Expand-Contract Transition Safety ($\mathcal{I}_9$)
 
 - **Formal Statement:** In accordance with the Expand-Contract pattern ([Sato, Sadalage & Fowler, 2021, *Patterns of Distributed Systems: Expand-Contract*](https://martinfowler.com/bliki/ParallelChange.html)), all breaking schema modifications, protocol upgrades, and service migrations must execute via temporary dual-state transition systems that guarantee zero downtime and immediate rollback capability.
 - **Violation Condition:** Executing an in-place destructive database column rename (`ALTER TABLE RENAME`) that causes downtime for old application instances during rolling deployment.
@@ -14478,12 +14478,12 @@ sequenceDiagram
     Note over OldDB: Drop Legacy Column `name`
 ```
 
-### Invariant 10: Architectural Decision Record (ADR) Immutability (\$\mathcal{I}\_{10}\$)
+### Invariant 10: Architectural Decision Record (ADR) Immutability ($\mathcal{I}_{10}$)
 
 - **Formal Statement:** The context, evaluated options, chosen candidate, empirical proof receipts, non-negotiable invariants, and anticipated consequences must be committed to the repository in a versioned, immutable ADR (`doc/adr/NNNN-*.md`).
 - **Violation Condition:** Merging major architectural changes with rationale scattered across ephemeral Slack messages or Jira comments.
 
-### Invariant 11: Decommissioning & Transition Shim Expiry (\$\mathcal{I}\_{11}\$)
+### Invariant 11: Decommissioning & Transition Shim Expiry ($\mathcal{I}_{11}$)
 
 - **Formal Statement:** Every temporary backward-compatibility layer, feature flag, dual-write bridge, and CDC synchronization worker must be provisioned with an explicit **Decommissioning Milestone** and automated deletion task.
 - **Violation Condition:** Leaving dual-write shims, deprecated adapter classes, or dead feature flag conditionals in the production codebase indefinitely after successful migration.
@@ -14583,7 +14583,7 @@ Neither tracks **epistemic state**: *What do we know to be true? What are we ass
     │   src/ledger/  ──  src/auth/  ──  migrations/  ──  tests/  ──  deploy/      │
     └─────────────────────────────────────────────────────────────────────────────┘
 
-The working artifacts in Sections 21 through 35 represent typed nodes within an **Epistemic Graph** \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$. Each artifact captures a discrete transformation of the problem state across the 9 Operations of Systematic Inventive Thinking.
+The working artifacts in Sections 21 through 35 represent typed nodes within an **Epistemic Graph** $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each artifact captures a discrete transformation of the problem state across the 9 Operations of Systematic Inventive Thinking.
 
 ------------------------------------------------------------------------
 
@@ -14721,7 +14721,7 @@ The **Engineering Task Passport** establishes the authoritative boundary and man
 
 ### Formal Epistemic Purpose & Role
 
-The **Problem Framing Map** strips premature implementation mechanisms from the engineering request and reconstructs the problem as an implementation-agnostic behavioral delta. It formalizes required behavior using the invariant tuple \$(C, E, O, M, I)\$ (under Conditions \$C\$, when Event \$E\$ occurs, the system must produce Outcome \$O\$, measured by Metric \$M\$, without violating Invariant \$I\$). It systematically shifts system boundaries across 5 architectural levels and evaluates multiple stakeholder perspectives.
+The **Problem Framing Map** strips premature implementation mechanisms from the engineering request and reconstructs the problem as an implementation-agnostic behavioral delta. It formalizes required behavior using the invariant tuple $(C, E, O, M, I)$ (under Conditions $C$, when Event $E$ occurs, the system must produce Outcome $O$, measured by Metric $M$, without violating Invariant $I$). It systematically shifts system boundaries across 5 architectural levels and evaluates multiple stakeholder perspectives.
 
 ### Input Preconditions
 
@@ -15371,7 +15371,7 @@ go test -v -tags=chaos -run TestMultiRegionEscrowPartition -timeout 30m ./tests/
       - Invariant: $\forall \text{accounts } a, \sum \text{debits}(a) \le \text{initial\_balance}(a)$.
       - 100% of duplicate HTTP requests with identical `idempotency_key` return identical `auth_token`.
     - **Falsification Criteria**:
-      - $\sum \text{debits}(a) > \text{initial\_balance}(a)$ even by $0.01.
+      - $\sum \text{debits}(a) > \text{initial\_balance}(a)$ even by 0.01.
 
     ## 4. Empirical Results
     - **Result**: 5,000,000 operations executed during 5 simulated partition cycles.
@@ -15737,7 +15737,7 @@ Every engineering statement, observation, hypothesis, and decision must be uniqu
 
 ### 2. Epistemic Graph Relationships & Provenance
 
-The Epistemic Graph \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$ is composed of typed nodes \$\mathcal{V}\$ with explicit **Provenance Types**, connected by directed, typed edges \$\mathcal{E}\$:
+The Epistemic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ is composed of typed nodes $\mathcal{V}$ with explicit **Provenance Types**, connected by directed, typed edges $\mathcal{E}$:
 
 #### Node Provenance Types
 
@@ -15751,11 +15751,11 @@ The Epistemic Graph \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$ is composed of 
 
 #### Directed Edge Types
 
-- `supports` (\$A \xrightarrow{\text{supports}} B\$): Node \$A\$ provides justifying evidence, data, or logical derivation for Node \$B\$.
-- `contradicts` (\$A \xleftrightarrow{\text{contradicts}} B\$): Node \$A\$ and Node \$B\$ cannot be simultaneously valid in the same operational context.
-- `depends_on` (\$A \xrightarrow{\text{depends_on}} B\$): Node \$A\$ requires Node \$B\$ to remain valid; if \$B\$ is falsified, \$A\$ loses its epistemic justification.
-- `falsifies` (\$A \xrightarrow{\text{falsifies}} B\$): Node \$A\$ (typically an `EVD-` or `VAL-` result) empirically disproves Node \$B\$ (`HYP-` or `ASM-`).
-- `invalidates` (\$A \xrightarrow{\text{invalidates}} B\$): Node \$A\$ triggers the mandatory cancellation, deprecation, or re-opening of Node \$B\$ (`CAN-` or `DEC-`).
+- `supports` ($A \xrightarrow{\text{supports}} B$): Node $A$ provides justifying evidence, data, or logical derivation for Node $B$.
+- `contradicts` ($A \xleftrightarrow{\text{contradicts}} B$): Node $A$ and Node $B$ cannot be simultaneously valid in the same operational context.
+- `depends_on` ($A \xrightarrow{\text{depends_on}} B$): Node $A$ requires Node $B$ to remain valid; if $B$ is falsified, $A$ loses its epistemic justification.
+- `falsifies` ($A \xrightarrow{\text{falsifies}} B$): Node $A$ (typically an `EVD-` or `VAL-` result) empirically disproves Node $B$ (`HYP-` or `ASM-`).
+- `invalidates` ($A \xrightarrow{\text{invalidates}} B$): Node $A$ triggers the mandatory cancellation, deprecation, or re-opening of Node $B$ (`CAN-` or `DEC-`).
 
 ------------------------------------------------------------------------
 
@@ -15765,18 +15765,18 @@ The central power of the Epistemic Graph is its ability to execute **Transitive 
 
 #### Formal Invalidation Propagation Algorithm
 
-Let the Epistemic Graph be \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$. When an empirical verification \$EVD_k\$ produces a falsification verdict:
+Let the Epistemic Graph be $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. When an empirical verification $EVD_k$ produces a falsification verdict:
 
-1.  **Target Falsification**: Mark target node \$N\_{target}\$ (where \$EVD_k \xrightarrow{\text{falsifies}} N\_{target}\$) as `STATUS: FALSIFIED`.
-2.  **Downstream Dependency Traversal**: Initialize invalidation queue \$Q = {N\_{target}}\$.
-3.  **Breadth-First Propagation**: While \$Q \neq \emptyset\$:
-    - Pop node \$U\$ from \$Q\$.
-    - Find all dependent nodes \$V \in \mathcal{V}\$ such that \$(V \xrightarrow{\text{depends_on}} U) \in \mathcal{E}\$ or \$(U \xrightarrow{\text{invalidates}} V) \in \mathcal{E}\$.
-    - For each \$V\$:
-      - If \$V\$ is a Candidate Mechanism (`CAN-`), mark \$V\$ as `STATUS: INVALIDATED`.
-      - If \$V\$ is a Decision Record (`DEC-`), mark \$V\$ as `STATUS: RE-OPENED / INVALIDATED` and alert task owners.
-      - If \$V\$ is a Transition Plan (`TRANS-`), mark \$V\$ as `STATUS: BLOCKED`.
-      - Push \$V\$ onto \$Q\$.
+1.  **Target Falsification**: Mark target node $N_{target}$ (where $EVD_k \xrightarrow{\text{falsifies}} N_{target}$) as `STATUS: FALSIFIED`.
+2.  **Downstream Dependency Traversal**: Initialize invalidation queue $Q = \{N_{target}\}$.
+3.  **Breadth-First Propagation**: While $Q \neq \emptyset$:
+    - Pop node $U$ from $Q$.
+    - Find all dependent nodes $V \in \mathcal{V}$ such that $(V \xrightarrow{\text{depends_on}} U) \in \mathcal{E}$ or $(U \xrightarrow{\text{invalidates}} V) \in \mathcal{E}$.
+    - For each $V$:
+      - If $V$ is a Candidate Mechanism (`CAN-`), mark $V$ as `STATUS: INVALIDATED`.
+      - If $V$ is a Decision Record (`DEC-`), mark $V$ as `STATUS: RE-OPENED / INVALIDATED` and alert task owners.
+      - If $V$ is a Transition Plan (`TRANS-`), mark $V$ as `STATUS: BLOCKED`.
+      - Push $V$ onto $Q$.
 4.  **Upstream Reaction**: Trigger Operation 4 (Explore Solution Space) or Operation 8 (Value & Select) to re-evaluate alternative paths.
 
 <!-- -->
@@ -15821,13 +15821,13 @@ Let the Epistemic Graph be \$\mathcal{G} = (\mathcal{V}, \mathcal{E})\$. When an
 2.  **Empirical Falsification**:
 
     - Verification Card `VAL-04` executes continuous UDP/TCP network benchmarks over the provisioned DirectConnect link.
-    - Benchmark Evidence `EVD-04` reveals an unavoidable speed-of-light physical latency floor of \$76.4\text{ms}\$ P50 and \$84.2\text{ms}\$ P99 due to transatlantic fiber routing.
-    - `EVD-04` triggers: `EVD-04` \$\xrightarrow{\text{falsifies}}\$ `ASM-03`.
+    - Benchmark Evidence `EVD-04` reveals an unavoidable speed-of-light physical latency floor of $76.4\text{ms}$ P50 and $84.2\text{ms}$ P99 due to transatlantic fiber routing.
+    - `EVD-04` triggers: `EVD-04` $\xrightarrow{\text{falsifies}}$ `ASM-03`.
 
 3.  **Transitive Propagation Execution**:
 
     - `ASM-03` status changes from `ASSUMED` to `FALSIFIED`.
-    - The graph engine scans for all nodes with `depends_on` \$\to\$ `ASM-03`.
+    - The graph engine scans for all nodes with `depends_on` $\to$ `ASM-03`.
     - `CAN-01` depends on `ASM-03` to meet the non-negotiable invariant `INV-02` (P99 \<= 120ms). `CAN-01` is automatically marked `INVALIDATED`.
     - `DEC-01` depends on `CAN-01`. `DEC-01` is automatically transitioned from `LOCKED` to `RE-OPENED (INVALIDATED BY EVD-04)`.
     - `TRANS-01` deployment pipeline is automatically blocked in CI/CD.
@@ -15863,14 +15863,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 1.1: Separate Required Function from Current Code, Service, Library, or Infrastructure
 
-- **Core Mechanism / Transformation**: Strips implementation-specific nouns, vendor products, and architectural artifacts from the problem statement, replacing them with a functional predicate: \$\text{Verb} + \text{Direct Object} + \text{Bounded Constraint}\$. Resolves the psychological inertia that equates the problem with a specific technology stack.
+- **Core Mechanism / Transformation**: Strips implementation-specific nouns, vendor products, and architectural artifacts from the problem statement, replacing them with a functional predicate: $\text{Verb} + \text{Direct Object} + \text{Bounded Constraint}$. Resolves the psychological inertia that equates the problem with a specific technology stack.
 - **Input Preconditions**: The engineering task description contains concrete technologies (e.g., "Add Redis cache," "Migrate to Kafka," "Rewrite in Rust," "Deploy Kubernetes operator").
 - **Concrete Software Implementation Patterns**:
   - *Contract-First Interface Extraction*: Define an abstract trait or interface describing purely behavioral inputs and outputs before selecting an implementation provider.
-  - *Technology-Agnostic Specification*: Express requirements in terms of state transitions, delivery guarantees (\$at\text{-}least\text{-}once\$, \$exactly\text{-}once\text{ idempotence}\$), and latency distributions (\$p99 \< 15\text{ ms}\$) rather than specific engine features.
+  - *Technology-Agnostic Specification*: Express requirements in terms of state transitions, delivery guarantees ($at\text{-}least\text{-}once$, $exactly\text{-}once\text{ idempotence}$), and latency distributions ($p99 < 15\text{ ms}$) rather than specific engine features.
 - **Example in Distributed Systems / Backend**:
   - *Initial Framing*: "We need to install Apache Kafka to handle spikes in checkout events."
-  - *Functional Transformation*: "We must decouple transaction ingestion (\$10^4\text{ req/sec}\$) from asynchronous invoice generation (\$500\text{ doc/sec}\$) without losing events during downstream worker restarts or scaling events."
+  - *Functional Transformation*: "We must decouple transaction ingestion ($10^4\text{ req/sec}$) from asynchronous invoice generation ($500\text{ doc/sec}$) without losing events during downstream worker restarts or scaling events."
   - *Uncovered Solution Space*: Redis Streams, SQLite-backed transactional outbox, PostgreSQL `LISTEN`/`NOTIFY` with queue table, AWS SQS FIFO, or in-memory ring buffers with WAL.
 - **Anti-Patterns to Avoid**:
   - *Solution Smuggling*: Phrasing the requirement as "The system must use an event broker" instead of "The system must buffer state transitions."
@@ -15880,14 +15880,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 1.2: Describe Required and Actual Behavior Using Observable Conditions and Invariants
 
-- **Core Mechanism / Transformation**: Formulates the delta between actual and required behavior as a mathematically verifiable behavioral invariant under specific environmental preconditions: \$\$\forall s \in \mathcal{S}*{\text{valid}}, \quad \mathcal{P}*{\text{pre}}(s, e) \implies \mathcal{I}*{\text{system}}(\text{step}(s, e)) \land \mathcal{Q}*{\text{SLA}}(\Delta t)\$\$
+- **Core Mechanism / Transformation**: Formulates the delta between actual and required behavior as a mathematically verifiable behavioral invariant under specific environmental preconditions: $$\forall s \in \mathcal{S}_{\text{valid}}, \quad \mathcal{P}_{\text{pre}}(s, e) \implies \mathcal{I}_{\text{system}}(\text{step}(s, e)) \land \mathcal{Q}_{\text{SLA}}(\Delta t)$$
 - **Input Preconditions**: Ambiguous, subjective, or narrative requirements (e.g., "The payment service must be resilient and fast").
 - **Concrete Software Implementation Patterns**:
-  - *Hoare Triple Framing*: Explicitly declare \${P}; C ;{Q}\$ where \$P\$ is the precondition, \$C\$ is the computation, and \$Q\$ is the postcondition.
+  - *Hoare Triple Framing*: Explicitly declare ${P}; C ;{Q}$ where $P$ is the precondition, $C$ is the computation, and $Q$ is the postcondition.
   - *Executable Invariant Assertions*: Encode invariants into automated assertions, property-based generators, or TLA+ state specifications.
 - **Example in Distributed Systems / Backend**:
-  - *Required Invariant*: "Under concurrent double-submit events (\$e_1, e_2\$) sharing `idempotency_key = K` within \$\Delta t = 5000\text{ ms}\$, exactly one transaction must debit the account balance, and both requests must return identical transaction receipts."
-  - *Actual Behavior*: "Under concurrent network retries, race conditions in the read-then-write balance check result in duplicate debits (\$1.4%\$ of concurrent requests)."
+  - *Required Invariant*: "Under concurrent double-submit events ($e_1, e_2$) sharing `idempotency_key = K` within $\Delta t = 5000\text{ ms}$, exactly one transaction must debit the account balance, and both requests must return identical transaction receipts."
+  - *Actual Behavior*: "Under concurrent network retries, race conditions in the read-then-write balance check result in duplicate debits ($1.4\%$ of concurrent requests)."
 - **Anti-Patterns to Avoid**:
   - *Vague Adjectives*: Using terms like "performant," "scalable," "robust," or "clean" without quantifiable metrics.
   - *Unbounded Scope*: Omitting failure conditions, timeout horizons, or concurrency thresholds.
@@ -15922,9 +15922,9 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Downstream Consumer Contract Audit*: Evaluate consumer expectations regarding schema evolution, idempotency keys, and error status code semantics.
 - **Example in Distributed Systems / Backend**:
   - *Feature Perspective*: "Implement an endpoint to bulk-delete user records on demand."
-  - *Operator Perspective*: "A bulk delete of \$10^6\$ rows in PostgreSQL will lock the table, bloat the WAL, trigger replication lag, and crash read replicas."
+  - *Operator Perspective*: "A bulk delete of $10^6$ rows in PostgreSQL will lock the table, bloat the WAL, trigger replication lag, and crash read replicas."
   - *Adversary Perspective*: "An unauthenticated or compromised client can trigger catastrophic denial of service by issuing recursive bulk deletion requests."
-  - *Synthesized Architectural Constraint*: "Bulk delete must execute via chunked soft-deletion (\$1000\text{ rows/batch}\$) in background workers, bounded by replication lag telemetry."
+  - *Synthesized Architectural Constraint*: "Bulk delete must execute via chunked soft-deletion ($1000\text{ rows/batch}$) in background workers, bounded by replication lag telemetry."
 - **Anti-Patterns to Avoid**:
   - *Happy-Path Solipsism*: Assuming clients always send well-formed requests with low concurrency and reliable network connections.
   - *Ignoring the On-Call Operator*: Failing to account for observability, emergency kill-switches, and zero-downtime rollback capabilities.
@@ -15944,14 +15944,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 2.1: Identify Clashes Between Quality Attributes, Requirements, or Operating Modes
 
-- **Core Mechanism / Transformation**: Formalizes the engineering tension into an explicit **System Contradiction** (\$A \uparrow \implies B \downarrow\$) or **Physical / Operational Contradiction** (Parameter \$X\$ must be high for requirement \$R_1\$, but low for requirement \$R_2\$). Prohibits premature compromise.
+- **Core Mechanism / Transformation**: Formalizes the engineering tension into an explicit **System Contradiction** ($A \uparrow \implies B \downarrow$) or **Physical / Operational Contradiction** (Parameter $X$ must be high for requirement $R_1$, but low for requirement $R_2$). Prohibits premature compromise.
 - **Input Preconditions**: The engineering team is debating trade-offs (e.g., "Do we want high performance or strong consistency? Low memory footprint or low latency?").
 - **Concrete Software Implementation Patterns**:
   - *Contradiction Matrix Mapping*: Map the trade-off to one of the 4 Separation Principles (Time, State/Data Ownership, Operating Condition, System Boundary).
-  - *Separation in Time*: Parameter \$X\$ is high during Phase 1 and low during Phase 2 (e.g., bulk append without indexing during ingestion; asynchronous index generation during maintenance window).
-  - *Separation by Condition*: Parameter \$X\$ is strongly consistent for financial transactions, but eventually consistent for user profile views.
+  - *Separation in Time*: Parameter $X$ is high during Phase 1 and low during Phase 2 (e.g., bulk append without indexing during ingestion; asynchronous index generation during maintenance window).
+  - *Separation by Condition*: Parameter $X$ is strongly consistent for financial transactions, but eventually consistent for user profile views.
 - **Example in Distributed Systems / Backend**:
-  - *Contradiction*: "We need immediate write acknowledgment for ultra-low latency (\$p99 \< 5\text{ ms}\$), but we need synchronous multi-region disk fsync to prevent data loss on node crashes."
+  - *Contradiction*: "We need immediate write acknowledgment for ultra-low latency ($p99 < 5\text{ ms}$), but we need synchronous multi-region disk fsync to prevent data loss on node crashes."
   - *Resolution via Separation in Time & Boundary*: Acknowledge immediately upon logging to a local non-volatile in-memory ring buffer (fast path), while replicating asynchronously via Raft consensus to multi-region disks with pipelined batch commits.
 - **Anti-Patterns to Avoid**:
   - *The Compromise Trap*: Averaging parameters (e.g., choosing mediocre latency and mediocre consistency) instead of separating conditions to achieve both.
@@ -15961,14 +15961,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 2.2: Locate the Limiting Bottleneck in Execution Flow, Delivery, or Decision-Making
 
-- **Core Mechanism / Transformation**: Applies Goldratt's Theory of Constraints (TOC) to identify the single limiting constraint (\$\tau\_{\max}\$) that governs the throughput, latency, or iteration speed of the entire system. Any optimization not focused on the constraint is an illusion.
+- **Core Mechanism / Transformation**: Applies Goldratt's Theory of Constraints (TOC) to identify the single limiting constraint ($\tau_{\max}$) that governs the throughput, latency, or iteration speed of the entire system. Any optimization not focused on the constraint is an illusion.
 - **Input Preconditions**: System is suffering from throughput limitations, high end-to-end latency, or slow deployment cycles, but optimization efforts are scattered across multiple modules.
 - **Concrete Software Implementation Patterns**:
-  - *Amdahl's Law Profiling*: Profile CPU, disk I/O, lock contention, network serialization, and database row locks to compute the theoretical maximum speedup: \$\$S\_{\text{latency}}(s) = \frac{1}{(1 - p) + \frac{p}{s}}\$\$
+  - *Amdahl's Law Profiling*: Profile CPU, disk I/O, lock contention, network serialization, and database row locks to compute the theoretical maximum speedup: $$S_{\text{latency}}(s) = \frac{1}{(1 - p) + \frac{p}{s}}$$
   - *Critical Path Tracing*: Use distributed tracing (OpenTelemetry) to extract the critical path DAG of asynchronous and synchronous execution spans.
 - **Example in Distributed Systems / Backend**:
-  - *Observed Issue*: Microservices pipeline takes \$1200\text{ ms}\$ to process an order. Developers optimize JSON parsing in 4 services (saving \$12\text{ ms}\$).
-  - *TOC Bottleneck Analysis*: Distributed tracing reveals that \$1050\text{ ms}\$ (\$87.5%\$ of total time) is spent waiting on a synchronous row-level lock on the `merchants` table in PostgreSQL.
+  - *Observed Issue*: Microservices pipeline takes $1200\text{ ms}$ to process an order. Developers optimize JSON parsing in 4 services (saving $12\text{ ms}$).
+  - *TOC Bottleneck Analysis*: Distributed tracing reveals that $1050\text{ ms}$ ($87.5\%$ of total time) is spent waiting on a synchronous row-level lock on the `merchants` table in PostgreSQL.
   - *Targeted Intervention*: Eliminate the shared database row lock via optimistic concurrency control and distributed token bucket rate-limiting.
 - **Anti-Patterns to Avoid**:
   - *Local Optimization Fallacy*: Optimizing non-bottleneck code (e.g., micro-benchmarking string concatenation when network I/O dominates).
@@ -15978,14 +15978,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 2.3: Construct a Causal Chain from Symptom to Testable Mechanism
 
-- **Core Mechanism / Transformation**: Builds a directed acyclic graph (DAG) of causal links connecting observable external symptoms to root physical/computational mechanisms, requiring empirical evidence for each edge: \$\$\text{Symptom} \xleftarrow{\text{causes}} \text{Intermediate State} \xleftarrow{\text{causes}} \text{Latent Defect} \xleftarrow{\text{causes}} \text{Root Flaw}\$\$
+- **Core Mechanism / Transformation**: Builds a directed acyclic graph (DAG) of causal links connecting observable external symptoms to root physical/computational mechanisms, requiring empirical evidence for each edge: $$\text{Symptom} \xleftarrow{\text{causes}} \text{Intermediate State} \xleftarrow{\text{causes}} \text{Latent Defect} \xleftarrow{\text{causes}} \text{Root Flaw}$$
 - **Input Preconditions**: An intermittent defect, memory leak, race condition, or distributed anomaly is reported with ambiguous or conflicting diagnostic theories.
 - **Concrete Software Implementation Patterns**:
   - *Falsifiable Causal Tree*: Each node in the causal tree must define a specific diagnostic test whose outcome can definitively falsify that branch.
   - *Differential Fault Isolation*: Compare system states between execution paths where the fault occurs and where it does not (e.g., canary vs. control instances).
 - **Example in Distributed Systems / Backend**:
   - *Symptom*: Spontaneous HTTP 504 Gateway Timeouts on auth service every 4 hours.
-  - *Causal Chain*: Timeouts \$\leftarrow\$ Connection pool starvation \$\leftarrow\$ Leaked DB connections \$\leftarrow\$ Unhandled panic in third-party OAuth callback handler bypassing the `defer dbConn.Close()` statement.
+  - *Causal Chain*: Timeouts $\leftarrow$ Connection pool starvation $\leftarrow$ Leaked DB connections $\leftarrow$ Unhandled panic in third-party OAuth callback handler bypassing the `defer dbConn.Close()` statement.
   - *Differentiating Test*: Inject panicking mock OAuth payloads in staging and assert database connection pool active count monotonically increases.
 - **Anti-Patterns to Avoid**:
   - *Narrative Rationalization*: Accepting a plausible-sounding story without running an empirical falsification test.
@@ -16002,7 +16002,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *First-Principles Deconstruction*: Strip away all historical frameworks and ask: "If we built this today with modern primitives (e.g., NVMe SSDs, eBPF, io_uring, multi-core SIMD), what is the minimum theoretical mechanism required?"
 - **Example in Distributed Systems / Backend**:
   - *Hidden Assumption*: "All user sessions must be stored in a centralized Redis cluster because web servers are stateless."
-  - *Audit*: Inspecting traffic reveals \$98%\$ of requests are routed to the same region. Modern encrypted JWTs with short lifetimes and local in-memory LRU caches eliminate \$99.5%\$ of Redis roundtrips.
+  - *Audit*: Inspecting traffic reveals $98\%$ of requests are routed to the same region. Modern encrypted JWTs with short lifetimes and local in-memory LRU caches eliminate $99.5\%$ of Redis roundtrips.
 - **Anti-Patterns to Avoid**:
   - *Tradition as Requirement*: Confusing "the way we did it five years ago" with an immutable business invariant.
   - *Unchallenged Vendor Dogma*: Believing that specific cloud vendor architectural patterns are mandatory for every scale.
@@ -16030,7 +16030,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Coordination Trimming (CRDTs / Lock-Free)*: Replace two-phase commit (2PC) or distributed locks with Conflict-Free Replicated Data Types (CRDTs) or append-only event logs.
   - *State Trimming*: Eliminate persistent database storage for derived data; recompute on demand or leverage immutable event replays.
 - **Example in Distributed Systems / Backend**:
-  - *Initial Architecture*: Client \$\rightarrow\$ API Gateway \$\rightarrow\$ BFF Service \$\rightarrow\$ Aggregator Service \$\rightarrow\$ Core Database.
+  - *Initial Architecture*: Client $\rightarrow$ API Gateway $\rightarrow$ BFF Service $\rightarrow$ Aggregator Service $\rightarrow$ Core Database.
   - *Trimming Transformation*: Remove BFF and Aggregator services. Expose a GraphQL/gRPC federated gateway that queries the Core Database directly using secure view schemas, eliminating 2 network hops and 15,000 lines of boilerplate mapping code.
 - **Anti-Patterns to Avoid**:
   - *Trimming the Invariant*: Removing safety checks, authentication, or validation invariants in the name of "simplification."
@@ -16047,7 +16047,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Temporal Splitting*: Decouple synchronous user-facing request flows from asynchronous background reconciliation jobs.
   - *Criticality Partitioning (Bulkheading)*: Allocate isolated worker pools and database connection pools for Tier-1 checkout traffic versus Tier-3 analytics exports.
 - **Example in Distributed Systems / Backend**:
-  - *Monolithic Bottleneck*: A shared PostgreSQL table stores both high-velocity IoT telemetry (\$10^6\text{ writes/min}\$) and user billing accounts (\$10^2\text{ writes/day}\$). Vacuuming telemetry blocks billing transactions.
+  - *Monolithic Bottleneck*: A shared PostgreSQL table stores both high-velocity IoT telemetry ($10^6\text{ writes/min}$) and user billing accounts ($10^2\text{ writes/day}$). Vacuuming telemetry blocks billing transactions.
   - *Partitioning Transformation*: Split into two storage engines: TimescaleDB/ClickHouse for append-only time-series telemetry, and PostgreSQL ACID tables for billing accounts.
 - **Anti-Patterns to Avoid**:
   - *Premature Microservices*: Splitting code across network boundaries when an in-process modular split (e.g., separate packages/namespaces) would suffice.
@@ -16065,7 +16065,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Hardware Delegation*: Replace software hashing algorithms with hardware-accelerated AES-NI / CRC32 SIMD instructions.
 - **Example in Distributed Systems / Backend**:
   - *Custom Application Logic*: A 2,000-line distributed lock and worker polling system built in Go to ensure single-worker execution of scheduled tenant invoices.
-  - *Delegation Transformation*: Replace custom coordinator with PostgreSQL advisory locks (`pg_try_advisory_xact_lock()`) or Redis Redlock, reducing application code by \$95%\$ while improving reliability.
+  - *Delegation Transformation*: Replace custom coordinator with PostgreSQL advisory locks (`pg_try_advisory_xact_lock()`) or Redis Redlock, reducing application code by $95\%$ while improving reliability.
 - **Anti-Patterns to Avoid**:
   - *Leaky Abstraction Abuse*: Relying on obscure, undocumented vendor-specific extensions that prevent migration or local unit testing.
   - *Resource Overload*: Overloading an already strained database with compute-heavy logic that belongs in application workers.
@@ -16075,7 +16075,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 ### Technique 3.4: Replace the Computational Mechanism (Storage, Communication, Coordination, Compute, Representation)
 
 - **Core Mechanism / Transformation**: Swaps the underlying algorithmic, data-structural, or physical mechanism while holding functional invariants constant.
-- **Input Preconditions**: The existing mechanism has hit fundamental physical or mathematical scaling limits (e.g., \$O(N^2)\$ algorithmic complexity, B-Tree lock contention, JSON parsing overhead).
+- **Input Preconditions**: The existing mechanism has hit fundamental physical or mathematical scaling limits (e.g., $O(N^2)$ algorithmic complexity, B-Tree lock contention, JSON parsing overhead).
 - **Concrete Software Implementation Patterns**:
   - *Data Representation*: Replace textual JSON over HTTP/1.1 with binary Protobuf/FlatBuffers over gRPC/HTTP/2.
   - *Storage Model*: Replace B-Tree row-oriented storage with Log-Structured Merge (LSM) trees for write-heavy workloads, or columnar Parquet for analytical scans.
@@ -16098,8 +16098,8 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Lazy Evaluation*: Defer expensive computations (e.g., PDF generation, image resizing) until the exact instant the resource is accessed.
   - *Precomputation / Materialization*: Shift compute from request-time to write-time via materialized views or ahead-of-time static compilation.
 - **Example in Distributed Systems / Backend**:
-  - *Problem*: Microservice executes 1 database query per incoming item in an order (\$N+1\$ query problem), generating 500 SQL queries per request.
-  - *Transformation*: Change quantity and ordering: batch all item IDs into a single vectorized query (`WHERE id = ANY($1)`) or join in a single roundtrip, reducing database latency from \$350\text{ ms}\$ to \$4\text{ ms}\$.
+  - *Problem*: Microservice executes 1 database query per incoming item in an order ($N+1$ query problem), generating 500 SQL queries per request.
+  - *Transformation*: Change quantity and ordering: batch all item IDs into a single vectorized query (`WHERE id = ANY($1)`) or join in a single roundtrip, reducing database latency from $350\text{ ms}$ to $4\text{ ms}$.
 - **Anti-Patterns to Avoid**:
   - *Unbounded Batch Buffering*: Batching without timeout bounds, leading to unacceptable latency spikes under low traffic.
   - *Memory Exhaustion via Laziness*: Creating memory leaks through unforced lazy thunks or uncollected promises.
@@ -16119,7 +16119,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 4.1: Generate Multiple Candidate Solutions Differing by Underlying Operating Principle
 
-- **Core Mechanism / Transformation**: Forces the generation of \$\ge 3\$ structurally distinct candidate mechanisms (`CAN-*`), where each candidate is grounded in a fundamentally different architectural paradigm (e.g., centralized vs. peer-to-peer; synchronous vs. event-sourced; push vs. pull).
+- **Core Mechanism / Transformation**: Forces the generation of $\ge 3$ structurally distinct candidate mechanisms (`CAN-*`), where each candidate is grounded in a fundamentally different architectural paradigm (e.g., centralized vs. peer-to-peer; synchronous vs. event-sourced; push vs. pull).
 - **Input Preconditions**: The team has converged on a single solution idea without exploring alternatives, risking confirmation bias.
 - **Concrete Software Implementation Patterns**:
   - *Paradigm Triangulation*: Explicitly formulate:
@@ -16142,8 +16142,8 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Core Mechanism / Transformation**: Decomposes the architectural problem into independent, mutually orthogonal decision axes (e.g., Storage Engine, Concurrency Model, Communication Protocol, Consistency Model, Deployment Topology).
 - **Input Preconditions**: Architectural discussions are tangled because multiple technical choices are being debated simultaneously as an indivisible package.
 - **Concrete Software Implementation Patterns**:
-  - *Morphological Matrix Construction*: Define axes \$D_1, D_2, \dots, D_k\$ where each axis possesses discrete, well-defined technical options.
-  - *Orthogonality Verification*: Ensure that selecting an option on axis \$D_1\$ does not strictly dictate the choice on axis \$D_2\$.
+  - *Morphological Matrix Construction*: Define axes $D_1, D_2, \dots, D_k$ where each axis possesses discrete, well-defined technical options.
+  - *Orthogonality Verification*: Ensure that selecting an option on axis $D_1$ does not strictly dictate the choice on axis $D_2$.
 - **Example in Distributed Systems / Backend**:
   - *Architectural Challenge*: High-performance telemetry ingestion pipeline.
   - *Dimension 1 (Ingestion Transport)*: HTTP/REST, gRPC/Protobuf, raw TCP socket, UDP/Syslog.
@@ -16157,14 +16157,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 4.3: Combine Dimension Values to Discover Unexplored Regions of the Solution Space
 
-- **Core Mechanism / Transformation**: Computes the Cartesian product of morphological dimensions (\$D_1 \times D_2 \times \dots \times D_k\$) to synthesize novel architectural configurations that would not emerge through intuitive brainstorming.
+- **Core Mechanism / Transformation**: Computes the Cartesian product of morphological dimensions ($D_1 \times D_2 \times \dots \times D_k$) to synthesize novel architectural configurations that would not emerge through intuitive brainstorming.
 - **Input Preconditions**: Standard, off-the-shelf architectures fail to satisfy all constraints, requiring an innovative design.
 - **Concrete Software Implementation Patterns**:
   - *Systematic Cross-Product Evaluation*: Traverse combinatorial cells and evaluate the emergent properties of unusual combinations.
   - *Hybrid Architecture Synthesis*: Combine complementary strengths (e.g., local embedded RocksDB for fast write buffering + background compaction into S3 Parquet for cheap historical analytical queries).
 - **Example in Distributed Systems / Backend**:
-  - *Discovered Combination*: \[gRPC Stream\] \$\times\$ \[Embedded RocksDB Local Buffer\] \$\times\$ \[Direct S3 Parquet Upload\].
-  - *Resulting Innovation*: An ingestion agent that eliminates the distributed Kafka cluster entirely, buffering events locally on ephemeral NVMe disks and flushing directly to object storage, cutting infrastructure cost by \$80%\$.
+  - *Discovered Combination*: \[gRPC Stream\] $\times$ \[Embedded RocksDB Local Buffer\] $\times$ \[Direct S3 Parquet Upload\].
+  - *Resulting Innovation*: An ingestion agent that eliminates the distributed Kafka cluster entirely, buffering events locally on ephemeral NVMe disks and flushing directly to object storage, cutting infrastructure cost by $80\%$.
 - **Anti-Patterns to Avoid**:
   - *Combinatorial Explosion*: Generating thousands of permutations without systematic pruning mechanisms.
   - *Novelty for Novelty's Sake*: Selecting an exotic combination when a standard architecture fully satisfies requirements.
@@ -16176,11 +16176,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Core Mechanism / Transformation**: Filters the morphological solution space against hard constraints (regulatory compliance, SLA latency bounds, operational budget, data consistency invariants), eliminating unviable branches before deep investment.
 - **Input Preconditions**: A large morphological space of candidate architectures has been generated and needs rapid down-selection.
 - **Concrete Software Implementation Patterns**:
-  - *Constraint Satisfaction Filtering*: Discard any candidate cell that violates a mathematical invariant (e.g., CAP theorem constraints, latency physical bounds \$2 \times \text{RTT}\_{\text{cross-region}} \> \text{SLA}\$).
+  - *Constraint Satisfaction Filtering*: Discard any candidate cell that violates a mathematical invariant (e.g., CAP theorem constraints, latency physical bounds $2 \times \text{RTT}_{\text{cross-region}} > \text{SLA}$).
   - *Feasibility Boundary Check*: Verify team capability, licensing constraints, and operational cost limits against each cell.
 - **Example in Distributed Systems / Backend**:
-  - *Hard Constraint*: "Zero data loss under any single-node hardware failure (\$\text{RPO} = 0\$), with global write latency \$p99 \< 50\text{ ms}\$."
-  - *Pruning Action*: Discard all candidates relying on single-node in-memory storage without synchronous replication, and discard all candidates using synchronous cross-continental 3PC across \$\>3\$ regions (due to speed-of-light propagation latency exceeding \$80\text{ ms}\$).
+  - *Hard Constraint*: "Zero data loss under any single-node hardware failure ($\text{RPO} = 0$), with global write latency $p99 < 50\text{ ms}$."
+  - *Pruning Action*: Discard all candidates relying on single-node in-memory storage without synchronous replication, and discard all candidates using synchronous cross-continental 3PC across $>3$ regions (due to speed-of-light propagation latency exceeding $80\text{ ms}$).
 - **Anti-Patterns to Avoid**:
   - *Pruning on Soft Preferences*: Discarding viable options early due to personal unfamiliarity rather than hard constraints.
   - *Retaining Physically Impossible Options*: Continuing to evaluate candidates that violate fundamental physical or theoretical theorems.
@@ -16203,11 +16203,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Core Mechanism / Transformation**: Converts vague anxiety into an explicit, measurable **Decision-Significant Unknown** (`UNK-*`), where the answer has the power to directly flip an architectural choice between competing candidates.
 - **Input Preconditions**: Architectural debate is stalled due to conflicting speculations or unverified claims.
 - **Concrete Software Implementation Patterns**:
-  - *Bifurcation Framing*: Define the unknown in the format: "If parameter \$X \< V\_{\text{thresh}}\$, we select Candidate A; if \$X \ge V\_{\text{thresh}}\$, Candidate A is invalid and we select Candidate B."
+  - *Bifurcation Framing*: Define the unknown in the format: "If parameter $X < V_{\text{thresh}}$, we select Candidate A; if $X \ge V_{\text{thresh}}$, Candidate A is invalid and we select Candidate B."
   - *Measurable Metric Definition*: Specify the exact unit of measurement, environment conditions, and confidence threshold required.
 - **Example in Distributed Systems / Backend**:
   - *Vague Debate*: "Will SQLite handle our concurrent write load, or do we need PostgreSQL?"
-  - *Decision-Significant Unknown (`UNK-01`)*: "What is the \$p99\$ commit latency of SQLite in WAL mode under 500 concurrent writer threads issuing \$1\text{ KB}\$ transactions on our target cloud NVMe storage? (Threshold: If \$p99 \> 10\text{ ms}\$, SQLite is disqualified)."
+  - *Decision-Significant Unknown (`UNK-01`)*: "What is the $p99$ commit latency of SQLite in WAL mode under 500 concurrent writer threads issuing $1\text{ KB}$ transactions on our target cloud NVMe storage? (Threshold: If $p99 > 10\text{ ms}$, SQLite is disqualified)."
 - **Anti-Patterns to Avoid**:
   - *Trivia Chasing*: Researching interesting technical questions that have zero impact on the final architectural decision.
   - *Unfalsifiable Formulations*: Posing questions that cannot be answered with empirical data (e.g., "Is Rust better than Go for this team?").
@@ -16220,9 +16220,9 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Input Preconditions**: The problem appears novel or intractable within the immediate application domain.
 - **Concrete Software Implementation Patterns**:
   - *Domain Isomorphism Mapping*:
-    - *UI State Management* \$\cong\$ Database transaction logs and materialized views.
-    - *Microservice Orchestration* \$\cong\$ Hardware pipeline out-of-order execution and branch prediction.
-    - *API Rate Limiting* \$\cong\$ Network router token bucket and leaky bucket queuing algorithms.
+    - *UI State Management* $\cong$ Database transaction logs and materialized views.
+    - *Microservice Orchestration* $\cong$ Hardware pipeline out-of-order execution and branch prediction.
+    - *API Rate Limiting* $\cong$ Network router token bucket and leaky bucket queuing algorithms.
 - **Example in Distributed Systems / Backend**:
   - *Application Challenge*: Managing complex multi-tenant undo/redo state history in a web application.
   - *Isomorphic Transfer*: Adopt the Git DAG model (commit trees, immutable content-addressed blobs, directed delta chains), implementing version history as a Directed Acyclic Graph rather than mutable state diffs.
@@ -16240,7 +16240,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Epistemic Ledger Table*: Track `[Code | Assumption | Dependent Candidates | Cost of Error | Validation Method | Status]`.
   - *Automated Invalidation Hooks*: Mark dependent ADRs as `SUSPENDED` whenever a linked assumption is marked `FALSIFIED`.
 - **Example in Distributed Systems / Backend**:
-  - *Assumption (`ASM-04`)*: "Upstream third-party payment gateway maintains \$99.99%\$ availability and responds within \$200\text{ ms}\$."
+  - *Assumption (`ASM-04`)*: "Upstream third-party payment gateway maintains $99.99\%$ availability and responds within $200\text{ ms}$."
   - *Validation*: Production telemetry reveals upstream gateway experiences 2-second p99 latency spikes and daily 5-minute outages.
   - *Transitive Invalidation*: All architectural designs assuming synchronous end-to-end checkout (`CAN-01`, `CAN-03`) are immediately invalidated; asynchronous saga orchestration (`CAN-02`) is mandated.
 - **Anti-Patterns to Avoid**:
@@ -16255,11 +16255,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Input Preconditions**: A decision-significant unknown has been defined, and theoretical analysis cannot substitute for empirical measurement.
 - **Concrete Software Implementation Patterns**:
   - *Isolated Microbenchmark*: Write isolated benchmark suites (e.g., Go `testing.B`, Rust Criterion, JMH) measuring throughput and allocation under varying concurrency.
-  - *Throwaway Prototype (Spike)*: Build a minimal branch (\$\le 200\text{ LOC}\$) that validates API ergonomics or integration constraints, then delete the code.
+  - *Throwaway Prototype (Spike)*: Build a minimal branch ($\le 200\text{ LOC}$) that validates API ergonomics or integration constraints, then delete the code.
 - **Example in Distributed Systems / Backend**:
-  - *Unknown*: "Does unmarshaling \$50\text{ MB}\$ XML payloads in memory cause Go GC pauses exceeding our \$20\text{ ms}\$ SLA?"
-  - *Empirical Spike*: Create a 50-line script parsing synthetic payloads under heap profiling (`pprof`). Measurement shows \$120\text{ ms}\$ GC stop-the-world pauses.
-  - *Resulting Decision*: Switch to streaming SAX parsing with pooled byte buffers (`sync.Pool`), reducing allocations to near-zero and GC pause to \$\<1\text{ ms}\$.
+  - *Unknown*: "Does unmarshaling $50\text{ MB}$ XML payloads in memory cause Go GC pauses exceeding our $20\text{ ms}$ SLA?"
+  - *Empirical Spike*: Create a 50-line script parsing synthetic payloads under heap profiling (`pprof`). Measurement shows $120\text{ ms}$ GC stop-the-world pauses.
+  - *Resulting Decision*: Switch to streaming SAX parsing with pooled byte buffers (`sync.Pool`), reducing allocations to near-zero and GC pause to $<1\text{ ms}$.
 - **Anti-Patterns to Avoid**:
   - *Productionizing the Spike*: Merging dirty prototype code into production without proper refactoring, error handling, and test suites.
   - *Unrepresentative Benchmark*: Running benchmarks on a developer laptop that fails to replicate production network latency, multi-core contention, or data volume.
@@ -16343,14 +16343,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 7.1: Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity
 
-- **Core Mechanism / Transformation**: Applies queuing theory and system dynamics (Little's Law: \$L = \lambda W\$) to quantify queue buildup, memory accumulation, and buffer saturation under steady-state and burst traffic.
+- **Core Mechanism / Transformation**: Applies queuing theory and system dynamics (Little's Law: $L = \lambda W$) to quantify queue buildup, memory accumulation, and buffer saturation under steady-state and burst traffic.
 - **Input Preconditions**: System incorporates asynchronous worker pools, message brokers, connection pools, or in-memory buffers.
 - **Concrete Software Implementation Patterns**:
-  - *Capacity Sizing Calculations*: Calculate maximum queue residency time and memory footprints: \$\$T\_{\text{residence}} = \frac{N\_{\text{queue}}}{\mu - \lambda}\$\$
+  - *Capacity Sizing Calculations*: Calculate maximum queue residency time and memory footprints: $$T_{\text{residence}} = \frac{N_{\text{queue}}}{\mu - \lambda}$$
   - *Bounded Queue Enforcement*: Mandate explicit hard bounds on all in-memory channels, rejecting or shedding load when capacity is exceeded.
 - **Example in Distributed Systems / Backend**:
-  - *Unbounded Queue Failure*: A Go worker pool uses an unbuffered channel `make(chan Task)`. Under an upstream traffic spike of \$50,000\text{ req/sec}\$ with downstream database processing capacity of \$5,000\text{ req/sec}\$, \$45,000\text{ goroutines/sec}\$ spawn, exhausting server RAM in 12 seconds.
-  - *Queuing Transformation*: Enforce a bounded ring buffer of size \$10,000\$ with backpressure signaling and early HTTP 429 / 503 load shedding.
+  - *Unbounded Queue Failure*: A Go worker pool uses an unbuffered channel `make(chan Task)`. Under an upstream traffic spike of $50,000\text{ req/sec}$ with downstream database processing capacity of $5,000\text{ req/sec}$, $45,000\text{ goroutines/sec}$ spawn, exhausting server RAM in 12 seconds.
+  - *Queuing Transformation*: Enforce a bounded ring buffer of size $10,000$ with backpressure signaling and early HTTP 429 / 503 load shedding.
 - **Anti-Patterns to Avoid**:
   - *Infinite Buffer Fallacy*: Believing that an unbounded queue "absorbs" traffic spikes; in reality, it merely converts a fast failure into a slow, unrecoverable out-of-memory crash.
   - *Ignoring Inflow/Outflow Discrepancies*: Sizing worker pools without measuring downstream database write limits.
@@ -16362,12 +16362,12 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Core Mechanism / Transformation**: Maps positive (destabilizing) and negative (stabilizing) feedback loops in distributed communication, modeling emergent behaviors like retry storms, thundering herds, and cache stampedes.
 - **Input Preconditions**: Distributed services communicate over unreliable networks with automated retry policies.
 - **Concrete Software Implementation Patterns**:
-  - *Exponential Backoff with Full Jitter*: Implement randomized backoff intervals: \$\$t\_{\text{sleep}} = \text{random}(0, ; \min(t\_{\text{max}}, ; t\_{\text{base}} \times 2^{\text{attempt}}))\$\$
+  - *Exponential Backoff with Full Jitter*: Implement randomized backoff intervals: $$t_{\text{sleep}} = \text{random}(0,\; \min(t_{\text{max}},\; t_{\text{base}} \times 2^{\text{attempt}}))$$
   - *Circuit Breakers & Adaptive Concurrency Limits*: Automatically sever traffic to struggling dependencies (e.g., Netflix Hystrix, Resilience4j, TCP Vegas-style limiters).
   - *Single-Flight Request Coalescing*: Collapse concurrent duplicate cache-miss queries into a single upstream fetch (`golang.org/x/sync/singleflight`).
 - **Example in Distributed Systems / Backend**:
-  - *Retry Storm*: Database latency increases from \$10\text{ ms}\$ to \$500\text{ ms}\$. 50 client instances timeout at \$200\text{ ms}\$ and immediately retry 3 times. Total traffic quadruples (\$4\times\$), driving database CPU to \$100%\$ and causing total outage.
-  - *Feedback Stabilization*: Introduce circuit breakers, exponential jittered backoff, and strict retry budgets (max \$10%\$ additional traffic).
+  - *Retry Storm*: Database latency increases from $10\text{ ms}$ to $500\text{ ms}$. 50 client instances timeout at $200\text{ ms}$ and immediately retry 3 times. Total traffic quadruples ($4\times$), driving database CPU to $100\%$ and causing total outage.
+  - *Feedback Stabilization*: Introduce circuit breakers, exponential jittered backoff, and strict retry budgets (max $10\%$ additional traffic).
 - **Anti-Patterns to Avoid**:
   - *Aggressive Immediate Retries*: Retrying failed requests in a tight loop without delay or jitter.
   - *Global Timeout Uniformity*: Setting identical timeout durations across all layers of the call stack, causing upstream timeouts before downstream operations can succeed.
@@ -16381,9 +16381,9 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Concrete Software Implementation Patterns**:
   - *Lamport Timestamps & Vector Clocks*: Establish partial or total ordering of distributed events without relying on synchronized physical clocks.
   - *Dual-Version Wire Protocols*: Ensure all serializers support the Expand/Contract pattern (ignoring unknown fields, providing default values).
-  - *Read-After-Write Consistency Routing*: Route read requests from a user to the primary database for \$N\$ seconds following a write to mask replication lag.
+  - *Read-After-Write Consistency Routing*: Route read requests from a user to the primary database for $N$ seconds following a write to mask replication lag.
 - **Example in Distributed Systems / Backend**:
-  - *Race Condition*: User updates profile, immediately reloads page. Read request hits read replica with \$500\text{ ms}\$ replication lag; user sees old data and submits duplicate edit.
+  - *Race Condition*: User updates profile, immediately reloads page. Read request hits read replica with $500\text{ ms}$ replication lag; user sees old data and submits duplicate edit.
   - *Temporal Architecture*: Client receives monotonic revision token `rev=42` on write; subsequent read requests include `If-Match: rev=42`. Gateway routes to replica only if `replica_watermark >= 42`, else routes to primary.
 - **Anti-Patterns to Avoid**:
   - *Wall-Clock Faith*: Assuming physical server clocks (`System.currentTimeMillis()`) are synchronized across distributed nodes.
@@ -16393,16 +16393,16 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 7.4: Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, and Bottleneck Migration
 
-- **Core Mechanism / Transformation**: Simulates the evolution of the system over \$10\times\text{–}100\times\$ volume growth, identifying nonlinear inflection points where existing algorithms, indexes, or coordination mechanisms fail.
+- **Core Mechanism / Transformation**: Simulates the evolution of the system over $10\times\text{–}100\times$ volume growth, identifying nonlinear inflection points where existing algorithms, indexes, or coordination mechanisms fail.
 - **Input Preconditions**: Evaluating an architecture designed for current scale to determine its longevity and failure horizons.
 - **Concrete Software Implementation Patterns**:
-  - *Asymptotic Complexity Stress Testing*: Analyze algorithmic and storage scaling (\$O(1)\$ vs. \$O(\log N)\$ vs. \$O(N)\$ vs. \$O(N^2)\$).
+  - *Asymptotic Complexity Stress Testing*: Analyze algorithmic and storage scaling ($O(1)$ vs. $O(\log N)$ vs. $O(N)$ vs. $O(N^2)$).
   - *Bottleneck Migration Forecasting*: Calculate which subsystem becomes the next constraint when the current bottleneck is optimized.
 - **Example in Distributed Systems / Backend**:
-  - *Scaling Inflection*: A B-Tree index on `created_at` in PostgreSQL works perfectly at \$10^6\$ rows (\$100\text{ MB}\$, fits in RAM). At \$10^9\$ rows (\$100\text{ GB}\$), index lookups exceed RAM capacity, causing random disk I/O thrashing and a \$100\times\$ latency degradation.
+  - *Scaling Inflection*: A B-Tree index on `created_at` in PostgreSQL works perfectly at $10^6$ rows ($100\text{ MB}$, fits in RAM). At $10^9$ rows ($100\text{ GB}$), index lookups exceed RAM capacity, causing random disk I/O thrashing and a $100\times$ latency degradation.
   - *Proactive Design*: Introduce automated time-based table partitioning (monthly partitions) or migrate historical data to cold columnar storage.
 - **Anti-Patterns to Avoid**:
-  - *Linear Extrapolation Fallacy*: Assuming a system that handles \$1,000\text{ RPS}\$ linearly scales to \$100,000\text{ RPS}\$ without encountering distributed coordination bottlenecks.
+  - *Linear Extrapolation Fallacy*: Assuming a system that handles $1,000\text{ RPS}$ linearly scales to $100,000\text{ RPS}$ without encountering distributed coordination bottlenecks.
   - *Neglecting Metadata Scale*: Scaling data storage while forgetting that connection pools, file descriptors, or routing tables also grow.
 
 ------------------------------------------------------------------------
@@ -16421,12 +16421,12 @@ The 36 techniques provide concrete, operational transformations across the nine 
 ### Technique 8.1: Define Hard Constraints, Business Value, and Preference Criteria
 
 - **Core Mechanism / Transformation**: Categorizes decision criteria into a strict two-tier hierarchy:
-  1.  *Hard Constraints (Binary Pass/Fail)*: Non-negotiable invariants (regulatory compliance, data loss tolerance \$\text{RPO}=0\$, budget ceiling);
-  2.  *Preference Criteria (Weighted Trade-offs)*: Desirable quality attributes (\$p99\$ latency, developer onboarding speed, tooling ecosystem maturity).
+  1.  *Hard Constraints (Binary Pass/Fail)*: Non-negotiable invariants (regulatory compliance, data loss tolerance $\text{RPO}=0$, budget ceiling);
+  2.  *Preference Criteria (Weighted Trade-offs)*: Desirable quality attributes ($p99$ latency, developer onboarding speed, tooling ecosystem maturity).
 - **Input Preconditions**: Evaluating multiple viable architectural options with competing trade-offs.
 - **Concrete Software Implementation Patterns**:
   - *Two-Stage Decision Filter*:
-    - *Stage 1*: Discard any candidate failing \$\ge 1\$ Hard Constraint.
+    - *Stage 1*: Discard any candidate failing $\ge 1$ Hard Constraint.
     - *Stage 2*: Score surviving candidates against Preference Criteria.
 - **Example in Distributed Systems / Backend**:
   - *Hard Constraint*: Must run on-premises in air-gapped data centers without internet access.
@@ -16440,14 +16440,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 8.2: Compare Useful Effects Against Cost of New Mechanisms, Code, and Mutable State
 
-- **Core Mechanism / Transformation**: Adapts the TRIZ **Ideality Formula** to software engineering: \$\$I\_{\text{software}} = \frac{\sum \text{Useful Functional Capabilities}}{\sum \text{Operational Harms} + \sum \text{Lifecycle Costs} + \sum \text{Cognitive Overhead}}\$\$ The ideal system delivers all required functions with zero additional code, zero new services, and zero added mutable state.
+- **Core Mechanism / Transformation**: Adapts the TRIZ **Ideality Formula** to software engineering: $$I_{\text{software}} = \frac{\sum \text{Useful Functional Capabilities}}{\sum \text{Operational Harms} + \sum \text{Lifecycle Costs} + \sum \text{Cognitive Overhead}}$$ The ideal system delivers all required functions with zero additional code, zero new services, and zero added mutable state.
 - **Input Preconditions**: Choosing between building a custom complex subsystem, deploying a heavy distributed infrastructure, or reusing existing primitives.
 - **Concrete Software Implementation Patterns**:
-  - *Complexity Accounting*: Quantify the total footprint of a solution: new lines of code (\$\text{LOC}\$), new runtime services, new background daemon processes, new state stores, and new failure modes.
+  - *Complexity Accounting*: Quantify the total footprint of a solution: new lines of code ($\text{LOC}$), new runtime services, new background daemon processes, new state stores, and new failure modes.
 - **Example in Distributed Systems / Backend**:
   - *Option A*: Deploy a 3-node Apache Flink cluster to compute running 5-minute user click counts.
   - *Option B*: Use Redis `INCRBY` with `EXPIRE` keys in the existing Redis cluster.
-  - *Ideality Analysis*: Option B delivers \$95%\$ of the required functional capability with \$5%\$ of the operational overhead, zero new infrastructure clusters, and zero new deployment pipelines. Option B wins on Ideality.
+  - *Ideality Analysis*: Option B delivers $95\%$ of the required functional capability with $5\%$ of the operational overhead, zero new infrastructure clusters, and zero new deployment pipelines. Option B wins on Ideality.
 - **Anti-Patterns to Avoid**:
   - *Resume-Driven Architecture*: Choosing the most complex, trendy technology to gain personal resume experience regardless of operational cost.
   - *Ignoring Maintenance Debt*: Evaluating a solution only by its initial implementation time while ignoring multi-year operational maintenance costs.
@@ -16459,7 +16459,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 - **Core Mechanism / Transformation**: Explicitly maps and minimizes the collateral penalties of an architectural candidate, including on-call pager fatigue, debugging difficulty, infrastructure billing, and the blast radius of component crashes.
 - **Input Preconditions**: Candidates have satisfied functional requirements and are being compared on total cost of ownership (TCO).
 - **Concrete Software Implementation Patterns**:
-  - *Blast Radius Containment Audit*: Measure how many unaffected features fail if Candidate \$X\$ experiences a total crash or database corruption.
+  - *Blast Radius Containment Audit*: Measure how many unaffected features fail if Candidate $X$ experiences a total crash or database corruption.
   - *Cognitive Load Profiling*: Assess how many distinct technical paradigms a newly hired engineer must master to debug a production incident.
 - **Example in Distributed Systems / Backend**:
   - *Architecture Review*: An event-driven microservices architecture requires distributed tracing, asynchronous saga coordinators, and schema registries.
@@ -16479,9 +16479,9 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Explicit Reversal Triggers*: Document the exact empirical conditions under which this decision must be revisited and reversed.
 - **Example in Distributed Systems / Backend**:
   - *Decision*: Select Candidate 1 (PostgreSQL Partitioning) over Candidate 2 (ClickHouse Cluster).
-  - *Preserved Uncertainty*: "Selected Candidate 1 with Medium confidence based on `ASM-03` (traffic will not exceed \$5,000\text{ writes/sec}\$ this year). Reversal Trigger: If sustained write traffic exceeds \$8,000\text{ writes/sec}\$ or storage costs exceed \$\$3,000/\text{month}\$, trigger ADR-042 to migrate to ClickHouse."
+  - *Preserved Uncertainty*: "Selected Candidate 1 with Medium confidence based on `ASM-03` (traffic will not exceed $5,000\text{ writes/sec}$ this year). Reversal Trigger: If sustained write traffic exceeds $8,000\text{ writes/sec}$ or storage costs exceed USD 3,000/month, trigger ADR-042 to migrate to ClickHouse."
 - **Anti-Patterns to Avoid**:
-  - *Spurious Precision*: Assigning arbitrary decimal scores (e.g., \$8.74\$ vs. \$8.62\$) to subjective criteria to create an illusion of mathematical rigor.
+  - *Spurious Precision*: Assigning arbitrary decimal scores (e.g., $8.74$ vs. $8.62$) to subjective criteria to create an illusion of mathematical rigor.
   - *Irreversible Locking*: Documenting a decision as final without defining the conditions that would invalidate it.
 
 ------------------------------------------------------------------------
@@ -16505,7 +16505,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *Adversarial Pre-Mortem*: Assume the newly deployed system has suffered a catastrophic Sev-1 outage 3 months post-launch. Brainstorm the most likely causal mechanisms.
   - *Complexity Shift Mapping*: Identify whether eliminating complexity in code has introduced complexity in operations, networking, or database management.
 - **Example in Distributed Systems / Backend**:
-  - *Proposed Solution*: Introduce local in-memory caching to reduce database load by \$90%\$.
+  - *Proposed Solution*: Introduce local in-memory caching to reduce database load by $90\%$.
   - *Adversarial Pre-Mortem Findings*:
     1.  *New Failure Mode*: Cold cache node restart triggers a massive thundering herd that crashes the database.
     2.  *Complexity Shift*: Cache invalidation across 20 pods introduces subtle stale-data bugs.
@@ -16535,7 +16535,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ### Technique 9.3: Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims
 
-- **Core Mechanism / Transformation**: Treats the transition path from current state (\$S_0\$) to target state (\$S\_{\text{target}}\$) as a first-class architectural deliverable (`TRANS-*`), employing temporary shims, dual-writing, expand/contract schemas, and feature flags to ensure zero downtime and instant reversibility.
+- **Core Mechanism / Transformation**: Treats the transition path from current state ($S_0$) to target state ($S_{\text{target}}$) as a first-class architectural deliverable (`TRANS-*`), employing temporary shims, dual-writing, expand/contract schemas, and feature flags to ensure zero downtime and instant reversibility.
 - **Input Preconditions**: The new architecture requires changes to database schemas, wire protocols, or state storage.
 - **Concrete Software Implementation Patterns**:
   - *Expand / Contract Pattern (Parallel Run)*:
@@ -16561,7 +16561,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
   - *SLO / Error Budget Alerting*: Establish Prometheus/Grafana alerts based on multi-window burn rates.
   - *Shim Decommissioning Checklist*: Track every temporary transition shim (`TRANS-SHIM-*`) as an explicit ticket with an assigned deletion deadline.
 - **Example in Distributed Systems / Backend**:
-  - *Decommissioning Action*: Following successful migration to PostgreSQL, remove the dual-write interceptor code, delete the MongoDB client driver dependency, and drop the legacy MongoDB collection, recovering \$40\text{ GB}\$ of RAM and removing 1,200 lines of transitional routing logic.
+  - *Decommissioning Action*: Following successful migration to PostgreSQL, remove the dual-write interceptor code, delete the MongoDB client driver dependency, and drop the legacy MongoDB collection, recovering $40\text{ GB}$ of RAM and removing 1,200 lines of transitional routing logic.
 - **Anti-Patterns to Avoid**:
   - *Permanent "Temporary" Shims*: Leaving feature flags and dual-write shims in production for years, creating massive technical debt and accidental complexity.
   - *Unmonitored Rollout*: Assuming deployment success because no user has complained yet, without verifying telemetry metrics.
@@ -16636,7 +16636,7 @@ This matrix maps 15 established software engineering disciplines across the Nine
 ### 5. Property-Based Testing
 
 - **Cognitive Strengths**: Dominates **Operation 4 (Generative Input Space Exploration)**, **Operation 5 (Invariant Knowledge Discovery)**, and **Operation 9 (Falsification via Automated Shrinking)**.
-- **Methodological Primitives**: Generators, universal quantification (\$\forall x\$), state machine models, shrinking algorithms (QuickCheck, Hypothesis, PropEr).
+- **Methodological Primitives**: Generators, universal quantification ($\forall x$), state machine models, shrinking algorithms (QuickCheck, Hypothesis, PropEr).
 - **Epistemic Blind Spots**: Requires pre-formulated mathematical invariants; does not assist in business problem framing or organizational dependency mapping (**Operations 1, 6**).
 - **Ariadne Integration**: Property tests serve as the gold standard for falsifying candidate mechanisms in Deep Mode tasks.
 
@@ -16719,10 +16719,10 @@ This matrix maps 15 established software engineering disciplines across the Nine
 When an engineering team or AI agent encounters an impasse, the Practice × Operation Matrix is used as a diagnostic diagnostic tool:
 
 1.  **Identify the Active Failure Mode**:
-    - *Analysis Paralysis*: High investment in Framing/Space, zero executable verification \$\rightarrow\$ Route to **TDD / Performance Spikes / Verification (Op 9)**.
-    - *Local Thrashing / Shotgun Debugging*: High code editing, zero root cause diagnosis \$\rightarrow\$ Route to **Observability / Causal Chains / Threat Modeling (Op 2)**.
-    - *Cascading Production Outages*: Strong unit tests, zero queuing or feedback modeling \$\rightarrow\$ Route to **SRE / Systems Thinking / Dynamics (Op 7)**.
-    - *Architectural Rigidity / Monolithic Coupling*: High feature additions, zero boundary structuring \$\rightarrow\$ Route to **DDD / Refactoring / Dependency Matrices (Op 6)**.
+    - *Analysis Paralysis*: High investment in Framing/Space, zero executable verification $\rightarrow$ Route to **TDD / Performance Spikes / Verification (Op 9)**.
+    - *Local Thrashing / Shotgun Debugging*: High code editing, zero root cause diagnosis $\rightarrow$ Route to **Observability / Causal Chains / Threat Modeling (Op 2)**.
+    - *Cascading Production Outages*: Strong unit tests, zero queuing or feedback modeling $\rightarrow$ Route to **SRE / Systems Thinking / Dynamics (Op 7)**.
+    - *Architectural Rigidity / Monolithic Coupling*: High feature additions, zero boundary structuring $\rightarrow$ Route to **DDD / Refactoring / Dependency Matrices (Op 6)**.
 
 ### AI Knowledge Pack Router (Two-Stage Routing)
 
@@ -16819,7 +16819,7 @@ The empirical artifact, quantitative measurement, execution trace, or test verdi
 
 ### 14. Transition System / Architecture (`TRANS-`)
 
-The temporary, backward-compatible software mechanisms (dual-writing interceptors, feature flags, expand/contract schemas, canary proxies) designed specifically to migrate a running system safely from state \$S_0\$ to state \$S\_{\text{target}}\$ with zero downtime and instant rollback capability.
+The temporary, backward-compatible software mechanisms (dual-writing interceptors, feature flags, expand/contract schemas, canary proxies) designed specifically to migrate a running system safely from state $S_0$ to state $S_{\text{target}}$ with zero downtime and instant rollback capability.
 
 **Engineering reading:** During a column rename, both names coexist, reads and writes remain compatible, parity is measured, and either binary version can serve traffic until cutover is proven safe.
 
@@ -16851,10 +16851,10 @@ The automated normalization of external engineering skill artifacts (reproductio
 
 The four inventive principles adapted from TRIZ to software engineering:
 
-1.  *Separation in Time*: Parameter \$X\$ is active during Phase \$A\$, and non-\$X\$ during Phase \$B\$.
-2.  *Separation in State/Data Ownership*: Parameter \$X\$ belongs to Domain \$A\$, and non-\$X\$ to Domain \$B\$.
-3.  *Separation by Operating Condition/Mode*: Parameter \$X\$ applies under High Load, and non-\$X\$ under Low Load.
-4.  *Separation Across System Boundaries*: Parameter \$X\$ is enforced at the Edge, and non-\$X\$ in Core Compute.
+1.  *Separation in Time*: Parameter $X$ is active during Phase $A$, and non-$X$ during Phase $B$.
+2.  *Separation in State/Data Ownership*: Parameter $X$ belongs to Domain $A$, and non-$X$ to Domain $B$.
+3.  *Separation by Operating Condition/Mode*: Parameter $X$ applies under High Load, and non-$X$ under Low Load.
+4.  *Separation Across System Boundaries*: Parameter $X$ is enforced at the Edge, and non-$X$ in Core Compute.
 
 **Engineering reading:** Keep strict coordination inside one account but allow parallelism across accounts; the lock-contention trace should change without weakening ordering.
 
@@ -16884,13 +16884,13 @@ The total scope of services, data stores, API endpoints, and end-users impacted 
 
 ### 24. Ideality (Software TRIZ)
 
-The ratio of total delivered functional value to the sum of operational harms, infrastructure costs, and cognitive maintenance overhead: \$\$I = \frac{\sum \text{Useful Capabilities}}{\sum \text{Harms} + \sum \text{Costs} + \sum \text{Cognitive Overhead}}\$\$
+The ratio of total delivered functional value to the sum of operational harms, infrastructure costs, and cognitive maintenance overhead: $$I = \frac{\sum \text{Useful Capabilities}}{\sum \text{Harms} + \sum \text{Costs} + \sum \text{Cognitive Overhead}}$$
 
 **Engineering reading:** A mechanism is less ideal when the same SLO requires more state, pages, upgrades, migration work, and specialist knowledge, even if its benchmark is faster.
 
 ### 25. Morphological Space
 
-The multidimensional combinatorial solution space constructed by defining orthogonal architectural decision axes (\$D_1, D_2, \dots, D_k\$) and evaluating their cross-product configurations.
+The multidimensional combinatorial solution space constructed by defining orthogonal architectural decision axes ($D_1, D_2, \dots, D_k$) and evaluating their cross-product configurations.
 
 **Engineering reading:** A `SPACE-*` table makes it visible that the team varied database vendors but never varied state authority, reconciliation timing, or failure policy.
 
@@ -17139,7 +17139,7 @@ The following template can be instantiated in any repository as `engineering-tas
   - Directly executing `write_to_file` or `replace_file_content` to add libraries, services, or caches within the first turn.
 - **Concrete Example**:
   - *User Prompt*: "Add a Redis cache to `UserService.getUserById`."
-  - *Agent Behavior*: Flags premature solution. Identifies that `getUserById` suffers from \$400\text{ ms}\$ latency due to unindexed SQL joins. Adds a database index (reducing latency to \$2\text{ ms}\$) instead of introducing an external Redis cluster and cache invalidation complexity.
+  - *Agent Behavior*: Flags premature solution. Identifies that `getUserById` suffers from $400\text{ ms}$ latency due to unindexed SQL joins. Adds a database index (reducing latency to $2\text{ ms}$) instead of introducing an external Redis cluster and cache invalidation complexity.
 - **Enforcement / Validation**: Automated linting fails if code modifications precede problem framing on non-execution tickets.
 
 ------------------------------------------------------------------------
@@ -17170,8 +17170,8 @@ The following template can be instantiated in any repository as `engineering-tas
   - Presenting an unverified working premise as an established fact.
 - **Concrete Example**:
   - `[FACT]`: `auth_service.go` uses bcrypt with cost factor 14 (line 88).
-  - `[MEASURED]`: Bcrypt hash verification takes \$280\text{ ms}\$ on target AWS c6i.xlarge instance.
-  - `[ASSUMED]`: Authentication throughput requirement is \$500\text{ req/sec}\$.
+  - `[MEASURED]`: Bcrypt hash verification takes $280\text{ ms}$ on target AWS c6i.xlarge instance.
+  - `[ASSUMED]`: Authentication throughput requirement is $500\text{ req/sec}$.
   - `[DERIVED]`: Server requires at least 140 dedicated CPU cores to support auth load under current cost factor.
 - **Enforcement / Validation**: Epistemic overlay linter rejects un-tagged assertions.
 
@@ -17200,7 +17200,7 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Operational Preconditions**: Generating `CAN-*` candidates in Standard or Deep mode.
 - **Required Tool Usage Patterns**:
   - Construct a morphological matrix isolating orthogonal architectural axes.
-  - Formulate \$\ge 3\$ candidates spanning distinct operational paradigms.
+  - Formulate $\ge 3$ candidates spanning distinct operational paradigms.
 - **Forbidden Actions**:
   - Presenting 3 options that use the same operating principle (e.g., Option 1: MySQL, Option 2: PostgreSQL, Option 3: MariaDB).
 - **Concrete Example**:
@@ -17252,16 +17252,16 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Operational Preconditions**: Formulating Verification Cards (`VAL-*`).
 - **Required Tool Usage Patterns**:
   - Match verification tooling to claim type:
-    - *Algorithmic Invariant* \$\rightarrow\$ Property-Based Test / Formal Model.
-    - *Throughput / Latency* \$\rightarrow\$ Benchmark / Load Test.
-    - *Distributed Resilience* \$\rightarrow\$ Fault Injection / Chaos Test.
-    - *Test Quality* \$\rightarrow\$ Mutation Testing.
+    - *Algorithmic Invariant* $\rightarrow$ Property-Based Test / Formal Model.
+    - *Throughput / Latency* $\rightarrow$ Benchmark / Load Test.
+    - *Distributed Resilience* $\rightarrow$ Fault Injection / Chaos Test.
+    - *Test Quality* $\rightarrow$ Mutation Testing.
 - **Forbidden Actions**:
   - Using unit tests to assert throughput or concurrency scalability.
   - Using manual inspection to assert distributed consistency.
 - **Concrete Example**:
   - *Claim*: "The payment state machine never enters an invalid state."
-  - *Verification Method*: QuickCheck property test generating \$10^5\$ randomized event sequences, asserting state invariants on every transition.
+  - *Verification Method*: QuickCheck property test generating $10^5$ randomized event sequences, asserting state invariants on every transition.
 - **Enforcement / Validation**: Verification plan linter checks method-to-claim type compatibility.
 
 ------------------------------------------------------------------------
@@ -17276,7 +17276,7 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Forbidden Actions**:
   - Writing "happy-path only" tests that cannot fail under edge cases or invalid inputs.
 - **Concrete Example**:
-  - *Falsification Condition*: "If p99 response time exceeds \$50\text{ ms}\$ under 2,000 concurrent connections, or if memory allocation exceeds \$100\text{ MB}\$, Candidate 1 is FALSIFIED."
+  - *Falsification Condition*: "If p99 response time exceeds $50\text{ ms}$ under 2,000 concurrent connections, or if memory allocation exceeds $100\text{ MB}$, Candidate 1 is FALSIFIED."
 - **Enforcement / Validation**: Tests must demonstrate failure against mutated or baseline code.
 
 ------------------------------------------------------------------------
@@ -17291,7 +17291,7 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Forbidden Actions**:
   - Prematurely selecting one candidate and discarding alternatives without comparative empirical data.
 - **Concrete Example**:
-  - Competing prototypes for a search engine are implemented in parallel branches (RocksDB vs. SQLite FTS5) and evaluated against an identical \$10^6\$-document indexing benchmark.
+  - Competing prototypes for a search engine are implemented in parallel branches (RocksDB vs. SQLite FTS5) and evaluated against an identical $10^6$-document indexing benchmark.
 - **Enforcement / Validation**: Multi-worktree benchmark comparison artifact required before ADR lock.
 
 ------------------------------------------------------------------------
@@ -17306,7 +17306,7 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Forbidden Actions**:
   - Proposing a "big-bang" destructive schema migration without backward compatibility.
 - **Concrete Example**:
-  - Database column rename is planned as a 4-phase migration (Add new column \$\rightarrow\$ Dual-write \$\rightarrow\$ Backfill \$\rightarrow\$ Drop old column) spanning two deployment releases.
+  - Database column rename is planned as a 4-phase migration (Add new column $\rightarrow$ Dual-write $\rightarrow$ Backfill $\rightarrow$ Drop old column) spanning two deployment releases.
 - **Enforcement / Validation**: CI gate blocks PRs containing irreversible schema modifications lacking transition plans.
 
 ------------------------------------------------------------------------
@@ -17325,7 +17325,7 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Forbidden Actions**:
   - Declaring a task complete by stating "The code should work now" without running verification commands.
 - **Concrete Example**:
-  - Agent executes `npm test` and `npm run bench`, includes the exact terminal output showing \$100%\$ passing tests and \$4.2\times\$ throughput speedup, and links the updated ADR.
+  - Agent executes `npm test` and `npm run bench`, includes the exact terminal output showing $100\%$ passing tests and $4.2\times$ throughput speedup, and links the updated ADR.
 - **Enforcement / Validation**: Task completion gate rejects handoffs lacking terminal execution receipts.
 
 ------------------------------------------------------------------------
