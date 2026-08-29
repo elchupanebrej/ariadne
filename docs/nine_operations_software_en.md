@@ -2319,13 +2319,13 @@ flowchart TD
 
 | Perspective | Primary Focus | Evaluative Question | Typical Invariant Generated |
 |----|----|----|----|
-| **1. End-User / Client** | Utility, latency, responsiveness, predictability | *"What happens when my network drops mid-request?"* | Requests must return deterministic status; duplicate clicks must never double-bill. |
-| **2. Domain / Data Owner** | Correctness, auditability, financial integrity | *"Can we prove every balance mutation is justified by an immutable ledger entry?"* | Double-entry bookkeeping invariant: $\sum \text{Debits} = \sum \text{Credits}$ across all transactions. |
-| **3. SRE / Operator** | Blast radius, observability, survivability | *"If this component crashes at 3:00 AM, how do we detect it, isolate it, and recover without data loss?"* | Component must export Prometheus health metrics; failure must degrade gracefully without taking down parent process. |
-| **4. Adversary / Threat Actor** | Exploitation, resource exhaustion, abuse | *"Can I craft concurrent requests with identical timestamps to bypass rate limits or steal balance?"* | All state transitions must enforce strict concurrency serialization or atomic conditional checks. |
-| **5. Downstream Dependent** | Contract stability, backpressure, predictability | *"If our service slows down, will the upstream flood us with retries and cause a cascading outage?"* | Upstream must implement exponential backoff with jitter and circuit breaking. |
-| **6. Maintenance / On-Call** | Diagnosability, cognitive load, MTTR | *"When an alert fires, can I determine the root cause within 5 minutes from structured logs?"* | All log entries and traces must propagate a standardized `TraceID` and `TenantID`. |
-| **7. Future Developer** | Modifiability, change radius, testability | *"Can I modify the pricing formula without rewriting the database persistence layer?"* | Business logic must be decoupled from persistence via dependency inversion (ports and adapters). |
+| **End-User / Client** | Utility, latency, responsiveness, predictability | *"What happens when my network drops mid-request?"* | Requests must return deterministic status; duplicate clicks must never double-bill. |
+| **Domain / Data Owner** | Correctness, auditability, financial integrity | *"Can we prove every balance mutation is justified by an immutable ledger entry?"* | Double-entry bookkeeping invariant: $\sum \text{Debits} = \sum \text{Credits}$ across all transactions. |
+| **SRE / Operator** | Blast radius, observability, survivability | *"If this component crashes at 3:00 AM, how do we detect it, isolate it, and recover without data loss?"* | Component must export Prometheus health metrics; failure must degrade gracefully without taking down parent process. |
+| **Adversary / Threat Actor** | Exploitation, resource exhaustion, abuse | *"Can I craft concurrent requests with identical timestamps to bypass rate limits or steal balance?"* | All state transitions must enforce strict concurrency serialization or atomic conditional checks. |
+| **Downstream Dependent** | Contract stability, backpressure, predictability | *"If our service slows down, will the upstream flood us with retries and cause a cascading outage?"* | Upstream must implement exponential backoff with jitter and circuit breaking. |
+| **Maintenance / On-Call** | Diagnosability, cognitive load, MTTR | *"When an alert fires, can I determine the root cause within 5 minutes from structured logs?"* | All log entries and traces must propagate a standardized `TraceID` and `TenantID`. |
+| **Future Developer** | Modifiability, change radius, testability | *"Can I modify the pricing formula without rewriting the database persistence layer?"* | Business logic must be decoupled from persistence via dependency inversion (ports and adapters). |
 
 ------------------------------------------------------------------------
 
