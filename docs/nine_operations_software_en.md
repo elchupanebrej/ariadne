@@ -914,22 +914,13 @@ Every operation has three components:
 
 <!-- -->
 
-    ┌────────────────────────────────────────────────────────────────────────┐
-    │                         OPERATIONAL CONTRACT                           │
-    ├────────────────────────────────────────────────────────────────────────┤
-    │ INPUT:  Pre(O_k, S_in)                                                │
-    │         - Epistemic Frontier: { UNK_i, HYP_j, CTR_k }                  │
-    │         - Current Evidence:   { FACT_m, MEASURED_n }                   │
-    │                                                                        │
-    │ ACTION: Transformation A_k                                             │
-    │         - Cognitive Operator: Abduction / Separation / Morphological   │
-    │         - Epistemic Mutation: Node Addition, Edge Rewiring             │
-    │                                                                        │
-    │ OUTPUT: Post(O_k, S_out)                                               │
-    │         - Typed Deliverable:  Artifact (Map, Matrix, ADR, Test Suite)  │
-    │         - Epistemic Delta:    ΔV_E, ΔR_E                               │
-    │         - Stop Condition:     Falsifiability & Invariant Verification  │
-    └────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Input["Input: Pre(O_k, S_in)<br/>Epistemic frontier: UNK_i, HYP_j, CTR_k<br/>Current evidence: FACT_m, MEASURED_n"]
+    Input --> Action["Action: Transformation A_k<br/>Abduction, separation, or morphological operator<br/>Add nodes and rewire edges"]
+    Action --> Output["Output: Post(O_k, S_out)<br/>Typed artifact: map, matrix, ADR, or test suite<br/>Epistemic delta: ΔV_E, ΔR_E"]
+    Output --> Stop["Stop condition: Falsifiability and invariant verification"]
+```
 
 #### Evidence is monotonic. Belief is not.
 
@@ -1073,31 +1064,16 @@ Operation 2 moves past superficial symptoms ("the API is slow," "the release cyc
 
 <!-- -->
 
-                    ┌───────────────────────────┐
-                    │ Objective: High-QPS Store │
-                    └─────────────┬─────────────┘
-                                  │
-                   ┌──────────────┴──────────────┐
-                   ▼                             ▼
-      ┌─────────────────────────┐   ┌─────────────────────────┐
-      │ Requirement R1:         │   │ Requirement R2:         │
-      │ Strict ACID Consistency │   │ Sub-10ms Global Latency │
-      └────────────┬────────────┘   └────────────┬────────────┘
-                   │                             │
-                   ▼                             ▼
-      ┌─────────────────────────┐   ┌─────────────────────────┐
-      │ System Parameter:       │   │ System Parameter:       │
-      │ Multi-Region 2PC Locks  │   │ Asynchronous Eventual   │
-      └────────────┬────────────┘   └────────────┬────────────┘
-                   │                             │
-                   └──────────────┬──────────────┘
-                                  ▼
-                    ┌───────────────────────────┐
-                    │ CONTRADICTION CTR-01      │
-                    │ 2PC locks degrade latency │
-                    │ Eventual consistency      │
-                    │ violates financial ACID   │
-                    └───────────────────────────┘
+``` mermaid
+flowchart TD
+    Objective["Objective: High-QPS Store"]
+    Objective --> R1["Requirement R1: Strict ACID Consistency"]
+    Objective --> R2["Requirement R2: Sub-10ms Global Latency"]
+    R1 --> P1["System Parameter: Multi-Region 2PC Locks"]
+    R2 --> P2["System Parameter: Asynchronous Eventual Consistency"]
+    P1 --> Contradiction["CONTRADICTION CTR-01<br/>2PC locks degrade latency<br/>Eventual consistency violates financial ACID"]
+    P2 --> Contradiction
+```
 
 #### Deliverable
 
@@ -1304,14 +1280,18 @@ Operation 6 makes independent business requirements evolve, deploy, and test ind
 
 <!-- -->
 
-           ACCIDENTAL COUPLING                     AXIOMATIC DECOUPLING (PORTS & ADAPTERS)
-     ┌─────────────┐     ┌─────────────┐       ┌─────────────┐     ┌─────────────────────┐
-     │ OrderDomain │────>│ Shared DB   │       │ OrderDomain │────>│ OrderRepositoryPort│ (Interface)
-     └─────────────┘     │ Table       │       └─────────────┘     └──────────▲──────────┘
-     ┌─────────────┐     │ 'orders'    │                                      │ (implements)
-     │BillingDomain│────>│             │       ┌─────────────┐     ┌──────────┴──────────┐
-     └─────────────┘     └─────────────┘       │BillingDomain│────>│ PostgresOrderAdapter│ (Infrastructure)
-                                               └─────────────┘     └─────────────────────┘
+``` mermaid
+flowchart LR
+    subgraph Accidental["Accidental coupling"]
+        OrderA["Order Domain"] --> Shared[("Shared orders table")]
+        BillingA["Billing Domain"] --> Shared
+    end
+    subgraph Decoupled["Axiomatic decoupling: ports and adapters"]
+        OrderB["Order Domain"] --> Port["OrderRepositoryPort"]
+        BillingB["Billing Domain"] --> Adapter["PostgresOrderAdapter"]
+        Adapter -. implements .-> Port
+    end
+```
 
 #### Deliverable
 
@@ -1365,15 +1345,12 @@ Operation 7 finds dynamic failure modes, resource accumulation leaks, concurrenc
 
 <!-- -->
 
-           REINFORCING (DESTRUCTIVE) LOOP: RETRY STORM UNDER LOAD
-           ┌────────────────────────────────────────────────────────┐
-           ▼                                                        │ (+)
-     ┌───────────┐    Slowdown     ┌───────────┐    Timeouts    ┌───────────┐
-     │ High QPS  │───────────────> │ Database  │──────────────> │ Client    │
-     │ Ingestion │                 │ Saturation│                │ Retries   │
-     └───────────┘                 └───────────┘                └───────────┘
-           ▲                                                        │
-           └────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart LR
+    HighQPS["High-QPS ingestion"] -->|Slowdown| Database["Database saturation"]
+    Database -->|Timeouts| Retries["Client retries"]
+    Retries -->|Reinforcing feedback| HighQPS
+```
 
 #### Deliverable
 
@@ -1549,23 +1526,6 @@ These nine operations unify TRIZ, the Theory of Constraints, systems thinking, a
 A methodology must connect high-level epistemic intent to bit-level execution. In civil, aerospace, and chemical engineering, methods fail when they stay too abstract (pure philosophy) or too concrete (domain checklists that decay as technologies change).
 
 Ariadne organizes systematic inventive thinking into three coupled levels:
-
-    +-------------------------------------------------------------------------+
-    | Level 1: Operations (Epistemic State Transformations)                   |
-    | 9 Macro-Operators that alter the state of Engineering Uncertainty       |
-    +-------------------------------------------------------------------------+
-                                        │
-                                        ▼
-    +-------------------------------------------------------------------------+
-    | Level 2: Techniques (Concrete Inventive Operators)                      |
-    | 36 Directed Mechanisms executing specific structural & cognitive steps  |
-    +-------------------------------------------------------------------------+
-                                        │
-                                        ▼
-    +-------------------------------------------------------------------------+
-    | Level 3: Working Artifacts & Executable Evidence                        |
-    | Analytical Scaffolding (ADRs, DAGs) ⟷ Executable Verification (Tests)   |
-    +-------------------------------------------------------------------------+
 
 ``` mermaid
 graph TD
@@ -1747,21 +1707,12 @@ A central achievement of Level 2 is the adaptation of TRIZ physical contradictio
 
 Software engineering reasoning cannot exist in a purely mental or informal textual plane. High-integrity engineering produces two complementary classes of artifacts: **Structured Analytical Artifacts** and **Executable Empirical Evidence**.
 
-    ┌─────────────────────────────────────────────────────────────────────────────────┐
-    │                          THE DUAL-LAYER EVIDENCE MODEL                          │
-    │                                                                                 │
-    │   ANALYTICAL ARTIFACTS (Scaffolding)        EXECUTABLE EVIDENCE (Empirical)     │
-    │   ┌────────────────────────────────┐        ┌────────────────────────────────┐  │
-    │   │ Problem Passport (FRAME-)      │        │ Property Invariants (QuickCheck│  │
-    │   │ Causal DAG (HYP-)              │ ◄────► │ Mutation Kill Rates (PIT/Mu)   │  │
-    │   │ Morphological Matrix (CAN-)    │        │ Benchmark Spikes (Criterion)   │  │
-    │   │ Unknowns Registry (UNK-, ASM-) │        │ Fault Injection Scenarios      │  │
-    │   │ Architectural Record (DEC-)    │        │ Canary Telemetry & Logs        │  │
-    │   └────────────────────────────────┘        └────────────────────────────────┘  │
-    │                   │                                         ▲                   │
-    │                   └────────── Transitive Invalidation ──────┘                   │
-    │                       (Falsification triggers DAG updates)                      │
-    └─────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart LR
+    Analytical["Analytical artifacts<br/>Problem Passport (FRAME-)<br/>Causal DAG (HYP-)<br/>Morphological Matrix (CAN-)<br/>Unknowns Registry (UNK-, ASM-)<br/>Architectural Record (DEC-)"]
+    Evidence["Executable evidence<br/>Property invariants<br/>Mutation kill rates<br/>Benchmark spikes<br/>Fault injection<br/>Canary telemetry and logs"]
+    Analytical <-->|Transitive invalidation<br/>Falsification updates the DAG| Evidence
+```
 
 #### 4.3.1. Analytical Artifacts: Structured Epistemic Scaffolding
 
@@ -1794,10 +1745,12 @@ Software engineering, by contrast, operates on **formal, executable discrete-sta
 
 Because software is intrinsically executable, it provides **true empirical closure**:
 
-    Theoretical Hypothesis (Popperian Conjecture) 
-        ──[Transformed into]──► Executable Test Harness 
-        ──[Executed against]──► Concrete Runtime State 
-        ──[Yields]────────────► Deterministic Falsification or Empirical Corroboration
+``` mermaid
+flowchart LR
+    Hypothesis["Theoretical hypothesis<br/>(Popperian conjecture)"] -->|Transformed into| Harness["Executable test harness"]
+    Harness -->|Executed against| Runtime["Concrete runtime state"]
+    Runtime -->|Yields| Result["Deterministic falsification or empirical corroboration"]
+```
 
 In accordance with Karl Popper's logic of scientific discovery ([Popper, 1959/1934](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery)), a scientific or engineering proposition is meaningful only if it is **falsifiable**—that is, if there exists an empirical test whose negative outcome would definitively refute the claim.
 
@@ -1807,10 +1760,14 @@ In the Ariadne framework, no architectural claim (`CLM-`), causal hypothesis (`H
 
 The integration between analytical artifacts and executable evidence enables **Transitive Invalidation**. In an epistemic dependency graph:
 
-    [ASM-01: "Redis cache hit ratio > 95%"] ◄──depends_on── [CAN-02: "In-memory caching layer"]
-                                                                      ▲
-                                                                      │ depends_on
-                                                           [DEC-01: "Use CAN-02 for Search"]
+``` mermaid
+flowchart BT
+    ASM["ASM-01: Redis cache hit ratio > 95%"]
+    CAN["CAN-02: In-memory caching layer"]
+    DEC["DEC-01: Use CAN-02 for Search"]
+    CAN -->|depends_on| ASM
+    DEC -->|depends_on| CAN
+```
 
 If an executable benchmark spike (`EVD-04`) reveals that under realistic query distributions the hit ratio is only $42\%$, `ASM-01` is **falsified**. Through transitive invalidation:
 
@@ -3225,20 +3182,12 @@ Where:
 
 The USL reveals three fundamental regimes of software scalability:
 
-    Throughput λ(N)
-       ▲
-       │                  Peak (N*, λ*)
-       │                     ╭───╮
-       │                   ╭─╯   ╰──╮   Retrograde Regime (κ > 0)
-       │                 ╭─╯        ╰───────── Throughput Collapse
-       │               ╭─╯
-       │   ───────────╯────────────────────── Amdahl Ceiling (σ > 0, κ = 0)
-       │             /
-       │            /  Linear Scalability (σ = 0, κ = 0)
-       │           /
-       │          /
-       │         /
-       └────────┴────────────────────────────────────────► Concurrency / Nodes (N)
+``` mermaid
+flowchart LR
+    Linear["Linear scalability<br/>σ = 0, κ = 0"] --> Plateau["Amdahl plateau<br/>σ > 0, κ = 0"]
+    Plateau --> Peak["Optimal point<br/>N*, λ*"]
+    Peak --> Retrograde["Retrograde regime<br/>σ > 0, κ > 0<br/>Throughput collapse"]
+```
 
 1.  **Linear Scalability ($\sigma = 0, \kappa = 0$)**: Perfect horizontal scaling: $\lambda(N) = \gamma N$.
 2.  **Sub-linear Asymptotic Plateau ($\sigma > 0, \kappa = 0$)**: Governed by Amdahl's Law. Throughput plateaus at $\lambda_{\max} = \frac{\gamma}{\sigma}$.
@@ -3590,7 +3539,7 @@ The test suite duration ($18\text{ minutes}$) is an insignificant fraction ($0.0
 
 The output of Operation 2 is the formal working artifact: **Map of Causes, Constraints, and Contradictions (`DIAG-ID`)**.
 
-``` markdown
+```` markdown
 # [DIAG-ID] Map of Causes, Constraints, and Contradictions
 
 ## 1. Problem Passport Reference
@@ -3646,36 +3595,46 @@ flowchart TD
 
 - **EVDREQ-01**: Run async-profiler on gateway during 5,000 RPS load test to measure exact lock wait spans.
 
+````
+
 <!-- -->
 
 
-    ---
+---
 
-    ## 6. Stop Conditions & Falsification Criteria
+## 6. Stop Conditions & Falsification Criteria
 
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐ │ OPERATION 2 STOP CONDITIONS │ ├──────────────────────────────────────────────────────────────────────────────────────────────────┤ │ An engineer or autonomous agent MUST NOT proceed to Operation 3 (Transform) or Operation 4 │ │ (Explore) until ALL of the following criteria are strictly satisfied: │ │ │ │ 1. CAUSAL FALSIFIABILITY: │ │ Every active causal hypothesis \[HYP-\] is paired with at least one executable check │ │ \[EVDREQ-\] capable of disproving it. │ │ │ │ 2. NO BARE CORRELATIONS: │ │ No symptom \[OBS-\] is accepted as a root cause without an explicit mechanistic explanation │ │ of how the cause produces the symptom under the verified invariants. │ │ │ │ 3. CONTRADICTION DEEPENING: │ │ All core engineering trade-offs are formulated as Physical Contradictions (PC), specifying │ │ the conflicting parameter states and their respective operating conditions. │ │ │ │ 4. BOTTLENECK LOCALIZATION: │ │ The system constraint is mathematically or empirically localized (e.g., USL coefficients │ │ σ and κ identified, or queue accumulation point isolated). │ │ │ │ 5. TACIT ASSUMPTIONS EXPOSED: │ │ Underlying assumptions \[ASM-\] governing the problem boundaries are explicitly registered │ │ and evaluated for potential inversion. │ └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Gate["Operation 2 stop conditions"]
+    Gate --> C1["Causal falsifiability: every HYP has an EVDREQ check"]
+    Gate --> C2["No bare correlations: explain the mechanism"]
+    Gate --> C3["Contradiction deepening: define technical and physical states"]
+    Gate --> C4["Bottleneck localization: identify the limiting constraint"]
+    Gate --> C5["Tacit assumptions exposed: register ASM nodes and risks"]
+```
 
 
-    ### Popperian Falsifiability Rule
-    A diagnostic claim that cannot be disproved by any conceivable empirical test is an **epistemic hallucination**. If an agent states *"The system is slow due to microservice complexity,"* this statement is non-falsifiable. 
+### Popperian Falsifiability Rule
+A diagnostic claim that cannot be disproved by any conceivable empirical test is an **epistemic hallucination**. If an agent states *"The system is slow due to microservice complexity,"* this statement is non-falsifiable. 
 
-    To satisfy Operation 2, the claim must be translated into:
-    > *"The p99 latency spike is caused by synchronous HTTP serialization overhead between Service A and Service B ($HYP-01$). This hypothesis will be FALSIFIED if an in-memory mock of Service B reduces p99 latency by less than $50\text{ ms}$ under a 2,000 RPS load ($EVDREQ-01$)."*
+To satisfy Operation 2, the claim must be translated into:
+> *"The p99 latency spike is caused by synchronous HTTP serialization overhead between Service A and Service B ($HYP-01$). This hypothesis will be FALSIFIED if an in-memory mock of Service B reduces p99 latency by less than $50\text{ ms}$ under a 2,000 RPS load ($EVDREQ-01$)."*
 
-    ---
+---
 
-    ## 7. Common Mistakes & Diagnostic Anti-Patterns
+## 7. Common Mistakes & Diagnostic Anti-Patterns
 
-    ```mermaid
-    graph TD
-        classDef err fill:#ffebee,stroke:#c62828,stroke-width:2px;
-        
-        E1["<b>1. The Root Cause Fallacy</b><br/>Searching for a single culprit component in a complex adaptive network"]:::err
-        E2["<b>2. Symptomatic Monkey-Patching</b><br/>Suppressing errors or increasing timeouts without fixing mechanism"]:::err
-        E3["<b>3. Correlation as Causation</b><br/>Assuming metric spike X caused outage Y without confounding analysis"]:::err
-        E4["<b>4. Local Sub-Optimization</b><br/>Optimizing non-bottleneck code (Amdahl serial fraction ignored)"]:::err
-        E5["<b>5. Premature Compromise</b><br/>Settling for a mediocre trade-off instead of resolving the contradiction"]:::err
-        E6["<b>6. Confabulated Telemetry</b><br/>Cherry-picking log lines that confirm pre-existing biases"]:::err
+```mermaid
+graph TD
+    classDef err fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    
+    E1["<b>1. The Root Cause Fallacy</b><br/>Searching for a single culprit component in a complex adaptive network"]:::err
+    E2["<b>2. Symptomatic Monkey-Patching</b><br/>Suppressing errors or increasing timeouts without fixing mechanism"]:::err
+    E3["<b>3. Correlation as Causation</b><br/>Assuming metric spike X caused outage Y without confounding analysis"]:::err
+    E4["<b>4. Local Sub-Optimization</b><br/>Optimizing non-bottleneck code (Amdahl serial fraction ignored)"]:::err
+    E5["<b>5. Premature Compromise</b><br/>Settling for a mediocre trade-off instead of resolving the contradiction"]:::err
+    E6["<b>6. Confabulated Telemetry</b><br/>Cherry-picking log lines that confirm pre-existing biases"]:::err
 
 ### 1. The Root Cause Fallacy (Allspaw & Dekker)
 
@@ -4730,24 +4689,16 @@ Abadi formulated the **PACELC Theorem**, which models system behavior under both
 
 $$\text{If } \mathbf{P} \text{ (Partition)} \implies \text{choose between } \mathbf{A} \text{ (Availability) and } \mathbf{C} \text{ (Consistency)}; \quad \mathbf{E} \text{ (Else / Normal Operation)} \implies \text{choose between } \mathbf{L} \text{ (Latency) and } \mathbf{C} \text{ (Consistency)}.$$
 
-                                      ┌───────────────────────────┐
-                                      │   PACELC CLASSIFICATION   │
-                                      └─────────────┬─────────────┘
-                                                    │
-                           ┌────────────────────────┴────────────────────────┐
-                           ▼                                                 ▼
-                 ┌───────────────────┐                             ┌───────────────────┐
-                 │   PC / EC (or L)  │                             │   PA / EL (or C)  │
-                 │ (Consistency-1st) │                             │ (Availability-1st)│
-                 └─────────┬─────────┘                             └─────────┬─────────┘
-                           │                                                 │
-              ┌────────────┴────────────┐                       ┌────────────┴────────────┐
-              ▼                         ▼                       ▼                         ▼
-       ┌─────────────┐           ┌─────────────┐         ┌─────────────┐           ┌─────────────┐
-       │    PC/EC    │           │    PC/EL    │         │    PA/EL    │         │    PA/EC    │
-       │ Spanner/Raft│           │ MongoDB (W:1│         │Dynamo/Cass. │         │ Hazelcast / │
-       │ Strong Cons.│           │ Async Repl.)│         │ Low Latency │         │ Stale Master│
-       └─────────────┘           └─────────────┘         └─────────────┘         └─────────────┘
+``` mermaid
+flowchart TD
+    PACELC["PACELC classification"]
+    PACELC --> Consistency["PC / EC (or L)<br/>Consistency first"]
+    PACELC --> Availability["PA / EL (or C)<br/>Availability first"]
+    Consistency --> Spanner["PC/EC<br/>Spanner or Raft<br/>Strong consistency"]
+    Consistency --> Mongo["PC/EL<br/>MongoDB, W:1<br/>Asynchronous replication"]
+    Availability --> Dynamo["PA/EL<br/>Dynamo or Cassandra<br/>Low latency"]
+    Availability --> Hazelcast["PA/EC<br/>Hazelcast<br/>Stale master"]
+```
 
 PACELC makes the normal-case trade-off explicit. Even when the network is healthy, linearizable consistency needs round-trip coordination. For example, it can need synchronous quorum replication or two-phase commit. This adds latency.
 
@@ -6079,30 +6030,14 @@ A **Decision-Significant Unknown (`UNK-`)** is an unverified empirical parameter
 
 Engineers and AI agents must subject every proposed inquiry to the **Decision-Significance Filter**:
 
-                           ┌──────────────────────────────────────────────┐
-                           │  Proposed Question / Information Need        │
-                           └──────────────────────┬───────────────────────┘
-                                                  │
-                                                  ▼
-                           ┌──────────────────────────────────────────────┐
-                           │ Does an outcome exist that would alter the   │
-                           │ choice between Candidate A and Candidate B?  │
-                           └──────────────────────┬───────────────────────┘
-                                                  │
-                                         No ──────┴────── Yes
-                                         │                 │
-                                         ▼                 ▼
-                      ┌──────────────────────┐   ┌──────────────────────────────┐
-                      │ REJECT AS EPISTEMIC  │   │ Is EVOI(Experiment) > 0 ?   │
-                      │ NOISE (EVOI = 0)     │   └──────────────┬───────────────┘
-                      └──────────────────────┘                  │
-                                                       No ──────┴────── Yes
-                                                       │                 │
-                                                       ▼                 ▼
-                                    ┌──────────────────────┐   ┌──────────────────────┐
-                                    │ ADOPT CHEAPEST       │   │ REGISTER AS TYPED    │
-                                    │ REVERSIBLE FALLBACK  │   │ UNKNOWN [UNK-*]      │
-                                    └──────────────────────┘   └──────────────────────┘
+``` mermaid
+flowchart TD
+    Question["Proposed question or information need"] --> Changes{"Could an outcome alter the choice between Candidate A and Candidate B?"}
+    Changes -->|No| Reject["Reject as epistemic noise<br/>EVOI = 0"]
+    Changes -->|Yes| EVOI{"Is EVOI(experiment) > 0?"}
+    EVOI -->|No| Fallback["Adopt cheapest reversible fallback"]
+    EVOI -->|Yes| Unknown["Register as typed unknown<br/>UNK-*"]
+```
 
 #### Taxonomy of Decision-Significant Unknowns
 
@@ -7048,24 +6983,13 @@ $$\text{Abstractness } A = \frac{N_a}{N_c}, \quad A \in [0, 1]$$
 
 <!-- -->
 
-     Abstractness (A)
-      1.0 ┌──────────────────────────────────────────────┐
-          │ Zone of Uselessness                          │
-          │ (A=1, I=0)              Main Sequence Line   │
-          │ ╲                        A + I = 1           │
-          │  ╲                                           │
-          │   ╲                                          │
-          │    ╲                                         │
-          │     ╲                                        │
-          │      ╲                                       │
-          │       ╲                                      │
-          │        ╲                                     │
-          │         ╲                                    │
-          │          ╲               Zone of Pain        │
-          │           ╲              (A=0, I=0)          │
-      0.0 └────────────┴─────────────────────────────────┘
-         0.0 (Stable)                       1.0 (Unstable)
-                           Instability (I)
+``` mermaid
+flowchart LR
+    Stable["Stable concrete component<br/>A = 0, I = 0"] --> Main["Main sequence<br/>A + I = 1"]
+    Main --> Abstract["Abstract component<br/>A = 1, I = 0"]
+    Stable -.-> Pain["Zone of pain<br/>High dependency and low abstraction"]
+    Abstract -.-> Useless["Zone of uselessness<br/>High abstraction and low usefulness"]
+```
 
 The **Normalized Distance from the Main Sequence ($D$)** measures structural balance:
 
@@ -7141,19 +7065,15 @@ In [*How Buildings Learn: What Happens After They're Built* (Viking, 1994)](http
 
 <!-- -->
 
-     Slow / Stable
-      ┌─────────────────────────────────────────────────────────────┐
-      │ 1. DATA MODELS & STORAGE FOUNDATIONS (Relational Schemas)   │
-      ├─────────────────────────────────────────────────────────────┤
-      │ 2. CORE DOMAIN INVARIANTS & BUSINESS RULES (Domain Model)   │
-      ├─────────────────────────────────────────────────────────────┤
-      │ 3. APPLICATION WORKFLOWS & USE CASES (Orchestration)        │
-      ├─────────────────────────────────────────────────────────────┤
-      │ 4. PRESENTATION & INTEGRATION APIS (GraphQL, REST, UI)      │
-      ├─────────────────────────────────────────────────────────────┤
-      │ 5. THIRD-PARTY CLIENTS & EPHEMERAL CONSUMERS                │
-      └─────────────────────────────────────────────────────────────┘
-     Fast / Volatile
+``` mermaid
+flowchart TD
+    Slow["Slow / stable"] --> Data["1. Data models and storage foundations"]
+    Data --> Domain["2. Core domain invariants and business rules"]
+    Domain --> Workflows["3. Application workflows and use cases"]
+    Workflows --> APIs["4. Presentation and integration APIs"]
+    APIs --> Clients["5. Third-party clients and ephemeral consumers"]
+    Clients --> Fast["Fast / volatile"]
+```
 
 > **The Software Pace Layering Rule**:\
 > *Fast-changing layers must always depend on slow-changing layers, never the reverse.*\
@@ -7335,10 +7255,14 @@ Through algorithmic **partitioning** (matrix reordering based on topological sor
     Partitioned & Clustered DSM
               E   [A   B   C]   D
           E [ .     .   .   .   . ]  (Layer 0: Core Foundation / Zero Dependencies)
-        ┌─A [ .     .   1   .   . ]
-    Clus│ B [ .     .   .   1   . ]  (Layer 1: Strongly Connected Component Cluster)
-        └─C [ .     1   .   .   . ]  <-- Unresolved feedback loop requiring DIP!
-          D [ 1     .   1   .   . ]  (Layer 2: High-Level Application Orchestrator)
+``` mermaid
+flowchart TD
+    A["A"] --> B["B"] --> C["C"] --> A
+    D["D: High-level application orchestrator"] --> B
+    D --> E["E: Core foundation"]
+    C -. "Unresolved feedback loop; apply DIP" .-> Interface["I_A: Abstract interface"]
+    Interface -. implemented by .-> A
+```
 
 Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extract an abstract interface $I_A$ from Component $A$. Now, Component $C$ depends on interface $I_A$, and Component $A$ implements $I_A$. The transformed matrix becomes purely lower-triangular:
 
@@ -8221,20 +8145,12 @@ Where:
 
 <!-- -->
 
-     Mean Queue Wait Time (Wq)
-        │
-     ∞  │                                                  │ (Asymptote at ρ = 1.0)
-        │                                                 ╱
-        │                                                ╱
-        │                                               ╱
-        │                                              ╱
-        │                                            ┌┘  <-- Non-linear "Hockey Stick" Cliff
-        │                                          ┌─┘
-        │                                     ┌────┘
-        │                       ┌─────────────┘
-      0 └───────────────────────┴──────────────────────────┴─────>
-       0.0                     0.70          0.90         1.00
-                                   Server Utilization (ρ)
+``` mermaid
+flowchart LR
+    Low["ρ = 0.0<br/>Low queue wait"] --> Mid["ρ = 0.70<br/>Variance becomes visible"]
+    Mid --> Cliff["ρ = 0.90<br/>Non-linear queueing cliff"]
+    Cliff --> Asymptote["ρ → 1.0<br/>Wait time tends to infinity"]
+```
 
 > **The Non-Linear Utilization Law**:\
 > As utilization $\rho$ exceeds $0.70$–$0.80$, queue wait time grows non-linearly. At $\rho = 0.95$, wait time is $19\times$ the service time; at $\rho = 0.99$, it is $99\times$. Any slight variance in arrival rate or service time ($C_a^2 + C_s^2$) immediately pushes the system over the queueing cliff into severe latency degradation.
@@ -8794,22 +8710,13 @@ flowchart LR
 
 The team applied **Technique 7.3 (Account for Latencies, Ordering, and Phases)** by instituting the **Multi-Version Coexistence Rule**:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                             MULTI-VERSION COEXISTENCE PROTOCOL                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ INVARIANT: At any moment t, the system MUST be capable of correctly executing when Version V     │
-    │ and Version V+1 are both actively reading and writing to the identical storage and message buses.│
-    │                                                                                                  │
-    │ PHASE 1: TOLERANT READ (Deploy V1.1)                                                             │
-    │ - Deploy code that can read BOTH old (String) and new (Structured) payload formats.              │
-    │ - Still writes old format.                                                                       │
-    │                                                                                                  │
-    │ PHASE 2: WRITE EXPANSION (Deploy V2.0)                                                           │
-    │ - Deploy code that writes the new format, but maintains backward-compatible fallback fields.     │
-    │                                                                                                  │
-    │ PHASE 3: CONTRACT & CLEANUP (Deploy V3.0 - after 100% fleet migration)                           │
-    │ - Deprecate and remove legacy reading logic.                                                     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Invariant["Invariant: Version V and V+1 can read and write the same storage and buses"]
+    Invariant --> Phase1["Phase 1: Tolerant read<br/>Deploy V1.1<br/>Read old and new payloads; write old format"]
+    Phase1 --> Phase2["Phase 2: Write expansion<br/>Deploy V2.0<br/>Write new format with backward-compatible fields"]
+    Phase2 --> Phase3["Phase 3: Contract and cleanup<br/>Deploy V3.0 after full fleet migration<br/>Remove legacy read logic"]
+```
 
 ``` typescript
 type ShippingAddress =
@@ -8881,17 +8788,16 @@ The team applied **Separation Principles across Time and Resources**:
 
 <!-- -->
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                         TRANSACTION BOUNDARY TEMPORAL RESTRUCTURING                              │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ BEFORE (ANTI-PATTERN):                                                                           │
-    │   BEGIN DB TX ───> [ External HTTP Call (4.5s) ] ───> UPDATE DB ───> COMMIT DB TX                 │
-    │   (DB Connection held for 4,500ms!)                                                              │
-    │                                                                                                  │
-    │ AFTER (OPERATION 7 TEMPORAL SEPARATION):                                                         │
-    │   Step 1: [ External HTTP Call (4.5s) ] (Zero DB connections held)                               │
-    │   Step 2: BEGIN DB TX ───> UPDATE DB ───> COMMIT DB TX (DB Connection held for 3ms!)            │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart LR
+    subgraph Before["Before: anti-pattern"]
+        Begin["BEGIN DB transaction"] --> Http["External HTTP call<br/>4.5 seconds"] --> Update["UPDATE DB"] --> Commit["COMMIT DB transaction"]
+        Http -.-> Held["DB connection held for 4,500 ms"]
+    end
+    subgraph After["After: temporal separation"]
+        Http2["External HTTP call<br/>4.5 seconds<br/>No DB connection held"] --> Begin2["BEGIN DB transaction"] --> Update2["UPDATE DB"] --> Commit2["COMMIT<br/>Connection held for 3 ms"]
+    end
+```
 
 #### Outcome
 
@@ -9283,19 +9189,12 @@ For a system with $m$ independent functional requirements:
 
 $$I_{\text{total}} = \sum_{i=1}^m \log_2 \left( \frac{1}{P_{s,i}} \right)$$
 
-      Probability
-      Density p(x)
-           ▲
-           │                  ┌──────── Design Range ────────┐
-           │                  │                              │
-           │             ....─┼──────────────────────────────┼─....
-           │           .      │     Common Range (Overlap)   │      .
-           │         .        │             P_s              │        .
-           │        .         │                              │         .
-           │       .          │                              │          .
-           │      .  System   │                              │           .
-           │     .   Range    │                              │            .
-           └─────┴────────────┴──────────────────────────────┴────────────┴──────► Performance Parameter (x)
+``` mermaid
+flowchart LR
+    System["System range<br/>Probability density p(x)"] --> Overlap["Common range overlap<br/>P_s"]
+    Design["Design range"] --> Overlap
+    Overlap --> Information["Information content<br/>I = log₂(1 / P_s)"]
+```
 
 **Software Translation of the Information Axiom**:
 
@@ -9334,25 +9233,14 @@ $$\mathcal{P} = \{ A \in \mathcal{C} \mid \nexists B \in \mathcal{C} \text{ such
 
 Any candidate strictly dominated by another candidate in the feasible set must be eliminated immediately.
 
-      p99 Latency (Lower is Better)
-       0 ms ┌─────────────────────────────────────────────────────────┐
-            │                                                         │
-            │      ★ CAN-01 (Pareto Optimal)                          │
-            │        \                                                │
-            │         \                                               │
-            │          \                                              │
-            │           ★ CAN-03 (Pareto Optimal)                     │
-            │             \                                           │
-     100 ms │              \                                          │
-            │               \       ▲ CAN-02 (Dominated by CAN-01)    │
-            │                \                                        │
-            │                 ★ CAN-04 (Pareto Optimal)               │
-            │                   \                                     │
-     200 ms │                    \                                    │
-            │                     \── Pareto Frontier                 │
-            └─────────────────────────────────────────────────────────┴─────►
-            $0/mo                    $5,000/mo                 $10,000/mo
-                               Infrastructure Cost (TCO)
+``` mermaid
+flowchart TD
+    Frontier["Pareto frontier"] --> CAN1["CAN-01<br/>Pareto optimal"]
+    Frontier --> CAN3["CAN-03<br/>Pareto optimal"]
+    Frontier --> CAN4["CAN-04<br/>Pareto optimal"]
+    CAN1 -. dominates .-> CAN2["CAN-02<br/>Dominated by CAN-01"]
+    Costs["Axes: infrastructure cost (TCO) and p99 latency<br/>Lower latency and lower cost are better"] -.-> Frontier
+```
 
 ------------------------------------------------------------------------
 
@@ -10398,17 +10286,16 @@ Any candidate change with $\text{RPN} > 120$ or $S \ge 9$ cannot proceed without
 
 In Ariadne, an assertion in an Architecture Decision Record (ADR) or pull request is treated as ungrounded speculation until mapped to its corresponding rung on the **Evidentiary Ladder**.
 
-      EVIDENTIARY LADDER OF SOFTWARE VERIFICATION
-      ▲
-      │  [Rung 7] Chaos Engineering & Production Fault Injection (Network partition, node kill)
-      │  [Rung 6] Shadow Traffic & Dark Launching (Live traffic diffing, zero user impact)
-      │  [Rung 5] Saturation & Performance Profiling (p99 tail latency, memory allocation flamegraphs)
-      │  [Rung 4] Consumer-Driven Contract Testing (Pact, Schema Registry compatibility)
-      │  [Rung 3] Mutation Testing (Kill score MS >= 0.85 across synthetic faults)
-      │  [Rung 2] Property-Based Testing & Shrinking (QuickCheck, 100k generated state-sequences)
-      │  [Rung 1] Deterministic State-Machine & Unit Invariant Tests (Isolated, hermetic execution)
-      └─────────────────────────────────────────────────────────────────────────────────────────────►
-         INCREASING REALISM, SYSTEM RESILIENCE, & EPISTEMIC CONFIDENCE
+``` mermaid
+flowchart BT
+    R1["Rung 1: Deterministic state-machine and unit tests"] --> R2["Rung 2: Property-based testing and shrinking"]
+    R2 --> R3["Rung 3: Mutation testing"]
+    R3 --> R4["Rung 4: Consumer-driven contract testing"]
+    R4 --> R5["Rung 5: Saturation and performance profiling"]
+    R5 --> R6["Rung 6: Shadow traffic and dark launching"]
+    R6 --> R7["Rung 7: Chaos engineering and production fault injection"]
+    R7 --> Confidence["Increasing realism, system resilience, and epistemic confidence"]
+```
 
 #### The Rungs of the Evidentiary Ladder
 
@@ -11200,13 +11087,14 @@ In the Ariadne reasoning layer, software engineering is modeled as a directed ac
 
 A central feature of the Ariadne epistemic engine is **Transitive Invalidation**. If an assumption `ASM-01` ("Database network roundtrip latency is $<1\text{ ms}$ across availability zones") or a hypothesis `HYP-04` is proven false by empirical evidence `EVD-12` (`EVD-12 falsifies ASM-01`), all downstream candidate mechanisms (`CAN-02`), trade-off calculations (`VAL-03`), and decisions (`DEC-01`) that depend on that node are automatically marked **INVALIDATED** ($N_i \xrightarrow{\text{depends_on}} N_j \land \text{State}(N_j) = \text{FALSIFIED} \implies \text{State}(N_i) \leftarrow \text{INVALIDATED}$).
 
-    [ ASM-01: AZ Latency < 1ms ] ◄─── (falsifies) ─── [ EVD-12: Ping p99 = 8.4ms ]
-            │ (depends_on)                                      │
-            ▼                                                   │ (triggers)
-    [ CAN-02: Synchronous 2PC RPC ] ─────────────► [ State: INVALIDATED ]
-            │ (depends_on)                                      │
-            ▼                                                   │ (triggers)
-    [ DEC-01: Lockstep Distributed Commit ] ──────► [ State: INVALIDATED ]
+``` mermaid
+flowchart TD
+    Evidence["EVD-12: Ping p99 = 8.4 ms"] -->|falsifies| Assumption["ASM-01: AZ latency < 1 ms"]
+    Assumption -->|depends_on| Candidate["CAN-02: Synchronous 2PC RPC"]
+    Candidate -->|triggers| CandidateState["State: INVALIDATED"]
+    Candidate -->|depends_on| Decision["DEC-01: Lockstep distributed commit"]
+    Decision -->|triggers| DecisionState["State: INVALIDATED"]
+```
 
 ------------------------------------------------------------------------
 
@@ -11374,22 +11262,15 @@ In software engineering, a **Contradiction** arises when an effort to improve on
 
 Traditional engineering practice approaches contradictions as **inevitable trade-offs** to be negotiated via compromise (for example, "we will accept 500 ms latency to ensure consistency," or "we will accept occasional data loss to achieve 100,000 RPS"). Compromise is the primary generator of long-term architectural entropy: it leaves both requirements suboptimal and introduces complex, fragile middle-ground code.
 
-                        ┌─────────────────────────────────────────┐
-                        │          TRADITIONAL COMPROMISE         │
-                        │   Degrades both requirements into a     │
-                        │      sub-optimal middle ground          │
-                        └────────────────────┬────────────────────┘
-                                             │
-            Requirement A ◄──────────────────┴──────────────────► Requirement B
-       (for example, High Throughput)                               (for example, Low Latency)
-                                             ▲
-                                             │
-                        ┌────────────────────┴────────────────────┐
-                        │     SYSTEMATIC SEPARATION PRINCIPLE     │
-                        │  Satisfies 100% of Requirement A AND    │
-                        │  100% of Requirement B along orthogonal │
-                        │               dimensions                │
-                        └─────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Compromise["Traditional compromise<br/>Degrades both requirements into a sub-optimal middle ground"]
+    Separation["Systematic separation principle<br/>Satisfies 100% of both requirements along orthogonal dimensions"]
+    Compromise --> RequirementA["Requirement A:<br/>High throughput"]
+    Compromise --> RequirementB["Requirement B:<br/>Low latency"]
+    Separation --> RequirementA
+    Separation --> RequirementB
+```
 
 The Nine Operations resolve software contradictions through the **Four Software Separation Principles**:
 
@@ -12581,17 +12462,14 @@ invalidation_triggers:
 
 Sections 9 through 12 complete the bridge from abstract inventive theory to concrete, grounded software reality:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE COMPLETE EPISTEMIC CHAIN (PART 3 SYNTHESIS)                                                  │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. CONTRADICTIONS AS FIRST-CLASS CONCEPTS (§8): Map conflicts across software quality attributes.│
-    │ 2. SOFTWARE EFFECTS DATABASE (§9): Select invariant computational mechanisms over transient tools│
-    │ 3. COMPONENT ELIMINATION (§10): Trim accidental code & redistribute functions to existing carriers│
-    │ 4. REPOSITORY & TELEMETRY GROUNDING (§11): Extract empirical facts via AST, git, and OTel spans. │
-    │ 5. ADVERSARIAL CONTRADICTION REVIEW (§12): Subject candidate mechanisms to 7 attack vectors.     │
-    │                                                                                                  │
-    │ OUTPUT: Verified, grounded, trimmed, and invariant-preserving software transformations.          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart LR
+    C1["1. Contradictions as first-class concepts"] --> C2["2. Software effects database"]
+    C2 --> C3["3. Component elimination"]
+    C3 --> C4["4. Repository and telemetry grounding"]
+    C4 --> C5["5. Adversarial contradiction review"]
+    C5 --> Output["Output: Verified, grounded, trimmed, invariant-preserving transformations"]
+```
 
 By decoupling computational mechanisms from transient commercial software, relentlessly eliminating unnecessary code, anchoring reasoning in empirical repository and telemetry data, and subjecting all proposals to hostile contradiction review, human engineers and AI agents achieve repeatable architectural breakthroughs.
 
@@ -12760,16 +12638,16 @@ The router executes recursive transitive invalidation down the directed subgraph
 
 $$\forall v \in \mathcal{V}_t \quad \text{such that} \quad v \xrightarrow{\text{depends_on}^+} \text{ASM-02} \implies \text{State}(v) \leftarrow \text{INVALIDATED}$$
 
-    [ ASM-02: AZ Latency < 1ms ] ◄── (falsified_by) ── [ EVD-08: Ping p99 = 8.4ms ]
-            │ (depends_on)                                      │
-            ▼                                                   │ (triggers invalidation)
-    [ CAN-01: Synchronous 2PC RPC ] ─────────────► [ State: INVALIDATED ]
-            │ (depends_on)                                      │
-            ▼                                                   │ (triggers invalidation)
-    [ DEP-03: Tight Temporal Coupling ] ──────────► [ State: INVALIDATED ]
-            │ (depends_on)                                      │
-            ▼                                                   │ (triggers invalidation)
-    [ DEC-04: Lockstep Distributed Commit ] ──────► [ State: INVALIDATED ]
+``` mermaid
+flowchart TD
+    Evidence["EVD-08: Ping p99 = 8.4 ms"] -->|falsifies| Assumption["ASM-02: AZ latency < 1 ms"]
+    Assumption -->|depends_on| Candidate["CAN-01: Synchronous 2PC RPC"]
+    Candidate -->|invalidates| CandidateState["State: INVALIDATED"]
+    Candidate -->|depends_on| Dependency["DEP-03: Tight temporal coupling"]
+    Dependency -->|invalidates| DependencyState["State: INVALIDATED"]
+    Dependency -->|depends_on| Decision["DEC-04: Lockstep distributed commit"]
+    Decision -->|invalidates| DecisionState["State: INVALIDATED"]
+```
 
 When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt. It detects that $U_{\text{space}}$ and $U_{\text{diag}}$ have sharply increased due to the collapse of Candidate 1, and immediately routes execution back to **Step 4 (Explore Space)** or **Step 2 (Diagnose Mechanism)** to synthesize asynchronous or partition-tolerant candidate mechanisms (for example, Saga with compensating transactions, or CRDT-based state replication).
 
@@ -13118,7 +12996,7 @@ Apply the system dynamics modeling techniques (Section 7):
 - Node: `DYN-[ID]` (Dynamic System Model)
 - Artifact: **Dynamics Map** (Section 28)
 
-``` markdown
+```` markdown
 ### DYN-01: Dynamic Stress Attack on Candidates
 
 ```mermaid
@@ -13136,46 +13014,49 @@ flowchart LR
 - **CAN-02 Dynamic Risk:** Quota exhaustion in EU while US has surplus. If rebalancing queue lags ($> 5\text{ s}$), EU users receive false "Out of Stock" (false negative) while 200 units sit idle in US. Balancing loop required: exponential backoff quota requests.
 - **CAN-03 Dynamic Risk:** Mode switch boundary creates a sharp latency cliff: request $N=21$ takes $2\text{ ms}$, request $N=20$ takes $180\text{ ms}$. Concurrent requests at the boundary can race, triggering duplicate master delegations.
 
+````
+
 <!-- -->
 
 
-    ### 5. Verification Gates & Stop Conditions
-    - **Gate 6.1:** Dynamic models account for tail latency ($p99/p99.9$), client retries, and bounded queue limits.
-    - **Gate 6.2:** All reinforcing failure loops have explicit balancing mechanisms (circuit breakers, rate limiters, jittered backoff, shedding).
+### 5. Verification Gates & Stop Conditions
+- **Gate 6.1:** Dynamic models account for tail latency ($p99/p99.9$), client retries, and bounded queue limits.
+- **Gate 6.2:** All reinforcing failure loops have explicit balancing mechanisms (circuit breakers, rate limiters, jittered backoff, shedding).
 
-    ---
+---
 
-    ## Step 7. Select the Next Evidence Suite
+## Step 7. Select the Next Evidence Suite
 
-    ### 1. Objective & Semantic Boundary
-    If multiple competing candidates survive dependency and dynamics attacks, design a focused **differentiating empirical experiment suite** to resolve the decisive trade-offs before embarking on full-scale production implementation.
+### 1. Objective & Semantic Boundary
+If multiple competing candidates survive dependency and dynamics attacks, design a focused **differentiating empirical experiment suite** to resolve the decisive trade-offs before embarking on full-scale production implementation.
 
-    ### 2. Formal Input Preconditions
-    - Evaluated candidates (`CAN-01`, `CAN-02`, `CAN-03`) with attached `DEP-*` and `DYN-*` risk models.
-    - Multidimensional value criteria (performance, operational cost, cognitive load, migration friction).
+### 2. Formal Input Preconditions
+- Evaluated candidates (`CAN-01`, `CAN-02`, `CAN-03`) with attached `DEP-*` and `DYN-*` risk models.
+- Multidimensional value criteria (performance, operational cost, cognitive load, migration friction).
 
-    ### 3. Cognitive Transformation
-    Apply the value determination and differentiating check techniques (Sections 5 and 8):
-    1. **Identify the Decisive Differentiating Factor:** Find the single metric or invariant where Candidate A and Candidate B make contradictory claims (e.g., *"CAN-02 false-out-of-stock rate under asymmetric demand is $< 0.1\%$"* vs. *"CAN-03 boundary race condition causes zero double-allocations under Jepsen network partition"*).
-    2. **Specify Minimal Evidence Requests (`EVDREQ-`):** Define the exact synthetic workload, failure injection script, or benchmark harness required to generate unambiguous empirical proof.
+### 3. Cognitive Transformation
+Apply the value determination and differentiating check techniques (Sections 5 and 8):
+1. **Identify the Decisive Differentiating Factor:** Find the single metric or invariant where Candidate A and Candidate B make contradictory claims (e.g., *"CAN-02 false-out-of-stock rate under asymmetric demand is $< 0.1\%$"* vs. *"CAN-03 boundary race condition causes zero double-allocations under Jepsen network partition"*).
+2. **Specify Minimal Evidence Requests (`EVDREQ-`):** Define the exact synthetic workload, failure injection script, or benchmark harness required to generate unambiguous empirical proof.
 
-    ### 4. Produced Typed Epistemic Artifacts
-    - Node: `VAL-[ID]` (Multidimensional Trade-Off Matrix)
-    - Node: `EVDREQ-DIFF-[ID]` (Differentiating Evidence Requests)
-    - Artifact: **Value and Selection Table** (Section 8)
+### 4. Produced Typed Epistemic Artifacts
+- Node: `VAL-[ID]` (Multidimensional Trade-Off Matrix)
+- Node: `EVDREQ-DIFF-[ID]` (Differentiating Evidence Requests)
+- Artifact: **Value and Selection Table** (Section 8)
 
-    ```markdown
-    ### VAL-01: Multidimensional Candidate Evaluation
+```markdown
+### VAL-01: Multidimensional Candidate Evaluation
 
-    | Evaluation Dimension | CAN-01 (Multi-Raft) | CAN-02 (Quota Partitioning) | CAN-03 (Adaptive Mode Shift) |
-    |---|---|---|---|
-    | Invariant I1 (Zero Oversell)| Proven (ACID Raft) | Proven (Disjoint Sets) | Unproven under boundary race |
-    | Invariant I2 (Latency <300ms)| Fails under WAN spike | Passes (p99 < 15ms) | Passes (p99 < 25ms / 190ms peak)|
-    | Operational Complexity | High (Raft cluster ops) | Low (Standard SQL DB) | Medium (Routing state proxy) |
-    | Asymmetric Demand Penalty | None | Risk of premature out-of-stock| None |
+| Evaluation Dimension | CAN-01 (Multi-Raft) | CAN-02 (Quota Partitioning) | CAN-03 (Adaptive Mode Shift) |
+|---|---|---|---|
+| Invariant I1 (Zero Oversell)| Proven (ACID Raft) | Proven (Disjoint Sets) | Unproven under boundary race |
+| Invariant I2 (Latency <300ms)| Fails under WAN spike | Passes (p99 < 15ms) | Passes (p99 < 25ms / 190ms peak)|
+| Operational Complexity | High (Raft cluster ops) | Low (Standard SQL DB) | Medium (Routing state proxy) |
+| Asymmetric Demand Penalty | None | Risk of premature out-of-stock| None |
 
-    ### EVDREQ-DIFF-01: Quota Rebalancing Simulation & Race Test
-    - Objective: Measure CAN-02 false-out-of-stock rate under 90/10 asymmetric traffic skew, and test CAN-03 boundary race safety under 50 concurrent threads hitting stock=20.
+### EVDREQ-DIFF-01: Quota Rebalancing Simulation & Race Test
+- Objective: Measure CAN-02 false-out-of-stock rate under 90/10 asymmetric traffic skew, and test CAN-03 boundary race safety under 50 concurrent threads hitting stock=20.
+```
 
 ### 5. Verification Gates & Stop Conditions
 
@@ -13600,17 +13481,16 @@ In Deep Mode, single-agent reasoning is strictly prohibited. Deep Mode enforces:
 
 <!-- -->
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ DEEP MODE MULTI-AGENT VERIFICATION PIPELINE                                                      │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. Formal Specification of Invariants (TLA+ / Alloy / Executable Property Contracts)             │
-    │ 2. Independent Candidate Construction in Git Worktrees (`worktree/can-01`, `worktree/can-02`)    │
-    │ 3. Automated Mutation Testing (Assert Mutation Kill Score ≥ 85%)                                 │
-    │ 4. Jepsen / Chaos Fault Injection (Simulate Network Splits, SIGKILL, Clock Drift ±200ms)         │
-    │ 5. Synthetic Load & Saturation Benchmarks (Drive System to 10x Production Peak)                  │
-    │ 6. Dark Launch / Shadow Traffic Replay with Bit-for-Bit Differential Assertion                   │
-    │ 7. Formal Proof of Reversibility & Rollback Dry-Run on Staging Snapshot                          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Invariants["1. Specify invariants<br/>TLA+, Alloy, or executable property contracts"]
+    Invariants --> Candidates["2. Build independent candidates<br/>Git worktrees"]
+    Candidates --> Mutation["3. Run mutation testing<br/>Kill score ≥ 85%"]
+    Mutation --> Chaos["4. Run Jepsen and chaos fault injection<br/>Partitions, SIGKILL, clock drift"]
+    Chaos --> Load["5. Run synthetic load and saturation benchmarks"]
+    Load --> Shadow["6. Replay dark-launch and shadow traffic<br/>Bit-for-bit differential assertion"]
+    Shadow --> Rollback["7. Prove reversibility<br/>Rollback dry-run on staging snapshot"]
+```
 
 ------------------------------------------------------------------------
 
@@ -14303,35 +14183,24 @@ Traditional project management tools track **execution state** (to-do lists, tic
 
 Neither tracks **epistemic state**: *What do we know to be true? What are we assuming? What hypotheses are currently under test? What evidence has falsified which options? Why was candidate B chosen over candidate A?*
 
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                          EPISTEMIC GRAPH (Ariadne)                          │
-    │                                                                             │
-    │   [OBS-01] ──supports──> [HYP-01] ──contradicts──> [HYP-02]                 │
-    │      │                      │                                               │
-    │      │                      └──depends_on──> [ASM-01]                       │
-    │      │                                          │ (falsifies)               │
-    │      ▼                                          ▼                           │
-    │   [EVD-01] ───────────────────────────────> [VAL-01]                        │
-    │                                                 │                           │
-    │                                                 ▼ (invalidates)             │
-    │                                              [CAN-02] ──> [DEC-01]          │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                          ▲
-                                          │ Epistemic Overlay
-                                          ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                       PROJECT & EXECUTION STATE (GSD)                       │
-    │                                                                             │
-    │   Phase 01: Architecture ──> Phase 02: Migration ──> Phase 03: Cutover      │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                          ▲
-                                          │ Implementation Realization
-                                          ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                       CODE & INFRASTRUCTURE STATE                           │
-    │                                                                             │
-    │   src/ledger/  ──  src/auth/  ──  migrations/  ──  tests/  ──  deploy/      │
-    └─────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    OBS["OBS-01"] -->|supports| HYP1["HYP-01"]
+    HYP1 -->|contradicts| HYP2["HYP-02"]
+    HYP1 -->|depends_on| ASM["ASM-01"]
+    EVD["EVD-01"] --> VAL["VAL-01"]
+    ASM -->|falsifies| VAL
+    VAL -->|invalidates| CAN["CAN-02"]
+    CAN --> DEC["DEC-01"]
+    subgraph GSD["Project and execution state"]
+        Phase1["Phase 01: Architecture"] --> Phase2["Phase 02: Migration"] --> Phase3["Phase 03: Cutover"]
+    end
+    subgraph Code["Code and infrastructure state"]
+        Ledger["src/ledger/"] --> Auth["src/auth/"] --> Migrations["migrations/"] --> Tests["tests/"] --> Deploy["deploy/"]
+    end
+    DEC -. Epistemic overlay .-> Phase1
+    Phase3 -. Implementation realization .-> Ledger
+```
 
 The working artifacts in Sections 21 through 35 represent typed nodes within an **Epistemic Graph** $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each artifact captures a discrete transformation of the problem state across the 9 Operations of Systematic Inventive Thinking.
 
@@ -14576,7 +14445,7 @@ The **Map of Causes, Constraints, and Contradictions** formalizes the diagnostic
 
 ### Production-Grade Template: Diagnosis & Contradiction Map
 
-``` markdown
+```` markdown
 # DIAG-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Brief Title]
 
 ## 1. Empirical Observations & Symptoms
@@ -14584,36 +14453,43 @@ The **Map of Causes, Constraints, and Contradictions** formalizes the diagnostic
 - **OBS-02**: [Correlated behavior under defined load or environment]
 
 ## 2. Causal Hypotheses Tree
+
+``` mermaid
+flowchart TD
+    Observation["OBS-01: High latency / double auth"] --> Hypothesis1["HYP-01: Cross-region synchronous lock contention<br/>Status: VERIFIED"]
+    Hypothesis1 --> Evidence1["Evidence: 170 ms in Postgres row lock over WAN"]
+    Observation --> Hypothesis2["HYP-02: Local connection pool starvation<br/>Status: FALSIFIED"]
+    Hypothesis2 --> Evidence2["Evidence: Pool utilization was 14% during peak latency spikes"]
 ```
 
-\[OBS-01: High Latency / Double Auth\] │ ├── \[HYP-01: Cross-region synchronous lock contention\] (Status: VERIFIED) │ └── Evidence: Trace shows 170ms spent in Postgres row lock over WAN │ └── \[HYP-02: Local connection pool starvation\] (Status: FALSIFIED) └── Evidence: Pool utilization was 14% during peak latency spikes
 
+## 3. Binding System Constraint (Theory of Constraints)
+- **Constraint Identification**: [The single resource, boundary, or law of physics that dictates system throughput / latency]
+- **Constraint Exploitation**: [How the constraint is currently utilized or wasted]
+- **Subordination of Other Components**: [Are non-constraints overloading the constraint?]
 
-    ## 3. Binding System Constraint (Theory of Constraints)
-    - **Constraint Identification**: [The single resource, boundary, or law of physics that dictates system throughput / latency]
-    - **Constraint Exploitation**: [How the constraint is currently utilized or wasted]
-    - **Subordination of Other Components**: [Are non-constraints overloading the constraint?]
+## 4. Formal Engineering Contradictions (TRIZ Formulation)
 
-    ## 4. Formal Engineering Contradictions (TRIZ Formulation)
+### Contradiction 1: Technical Contradiction (Trade-off)
+- **Improving Parameter**: [e.g., Latency / Availability in local region]
+- **Worsening Parameter**: [e.g., Global Consistency / Double-Spend Prevention]
+- **Standard Compromise (Anti-Pattern)**: [e.g., Set TTL cache on balance and accept 0.05% loss]
 
-    ### Contradiction 1: Technical Contradiction (Trade-off)
-    - **Improving Parameter**: [e.g., Latency / Availability in local region]
-    - **Worsening Parameter**: [e.g., Global Consistency / Double-Spend Prevention]
-    - **Standard Compromise (Anti-Pattern)**: [e.g., Set TTL cache on balance and accept 0.05% loss]
+### Contradiction 2: Physical Contradiction (Opposing States Required)
+- **Parameter $P$ must be in State $S_1$**: [e.g., Balance state MUST be centralized and locked globally to prevent concurrent double-allocation]
+- **Parameter $P$ must be in State $S_2$**: [e.g., Balance state MUST be localized and unlocked to allow sub-100ms response during WAN partition]
+- **Conflict Condition**: [Occurs when concurrent transactions arrive across multiple continents within WAN propagation delay $\Delta t$]
 
-    ### Contradiction 2: Physical Contradiction (Opposing States Required)
-    - **Parameter $P$ must be in State $S_1$**: [e.g., Balance state MUST be centralized and locked globally to prevent concurrent double-allocation]
-    - **Parameter $P$ must be in State $S_2$**: [e.g., Balance state MUST be localized and unlocked to allow sub-100ms response during WAN partition]
-    - **Conflict Condition**: [Occurs when concurrent transactions arrive across multiple continents within WAN propagation delay $\Delta t$]
+## 5. Underlying Hidden Assumptions
+- **ASM-01**: [e.g., "An account balance must be stored as a single scalar integer in one database row."]
+- **ASM-02**: [e.g., "Replication must be synchronous to achieve zero data loss."]
 
-    ## 5. Underlying Hidden Assumptions
-    - **ASM-01**: [e.g., "An account balance must be stored as a single scalar integer in one database row."]
-    - **ASM-02**: [e.g., "Replication must be synchronous to achieve zero data loss."]
+## 6. Differentiating Falsification Tests
+| Hypothesis | Differentiating Experiment | Expected Result if TRUE | Expected Result if FALSE |
+|---|---|---|---|
+| **HYP-01** | Run load test with synthetic 150ms WAN delay on DB pool | P99 scales linearly with WAN delay | P99 remains flat |
 
-    ## 6. Differentiating Falsification Tests
-    | Hypothesis | Differentiating Experiment | Expected Result if TRUE | Expected Result if FALSE |
-    |---|---|---|---|
-    | **HYP-01** | Run load test with synthetic 150ms WAN delay on DB pool | P99 scales linearly with WAN delay | P99 remains flat |
+````
 
 ### Distributed Systems Case Study Example: Payment Contradiction Diagnosis
 
@@ -14753,35 +14629,38 @@ The **Solution Space Map** executes systematic morphological analysis across ort
 
 ### Distributed Systems Case Study Example: Payment Solution Space
 
-``` markdown
+```` markdown
 # SPACE-2026-08-PAY-001: Multi-Region Payment Engine Architectural Space
 
 ## 1. Morphological Analysis Matrix
+
+``` mermaid
+flowchart TD
+    Ownership["State ownership"] --> Master["Central master<br/>Pruned by WAN latency"]
+    Ownership --> DistSQL["Geo-partitioned distributed SQL"]
+    DistSQL --> CAN1["CAN-01: CockroachDB Geo-Raft"]
+    Ownership --> Escrow["Partitioned slices: escrow"]
+    Escrow --> CAN2["CAN-02: Bounded CRDT escrow"]
+    Ownership --> Consistency["Consistency protocol"]
+    Consistency --> TwoPC["Synchronous 2PC<br/>Pruned by WAN latency"]
+    Consistency --> LocalRaft["Raft within local region"] --> CAN1
+    Consistency --> Gossip["Asynchronous gossip and escrow"] --> CAN2
 ```
 
-                    [State Ownership]
-                     ├── Central Master (Pruned by WAN Latency)
-                     ├── Geo-Partitioned Dist SQL ─────────> [CAN-01: CockroachDB Geo-Raft]
-                     └── Partitioned Slices (Escrow) ───────> [CAN-02: Bounded CRDT Escrow]
-                                  │
-                                  ▼
-                         [Consistency Protocol]
-                          ├── Synchronous 2PC (Pruned by WAN Latency)
-                          ├── Raft within Local Region ─────> [CAN-01]
-                          └── Async Gossip + Escrow ────────> [CAN-02]
 
+## 2. Invariant-Based Pruning
+1. Any combination relying on synchronous cross-Atlantic network round-trips during the HTTP request lifecycle is pruned because minimum WAN RTT (76ms) + TLS + 2-phase coordination guarantees violation of the 120ms P99 SLA.
+2. Any pure eventual consistency model that allows uncontrolled balance overdrafts without hard cryptographic/mathematical bounds is pruned due to strict banking invariant INV-01.
 
-    ## 2. Invariant-Based Pruning
-    1. Any combination relying on synchronous cross-Atlantic network round-trips during the HTTP request lifecycle is pruned because minimum WAN RTT (76ms) + TLS + 2-phase coordination guarantees violation of the 120ms P99 SLA.
-    2. Any pure eventual consistency model that allows uncontrolled balance overdrafts without hard cryptographic/mathematical bounds is pruned due to strict banking invariant INV-01.
+## 3. Selected Candidates for Full Evaluation
+- **CAN-01 (Geo-Partitioned Distributed SQL)**:
+  - *Mechanism*: CockroachDB cluster across 3 regions. Accounts partitioned by `home_region`. Authorizations in home region achieve local consensus (< 30ms). Roaming authorizations (e.g. EU cardholder in US) execute cross-region Raft.
+- **CAN-02 (Bounded Counter CRDT with Autonomous Escrow Rebalancing)**:
+  - *Mechanism*: Custom Go service in each region. Balance partitioned into regional escrows. Local authorizations execute against local escrow in memory backed by local PostgreSQL ledger. Background daemon shifts escrow based on predictive traffic.
+- **CAN-03 (Tokenized Pre-Auth Reservation with Central Lease)**:
+  - *Mechanism*: Short-lived (5-minute) balance reservation leases granted to regional nodes by central authority. Regional node can authorize up to leased amount with zero coordination.
 
-    ## 3. Selected Candidates for Full Evaluation
-    - **CAN-01 (Geo-Partitioned Distributed SQL)**:
-      - *Mechanism*: CockroachDB cluster across 3 regions. Accounts partitioned by `home_region`. Authorizations in home region achieve local consensus (< 30ms). Roaming authorizations (e.g. EU cardholder in US) execute cross-region Raft.
-    - **CAN-02 (Bounded Counter CRDT with Autonomous Escrow Rebalancing)**:
-      - *Mechanism*: Custom Go service in each region. Balance partitioned into regional escrows. Local authorizations execute against local escrow in memory backed by local PostgreSQL ledger. Background daemon shifts escrow based on predictive traffic.
-    - **CAN-03 (Tokenized Pre-Auth Reservation with Central Lease)**:
-      - *Mechanism*: Short-lived (5-minute) balance reservation leases granted to regional nodes by central authority. Regional node can authorize up to leased amount with zero coordination.
+````
 
 ------------------------------------------------------------------------
 
@@ -14889,7 +14768,12 @@ The **Dependency Matrix** maps **reasons for change (requirements)** to **system
 ## 3. Change Propagation Radius & Decoupling Strategy
 ```
 
-\[Change: Add Local Currency Escrow\] │ ├──\> (Direct) Auth Engine Service \[Modifies balance deduction logic\] │ └──\> (Decoupled via Interface) Ledger DB \[No schema change required\] │ └──\> (Isolated) Gateway API \[Zero change: accepts existing payment DTO\]
+``` mermaid
+flowchart TD
+    Change["Change: Add local currency escrow"] --> Auth["Direct: Auth Engine Service<br/>Modifies balance deduction logic"]
+    Change --> Ledger["Decoupled via interface: Ledger DB<br/>No schema change required"]
+    Change --> Gateway["Isolated: Gateway API<br/>Zero change; accepts existing payment DTO"]
+```
 
 ### Distributed Systems Case Study Example: Payment Dependency Analysis
 
@@ -14932,7 +14816,7 @@ The **Dynamics Map** models system behavior across time, varying load, failure s
 
 ### Production-Grade Template: Dynamics Map
 
-``` markdown
+```` markdown
 # DYN-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Dynamics Map Title]
 
 ## 1. System Stocks, Flows, and Delays
@@ -14947,29 +14831,38 @@ The **Dynamics Map** models system behavior across time, varying load, failure s
 ## 2. Feedback Loops & System Archetypes
 
 ### Reinforcing Loop (Vicious Cycle: R1)
+
+``` mermaid
+flowchart LR
+    WAN["High WAN latency"] --> Duration["Increased request duration"] --> Pool["Connection pool exhaustion"]
+    Pool --> Timeouts["Client HTTP timeouts"] --> Queue["Gateway queue depth blowup"] --> Retries["Network retries"] --> Duration
 ```
 
-\[High WAN Latency\] ──\> \[Increased Request Duration\] ──\> \[Connection Pool Exhaustion\] ▲ │ │ ▼ \[Network Retries\] \<── \[Client HTTP Timeouts\] \<── \[Gateway Queue Depth Blowup\]
+*Mitigation*: Strict exponential backoff with jitter + client-side circuit breaking at 150ms.
 
-    *Mitigation*: Strict exponential backoff with jitter + client-side circuit breaking at 150ms.
+### Balancing Loop (Self-Correcting: B1)
 
-    ### Balancing Loop (Self-Correcting: B1)
+``` mermaid
+flowchart LR
+    Low["Regional escrow < 20%"] --> Pull["Trigger asynchronous pull"] --> Acquire["Acquire escrow from peer region"] --> Restored["Balance restored"]
+    Restored --> Low
+```
 
-\[Regional Escrow \< 20%\] ──\> \[Trigger Async Pull\] ──\> \[Acquire Escrow from Peer Region\] ▲ │ └──────────────── \[Balance Restored\] \<────────────────────┘
 
+## 3. Operating Modes Behavior Matrix
+| Operating Mode | System State & Behavior | Throughput Capacity | Latency Profile | Data Loss Risk |
+|---|---|---|---|---|
+| **Mode 1: Steady State** | All 3 regions healthy, WAN latency < 90ms | 50,000 TPS | P99 = 42ms | Zero (RPO = 0) |
+| **Mode 2: Peak Burst** | 3x normal traffic during flash sale | 150,000 TPS | P99 = 88ms | Zero |
+| **Mode 3: Degraded WAN** | Inter-region fiber cut, packet loss 20% | 50,000 TPS local | P99 = 45ms local | Zero (Sync pauses) |
+| **Mode 4: Complete Partition**| Total isolation of `ap-southeast-1` | 15,000 TPS local | P99 = 40ms local | Zero (Escrow bounds) |
+| **Mode 5: Disaster Recovery** | Complete loss of `us-east-1` data center | 40,000 TPS diverted | P99 = 110ms | RPO < 100ms |
+| **Mode 6: Reconvergence** | Partition heals, reconciling ledgers | 50,000 TPS + Sync | P99 = 65ms | Zero |
 
-    ## 3. Operating Modes Behavior Matrix
-    | Operating Mode | System State & Behavior | Throughput Capacity | Latency Profile | Data Loss Risk |
-    |---|---|---|---|---|
-    | **Mode 1: Steady State** | All 3 regions healthy, WAN latency < 90ms | 50,000 TPS | P99 = 42ms | Zero (RPO = 0) |
-    | **Mode 2: Peak Burst** | 3x normal traffic during flash sale | 150,000 TPS | P99 = 88ms | Zero |
-    | **Mode 3: Degraded WAN** | Inter-region fiber cut, packet loss 20% | 50,000 TPS local | P99 = 45ms local | Zero (Sync pauses) |
-    | **Mode 4: Complete Partition**| Total isolation of `ap-southeast-1` | 15,000 TPS local | P99 = 40ms local | Zero (Escrow bounds) |
-    | **Mode 5: Disaster Recovery** | Complete loss of `us-east-1` data center | 40,000 TPS diverted | P99 = 110ms | RPO < 100ms |
-    | **Mode 6: Reconvergence** | Partition heals, reconciling ledgers | 50,000 TPS + Sync | P99 = 65ms | Zero |
+## 4. Next Bottleneck Post-Optimization
+- After eliminating WAN database lock contention via regional escrows, the next binding constraint will be **local NVMe disk IOPS for PostgreSQL Write-Ahead Log (WAL) flushing under peak fsync load**.
 
-    ## 4. Next Bottleneck Post-Optimization
-    - After eliminating WAN database lock contention via regional escrows, the next binding constraint will be **local NVMe disk IOPS for PostgreSQL Write-Ahead Log (WAL) flushing under peak fsync load**.
+````
 
 ### Distributed Systems Case Study Example: Payment Dynamics
 
@@ -15052,7 +14945,7 @@ The **Verification Card** specifies an executable, falsifiable test harness for 
 
 ### Production-Grade Template: Verification Card
 
-``` markdown
+```` markdown
 # VAL-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Verification Title]
 
 ## 1. Target Candidate & Claim
@@ -15099,34 +14992,37 @@ const verificationCommand = "npm test -- --runInBand multi-region-escrow --timeo
 
 - **Verdict**: **SUPPORTED** (Claim verified under full fault envelope)
 
+````
+
 <!-- -->
 
 
-    ### Distributed Systems Case Study Example: Escrow Verification Card
+### Distributed Systems Case Study Example: Escrow Verification Card
 
-    ```markdown
-    # VAL-2026-08-PAY-001: Verification of Bounded CRDT Escrow Non-Negativity under Jepsen Partition
+``` markdown
+# VAL-2026-08-PAY-001: Verification of Bounded CRDT Escrow Non-Negativity under Jepsen Partition
 
-    ## 1. Target Candidate & Claim
-    - **Target Candidate**: CAN-02 (Bounded CRDT Escrow Engine)
-    - **Target Claim [CLM-01]**: Under symmetric network partition where EU is isolated from US and APAC for 120 seconds, concurrent debits against a single account cannot produce an aggregate balance deficit or double-authorization.
+## 1. Target Candidate & Claim
+- **Target Candidate**: CAN-02 (Bounded CRDT Escrow Engine)
+- **Target Claim [CLM-01]**: Under symmetric network partition where EU is isolated from US and APAC for 120 seconds, concurrent debits against a single account cannot produce an aggregate balance deficit or double-authorization.
 
-    ## 2. Verification Methodology
-    - **Test Category**: Chaos Injection & Distributed Jepsen Property Test.
-    - **Harness**: Jepsen test suite written in Clojure/Go driving 3 regional clusters.
-    - **Repository Location**: `file:///c:/Users/bulky/Projects/ariadne/tests/jepsen/escrow_test.clj`
+## 2. Verification Methodology
+- **Test Category**: Chaos injection and distributed property test.
+- **Harness**: TypeScript fault-injection harness driving 3 regional clusters.
+- **Repository Location**: `tests/jepsen/escrow_test.ts`
 
-    ## 3. Quantitative Criteria
-    - **Pass Criteria**:
-      - Invariant: $\forall \text{accounts } a, \sum \text{debits}(a) \le \text{initial\_balance}(a)$.
-      - 100% of duplicate HTTP requests with identical `idempotency_key` return identical `auth_token`.
-    - **Falsification Criteria**:
-      - $\sum \text{debits}(a) > \text{initial\_balance}(a)$ even by 0.01.
+## 3. Quantitative Criteria
+- **Pass Criteria**:
+  - Invariant: $\forall \text{accounts } a, \sum \text{debits}(a) \le \text{initial\_balance}(a)$.
+  - 100% of duplicate HTTP requests with identical `idempotency_key` return identical `auth_token`.
+- **Falsification Criteria**:
+  - $\sum \text{debits}(a) > \text{initial\_balance}(a)$ even by 0.01.
 
-    ## 4. Empirical Results
-    - **Result**: 5,000,000 operations executed during 5 simulated partition cycles.
-    - **Violations**: 0 balance over-allocations detected.
-    - **Verdict**: **SUPPORTED**.
+## 4. Empirical Results
+- **Result**: 5,000,000 operations executed during 5 simulated partition cycles.
+- **Violations**: 0 balance over-allocations detected.
+- **Verdict**: **SUPPORTED**.
+```
 
 ------------------------------------------------------------------------
 
@@ -15146,7 +15042,7 @@ The **Transition Plan** designs the temporary architectural mechanisms (expand/c
 
 ### Production-Grade Template: Transition Plan
 
-``` markdown
+```` markdown
 # TRANS-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Transition Plan Title]
 
 ## 1. System Evolution Endpoints
@@ -15154,40 +15050,50 @@ The **Transition Plan** designs the temporary architectural mechanisms (expand/c
 - **Target State ($S_1$)**: Multi-region active-active Go Auth Daemon, Bounded CRDT Escrow, local regional PostgreSQL ledgers, async gossip replication.
 
 ## 2. Temporary Transition Architecture (Shims & Adapters)
+
+``` mermaid
+flowchart TD
+    Traffic["Client traffic"] --> Router["Traffic router<br/>Envoy or feature flag"]
+    Router -->|95% S0| Legacy["Legacy Auth Service"] --> LegacyDB["PostgreSQL us-east-1"]
+    LegacyDB -->|CDC / Debezium| New["New Escrow Daemon"]
+    Router -->|5% S1| New
+    New --> Regional["Local regional database"]
+    Shadow["Shadow reconciler<br/>Compares S0 and S1 decisions"] -.-> Legacy
+    Shadow -.-> New
 ```
 
-\[Client Traffic\] │ ▼ \[Traffic Router (Envoy / Feature Flag)\] ├── (95% S0) ──\> \[Legacy Auth Service\] ──\> \[PostgreSQL us-east-1\] │ │ │ (CDC / Debezium) │ ▼ └── ( 5% S1) ──\> \[New Escrow Daemon\] ───\> \[Local Regional DB\] │ \[Shadow Reconciler\] (Compares S0 vs S1 decisions)
 
+## 3. Phased Migration Execution Stages
 
-    ## 3. Phased Migration Execution Stages
+### Phase 1: Dual-Schema & Shadow Mode (Zero Traffic Impact)
+- Deploy regional PostgreSQL databases in `eu-west-1` and `ap-southeast-1`.
+- Establish Debezium CDC pipeline replicating account state from US master to regional stores.
+- Deploy new Auth Daemon in **Shadow Mode**: processes duplicate stream of production traffic, compares authorization decisions against legacy service without returning responses to clients.
+- *Gate 1*: Shadow reconciliation discrepancy rate must equal 0.000% across 100,000,000 transactions over 7 consecutive days.
 
-    ### Phase 1: Dual-Schema & Shadow Mode (Zero Traffic Impact)
-    - Deploy regional PostgreSQL databases in `eu-west-1` and `ap-southeast-1`.
-    - Establish Debezium CDC pipeline replicating account state from US master to regional stores.
-    - Deploy new Auth Daemon in **Shadow Mode**: processes duplicate stream of production traffic, compares authorization decisions against legacy service without returning responses to clients.
-    - *Gate 1*: Shadow reconciliation discrepancy rate must equal 0.000% across 100,000,000 transactions over 7 consecutive days.
+### Phase 2: Canary Routing & Escrow Allocation (Internal Staff)
+- Allocate 5% balance escrows for internal test accounts.
+- Route 100% of internal staff transactions in EU to the new regional engine.
+- *Gate 2*: P99 latency <= 50ms, zero escrow sync errors.
 
-    ### Phase 2: Canary Routing & Escrow Allocation (Internal Staff)
-    - Allocate 5% balance escrows for internal test accounts.
-    - Route 100% of internal staff transactions in EU to the new regional engine.
-    - *Gate 2*: P99 latency <= 50ms, zero escrow sync errors.
+### Phase 3: Regional Ramp-Up (1% -> 10% -> 50% -> 100%)
+- Step-by-step traffic migration using weighted DNS/Envoy routing per geographical region.
+- Continuous automated ledger reconciliation running every 60 seconds.
 
-    ### Phase 3: Regional Ramp-Up (1% -> 10% -> 50% -> 100%)
-    - Step-by-step traffic migration using weighted DNS/Envoy routing per geographical region.
-    - Continuous automated ledger reconciliation running every 60 seconds.
+## 4. Automated Rollback Triggers & Procedure
+| Trigger ID | Condition | Automated Action | Rollback Time |
+|---|---|---|---|
+| **ROLL-01** | Regional Auth Error Rate > 0.05% for 30s | Route 100% traffic back to Legacy US Master | < 5 seconds |
+| **ROLL-02** | Ledger Reconciliation Discrepancy > 0 | Freeze regional escrow allocation, fallback to legacy | < 10 seconds |
+| **ROLL-03** | Regional P99 Latency > 150ms for 2 min | Flip Envoy canary weight to 0% | < 2 seconds |
 
-    ## 4. Automated Rollback Triggers & Procedure
-    | Trigger ID | Condition | Automated Action | Rollback Time |
-    |---|---|---|---|
-    | **ROLL-01** | Regional Auth Error Rate > 0.05% for 30s | Route 100% traffic back to Legacy US Master | < 5 seconds |
-    | **ROLL-02** | Ledger Reconciliation Discrepancy > 0 | Freeze regional escrow allocation, fallback to legacy | < 10 seconds |
-    | **ROLL-03** | Regional P99 Latency > 150ms for 2 min | Flip Envoy canary weight to 0% | < 2 seconds |
+## 5. Decommissioning Criteria for Transition Shims
+- [ ] Legacy shadow comparison proxy deleted: `src/gateway/shadow_proxy.ts`.
+- [ ] Debezium CDC pipeline dismantled once all accounts are mastered in CRDT model.
+- [ ] Feature flag `enable_multi_region_escrow_v2` removed from code and configs.
+- [ ] Legacy monolith `balance` column dropped in PostgreSQL after 30-day quiet period.
 
-    ## 5. Decommissioning Criteria for Transition Shims
-    - [ ] Legacy shadow comparison proxy deleted: `src/gateway/shadow_proxy.go`.
-    - [ ] Debezium CDC pipeline dismantled once all accounts are mastered in CRDT model.
-    - [ ] Feature flag `enable_multi_region_escrow_v2` removed from code and configs.
-    - [ ] Legacy monolith `balance` column dropped in PostgreSQL after 30-day quiet period.
+````
 
 ------------------------------------------------------------------------
 
@@ -15531,34 +15437,13 @@ Let the Epistemic Graph be $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. When an e
 
 <!-- -->
 
-                        ┌─────────────────────────────────────────┐
-                        │  [EVD-2026-08-04: Latency Benchmark]    │
-                        │  Measured: Cross-region RTT = 85ms      │
-                        └─────────────────────────────────────────┘
-                                             │
-                                             ▼ (falsifies)
-                        ┌─────────────────────────────────────────┐
-                        │  [ASM-03: WAN Latency < 15ms]           │
-                        │  Status: FALSIFIED                      │
-                        └─────────────────────────────────────────┘
-                                             │
-                                             ▼ (invalidates via depends_on)
-                        ┌─────────────────────────────────────────┐
-                        │  [CAN-01: Synchronous 2PC across WAN]   │
-                        │  Status: INVALIDATED                    │
-                        └─────────────────────────────────────────┘
-                                             │
-                                             ▼ (invalidates via depends_on)
-                        ┌─────────────────────────────────────────┐
-                        │  [DEC-01: Adopt Global 2PC Master]      │
-                        │  Status: RE-OPENED / INVALIDATED        │
-                        └─────────────────────────────────────────┘
-                                             │
-                                             ▼ (triggers)
-                        ┌─────────────────────────────────────────┐
-                        │  [SPACE-01: Re-evaluate Solution Space] │
-                        │  Promotes CAN-02 (Bounded CRDT Escrow)  │
-                        └─────────────────────────────────────────┘
+``` mermaid
+flowchart TD
+    Evidence["EVD-2026-08-04: Latency benchmark<br/>Cross-region RTT = 85 ms"] -->|falsifies| Assumption["ASM-03: WAN latency < 15 ms<br/>Status: FALSIFIED"]
+    Assumption -->|invalidates via depends_on| Candidate["CAN-01: Synchronous 2PC across WAN<br/>Status: INVALIDATED"]
+    Candidate -->|invalidates via depends_on| Decision["DEC-01: Adopt global 2PC master<br/>Status: RE-OPENED / INVALIDATED"]
+    Decision -->|triggers| Space["SPACE-01: Re-evaluate solution space<br/>Promotes CAN-02: Bounded CRDT Escrow"]
+```
 
 #### Concrete Distributed Systems Invalidation Trace
 
@@ -17086,17 +16971,15 @@ Software engineering stands at a historic inflection point. For decades, the dis
 
 The **Nine Operations of Systematic Inventive Thinking** resolve this dichotomy by demonstrating that software is uniquely suited for systematic inventive reasoning. Unlike civil or mechanical engineering, where building physical prototypes is slow and expensive, software enables the immediate transformation of theoretical hypotheses into **executable experiments**. A software problem can be framed functionally, diagnosed causally, transformed inventively, explored combinatorially, and then immediately subjected to property-based tests, chaos injection, performance benchmarks, and zero-downtime canary transitions.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE UNIFIED EPISTEMIC SEARCH ENGINE                                                              │
-    │                                                                                                  │
-    │   FRAME          DIAGNOSE         TRANSFORM         EXPLORE          VERIFY          TRANSITION   │
-    │ ┌───────┐      ┌──────────┐      ┌─────────┐      ┌─────────┐      ┌────────┐      ┌────────────┐│
-    │ │Problem│ ───► │Causal    │ ───► │System   │ ───► │Solution │ ───► │Exec    │ ───► │Zero-Downtime││
-    │ │Model  │      │Hypothesis│      │Transform│      │Space    │      │Evidence│      │Rollout     ││
-    │ └───────┘      └──────────┘      └─────────┘      └─────────┘      └────────┘      └────────────┘│
-    │     ▲                                                                                    │       │
-    │     └────────────────────────── TRANSITIVE INVALIDATION ─────────────────────────────────┘       │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+``` mermaid
+flowchart LR
+    Frame["Frame<br/>Problem model"] --> Diagnose["Diagnose<br/>Causal hypothesis"]
+    Diagnose --> Transform["Transform<br/>System"]
+    Transform --> Explore["Explore<br/>Solution space"]
+    Explore --> Verify["Verify<br/>Executable evidence"]
+    Verify --> Transition["Transition<br/>Zero-downtime rollout"]
+    Verify -. Transitive invalidation .-> Diagnose
+```
 
 For human engineering organizations, this framework eliminates the unproductive "battle of methodologies," providing a shared cognitive language that unites Domain-Driven Design, Test-Driven Development, SRE, Refactoring, and Systems Thinking under nine invariant operations.
 
