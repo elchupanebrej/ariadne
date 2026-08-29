@@ -103,73 +103,73 @@ Every formal term has an **engineering reading**. The formal statement keeps pre
 
 - [Part 0. Failure Atlas: Enter Through the Incident](#part-0-failure-atlas-enter-through-the-incident)
 - [Part 1. Why Software Engineering Needs a Shared Foundation](#part-1-why-software-engineering-needs-a-shared-foundation)
-  - [1. The Problem of Multiple Engineering Schools](#1-the-problem-of-multiple-engineering-schools)
-    - [1.1. The Same Operation Receives Different Names](#11-the-same-operation-receives-different-names)
-    - [1.2. A Single School Mixes Different Kinds of Work](#12-a-single-school-mixes-different-kinds-of-work)
-    - [1.3. The False Question "Which Methodology is Better?"](#13-the-false-question-which-methodology-is-better)
-  - [2. From Methods to Operations on Problem State](#2-from-methods-to-operations-on-problem-state)
-    - [2.1. From Method Rituals to Operations on Problem State](#21-from-method-rituals-to-operations-on-problem-state)
-    - [2.2. Problem State and Epistemic Overlay](#22-problem-state-and-epistemic-overlay)
-    - [2.3. Input-Action-Output Model](#23-input-action-output-model)
-    - [2.4. Humans vs AI Agents](#24-humans-vs-ai-agents)
-  - [3. The Nine Operations](#3-the-nine-operations)
-  - [4. Three Levels of the Methodology](#4-three-levels-of-the-methodology)
-    - [4.1. Operations (The Epistemic State Transformations)](#41-operations-the-epistemic-state-transformations)
-    - [4.2. Techniques (The 36 Concrete Inventive Operators)](#42-techniques-the-36-concrete-inventive-operators)
-    - [4.3. Working Artifacts and Executable Evidence (The Dual-Layer Evidence Model)](#43-working-artifacts-and-executable-evidence-the-dual-layer-evidence-model)
-  - [5. What a Good Result of Engineering Reasoning Is](#5-what-a-good-result-of-engineering-reasoning-is)
+  - [1.1. The Problem of Multiple Engineering Schools](#11-the-problem-of-multiple-engineering-schools)
+    - [1.1.2. The Same Operation Receives Different Names](#112-the-same-operation-receives-different-names)
+    - [1.1.3. A Single School Mixes Different Kinds of Work](#113-a-single-school-mixes-different-kinds-of-work)
+    - [1.1.4. The False Question "Which Methodology is Better?"](#114-the-false-question-which-methodology-is-better)
+  - [1.2. From Methods to Operations on Problem State](#12-from-methods-to-operations-on-problem-state)
+    - [1.2.1. From method rituals to operations on problem state](#121-from-method-rituals-to-operations-on-problem-state)
+    - [1.2.2. Problem state and epistemic overlay](#122-problem-state-and-epistemic-overlay)
+    - [1.2.3. Input-action-output model](#123-input-action-output-model)
+    - [1.2.4. Humans vs AI agents](#124-humans-vs-ai-agents)
+  - [1.3. The Nine Operations](#13-the-nine-operations)
+  - [1.4. Three Levels of the Methodology](#14-three-levels-of-the-methodology)
+    - [1.4.1. Operations (The Epistemic State Transformations)](#141-operations-the-epistemic-state-transformations)
+    - [1.4.2. Techniques (The 36 Concrete Inventive Operators)](#142-techniques-the-36-concrete-inventive-operators)
+    - [1.4.3. Working Artifacts and Executable Evidence (The Dual-Layer Evidence Model)](#143-working-artifacts-and-executable-evidence-the-dual-layer-evidence-model)
+  - [1.5. What a Good Result of Engineering Reasoning Is](#15-what-a-good-result-of-engineering-reasoning-is)
 - [Part 2. The Nine Core Operations](#part-2-the-nine-core-operations)
-  - [Operation 1. Frame and Model the Software Problem](#operation-1-frame-and-model-the-software-problem)
-  - [Operation 2. Find the Constraint, Cause, or Contradiction](#operation-2-find-the-constraint-cause-or-contradiction)
-  - [Operation 3. Transform the Existing Software System](#operation-3-transform-the-existing-software-system)
-  - [Operation 4. Explore the Space of Architectures and Implementations](#operation-4-explore-the-space-of-architectures-and-implementations)
-  - [Operation 5. Expand Knowledge and Obtain Missing Evidence](#operation-5-expand-knowledge-and-obtain-missing-evidence)
-  - [Operation 6. Arrange Dependencies and Change Boundaries](#operation-6-arrange-dependencies-and-change-boundaries)
-  - [Operation 7. Understand System Behavior Over Time and Under Load](#operation-7-understand-system-behavior-over-time-and-under-load)
-  - [Operation 8. Determine Engineering Value and Select](#operation-8-determine-engineering-value-and-select)
-  - [Operation 9. Verify the Solution by Execution and Safely Execute the Transition](#operation-9-verify-the-solution-by-execution-and-safely-execute-the-transition)
+  - [2.1. Operation 1. Frame and Model the Software Problem](#21-operation-1-frame-and-model-the-software-problem)
+  - [2.2. Operation 2. Find the Constraint, Cause, or Contradiction](#22-operation-2-find-the-constraint-cause-or-contradiction)
+  - [2.3. Operation 3. Transform the Existing Software System](#23-operation-3-transform-the-existing-software-system)
+  - [2.4. Operation 4. Explore the Space of Architectures and Implementations](#24-operation-4-explore-the-space-of-architectures-and-implementations)
+  - [2.5. Operation 5. Expand Knowledge and Obtain Missing Evidence](#25-operation-5-expand-knowledge-and-obtain-missing-evidence)
+  - [2.6. Operation 6. Arrange Dependencies and Change Boundaries](#26-operation-6-arrange-dependencies-and-change-boundaries)
+  - [2.7. Operation 7. Understand System Behavior Over Time and Under Load](#27-operation-7-understand-system-behavior-over-time-and-under-load)
+  - [2.8. Operation 8. Determine Engineering Value and Select](#28-operation-8-determine-engineering-value-and-select)
+  - [2.9. Operation 9. Verify the Solution by Execution and Safely Execute the Transition](#29-operation-9-verify-the-solution-by-execution-and-safely-execute-the-transition)
 - [Part 3. How the Nine Operations Work in Software Engineering](#part-3-how-the-nine-operations-work-in-software-engineering)
-  - [6. Foundations of the Nine Operations](#6-foundations-of-the-nine-operations)
-  - [7. How to Understand Core Concepts in Software](#7-how-to-understand-core-concepts-in-software)
-  - [8. Software Contradictions as a First-Class Concept](#8-software-contradictions-as-a-first-class-concept)
-  - [9. Software Equivalent of an Effects Database](#9-software-equivalent-of-an-effects-database)
-  - [10. Why Component Elimination is Crucial in Software](#10-why-component-elimination-is-crucial-in-software)
-  - [11. Why Agents Must Model from Codebase and System Data](#11-why-agents-must-model-from-codebase-and-system-data)
-  - [12. Independent Contradiction Reviewer](#12-independent-contradiction-reviewer)
+  - [3.6. Foundations of the Nine Operations](#36-foundations-of-the-nine-operations)
+  - [3.7. How to Understand Core Concepts in Software](#37-how-to-understand-core-concepts-in-software)
+  - [3.8. Software Contradictions as a First-Class Concept](#38-software-contradictions-as-a-first-class-concept)
+  - [3.9. Software Equivalent of an Effects Database](#39-software-equivalent-of-an-effects-database)
+  - [3.10. Why Component Elimination is Crucial in Software](#310-why-component-elimination-is-crucial-in-software)
+  - [3.11. Why Agents Must Model from Codebase and System Data](#311-why-agents-must-model-from-codebase-and-system-data)
+  - [3.12. Independent Contradiction Reviewer](#312-independent-contradiction-reviewer)
 - [Part 4. The Unified Development Reasoning Cycle](#part-4-the-unified-development-reasoning-cycle)
-  - [13. Not a Project Lifecycle, but an Uncertainty Router](#13-not-a-project-lifecycle-but-an-uncertainty-router)
-  - [14. Primary Route for an Unfamiliar Software Problem](#14-primary-route-for-an-unfamiliar-software-problem)
-  - [15. How to Select the Next Operation](#15-how-to-select-the-next-operation)
-  - [16. Three Depth Modes](#16-three-depth-modes)
-  - [17. Multi-Agent Reasoning](#17-multi-agent-reasoning)
-  - [18. Claim Provenance Rule & Formal Provenance Algebra](#18-claim-provenance-rule--formal-provenance-algebra)
-  - [19. The 10-Rung Evidentiary Ladder](#19-the-10-rung-evidentiary-ladder)
-  - [20. Completion Conditions for Entire Task](#20-completion-conditions-for-entire-task)
+  - [4.13. Not a Project Lifecycle, but an Uncertainty Router](#413-not-a-project-lifecycle-but-an-uncertainty-router)
+  - [4.14. Primary Route for an Unfamiliar Software Problem](#414-primary-route-for-an-unfamiliar-software-problem)
+  - [4.15. How to Select the Next Operation](#415-how-to-select-the-next-operation)
+  - [4.16. Three Depth Modes](#416-three-depth-modes)
+  - [4.17. Multi-Agent Reasoning](#417-multi-agent-reasoning)
+  - [4.18. Claim Provenance Rule & Formal Provenance Algebra](#418-claim-provenance-rule--formal-provenance-algebra)
+  - [4.19. The 10-Rung Evidentiary Ladder](#419-the-10-rung-evidentiary-ladder)
+  - [4.20. Completion Conditions for Entire Task](#420-completion-conditions-for-entire-task)
 - [Part 5. Working Artifacts](#part-5-working-artifacts)
-  - [21. Engineering Task Passport \[TASK-ID\]](#21-engineering-task-passport-task-id)
-  - [22. Problem Framing Map \[FRAME-ID\]](#22-problem-framing-map-frame-id)
-  - [23. Map of Causes, Constraints, and Contradictions \[DIAG-ID\]](#23-map-of-causes-constraints-and-contradictions-diag-id)
-  - [24. Transformation Log \[TRF-ID\]](#24-transformation-log-trf-id)
-  - [25. Solution Space Map \[SPACE-ID\]](#25-solution-space-map-space-id)
-  - [26. Registry of Unknowns and Knowledge \[UNK-ID\]](#26-registry-of-unknowns-and-knowledge-unk-id)
-  - [27. Dependency Matrix \[DEP-ID\]](#27-dependency-matrix-dep-id)
-  - [28. Dynamics Map \[DYN-ID\]](#28-dynamics-map-dyn-id)
-  - [29. Value and Selection Table \[VAL-SELECT-ID\]](#29-value-and-selection-table-val-select-id)
-  - [30. Verification Card \[VAL-ID\]](#30-verification-card-val-id)
-  - [31. Transition Plan \[TRANS-ID\]](#31-transition-plan-trans-id)
-  - [32. Assumption Registry \[ASM-ID\]](#32-assumption-registry-asm-id)
-  - [33. Decision Log / Architectural Decision Record \[DEC-ID\]](#33-decision-log--architectural-decision-record-dec-id)
-  - [34. Work State Map \[STATE-ID\]](#34-work-state-map-state-id)
-  - [35. Human-AI Handoff \[HANDOFF-ID\]](#35-human-ai-handoff-handoff-id)
-  - [36. Minimal Artifact Set for Small Tasks](#36-minimal-artifact-set-for-small-tasks)
-  - [37. Full Artifact Set for Complex Projects](#37-full-artifact-set-for-complex-projects)
-- [Appendix 1. 36 Techniques for Software Engineering](#appendix-1-36-techniques-for-software-engineering-expanded-reference-manual)
-- [Appendix 2. Practice × Operation Matrix](#appendix-2-practice--operation-matrix-expanded-analytical-guide)
-- [Appendix 3. Glossary of Epistemic and Architectural Concepts](#appendix-3-glossary-of-epistemic-and-architectural-concepts)
-- [Appendix 4. Engineering Task Template](#appendix-4-engineering-task-template-instantiable-specification)
-- [Appendix 5. Rules for the Developer Agent](#appendix-5-rules-for-the-developer-agent-operational-standard)
-- [Conclusion](#conclusion-the-synthesis-of-inventive-thought-and-executable-software)
-- [Master Bibliography](#master-bibliography)
+  - [5.21. Engineering Task Passport \[TASK-ID\]](#521-engineering-task-passport-task-id)
+  - [5.22. Problem Framing Map \[FRAME-ID\]](#522-problem-framing-map-frame-id)
+  - [5.23. Map of Causes, Constraints, and Contradictions \[DIAG-ID\]](#523-map-of-causes-constraints-and-contradictions-diag-id)
+  - [5.24. Transformation Log \[TRF-ID\]](#524-transformation-log-trf-id)
+  - [5.25. Solution Space Map \[SPACE-ID\]](#525-solution-space-map-space-id)
+  - [5.26. Registry of Unknowns and Knowledge \[UNK-ID\]](#526-registry-of-unknowns-and-knowledge-unk-id)
+  - [5.27. Dependency Matrix \[DEP-ID\]](#527-dependency-matrix-dep-id)
+  - [5.28. Dynamics Map \[DYN-ID\]](#528-dynamics-map-dyn-id)
+  - [5.29. Value and Selection Table \[VAL-SELECT-ID\]](#529-value-and-selection-table-val-select-id)
+  - [5.30. Verification Card \[VAL-ID\]](#530-verification-card-val-id)
+  - [5.31. Transition Plan \[TRANS-ID\]](#531-transition-plan-trans-id)
+  - [5.32. Assumption Registry \[ASM-ID\]](#532-assumption-registry-asm-id)
+  - [5.33. Decision Log / Architectural Decision Record \[DEC-ID\]](#533-decision-log--architectural-decision-record-dec-id)
+  - [5.34. Work State Map \[STATE-ID\]](#534-work-state-map-state-id)
+  - [5.35. Human-AI Handoff \[HANDOFF-ID\]](#535-human-ai-handoff-handoff-id)
+  - [5.36. Minimal Artifact Set for Small Tasks](#536-minimal-artifact-set-for-small-tasks)
+  - [5.37. Full Artifact Set for Complex Projects](#537-full-artifact-set-for-complex-projects)
+- [6.38. Appendix 1. 36 Techniques for Software Engineering (Expanded Reference Manual)](#638-appendix-1-36-techniques-for-software-engineering-expanded-reference-manual)
+- [6.39. Appendix 2. Practice × Operation Matrix (Expanded Analytical Guide)](#639-appendix-2-practice--operation-matrix-expanded-analytical-guide)
+- [6.40. Appendix 3. Glossary of Epistemic and Architectural Concepts](#640-appendix-3-glossary-of-epistemic-and-architectural-concepts)
+- [6.41. Appendix 4. Engineering Task Template (Instantiable Specification)](#641-appendix-4-engineering-task-template-instantiable-specification)
+- [6.42. Appendix 5. Rules for the Developer Agent (Operational Standard)](#642-appendix-5-rules-for-the-developer-agent-operational-standard)
+- [6.43. Conclusion: The Synthesis of Inventive Thought and Executable Software](#643-conclusion-the-synthesis-of-inventive-thought-and-executable-software)
+- [6.44. Master Bibliography](#644-master-bibliography)
 
 ------------------------------------------------------------------------
 
@@ -202,9 +202,9 @@ The table is a router. The table is not the model. When you recognize the failur
 
 # Part 1. Why Software Engineering Needs a Shared Foundation
 
-## 1. The Problem of Multiple Engineering Schools
+## 1.1. The Problem of Multiple Engineering Schools
 
-### Many schools, no shared method
+### 1.1.1. Many schools, no shared method
 
 Software engineering has many schools. Sixty years of practice and research produced many methods, design philosophies, and operational models:
 
@@ -263,9 +263,9 @@ The split of methods produces three problems:
 
 ------------------------------------------------------------------------
 
-### 1.1. The Same Operation Receives Different Names
+### 1.1.2. The Same Operation Receives Different Names
 
-#### Software physics and shared operations
+#### 1.1.2.1. Software physics and shared operations
 
 Software is bound by the same computational limits in every paradigm. The paradigm can be a high-throughput message topology, a bare-metal kernel, a reactive user interface, or a secure enclave. The limits do not change:
 
@@ -313,13 +313,13 @@ flowchart LR
     D1 & D2 & D3 & D4 ==> OP2
 ```
 
-#### How schools name the same operations
+#### 1.1.2.2. How schools name the same operations
 
 The sections below show how major software engineering schools name the same operations.
 
 ------------------------------------------------------------------------
 
-#### 1. Remove a component and move its function (Operation 3: Transform)
+#### 1.1.2.3. Remove a component and move its function (Operation 3: Transform)
 
 The operation is: **find a component that adds overhead, latency, or maintenance cost; remove that component; move its useful function to a surviving component, the data owner, or the environment**.
 
@@ -328,7 +328,7 @@ The operation is: **find a component that adds overhead, latency, or maintenance
 - **Clean Architecture and Hexagonal Architecture:** Names include *Flattening the Use-Case Layer* and *Collapsing Anemic Controllers*. You remove redundant Data Transfer Object (DTO) mappers and one-line interactors that only forward repository calls.
 - **TRIZ / Systematic Inventive Thinking** ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)): The name is *Trimming (Ideal Final Result)*. You remove an element. You move its useful functions to remaining elements or to existing external resources. The system moves closer to ideality ($I = \frac{\sum \text{Useful Functions}}{\sum \text{Costs} + \sum \text{Harm}}$).
 
-##### Concrete Architectural Example: Telemetry Ingestion Pipeline
+##### 1.1.2.3.1. Concrete Architectural Example: Telemetry Ingestion Pipeline
 
 Consider an enterprise telemetry platform where an intermediate streaming buffer service (`TelemetryEnricher`) sits between an edge gateway and an append-only analytical database:
 
@@ -387,7 +387,7 @@ In both designs, the transformation removes serialization overhead, network late
 
 ------------------------------------------------------------------------
 
-#### 2. Separation principles and boundary localization (Operation 6: Dependencies)
+#### 1.1.2.4. Separation principles and boundary localization (Operation 6: Dependencies)
 
 The operation is: **decouple two conflicting concerns, execution models, or rates of change by adding explicit physical, logical, or temporal boundaries**.
 
@@ -402,7 +402,7 @@ The operation is: **decouple two conflicting concerns, execution models, or rate
   3. *Separation upon Condition:* Change behavior from operating context or workload characteristics.
   4. *Separation between Parts and Whole:* The subsystem has property $A$. The macro-system has property $\neg A$.
 
-##### Comparative Mapping Table: Separation Across Schools
+##### 1.1.2.4.1. Comparative Mapping Table: Separation Across Schools
 
 | Ariadne Separation Principle | Domain-Driven Design (Evans 2003) | Site Reliability Eng. (Beyer et al. 2016) | Architecture Patterns (Fowler 1999/2002) | Clean Architecture | Theory of Constraints (Goldratt 1984) |
 |:---|:---|:---|:---|:---|:---|
@@ -413,7 +413,7 @@ The operation is: **decouple two conflicting concerns, execution models, or rate
 
 ------------------------------------------------------------------------
 
-#### 3. Diagnostic investigation and contradiction modeling (Operation 2: Diagnose)
+#### 1.1.2.5. Diagnostic investigation and contradiction modeling (Operation 2: Diagnose)
 
 The operation is: **find the structural, logical, or physical mechanism that keeps an undesirable system state, and write a falsifiable causal model**.
 
@@ -425,9 +425,9 @@ The operation is: **find the structural, logical, or physical mechanism that kee
 
 ------------------------------------------------------------------------
 
-### 1.2. A Single School Mixes Different Kinds of Work
+### 1.1.3. A Single School Mixes Different Kinds of Work
 
-#### The hazard of mixed work
+#### 1.1.3.1. The hazard of mixed work
 
 Section 1.1 showed how different disciplines split one operation across many names. The inverse problem is equally destructive: **one engineering school packs different kinds of intellectual work and empirical work into one ritual package**.
 
@@ -459,7 +459,7 @@ flowchart TD
     style DeconstructedOperations fill:#f0f8ff,stroke:#0275d8,stroke-width:2px;
 ```
 
-#### Impact on AI agents and human teams
+#### 1.1.3.2. Impact on AI agents and human teams
 
 Experienced human engineers partly compensate with tacit knowledge. A senior architect knows when to stop discussing domain boundaries (framing / dependencies) and start measuring database write latencies (knowledge acquisition / empirical evidence).
 
@@ -471,11 +471,11 @@ For an AI coding agent or a junior team, a vague directive such as *"Apply DDD"*
 
 ------------------------------------------------------------------------
 
-#### Split major method bundles
+#### 1.1.3.3. Split major method bundles
 
 An actionable framework must split major engineering schools into Ariadne reasoning operations and typed epistemic artifacts.
 
-##### 1. Deconstructing Domain-Driven Design (Evans, 2003)
+##### 1.1.3.3.1. Deconstructing Domain-Driven Design (Evans, 2003)
 
 DDD bundles at least six distinct operations spanning organizational strategy, domain modeling, state consistency, and distributed event dynamics:
 
@@ -492,7 +492,7 @@ DDD bundles at least six distinct operations spanning organizational strategy, d
   - *Constituent Operations*: **Operation 6 (Dependency Inversion)**.
   - *Epistemic Deliverable*: Interface contracts separating domain aggregates from persistence mechanisms.
 
-##### 2. Deconstructing Test-Driven Development (Beck, 2002)
+##### 1.1.3.3.2. Deconstructing Test-Driven Development (Beck, 2002)
 
 The classical "Red-Green-Refactor" cycle bundles contract specification, minimal hypothesis generation, structural refactoring, and regression safety:
 
@@ -506,7 +506,7 @@ The classical "Red-Green-Refactor" cycle bundles contract specification, minimal
   - *Constituent Operations*: **Operation 3 (Transform System)** and **Operation 6 (Arrange Dependencies)**.
   - *Epistemic Deliverable*: Elimination of duplicate logic, encapsulation of volatiles, guarded continuously by **Operation 9 (Executable Verification)**.
 
-##### 3. Deconstructing Site Reliability Engineering (Beyer et al., 2016)
+##### 1.1.3.3.3. Deconstructing Site Reliability Engineering (Beyer et al., 2016)
 
 SRE bundles operational goal setting, distributed observability, dynamic capacity management, and post-incident learning:
 
@@ -525,7 +525,7 @@ SRE bundles operational goal setting, distributed observability, dynamic capacit
 
 ------------------------------------------------------------------------
 
-#### Comprehensive Matrix: Deconstruction of Engineering Schools
+#### 1.1.3.4. Comprehensive Matrix: Deconstruction of Engineering Schools
 
 The following matrix formally decomposes major software engineering traditions into their underlying Ariadne Reasoning Operations and identifies the specific failure risk when the work is conflated.
 
@@ -546,9 +546,9 @@ The following matrix formally decomposes major software engineering traditions i
 
 ------------------------------------------------------------------------
 
-### 1.3. The False Question "Which Methodology is Better?"
+### 1.1.4. The False Question "Which Methodology is Better?"
 
-#### The false rank of methods
+#### 1.1.4.1. The false rank of methods
 
 Software engineering history repeats the same debates:
 
@@ -589,7 +589,7 @@ flowchart TD
     style EpistemicQuestion fill:#f0f8ff,stroke:#0275d8,stroke-width:2px;
 ```
 
-#### Direct operations at problem state
+#### 1.1.4.2. Direct operations at problem state
 
 Do not ask *"Which methodology is better?"* Ask this:
 
@@ -610,7 +610,7 @@ Under Ariadne, an engineering system at any time has a **problem state**. The pr
 - **Decisions (`DEC-`):** Formally locked architectural choices backed by evidence.
 - **Transition plans (`TRANS-`):** Temporary architectural mechanisms (dual-writing, feature flags, CDC pipelines) that make migration from current state to target state safe.
 
-#### Falsification and transitive invalidation
+#### 1.1.4.3. Falsification and transitive invalidation
 
 A core rule of Ariadne is **transitive invalidation**. In software design, decisions often rest on trees of implicit assumptions:
 
@@ -647,7 +647,7 @@ graph TD
 
 ------------------------------------------------------------------------
 
-#### Problem-state to operation routing
+#### 1.1.4.4. Problem-state to operation routing
 
 Do not choose a methodology first. Inspect the current problem state. Then select the matching reasoning operation:
 
@@ -665,11 +665,11 @@ Do not choose a methodology first. Inspect the current problem state. Then selec
 
 ------------------------------------------------------------------------
 
-### Case study: a distributed ledger contradiction
+### 1.1.5. Case study: a distributed ledger contradiction
 
 This case shows the difference between method wars and systematic reasoning. The system is a high-throughput distributed financial ledger.
 
-#### The problem and the method war
+#### 1.1.5.1. The problem and the method war
 
 An enterprise financial application must process high-velocity payment settlements. Under high load, user accounts receive concurrent settlement updates.
 
@@ -689,34 +689,34 @@ flowchart LR
     end
 ```
 
-#### Ariadne resolution
+#### 1.1.5.2. Ariadne resolution
 
 The nine operations resolve the contradiction without a compromise:
 
-##### Step 1: Operation 1 (Frame problem and contract)
+##### 1.1.5.2.1. Step 1: Operation 1 (Frame problem and contract)
 
 - **Required observable behavior:** The system must process authorized settlements. No account balance may drop below zero ($Balance \ge 0$ at all times).
 - **System boundary:** Account Settlement Ingress $\to$ Account Ledger State.
 - **Non-negotiable invariants:** Linearizable consistency per account; throughput $\ge 50,000 \text{ ops/sec}$; p99 latency $\le 10 \text{ ms}$.
 
-##### Step 2: Operation 2 (Find cause and contradiction)
+##### 1.1.5.2.2. Step 2: Operation 2 (Find cause and contradiction)
 
 - **Contradiction statement (`CTR-01`):**
   - If you use *global pessimistic locking* across distributed databases, you keep $P_2$ (consistency), but you degrade $P_1$ (throughput) because of lock contention and distributed transaction overhead (2PC).
   - If you use *asynchronous eventual consistency*, you maximize $P_1$ (throughput), but you violate $P_2$ (linearizable invariant). Concurrent overdraft transactions can pass before state reconciles.
 
-##### Step 3: Operation 5 (Expand knowledge and decision-significant unknowns)
+##### 1.1.5.2.3. Step 3: Operation 5 (Expand knowledge and decision-significant unknowns)
 
 - **Decision-significant unknown (`UNK-01`):** What is the real-world cross-account contention distribution?
 - **Evidence request (`EVDREQ-01`):** Query production historical audit logs. Calculate the probability that simultaneous concurrent transactions hit the *exact same* account ID within a 100 ms window.
 - **Evidence result (`EVD-01`):** $99.98\%$ of transactions target mutually independent account IDs. High contention sits in a small fraction ($0.02\%$) of merchant accounts.
 
-##### Step 4: Operation 6 and TRIZ separation principles (Arrange dependencies and boundaries)
+##### 1.1.5.2.4. Step 4: Operation 6 and TRIZ separation principles (Arrange dependencies and boundaries)
 
 - TRIZ **Separation in Space / State Partitioning:** Contention exists *within* one account, not *between* different accounts. Global locking is accidental coupling.
 - TRIZ **Separation in Time:** Instantaneous balance reservation is separate from long-term immutable ledger persistence.
 
-##### Step 5: Operation 4 (Explore candidate mechanisms)
+##### 1.1.5.2.5. Step 5: Operation 4 (Explore candidate mechanisms)
 
 The team synthesizes structurally distinct candidates:
 
@@ -724,7 +724,7 @@ The team synthesizes structurally distinct candidates:
 - `CAN-02`: Single-threaded in-memory actor model with account-ID hash partitioning (virtual actors pin account state to specific CPU cores; zero lock overhead; linearizability per account).
 - `CAN-03`: Optimistic concurrency with escrow reservation tokens (split balance into independent reservable buckets).
 
-##### Step 6: Operation 9 (Executable verification and transition)
+##### 1.1.5.2.6. Step 6: Operation 9 (Executable verification and transition)
 
 The team implements `CAN-02` (partitioned in-memory actor with asynchronous append-only journaling):
 
@@ -770,14 +770,14 @@ class AccountActor {
 }
 ```
 
-##### Step 7: Empirical verification (`EVD-02`)
+##### 1.1.5.2.7. Step 7: Empirical verification (`EVD-02`)
 
 - Benchmark results: Sustained throughput of $140,000 \text{ ops/sec}$ across a 16-core node; p99 latency of $2.1 \text{ ms}$; zero invariant violations under $10\times$ overload mutation fuzzing.
 - **Transition plan (`TRANS-01`):** Deploy the actor partition cluster in shadow mode. Mirror production transactions with a CDC stream. Verify ledger hash equivalence for 72 hours. Then shift live traffic.
 
 ------------------------------------------------------------------------
 
-### Conclusion to Section 1
+### 1.1.6. Conclusion to Section 1
 
 You do not resolve engineering problems by selecting a favored methodology and enforcing its rituals across the whole problem. You resolve them when you:
 
@@ -789,9 +789,9 @@ This clarity is the foundation for the nine operations in the rest of this docum
 
 ------------------------------------------------------------------------
 
-## 2. From Methods to Operations on Problem State
+## 1.2. From Methods to Operations on Problem State
 
-### 2.1. From method rituals to operations on problem state
+### 1.2.1. From method rituals to operations on problem state
 
 For decades, software engineering has moved between process lifecycles (Waterfall, RUP) and execution methodologies (Scrum, Extreme Programming, Kanban). These frameworks govern cadence, resource allocation, and team synchronization. They do not describe the *epistemic mechanics* of architectural reasoning. They organize when work happens. They do not organize how an engineer or an AI agent navigates uncertainty, finds contradictions, or converges on a sound computational design.
 
@@ -825,7 +825,7 @@ An engineering method is a bundled sequence of operations. When you split method
 
 ------------------------------------------------------------------------
 
-### 2.2. Problem state and epistemic overlay
+### 1.2.2. Problem state and epistemic overlay
 
 In Ariadne, an engineering problem at time $t$ is a **problem state** tuple $\mathcal{S}_t$:
 
@@ -841,7 +841,7 @@ Where:
 
 $$\mathcal{E}_t = \langle \mathcal{V}_E, \mathcal{R}_E \rangle$$
 
-#### Node types ($\mathcal{V}_E$)
+#### 1.2.2.1. Node types ($\mathcal{V}_E$)
 
 Every node $v \in \mathcal{V}_E$ has a typed identifier and a provenance label:
 
@@ -856,7 +856,7 @@ Every node $v \in \mathcal{V}_E$ has a typed identifier and a provenance label:
 9. **`TRANS-` (Transition plan):** The temporary architecture (dual-writing, feature flags, shims, data migrations) required to move safely from current state to target state.
 10. **`DEC-` (Locked decision / ADR):** An immutable architectural choice grounded in verified evidence.
 
-#### Provenance types
+#### 1.2.2.2. Provenance types
 
 Every node $v \in \mathcal{V}_E$ has a provenance type $\tau(v)$:
 
@@ -870,7 +870,7 @@ $$\tau(v) \in \{\text{FACT}, \text{MEASURED}, \text{DERIVED}, \text{ASSUMED}, \t
 - $\text{UNKNOWN}$: Explicitly acknowledged missing information.
 - $\text{DECIDED}$: Locked by a human architect, or verified through empirical falsification.
 
-#### Relations ($\mathcal{R}_E$)
+#### 1.2.2.3. Relations ($\mathcal{R}_E$)
 
 Edges in the epistemic graph define semantic dependencies:
 
@@ -900,7 +900,7 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### 2.3. Input-action-output model
+### 1.2.3. Input-action-output model
 
 An **operation** $\mathcal{O}_k$ is a deterministic cognitive and structural transformer. It maps an input problem state $\mathcal{S}_{\text{in}}$ to a refined output problem state $\mathcal{S}_{\text{out}}$:
 
@@ -922,7 +922,7 @@ flowchart TD
     Output --> Stop["Stop condition: Falsifiability and invariant verification"]
 ```
 
-#### Evidence is monotonic. Belief is not.
+#### 1.2.3.1. Evidence is monotonic. Belief is not.
 
 In software reasoning, empirical evidence accumulation is strictly monotonic. After a benchmark executes and logs a measurement, that historical trace $\text{EVD-} k$ remains an immutable empirical fact.
 
@@ -934,7 +934,7 @@ Downstream candidate mechanisms (`CAN-`) or design decisions (`DEC-`) that rest 
 
 ------------------------------------------------------------------------
 
-### 2.4. Humans vs AI agents
+### 1.2.4. Humans vs AI agents
 
 Software engineering reasoning is done by human engineers or by LLM agents. Both have characteristic failure modes on complex software systems:
 
@@ -951,7 +951,7 @@ Formal problem state plus preconditions and postconditions for each operation tu
 
 ------------------------------------------------------------------------
 
-## 3. The Nine Operations
+## 1.3. The Nine Operations
 
 The nine operations are not arbitrary steps in a linear pipeline. They are an orthogonal, complete basis of cognitive transformations. They explore, diagnose, restructure, and validate software systems.
 
@@ -992,9 +992,9 @@ The sections below analyze each of the nine operations.
 
 ------------------------------------------------------------------------
 
-### 3.1. Operation 1: Frame and Model the Software Problem
+### 1.3.1. Operation 1: Frame and Model the Software Problem
 
-#### Principle
+#### 1.3.1.1. Principle
 
 > **"Separate the problem domain from the implementation machine."**
 
@@ -1002,23 +1002,23 @@ In [*Problem Frames: Analysing and Structuring Software Development Problems* (J
 
 Nam P. Suh's **Axiomatic Design** ([Suh, 1990](https://global.oup.com/academic/product/the-principles-of-design-9780195043457)) maps Functional Requirements (FRs) in the functional domain to Design Parameters (DPs) in the physical domain. Physical choices must not corrupt the functional specification.
 
-#### Purpose
+#### 1.3.1.2. Purpose
 
 Operation 1 strips premature implementation anchoring ("we need Kafka," "we need a Redis cache," "we must rewrite in Go"). It isolates the observable behavioral delta that the software system must deliver. It sets non-negotiable correctness invariants and system boundaries before architectural capital is spent.
 
-#### Input uncertainty ($\mathcal{U}_1$)
+#### 1.3.1.3. Input uncertainty ($\mathcal{U}_1$)
 
 - **Anchoring ambiguity:** Problem statements mix customer needs with technical components.
 - **Boundary confusion:** The system boundary is unclear (client vs. API gateway vs. core service vs. database).
 - **Implicit invariants:** Unstated business constraints. If they are violated, a technically functioning system is still useless.
 
-#### Action ($\mathcal{A}_1$)
+#### 1.3.1.4. Action ($\mathcal{A}_1$)
 
 1. **Functional abstraction:** Express the required function as an active verb and a domain object. Strip technical nouns. Transform "Write an Elasticsearch pipeline" into "Deliver full-text search results matching query $Q$ with freshness $\le 2\text{s}$".
 2. **Behavioral invariant formulation:** Specify the contract with this template: $$\text{Under Conditions } \mathcal{C}, \text{ when Event } \mathcal{E} \text{ occurs, System delivers Outcome } \mathcal{O} \text{ measured as } \mathcal{M}, \text{ preserving Invariant } \mathcal{I}.$$
 3. **Multi-perspective boundary projection:** Project the problem across 7 architectural viewpoints: End User, API Consumer, Data Auditor, Security Adversary, SRE/Operator, Maintainer, and Business Sponsor.
 
-#### Deliverable
+#### 1.3.1.5. Deliverable
 
 A **Problem Framing Map** that contains:
 
@@ -1027,16 +1027,16 @@ A **Problem Framing Map** that contains:
 - Formal invariant definitions (`INV-`): Explicit mathematical or logical safety properties.
 - Success metric specifications: Quantitative bounds (for example, $p99 \le 150\text{ms}$, availability $\ge 99.99\%$).
 
-#### Human vs AI agent
+#### 1.3.1.6. Human vs AI agent
 
 - **For human architects:** Breaks cognitive inertia and confirmation bias. Senior engineers cannot prescribe their favorite tool to every incoming problem.
 - **For AI agents:** Prevents "hallucinatory solution hopping." An LLM agent given a feature request typically writes code for a concrete library at once. Operation 1 forces the agent to freeze the behavioral contract and set falsifiable success criteria before it generates code.
 
 ------------------------------------------------------------------------
 
-### 3.2. Operation 2: Find the Constraint, Cause, or Contradiction
+### 1.3.2. Operation 2: Find the Constraint, Cause, or Contradiction
 
-#### Principle
+#### 1.3.2.1. Principle
 
 > **"Find the physical mechanism, bottleneck, or contradiction that keeps the undesirable state."**
 
@@ -1046,17 +1046,17 @@ In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Pro
 
 Judea Pearl's [*Causality* (Pearl, 2009)](https://doi.org/10.1017/CBO9780511803161) distinguishes correlational observations from structural causal mechanisms with counterfactual interventions: $P(Y \mid \text{do}(X)) \neq P(Y \mid X)$.
 
-#### Purpose
+#### 1.3.2.2. Purpose
 
 Operation 2 moves past superficial symptoms ("the API is slow," "the release cycle is 2 weeks," "the database crashes under peak"). It finds the exact causal graph, the limiting bottleneck (Amdahl's Law, Universal Scalability Law), or the underlying contradiction that prevents the system from reaching its goal.
 
-#### Input uncertainty ($\mathcal{U}_2$)
+#### 1.3.2.3. Input uncertainty ($\mathcal{U}_2$)
 
 - **Symptom-cause mix:** An alarm or metric spike is treated as the root mechanism.
 - **Contradiction camouflage:** An artificial trade-off ("we must sacrifice consistency for performance") is accepted as an immutable physical law.
 - **Unexamined working assumptions:** Invisible dogmas ("all database queries must be transactional," "all microservices must communicate through HTTP").
 
-#### Action ($\mathcal{A}_2$)
+#### 1.3.2.4. Action ($\mathcal{A}_2$)
 
 1.  **Causal Graph Abduction**: Construct a directed acyclic causal chain from observed symptoms to root physical mechanisms, strictly annotating each edge with empirical proof or a differentiating falsification test.
 2.  **Bottleneck Isolation**: Apply queueing theory and Amdahl's Law to identify whether the limitation is serialized CPU, memory bandwidth, lock contention, network I/O, storage latency, or organizational approval serialized paths.
@@ -1075,7 +1075,7 @@ flowchart TD
     P2 --> Contradiction
 ```
 
-#### Deliverable
+#### 1.3.2.5. Deliverable
 
 A **Map of Causes, Constraints, and Contradictions** containing:
 
@@ -1083,16 +1083,16 @@ A **Map of Causes, Constraints, and Contradictions** containing:
 - Contradiction nodes (`CTR-`): Explicit trade-off definitions.
 - Evidence Request nodes (`EVDREQ-`): Differentiating tests designed to disprove competing hypotheses.
 
-#### Human vs AI agent
+#### 1.3.2.6. Human vs AI agent
 
 - **For human architects**: Prevents cargo-culting and superficial blame games (for example, blaming the network or the database driver without profiling).
 - **For AI agents**: LLMs are prone to generating plausible-sounding narratives that hallucinate causality. Operation 2 forces the agent to output a formal hypothesis tree with paired empirical verification scripts.
 
 ------------------------------------------------------------------------
 
-### 3.3. Operation 3: Transform the Existing Software System
+### 1.3.3. Operation 3: Transform the Existing Software System
 
-#### Principle
+#### 1.3.3.1. Principle
 
 > **"Transform system structure purposefully: remove, split, combine, delegate functions, and alter execution mechanics rather than blindly adding new software."**
 
@@ -1100,17 +1100,17 @@ In TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the highest-le
 
 In software architecture, David L. Parnas ([Parnas, 1972](https://dl.acm.org/doi/10.1145/361598.361623)) established that modular decomposition must be guided by information hiding and responsibility allocation rather than mechanical flowcharting.
 
-#### Purpose
+#### 1.3.3.2. Purpose
 
 Operation 3 evolves an existing system's computational topology to remove bottlenecks and resolve contradictions. It avoids the "Second-System Effect" ([Brooks, 1975](https://en.wikipedia.org/wiki/The_Mythical_Man-Month)): costly, unguided ground-up rewrites.
 
-#### Input uncertainty ($\mathcal{U}_3$)
+#### 1.3.3.3. Input uncertainty ($\mathcal{U}_3$)
 
 - **Structural Rigidity**: Belief that the current component topology is fixed.
 - **Accidental Complexity**: Bloat caused by intermediary adapters, redundant caching layers, and unnecessary microservice hops.
 - **Resource Underutilization**: Failure to use built-in runtime, database, OS, or compiler capabilities.
 
-#### Action ($\mathcal{A}_3$)
+#### 1.3.3.4. Action ($\mathcal{A}_3$)
 
 Apply the five systematic software transformation operators:
 
@@ -1124,7 +1124,7 @@ Apply the five systematic software transformation operators:
 4.  **Replace Mechanism**: Shift computational paradigm (for example, synchronous polling $\to$ event-driven push; mutable shared-memory locks $\to$ actor-based message passing; full snapshot copying $\to$ append-only Write-Ahead Log streaming).
 5.  **Alter Execution Topology**: Reorder operations, execute speculatively, introduce backpressure, or pipeline sequential stages.
 
-#### Deliverable
+#### 1.3.3.5. Deliverable
 
 A **Transformation Log** containing:
 
@@ -1132,16 +1132,16 @@ A **Transformation Log** containing:
 - Function Absorption Matrix: Mapping trimmed components to the surviving carriers of their functions.
 - Invariant Impact Assessment: Proof that the transformation does not violate $\mathcal{I}_t$.
 
-#### Human vs AI agent
+#### 1.3.3.6. Human vs AI agent
 
 - **For human architects:** Replaces "let's rewrite the whole system from scratch" with surgical topological edits.
 - **For AI agents**: Prevents the agent from endlessly stacking new dependencies (for example, adding 5 new npm packages or spinning up new containers). Forces the agent to evaluate subtraction and delegation first.
 
 ------------------------------------------------------------------------
 
-### 3.4. Operation 4: Explore the Space of Architectures and Implementations
+### 1.3.4. Operation 4: Explore the Space of Architectures and Implementations
 
-#### Principle
+#### 1.3.4.1. Principle
 
 > **"Construct an orthogonal morphological space of solution classes to avoid premature convergence on local optima."**
 
@@ -1149,16 +1149,16 @@ In [*Discovery, Invention, Research Through the Morphological Approach* (Zwicky,
 
 In software engineering, Nam P. Suh's **Axiomatic Design** ([Suh, 1990](https://global.oup.com/academic/product/the-principles-of-design-9780195043457)) defines the **Independence Axiom (Axiom 1)**: an optimal design must maintain the independence of functional requirements. When exploring the architectural space, dimensions must be orthogonal such that choosing a design parameter along one dimension does not unintentionally constrain or violate another.
 
-#### Purpose
+#### 1.3.4.2. Purpose
 
 Operation 4 expands the solution frontier across distinct design paradigms. The team must not evaluate only 5 minor variants of one implementation paradigm while it stays blind to better architectural classes.
 
-#### Input uncertainty ($\mathcal{U}_4$)
+#### 1.3.4.3. Input uncertainty ($\mathcal{U}_4$)
 
 - **Local Optimum Trap**: Being trapped within a single paradigm (for example, evaluating only relational SQL schemas when the problem is fundamentally graph-traversal or log-structured).
 - **Superficial Diversity**: Generating options that differ only by brand name (for example, Kafka vs. RabbitMQ vs. AWS SQS) rather than architectural mechanics (for example, durable append-only log vs. ephemeral broker-tracked queue vs. distributed ring buffer).
 
-#### Action ($\mathcal{A}_4$)
+#### 1.3.4.4. Action ($\mathcal{A}_4$)
 
 1.  **Identify Orthogonal Architectural Dimensions ($\mathcal{D}_1, \mathcal{D}_2, \dots, \mathcal{D}_k$)**:
     - *State Ownership*: Centralized Shared-Everything $\mid$ Domain-Partitioned $\mid$ Client-Owned $\mid$ Replicated Shared-Nothing.
@@ -1183,7 +1183,7 @@ Operation 4 expands the solution frontier across distinct design paradigms. The 
 - **Candidate 2 (event-driven):** State model B + communication 2 + consistency Y (Kafka log, outbox pattern, causal consistency).
 - **Candidate 3 (local-first):** State model C + communication 2 + consistency Z (client SQLite, CRDT sync, eventual consistency).
 
-#### Deliverable
+#### 1.3.4.5. Deliverable
 
 A **Solution Space Map** containing:
 
@@ -1191,16 +1191,16 @@ A **Solution Space Map** containing:
 - Candidate Mechanism nodes (`CAN-01`, `CAN-02`, `CAN-03`): Representing genuinely distinct architectural classes.
 - Pruning Justifications: Explaining why discarded quadrants were eliminated.
 
-#### Human vs AI agent
+#### 1.3.4.6. Human vs AI agent
 
 - **For human architects**: Overcomes team tribalism and vendor hype, forcing explicit consideration of radically different paradigms.
 - **For AI agents**: An LLM agent prompted to "propose 3 designs" typically returns three slight rewordings of the most frequent training pattern. Operation 4 enforces orthogonal parameterization, forcing the model to generate diverse, mathematically contrasting architectural archetypes.
 
 ------------------------------------------------------------------------
 
-### 3.5. Operation 5: Expand Knowledge and Obtain Missing Evidence
+### 1.3.5. Operation 5: Expand Knowledge and Obtain Missing Evidence
 
-#### Principle
+#### 1.3.5.1. Principle
 
 > **"Distinguish lack of knowledge from lack of options; resolve decision-significant unknowns through empirical falsification and cross-domain mechanism transfer."**
 
@@ -1208,24 +1208,24 @@ In [*The Logic of Scientific Discovery* (Popper, 1934/1959)](https://www.routled
 
 In systems engineering and decision theory ([Simon, 1969](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/)), the **Expected Value of Information (EVOI)** dictates that one should only expend resources gathering information if the anticipated result has the power to change an imminent, high-consequence decision.
 
-#### Purpose
+#### 1.3.5.2. Purpose
 
 Operation 5 prevents two failures: architectural paralysis (endless speculative debate) and reckless blind implementation. It names the critical unknowns that block a sound decision. It then runs the cheapest empirical experiment (spike, benchmark, trace inspection) that can resolve them.
 
-#### Input uncertainty ($\mathcal{U}_5$)
+#### 1.3.5.3. Input uncertainty ($\mathcal{U}_5$)
 
 - **Decision-Significant Unknowns**: Missing factual metrics (for example, "Will this database engine support 50,000 range queries/sec on encrypted columns?").
 - **Vendor/Documentation Drift**: Discrepancies between official library documentation and actual runtime behavior under stress.
 - **Unverified Assumptions Masquerading as Facts**: Untested team beliefs about system performance or platform guarantees.
 
-#### Action ($\mathcal{A}_5$)
+#### 1.3.5.4. Action ($\mathcal{A}_5$)
 
 1.  **Formulate Decision-Significant Unknowns (`UNK-`)**: Frame questions strictly in terms of decision impact: $$\text{If } \text{Result} = X \implies \text{Select Candidate } A; \quad \text{If } \text{Result} = Y \implies \text{Select Candidate } B.$$
 2.  **Cross-Domain Functional Isomorph Transfer**: Search for proven mechanisms in unrelated computational or physical domains that perform the identical abstract function (for example, borrowing log-structured merge trees from filesystems for high-throughput write ingestion; borrowing biological immune response algorithms for distributed anomaly detection).
 3.  **Design Minimal Falsification Spikes (`EVDREQ-`)**: Construct minimal, isolated, throwaway test programs designed specifically to stress the boundary condition and falsify the working assumption.
 4.  **Execute and Ingest Empirical Evidence (`EVD-`)**: Execute the spike, capture raw metrics/traces, and update the epistemic graph.
 
-#### Deliverable
+#### 1.3.5.5. Deliverable
 
 A **Registry of Unknowns and Empirical Evidence** containing:
 
@@ -1234,16 +1234,16 @@ A **Registry of Unknowns and Empirical Evidence** containing:
 - Evidence Result nodes (`EVD-`): Recording empirical data, logs, and benchmark verdicts.
 - Updated Provenance Labels: Transitioning assumptions from `ASSUMED` to `FACT` or `FALSIFIED`.
 
-#### Human vs AI agent
+#### 1.3.5.6. Human vs AI agent
 
 - **For human architects**: Replaces subjective architectural committee arguments with objective, empirical benchmark data.
 - **For AI agents**: AI agents have no internal physical runtime; they operate entirely on text token associations. Operation 5 mandates that whenever an agent encounters an unverified premise, it MUST pause code generation, write an automated test/spike, execute it in the host environment via tools, and ground its next reasoning step in real execution output.
 
 ------------------------------------------------------------------------
 
-### 3.6. Operation 6: Arrange Dependencies and Change Boundaries
+### 1.3.6. Operation 6: Arrange Dependencies and Change Boundaries
 
-#### Principle
+#### 1.3.6.1. Principle
 
 > **"Structure dependencies around reasons for change; minimize the change radius and eliminate accidental coupling between independent requirements."**
 
@@ -1251,17 +1251,17 @@ In his seminal paper [*On the Criteria To Be Used in Decomposing Systems into Mo
 
 This is formalized in Nam P. Suh's **Axiomatic Design (Independence Axiom)** ([Suh, 1990](https://global.oup.com/academic/product/the-principles-of-design-9780195043457)) and Robert C. Martin's **Single Responsibility Principle (SRP)** and **Dependency Inversion Principle (DIP)** ([Martin, 2017](https://www.informit.com/store/clean-architecture-a-craftsmans-guide-to-software-9780134494166)): an architectural element should have one, and only one, reason to change, and high-level policy must never depend on low-level volatile mechanisms.
 
-#### Purpose
+#### 1.3.6.2. Purpose
 
 Operation 6 makes independent business requirements evolve, deploy, and test independently. It exposes hidden dependency vectors. A change to requirement $A$ must not force changes across dozens of unrelated modules.
 
-#### Input uncertainty ($\mathcal{U}_6$)
+#### 1.3.6.3. Input uncertainty ($\mathcal{U}_6$)
 
 - **Invisible Coupling Vectors**: Coupling that exists outside static code imports—such as shared database tables, shared message schemas, implicit temporal sequencing, shared configuration files, or coordinated deployment requirements.
 - **Leaky Abstractions**: High-level business logic contaminated with low-level infrastructure, networking, or persistence concerns.
 - **Cascading Change Radius**: High uncertainty regarding the blast radius of modifying a core interface.
 
-#### Action ($\mathcal{A}_6$)
+#### 1.3.6.4. Action ($\mathcal{A}_6$)
 
 1.  **Full-Spectrum Dependency Mapping**: Map all 7 vectors of coupling across the candidate architecture:
     - *Source/Compile Coupling*: Direct imports, type references.
@@ -1293,7 +1293,7 @@ flowchart LR
     end
 ```
 
-#### Deliverable
+#### 1.3.6.5. Deliverable
 
 A **Dependency Matrix & Change Propagation Map** containing:
 
@@ -1301,16 +1301,16 @@ A **Dependency Matrix & Change Propagation Map** containing:
 - Change Radius Impact Analysis: Documenting expected touched files and tests for core evolutionary scenarios.
 - Boundary Invariant Declarations: Formal rules governing cross-boundary communication.
 
-#### Human vs AI agent
+#### 1.3.6.6. Human vs AI agent
 
 - **For human architects**: Exposes the fallacy of "microservices that share a database," showing that physical process separation without data decoupling provides zero real modularity.
 - **For AI agents**: LLMs frequently introduce circular dependencies, leaky domain models, or deep transitive imports when attempting to make tests pass. Operation 6 establishes strict architectural linting and boundary validation rules that the agent must respect.
 
 ------------------------------------------------------------------------
 
-### 3.7. Operation 7: Understand System Behavior Over Time and Under Load
+### 1.3.7. Operation 7: Understand System Behavior Over Time and Under Load
 
-#### Principle
+#### 1.3.7.1. Principle
 
 > **"Examine the system across time, under load, and during failures; static structural diagrams are fundamentally insufficient."**
 
@@ -1318,17 +1318,17 @@ In [*Thinking in Systems: A Primer* (Meadows, 2008)](https://www.chelseagreen.co
 
 In software systems, queueing theory and **Little's Law** ($L = \lambda W$) dictate that when arrival rate $\lambda$ approaches service capacity $\mu$, queue depth $L$ and wait time $W$ explode non-linearly towards infinity. Furthermore, distributed systems exhibit **metastable failure modes** ([Huang et al., 2022](https://dl.acm.org/doi/10.1145/3477132.3483541); [Nygard, 2018](https://pragprog.com/titles/mnee2/release-it-second-edition/)), where a transient trigger puts the system into a permanent degraded state that sustains itself even after the trigger is removed (for example, retry storms, cache stampedes, garbage collection thrashing).
 
-#### Purpose
+#### 1.3.7.2. Purpose
 
 Operation 7 finds dynamic failure modes, resource accumulation leaks, concurrency races, and operational instabilities. Static code reviews and component block diagrams do not show these modes.
 
-#### Input uncertainty ($\mathcal{U}_7$)
+#### 1.3.7.3. Input uncertainty ($\mathcal{U}_7$)
 
 - **Dynamic Blindspots**: Ignoring what happens when a downstream dependency experiences a 500ms latency degradation.
 - **Metastable Collapse Vulnerability**: Unchecked retry loops, unbounded queues, and thundering herd vulnerabilities under sudden traffic surges.
 - **Transient State Hazards**: Data corruption or split-brain states occurring during cold starts, failovers, or rolling deployments.
 
-#### Action ($\mathcal{A}_7$)
+#### 1.3.7.4. Action ($\mathcal{A}_7$)
 
 1.  **Stock-and-Flow & Queueing Modeling**:
     - Model request queues, connection pools, thread pools, and memory buffers as explicit stocks.
@@ -1352,7 +1352,7 @@ flowchart LR
     Retries -->|Reinforcing feedback| HighQPS
 ```
 
-#### Deliverable
+#### 1.3.7.5. Deliverable
 
 A **System Dynamics and Load Behavior Map** containing:
 
@@ -1360,16 +1360,16 @@ A **System Dynamics and Load Behavior Map** containing:
 - Feedback Loop Catalog: Documenting protective circuit breakers, rate limiters, and backpressure mechanisms.
 - Failure Mode and Effects Analysis (FMEA): Specifying system behavior under 5 classic distributed failure scenarios.
 
-#### Human vs AI agent
+#### 1.3.7.6. Human vs AI agent
 
 - **For human architects**: Expands mental simulation beyond the "happy path," ensuring the architecture includes load shedding, bulkhead isolation, and graceful degradation before hitting production.
 - **For AI agents**: AI agents are notorious for writing code that works perfectly for a single synchronous request in a test fixture but catastrophic in production (for example, spawning unbounded goroutines/threads, catching exceptions and retrying immediately in a tight loop). Operation 7 enforces explicit backpressure, timeouts, and bounded concurrency in agent-generated code.
 
 ------------------------------------------------------------------------
 
-### 3.8. Operation 8: Determine Engineering Value and Select
+### 1.3.8. Operation 8: Determine Engineering Value and Select
 
-#### Principle
+#### 1.3.8.1. Principle
 
 > **"Evaluate options by full engineering value, accounting for total lifecycle cost, operational overhead, transition risk, and ideality."**
 
@@ -1381,17 +1381,17 @@ In Nam P. Suh's **Axiomatic Design (Information Axiom / Axiom 2)** ([Suh, 1990](
 
 In multi-criteria decision analysis under uncertainty ([Simon, 1969](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/)), choices must account not only for immediate capital acquisition/construction costs, but for ongoing operational friction, cognitive load, on-call toil, failure blast radius, and reversibility.
 
-#### Purpose
+#### 1.3.8.2. Purpose
 
 Operation 8 selects among competing candidate mechanisms (`CAN-`). The selection must be rigorous, transparent, and defensible. The chosen architecture must maximize long-term engineering value. Resume-driven development and short-term hacking are not the goal.
 
-#### Input uncertainty ($\mathcal{U}_8$)
+#### 1.3.8.3. Input uncertainty ($\mathcal{U}_8$)
 
 - **Hidden Lifecycle Costs**: Ignoring maintenance, observability, cloud infrastructure spend, security patching, and on-call paging burdens.
 - **Cognitive Overhead**: Introducing overly clever or esoteric technology stacks that the existing engineering organization cannot maintain.
 - **Unstated Trade-Offs**: Selecting a candidate without explicitly documenting the negative consequences accepted.
 
-#### Action ($\mathcal{A}_8$)
+#### 1.3.8.4. Action ($\mathcal{A}_8$)
 
 1.  **Multi-Attribute Utility & Ideality Scoring**: Evaluate surviving candidate mechanisms across 6 comprehensive value dimensions:
     - *Functional Delivery*: Completeness of required behavioral invariants.
@@ -1416,7 +1416,7 @@ Operation 8 selects among competing candidate mechanisms (`CAN-`). The selection
 | Reversibility | Easy | Very Hard | Medium |
 | IDEALITY SCORE | 0.62 | 0.45 | 0.88 (OPTIMAL) |
 
-#### Deliverable
+#### 1.3.8.5. Deliverable
 
 A **Locked Architectural Decision Record (ADR)** containing:
 
@@ -1425,16 +1425,16 @@ A **Locked Architectural Decision Record (ADR)** containing:
 - Acknowledged Consequences & Accepted Harms: Documented negative trade-offs.
 - Invalidation Triggers: Conditions under which this decision MUST be formally revisited.
 
-#### Human vs AI agent
+#### 1.3.8.6. Human vs AI agent
 
 - **For human architects**: Establishes organizational alignment and creates an enduring historical record that prevents future engineers from repeating past mistakes.
 - **For AI agents**: Prevents agentic over-engineering. Without Operation 8, an LLM agent given a simple task will often generate an elaborate microservice architecture with Kubernetes manifests, distributed tracing, and message buses. Operation 8 forces the agent to compute the ideality score and select the minimal sufficient mechanism.
 
 ------------------------------------------------------------------------
 
-### 3.9. Operation 9: Verify the Solution by Execution and Safely Execute the Transition
+### 1.3.9. Operation 9: Verify the Solution by Execution and Safely Execute the Transition
 
-#### Principle
+#### 1.3.9.1. Principle
 
 > **"Treat every design as an unproven hypothesis until verified by execution; execute transitions through reversible, zero-downtime intermediate systems."**
 
@@ -1446,17 +1446,17 @@ To bridge the gap between theoretical correctness and empirical reality, softwar
 
 Furthermore, in industrial software engineering, an architecture is only as good as its **Transition System** ([Nygard, 2018](https://pragprog.com/titles/mnee2/release-it-second-edition/); [Fowler, 2018](https://martinfowler.com/bliki/StranglerFigApplication.html)). A migration that requires a 6-hour maintenance window or risks corrupting live customer data is unacceptable. Transitions must be modeled as temporary, fault-tolerant state machines (Expand/Contract, Parallel Run, Dark Launching, Dual-Writing with Reconciliation).
 
-#### Purpose
+#### 1.3.9.2. Purpose
 
 Operation 9 closes the loop. It proves that the synthesized mechanism satisfies required behavioral invariants in a running environment. It executes the production rollout without downtime, data loss, or irreversible failure.
 
-#### Input uncertainty ($\mathcal{U}_9$)
+#### 1.3.9.3. Input uncertainty ($\mathcal{U}_9$)
 
 - **Execution Divergence**: The subtle discrepancies between design models, unit tests, and live production runtimes.
 - **Migration & Cutover Risk**: Unverified assumptions about data volume, replication lag, backward compatibility, and schema lock times during live upgrades.
 - **Irreversibility Trap**: Deploying a change that cannot be rolled back if an anomaly is detected.
 
-#### Action ($\mathcal{A}_9$)
+#### 1.3.9.4. Action ($\mathcal{A}_9$)
 
 1.  **Multi-Tier Executable Verification Suite**:
     - *Invariant & Property-Based Tests*: Generate thousands of randomized inputs to falsify state machine invariants (QuickCheck / Hypothesis style).
@@ -1482,7 +1482,7 @@ flowchart LR
     P4 -.->|SLO Breach / Anomaly| RB[Automated Rollback to Legacy]
 ```
 
-#### Deliverable
+#### 1.3.9.5. Deliverable
 
 A **Verification Suite & Phased Transition Plan** containing:
 
@@ -1490,14 +1490,14 @@ A **Verification Suite & Phased Transition Plan** containing:
 - Empirical Verification Evidence (`EVD-`): Test run logs, benchmark results, and mutation coverage reports proving correctness.
 - Transition Plan (`TRANS-`): Detailed 5-phase rollout and instantaneous rollback procedures with explicit health metrics.
 
-#### Human vs AI agent
+#### 1.3.9.6. Human vs AI agent
 
 - **For human architects**: Guarantees operational safety and business continuity, turning high-stakes deployments from nerve-wracking gambles into routine, reversible non-events.
 - **For AI agents**: This is the ultimate ground-truth checkpoint. An AI agent cannot claim completion simply because it generated code that looks plausible. It must execute the verification suite, inspect real test results (`EVD-`), prove that invariants hold, and construct the exact migration scripts needed for safe execution.
 
 ------------------------------------------------------------------------
 
-### Summary: the nine-operation matrix
+### 1.3.10. Summary: the nine-operation matrix
 
 The table summarizes the nine operations and their coverage of software engineering problem state:
 
@@ -1517,7 +1517,7 @@ These nine operations unify TRIZ, the Theory of Constraints, systems thinking, a
 
 ------------------------------------------------------------------------
 
-## 4. Three Levels of the Methodology
+## 1.4. Three Levels of the Methodology
 
 A methodology must connect high-level epistemic intent to bit-level execution. In civil, aerospace, and chemical engineering, methods fail when they stay too abstract (pure philosophy) or too concrete (domain checklists that decay as technologies change).
 
@@ -1575,7 +1575,7 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### 4.1. Operations (The Epistemic State Transformations)
+### 1.4.1. Operations (The Epistemic State Transformations)
 
 At the highest level, an **Operation** is a formal state transformation operator $T: \mathcal{S} \to \mathcal{S}'$ acting upon the **Epistemic State** of the engineering problem.
 
@@ -1613,7 +1613,7 @@ The nine operations do not correspond to chronological project phases (for examp
 
 ------------------------------------------------------------------------
 
-### 4.2. Techniques (The 36 Concrete Inventive Operators)
+### 1.4.2. Techniques (The 36 Concrete Inventive Operators)
 
 If Operations dictate *what epistemic transformation must occur*, **Techniques** specify *the exact cognitive and structural mechanics of execution*. The 36 techniques operationalize foundational principles from:
 
@@ -1622,7 +1622,7 @@ If Operations dictate *what epistemic transformation must occur*, **Techniques**
 - **Systems Thinking and System Dynamics (Forrester, Meadows)**: Stocks, flows, feedback delays, and non-linear system responses;
 - **Formal Software Engineering and Modularity Principles (Parnas, Dijkstra, Liskov)**: Information hiding, separation of concerns, and behavioral subtyping.
 
-#### The 36 Techniques Taxonomy
+#### 1.4.2.1. The 36 Techniques Taxonomy
 
 | Operation | Techniques |
 |---|---|
@@ -1636,7 +1636,7 @@ If Operations dictate *what epistemic transformation must occur*, **Techniques**
 | **8. Determine engineering value and select** | 8.1 Define constraints, value, and preference criteria.<br/>8.2 Compare useful effects with mechanism cost.<br/>8.3 Minimize operational harm, cognitive load, spend, and blast radius.<br/>8.4 Rank candidates with Pareto analysis. |
 | **9. Verify the solution by execution and execute the transition safely** | 9.1 Predict benefits, new failure modes, and shifted complexity.<br/>9.2 Validate claims with executable code.<br/>9.3 Design transition architecture.<br/>9.4 Anchor results with telemetry and decommission shims. |
 
-#### The Four Software Separation Principles
+#### 1.4.2.2. The Four Software Separation Principles
 
 A central achievement of Level 2 is the adaptation of TRIZ physical contradiction resolution into the **Four Software Separation Principles**:
 
@@ -1655,7 +1655,7 @@ A central achievement of Level 2 is the adaptation of TRIZ physical contradictio
 
 ------------------------------------------------------------------------
 
-### 4.3. Working Artifacts and Executable Evidence (The Dual-Layer Evidence Model)
+### 1.4.3. Working Artifacts and Executable Evidence (The Dual-Layer Evidence Model)
 
 Software engineering reasoning cannot exist in a purely mental or informal textual plane. High-integrity engineering produces two complementary classes of artifacts: **Structured Analytical Artifacts** and **Executable Empirical Evidence**.
 
@@ -1666,7 +1666,7 @@ flowchart LR
     Analytical <-->|Transitive invalidation<br/>Falsification updates the DAG| Evidence
 ```
 
-#### 4.3.1. Analytical Artifacts: Structured Epistemic Scaffolding
+#### 1.4.3.1. Analytical Artifacts: Structured Epistemic Scaffolding
 
 Analytical artifacts serve as the externalized cognitive scaffolding for human engineers and AI agents. They record the precise provenance, dependencies, and rationale of every architectural proposition:
 
@@ -1677,7 +1677,7 @@ Analytical artifacts serve as the externalized cognitive scaffolding for human e
 5.  **Architectural Decision Record (`DEC-`)**: A formal, immutable record capturing the chosen candidate mechanism, the resolved contradictions, the rejected alternatives with explicit rationale, the accepted operational risks, and the **review triggers** (the specific conditions that would invalidate the decision) ([Bass, Clements, & Kazman, 2021](https://www.pearson.com/en-us/subject-catalog/p/software-architecture-in-practice/P200000009477)).
 6.  **Transition and Rollback Plan (`TRANS-`)**: The explicit specification of intermediate transition mechanisms (dual-writing, backward-compatible schemas, traffic routing gates, and automated rollback thresholds).
 
-#### 4.3.2. Executable Evidence: Empirical Proof Vehicles
+#### 1.4.3.2. Executable Evidence: Empirical Proof Vehicles
 
 Analytical artifacts, however rigorous, remain unproven conjectures until subjected to executable validation. Executable evidence consists of deterministic and statistical verification harnesses executed directly against the code, runtime, or infrastructure:
 
@@ -1687,7 +1687,7 @@ Analytical artifacts, however rigorous, remain unproven conjectures until subjec
 4.  **Chaos and Resilience Experiments**: Dynamic disruption of dependencies (for example, killing leader nodes, corrupting packets, exhausting thread pools) to verify self-healing, backpressure, and fail-safe recovery mechanisms.
 5.  **Telemetry and Canary Verification Gates**: Real-time statistical evaluation of production error budgets, p99 latency distributions, and invariant assertions during progressive traffic cutovers.
 
-#### 4.3.3. The Epistemic Supremacy of Executable Evidence and True Empirical Closure
+#### 1.4.3.3. The Epistemic Supremacy of Executable Evidence and True Empirical Closure
 
 Why does software engineering allow a degree of epistemic certainty that physical engineering disciplines can rarely achieve?
 
@@ -1708,7 +1708,7 @@ In accordance with Karl Popper's logic of scientific discovery ([Popper, 1959/19
 
 In the Ariadne framework, no architectural claim (`CLM-`), causal hypothesis (`HYP-`), or assumption (`ASM-`) is considered justified until it is linked to an executable verification harness.
 
-#### 4.3.4. Transitive Invalidation Dynamics
+#### 1.4.3.4. Transitive Invalidation Dynamics
 
 The integration between analytical artifacts and executable evidence enables **Transitive Invalidation**. In an epistemic dependency graph:
 
@@ -1732,7 +1732,7 @@ This eliminates "architectural decay" where systems are built upon layers of unv
 
 ------------------------------------------------------------------------
 
-## 5. What a Good Result of Engineering Reasoning Is
+## 1.5. What a Good Result of Engineering Reasoning Is
 
 Engineering reasoning is often scored with superficial proxies: polish of an architectural diagram, number of design patterns cited, length of an RFC, or speed of first code.
 
@@ -1760,7 +1760,7 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### 5.1. Operational Quality Criteria Across All Nine Operations
+### 1.5.1. Operational Quality Criteria Across All Nine Operations
 
 To establish rigorous quality gates for both human software engineers and AI agents, we define the precise criteria for a sound outcome across each of the nine operations:
 
@@ -1778,7 +1778,7 @@ To establish rigorous quality gates for both human software engineers and AI age
 
 ------------------------------------------------------------------------
 
-### 5.2. Comparative Quality Analysis: Weak vs. Rigorous Reasoning
+### 1.5.2. Comparative Quality Analysis: Weak vs. Rigorous Reasoning
 
 To make the demarcation between superficial engineering and systematic epistemic rigor unmistakable, we contrast common anti-patterns with sound engineering deliverables across the nine operations:
 
@@ -1796,7 +1796,7 @@ To make the demarcation between superficial engineering and systematic epistemic
 
 ------------------------------------------------------------------------
 
-### 5.3. Foundations of Empirical Soundness in Software Systems
+### 1.5.3. Foundations of Empirical Soundness in Software Systems
 
 The framework's rigorous standards are anchored in foundational literature across the history of computer science:
 
@@ -1820,9 +1820,9 @@ When engineering reasoning adheres to these three levels—operating systematica
 
 # Part 2. The Nine Core Operations
 
-## Operation 1. Frame and Model the Software Problem
+## 2.1. Operation 1. Frame and Model the Software Problem
 
-### Failure First: The Cache That Preserved Revoked Access
+### 2.1.1. Failure First: The Cache That Preserved Revoked Access
 
 A team receives the request “add Redis so authorization checks are faster.” It implements a five-minute cache for permission decisions. At 14:03 an administrator revokes a compromised account; at 14:04 the cached positive decision still authorizes a funds transfer. The code satisfies the requested implementation and violates the actual safety requirement.
 
@@ -1833,7 +1833,7 @@ A team receives the request “add Redis so authorization checks are faster.” 
 
 The correction is shared. The control differs. Humans need a review ritual that permits reframing a sponsor's proposed solution. Agents need an input contract and a gate that blocks implementation while framing fields are unresolved.
 
-#### Formal Concept → Engineering Meaning
+#### 2.1.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -1841,7 +1841,7 @@ The correction is shared. The control differs. Humans need a review ritual that 
 | Behavioral delta, $\Delta B = B_{\text{required}} - B_{\text{actual}}$ | Difference between observed and required behavior under specified conditions. | Today a revoked principal succeeds for up to five minutes; required behavior is rejection within 250 ms. That measurable gap, not “missing Redis,” is the problem. |
 | Transitive invalidation | Invalidity propagates from a false upstream premise to dependent claims and artifacts. | If “five minutes of stale authorization is safe” is false, the cache design, tests, capacity plan, and rollout decision depending on it must all be reopened. |
 
-## Why framing comes first
+### 2.1.2. Why framing comes first
 
 **Operation 1: Frame and Model the Software Problem** is the first gate. A framing error can make the team optimize the wrong measure, automate a false assumption, solve a symptom instead of a constraint, or select a technology too early.
 
@@ -1884,7 +1884,7 @@ Before you create candidate architectures (`CAN-`), causal hypotheses (`HYP-`), 
 
 ------------------------------------------------------------------------
 
-### Main Question
+#### 2.1.2.1. Main Question
 
 > **What software system behavior must change, under what observable conditions, and bounded by what non-negotiable invariants, regardless of what code, service, database, or library currently exists?**
 
@@ -1909,7 +1909,7 @@ Good framing removes implementation names. It states the **observable behavioral
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.1.3. Theoretical Grounding
 
 Operation 1 rests on computer science, software architecture theory, and mathematical logic. The base is: separate the problem domain from the implementation machine, specify behavioral invariants, and model quality attributes from multiple perspectives.
 
@@ -1961,7 +1961,7 @@ classDiagram
     BassKazmanQualityAttributes <|-- Operation1_Framing : Measurable Scenarios
 ```
 
-### 1.1. Michael Jackson's Problem Frames Theory (2001)
+#### 2.1.3.1. Michael Jackson's Problem Frames Theory (2001)
 
 In [*Problem Frames: Analysing and Structuring Software Development Problems* (Addison-Wesley, 2001)](https://www.pearson.com/en-us/subject-catalog/p/problem-frames-analysing-and-structuring-software-development-problems/P200000003157), Michael Jackson distinguishes the **problem domain** (the environment, real-world entities, business context) from the **machine** (the software system to be constructed).
 
@@ -1989,7 +1989,7 @@ Operation 1 applies Jackson's principle: **the problem lives in the domain; the 
 
 ------------------------------------------------------------------------
 
-### 1.2. Parnas on Information Hiding and Modular Decomposition (1972)
+#### 2.1.3.2. Parnas on Information Hiding and Modular Decomposition (1972)
 
 In [*On the Criteria To Be Used in Decomposing Systems into Modules* (CACM, 1972, DOI: 10.1145/361598.361623)](https://dl.acm.org/doi/10.1145/361598.361623), David L. Parnas showed that decomposition by execution flowcharts or procedural steps produces fragile, tightly coupled architectures. Decomposition must be guided by **information hiding**:
 
@@ -2004,7 +2004,7 @@ Framing that binds a problem to a specific database schema or RPC framework leak
 
 ------------------------------------------------------------------------
 
-### 1.3. Dijkstra's Separation of Concerns (1972)
+#### 2.1.3.3. Dijkstra's Separation of Concerns (1972)
 
 In his ACM Turing Lecture [*The Humble Programmer* (CACM, 1972, DOI: 10.1145/355604.361591)](https://dl.acm.org/doi/10.1145/355604.361591), Edsger W. Dijkstra introduced **separation of concerns** as a defense against human cognitive limits:
 
@@ -2014,7 +2014,7 @@ Dijkstra states that separating **what** a program must achieve from **how** har
 
 ------------------------------------------------------------------------
 
-### 1.4. Hoare's Axiomatic Basis and Pre/Post Conditions (1969)
+#### 2.1.3.4. Hoare's Axiomatic Basis and Pre/Post Conditions (1969)
 
 In [*An Axiomatic Basis for Computer Programming* (CACM, 1969, DOI: 10.1145/363235.363259)](https://dl.acm.org/doi/10.1145/363235.363259), C. A. R. Hoare introduced axiomatic semantics with the Hoare Triple:
 
@@ -2036,7 +2036,7 @@ $$\mathcal{I} \equiv \forall \text{order} \in \text{Orders},\; \text{Count}(\tex
 
 ------------------------------------------------------------------------
 
-### 1.5. Lamport's Temporal Logic and Invariant Specification (2002)
+#### 2.1.3.5. Lamport's Temporal Logic and Invariant Specification (2002)
 
 In [*Specifying Systems: The TLA+ Language and Tools for Hardware and Software Engineers* (Addison-Wesley, 2002)](https://www.microsoft.com/en-us/research/publication/specifying-systems-the-tla-language-and-tools-for-hardware-and-software-engineers/), Leslie Lamport models concurrent and distributed software as discrete state transition systems.
 
@@ -2049,7 +2049,7 @@ In Operation 1, framing must separate safety from liveness. A system that does n
 
 ------------------------------------------------------------------------
 
-### 1.6. Bass, Clements & Kazman's Quality Attribute Scenarios (2021)
+#### 2.1.3.6. Bass, Clements & Kazman's Quality Attribute Scenarios (2021)
 
 In [*Software Architecture in Practice* (4th ed., Addison-Wesley, 2021)](https://www.oreilly.com/library/view/software-architecture-in/9780136886099/), Len Bass, Paul Clements, and Rick Kazman showed that vague architectural qualities ("the system must be fast, scalable, and secure") are non-operational and unfalsifiable.
 
@@ -2066,7 +2066,7 @@ Operation 1 uses this 6-part structure as the standard template for behavioral m
 
 ------------------------------------------------------------------------
 
-## 2. Cognitive Pathology: Human Solution Anchoring vs. AI Premature Tool Selection
+### 2.1.4. Cognitive Pathology: Human Solution Anchoring vs. AI Premature Tool Selection
 
 Problem framing is not only an analytical technique. It is a cognitive defense. Human engineers and AI agents both bypass problem modeling and jump to solution synthesis.
 
@@ -2089,7 +2089,7 @@ flowchart TD
     H_Outcome & AI_Outcome --> EpistemicDisaster["Epistemic Disaster:<br/>• Solves the wrong problem<br/>• Introduces unmanaged mutable state<br/>• Creates accidental coupling<br/>• Guarantees downstream rework"]
 ```
 
-### 2.1. Human solution anchoring
+#### 2.1.4.1. Human solution anchoring
 
 In human architects, premature solution commitment is driven by known psychological heuristics:
 
@@ -2097,7 +2097,7 @@ In human architects, premature solution commitment is driven by known psychologi
 - **The law of the instrument** ([Abraham Maslow, 1966](https://en.wikipedia.org/wiki/Law_of_the_instrument)): *"I suppose it is tempting, if the only tool you have is a hammer, to treat everything as if it were a nail."* Teams with deep Kubernetes expertise frame all deployment, scaling, and isolation problems as custom CRDs, sidecars, and operators. They ignore simpler OS-level or database-level solutions.
 - **Resume-driven development (RDD) and social proof:** Engineers select architectural mechanisms that raise professional marketability or match industry fashion. They justify the complexity after the fact with fabricated scalability requirements.
 
-### 2.2. AI agent premature tool selection
+#### 2.1.4.2. AI agent premature tool selection
 
 In LLMs acting as software agents, premature commitment looks different. The architectural failure is the same:
 
@@ -2105,7 +2105,7 @@ In LLMs acting as software agents, premature commitment looks different. The arc
 - **Premature tool invocations:** When an agent has execution tools (`run_command`, `write_to_file`), a prompt *"Make the user search faster"* often runs `npm install elasticsearch` or changes database configuration on the first turn. The agent has not established baseline latency, query distributions, or invariant constraints.
 - **Associative pattern matching vs. causal reasoning:** LLMs complete associative patterns. They have no innate model of engineering uncertainty. Without an explicit reasoning harness, an agent treats a premature solution in the user's prompt as a hard constraint, not as a hypothesis to unpack.
 
-### 2.3. Comparative taxonomy of framing pathologies
+#### 2.1.4.3. Comparative taxonomy of framing pathologies
 
 | Pathology dimension | Human architect | AI agent | Ariadne counter-measure |
 |----|----|----|----|
@@ -2117,7 +2117,7 @@ In LLMs acting as software agents, premature commitment looks different. The arc
 
 ------------------------------------------------------------------------
 
-## 3. The Four Framing Techniques
+### 2.1.5. The Four Framing Techniques
 
 Operation 1 provides four techniques. They transform an ambiguous, solution-entangled request into a verifiable Problem Framing Map (`FRAME-`).
 
@@ -2152,9 +2152,9 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### Technique 1.1. Separate Function from Implementation
+#### 2.1.5.1. Technique 1.1. Separate Function from Implementation
 
-#### Formal Definition
+##### 2.1.5.1.1. Formal Definition
 
 Let $S_{\text{raw}}$ be a raw problem statement. The Functional Abstraction Operator $\mathcal{F}_{\text{abstract}}$ maps $S_{\text{raw}}$ to a pure functional tuple:
 
@@ -2169,13 +2169,13 @@ Where:
 
 The transformation forbids concrete software components, libraries, database engines, network protocols, or infrastructure products in the functional statement.
 
-#### Linguistic Transformation Rules
+##### 2.1.5.1.2. Linguistic Transformation Rules
 
 1.  **Strip Named Technologies**: Replace proper nouns (for example, *PostgreSQL, Kafka, Redis, gRPC, React, AWS Lambda*) with their underlying computational function (for example, *relational storage, durable log, in-memory cache, synchronous RPC, presentation layer, ephemeral compute*).
 2.  **Convert Nouns to Verbs**: Transform component nouns into behavioral verbs (for example, replace *"we need a queue"* with *"we must decouple ingestion rate from processing rate"*).
 3.  **Identify the Underlying State Mutation**: Articulate what data or system state is created, updated, or preserved, and what invariants govern that mutation.
 
-#### Concrete Transformation Examples
+##### 2.1.5.1.3. Concrete Transformation Examples
 
 | Raw Request (Solution-Coupled) | Extracted Implementation | Technology-Agnostic Function (Technique 1.1) |
 |----|----|----|
@@ -2186,9 +2186,9 @@ The transformation forbids concrete software components, libraries, database eng
 
 ------------------------------------------------------------------------
 
-### Technique 1.2. Describe Required and Actual Behavior
+#### 2.1.5.2. Technique 1.2. Describe Required and Actual Behavior
 
-#### Formal Definition
+##### 2.1.5.2.1. Formal Definition
 
 Behavioral modeling states the system's operational contract as the **behavioral delta tuple**:
 
@@ -2202,7 +2202,7 @@ Where:
 - $\mathcal{L}_{\text{liveness}}$ is the set of liveness guarantees: $\forall e \in \text{Stimuli},\; \Diamond \text{Response}(e) = \text{True}$ within bounded time $T$.
 - $\mathcal{M}_{\text{metrics}}$ is the quantifiable vector of quality attribute thresholds.
 
-#### Quality attribute scenario template
+##### 2.1.5.2.2. Quality attribute scenario template
 
 Required behavior must use the 6-part Bass-Clements-Kazman scenario. The structure gives precision and operational falsifiability:
 
@@ -2226,11 +2226,11 @@ flowchart TD
     end
 ```
 
-#### Code example: formal contract modeling
+##### 2.1.5.2.3. Code example: formal contract modeling
 
 The next example shows an implementation-coupled specification versus an invariant-driven behavioral contract. The domain is a payment execution interface:
 
-##### Anti-Pattern: Implementation-Coupled Specification (TypeScript)
+###### 2.1.5.2.3.1. Anti-Pattern: Implementation-Coupled Specification (TypeScript)
 
 ``` typescript
 // FLAWED: The contract names Redis, HTTP, and PostgreSQL.
@@ -2247,7 +2247,7 @@ type HttpResponse = { status: number };
 type PaymentRecord = { orderId: string; amountCents: number };
 ```
 
-##### Invariant-Driven Behavioral Contract (TypeScript)
+###### 2.1.5.2.3.2. Invariant-Driven Behavioral Contract (TypeScript)
 
 ``` typescript
 // CORRECT: A technology-agnostic behavioral contract.
@@ -2271,9 +2271,9 @@ interface PaymentExecutionContract {
 
 ------------------------------------------------------------------------
 
-### Technique 1.3. Shift the System Boundary
+#### 2.1.5.3. Technique 1.3. Shift the System Boundary
 
-#### Multi-scale boundary hierarchy
+##### 2.1.5.3.1. Multi-scale boundary hierarchy
 
 Software problems rarely sit only at the layer where their symptoms appear. An engineer or agent must sweep the **eight architectural boundary levels** to find the minimal and optimal boundary of intervention.
 
@@ -2298,7 +2298,7 @@ flowchart TB
     end
 ```
 
-#### The Eight Architectural Boundary Levels
+##### 2.1.5.3.2. The Eight Architectural Boundary Levels
 
 1.  **Level 1: Sub-Function / Algorithm**: In-memory data structures, cache-line alignment, branch prediction, lock-free primitives, algorithmic complexity ($O(N)$ vs. $O(\log N)$).
 2.  **Level 2: Module / Package**: Information hiding boundaries, class/struct responsibilities, domain entity boundaries, package-level dependency directions.
@@ -2309,7 +2309,7 @@ flowchart TB
 7.  **Level 7: Client & Network Topology**: Mobile client runtimes, browser DOM execution, edge compute workers, last-mile cellular networks, client-side caching.
 8.  **Level 8: Socio-Technical & Delivery Pipeline**: Engineering team ownership boundaries (Conway's Law), CI/CD build and test pipelines, automated deployment stages, compliance gates.
 
-#### Boundary Shift Transformation Matrix
+##### 2.1.5.3.3. Boundary Shift Transformation Matrix
 
 | Initial Narrow Symptom | Level | Shifted Boundary Scope | Expanded Problem Formulation |
 |----|:--:|----|----|
@@ -2320,9 +2320,9 @@ flowchart TB
 
 ------------------------------------------------------------------------
 
-### Technique 1.4. Shift Perspective
+#### 2.1.5.4. Technique 1.4. Shift Perspective
 
-#### Multi-stakeholder overlay
+##### 2.1.5.4.1. Multi-stakeholder overlay
 
 Software systems serve competing, often contradictory stakeholder concerns. A problem framed only from the application developer's perspective will miss operational, financial, and security invariants.
 
@@ -2345,7 +2345,7 @@ flowchart TD
     Center --- P1 & P2 & P3 & P4 & P5 & P6 & P7
 ```
 
-#### Perspective Shift Analysis Matrix
+##### 2.1.5.4.2. Perspective Shift Analysis Matrix
 
 | Perspective | Primary Focus | Evaluative Question | Typical Invariant Generated |
 |----|----|----|----|
@@ -2359,7 +2359,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 4. Practical Case Studies
+### 2.1.6. Practical Case Studies
 
 Three real-world engineering problems show Operation 1 in use:
 
@@ -2369,20 +2369,20 @@ Three real-world engineering problems show Operation 1 in use:
 
 ------------------------------------------------------------------------
 
-### Case Study 1: Distributed Analytical Reporting vs. Transactional Integrity
+#### 2.1.6.1. Case Study 1: Distributed Analytical Reporting vs. Transactional Integrity
 
-#### Initial Stakeholder Request
+##### 2.1.6.1.1. Initial Stakeholder Request
 
 > *"Our PostgreSQL database is locking up at the end of every month during financial reporting. We need to extract the reporting logic into a dedicated microservice with an Apache Kafka event streaming pipeline."*
 
-#### Step-by-Step Problem Reframing
+##### 2.1.6.1.2. Step-by-Step Problem Reframing
 
-##### 1. Technique 1.1: Separate Function from Implementation
+###### 2.1.6.1.2.1. Technique 1.1: Separate Function from Implementation
 
 - **Premature Solution in Request**: Extract a microservice; deploy an Apache Kafka cluster; build an event-streaming ETL pipeline.
 - **Underlying Function**: **Execute long-running, compute-intensive analytical aggregations over historical transaction data** without increasing transaction latency or lock contention on the primary online transaction processing (OLTP) write path, while ensuring reports reflect data that is at most 15 minutes old.
 
-##### 2. Technique 1.2: Describe Required and Actual Behavior
+###### 2.1.6.1.2.2. Technique 1.2: Describe Required and Actual Behavior
 
 - **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: Monthly analytical SQL queries execute `SUM()`, `AVG()`, and complex `JOIN` operations directly against the master OLTP `transactions` and `accounts` tables. Queries hold shared table locks and exhaust CPU and buffer cache memory, causing OLTP write transaction latency to spike from $p99 = 12\text{ ms}$ to $p99 > 8,500\text{ ms}$, triggering HTTP 504 gateway timeouts.
 - **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
@@ -2390,19 +2390,19 @@ Three real-world engineering problems show Operation 1 in use:
 - **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: An analytical query must never acquire exclusive or shared table locks on the OLTP master database.
 - **Liveness Invariant ($\mathcal{L}_{\text{liveness}}$)**: All initiated reports must complete or fail with explicit error within 60 seconds (no hung queries).
 
-##### 3. Technique 1.3: Shift the System Boundary
+###### 2.1.6.1.2.3. Technique 1.3: Shift the System Boundary
 
 - *Narrow Boundary (Module/Query)*: Optimize SQL query execution plans with composite indexes. (Fails: index maintenance degrades OLTP write throughput).
 - *Subsystem Boundary (Service)*: Build a standalone reporting microservice. (Introduces massive accidental complexity: maintaining dual schemas, Kafka infrastructure, eventual consistency reconciliation).
 - *Storage/Cluster Boundary (Level 5)*: Decouple compute at the database storage engine layer. Use asynchronous PostgreSQL physical streaming replication to a dedicated read-only replica, or export WAL logs directly to a columnar analytical data lake (for example, ClickHouse / DuckDB / Parquet on S3).
 
-##### 4. Technique 1.4: Shift Perspective
+###### 2.1.6.1.2.4. Technique 1.4: Shift Perspective
 
 - *Finance Auditor*: Reports must reconcile exactly with ledger state at the cutoff timestamp.
 - *OLTP User / Customer*: Checkout and money transfer transactions must never fail or stall due to internal reporting activity.
 - *SRE / On-Call*: No complex distributed Kafka lag monitoring; replication failover must be automated; database CPU on primary must remain $< 60\%$.
 
-#### Resulting Problem Framing Map
+##### 2.1.6.1.3. Resulting Problem Framing Map
 
 ``` markdown
 ### Problem Framing: FRAME-01 (Distributed Financial Reporting)
@@ -2440,20 +2440,20 @@ Isolate analytical query compute from the transactional write path while maintai
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Idempotent Payment Processing Under Network Unreliability
+#### 2.1.6.2. Case Study 2: Idempotent Payment Processing Under Network Unreliability
 
-#### Initial Stakeholder Request
+##### 2.1.6.2.1. Initial Stakeholder Request
 
 > *"We are seeing duplicate charges on customer credit cards when the checkout page times out. We need to install Redis and implement distributed locking around the payment controller."*
 
-#### Step-by-Step Problem Reframing
+##### 2.1.6.2.2. Step-by-Step Problem Reframing
 
-##### 1. Technique 1.1: Separate Function from Implementation
+###### 2.1.6.2.2.1. Technique 1.1: Separate Function from Implementation
 
 - **Premature Solution in Request**: Redis distributed lock (`SETNX` with TTL); mutex locking in the payment HTTP controller.
 - **Underlying Function**: **Guarantee that a unique customer checkout intention is settled at most once against the payment processor and ledger**, regardless of network retries, client double-clicks, worker crashes, or concurrent execution threads.
 
-##### 2. Technique 1.2: Describe Required and Actual Behavior
+###### 2.1.6.2.2.2. Technique 1.2: Describe Required and Actual Behavior
 
 - **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: When an upstream network timeout occurs between the client and the API gateway, the mobile client automatically retries the checkout request. If the first request is still executing in a background worker, two concurrent threads invoke the payment gateway API with different internal transaction IDs, resulting in two distinct charges against the customer's credit card.
 - **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
@@ -2462,7 +2462,7 @@ Isolate analytical query compute from the transactional write path while maintai
 - **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: $$\forall \text{order_id}, \quad \text{Count}(\text{SuccessfulCharges}(\text{order_id})) \le 1$$
 - **Liveness Invariant ($\mathcal{L}_{\text{liveness}}$)**: Every submitted payment request must reach a terminal state (`SETTLED`, `REJECTED`, or `EXPIRED`) within 10 seconds.
 
-##### 3. Technique 1.3: Shift the System Boundary
+###### 2.1.6.2.2.3. Technique 1.3: Shift the System Boundary
 
 - *Narrow Boundary (In-Memory Controller)*: Mutex lock inside the web server process. (Fails: does not protect across multi-instance load-balanced servers).
 - *Infrastructure Boundary (Redis Lock)*: Distributed lock via Redis. (Fragile: if Redis lock TTL expires while the payment gateway call is in-flight, a concurrent retry will acquire the lock and execute a duplicate charge; network partitions to Redis cause false payment rejections).
@@ -2493,13 +2493,13 @@ sequenceDiagram
     end
 ```
 
-##### 4. Technique 1.4: Shift Perspective
+###### 2.1.6.2.2.4. Technique 1.4: Shift Perspective
 
 - *End-User*: Never gets double-charged; gets instant feedback even if they click "Pay" three times rapidly.
 - *Finance / Compliance*: Full audit log linking customer checkout attempt to payment gateway transaction ID.
 - *SRE / Resilience*: System has zero dependency on an auxiliary Redis cluster for financial correctness; database ACID guarantees provide absolute safety.
 
-#### Resulting Problem Framing Map
+##### 2.1.6.2.3. Resulting Problem Framing Map
 
 ``` markdown
 ### Problem Framing: FRAME-02 (Idempotent Payment Settlement)
@@ -2535,20 +2535,20 @@ Guarantee that a customer checkout intention is settled at most once against the
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Multi-Tenant API Rate Limiting and Fair Scheduling
+#### 2.1.6.3. Case Study 3: Multi-Tenant API Rate Limiting and Fair Scheduling
 
-#### Initial Stakeholder Request
+##### 2.1.6.3.1. Initial Stakeholder Request
 
 > *"A single customer flooded our API with a crawler and brought down the cluster for everyone. We need to install Kong API Gateway with the Redis Token Bucket plugin to rate limit all tenants to 100 requests per second."*
 
-#### Step-by-Step Problem Reframing
+##### 2.1.6.3.2. Step-by-Step Problem Reframing
 
-##### 1. Technique 1.1: Separate Function from Implementation
+###### 2.1.6.3.2.1. Technique 1.1: Separate Function from Implementation
 
 - **Premature Solution in Request**: Deploy Kong API Gateway; attach global Redis Token Bucket plugin; enforce hard 100 RPS cap across all tenants.
 - **Underlying Function**: **Protect shared computational and storage resources from saturation by high-volume tenants while ensuring fair capacity allocation, bounded latency, and predictable quality of service for all tenants.**
 
-##### 2. Technique 1.2: Describe Required and Actual Behavior
+###### 2.1.6.3.2.2. Technique 1.2: Describe Required and Actual Behavior
 
 - **Actual Behavior ($\mathcal{B}_{\text{actual}}$)**: A rogue or misconfigured tenant generates a burst of 10,000 RPS. The API gateway admits all requests, exhausting backend thread pools and database connections. Legitimate tenants experience $p99 \text{ latency} > 15,000\text{ ms}$ and widespread HTTP 503/504 errors (Noisy Neighbor problem).
 - **Required Behavior ($\mathcal{B}_{\text{required}}$)**:
@@ -2556,7 +2556,7 @@ Guarantee that a customer checkout intention is settled at most once against the
 - **Safety Invariant ($\mathcal{I}_{\text{safety}}$)**: $$\forall \text{Tenant } T_i, \quad \text{TrafficBurst}(T_j) \implies \text{Throughput}(T_i) \ge \text{GuaranteedSLA}(T_i) \quad (i \neq j)$$
 - **Performance Invariant ($\mathcal{I}_{\text{perf}}$)**: The rate-limiting mechanism itself must add $\le 1.0\text{ ms}$ overhead to the $p99$ latency of legitimate requests.
 
-##### 3. Technique 1.3: Shift the System Boundary
+###### 2.1.6.3.2.3. Technique 1.3: Shift the System Boundary
 
 - *Centralized Gateway Boundary (Level 4/6)*: Every API request performs a synchronous round-trip to a centralized Redis cluster to decrement a token bucket. (Fails: Redis becomes a single point of failure; adds 2–5ms cross-AZ network latency to every request; Redis saturation during a DDoS attack brings down the entire API gateway).
 - *Edge & In-Process Boundary (Level 1 / Level 7)*: Shift boundary to **Local In-Memory Rate Limiting with Asynchronous State Gossip** or **Client-Side Signed Quota Tokens**. Each gateway instance maintains local token buckets in memory, synchronizing aggregated usage asynchronously via background gossip, or offloading rate computation to CDN edge workers (Cloudflare Workers / Fastly Compute@Edge).
@@ -2577,14 +2577,14 @@ flowchart TD
     end
 ```
 
-##### 4. Technique 1.4: Shift Perspective
+###### 2.1.6.3.2.4. Technique 1.4: Shift Perspective
 
 - *Free-Tier User*: Receives clear HTTP 429 headers with `Retry-After` timestamp.
 - *Enterprise VIP Tenant*: Paid tier allows bursting up to 2,000 RPS without artificial throttling.
 - *Gateway SRE*: Rate limiter must be fail-open if the synchronization layer degrades; rate-checking must never consume more than 5% of gateway CPU.
 - *Security Analyst*: Rate limiting must block algorithmic credential-stuffing attacks across distributed IP pools.
 
-#### Resulting Problem Framing Map
+##### 2.1.6.3.3. Resulting Problem Framing Map
 
 ``` markdown
 ### Problem Framing: FRAME-03 (Multi-Tenant Fair Rate Limiting)
@@ -2622,11 +2622,11 @@ Protect shared system capacity from saturation by rogue tenants while guaranteei
 
 ------------------------------------------------------------------------
 
-## 5. Operational Deliverables: The `FRAME-*` Artifact and Templates
+### 2.1.7. Operational Deliverables: The `FRAME-*` Artifact and Templates
 
 The output of Operation 1 is the **Problem Framing Map (`FRAME-`)**. In the Ariadne reasoning harness, this artifact is recorded in project epistemic memory. It is the immutable contract for all later operations.
 
-### Comprehensive `FRAME-*` Markdown Template
+#### 2.1.7.1. Comprehensive `FRAME-*` Markdown Template
 
 ``` markdown
 # Problem Framing: FRAME-[ID] — [Descriptive Title]
@@ -2708,7 +2708,7 @@ The output of Operation 1 is the **Problem Framing Map (`FRAME-`)**. In the Aria
 
 ------------------------------------------------------------------------
 
-## 6. Stop Conditions & Measurable Acceptance Invariants
+### 2.1.8. Stop Conditions & Measurable Acceptance Invariants
 
 Operation 1 is complete if and only if the following **Five Invariant Stop Conditions** are verified. If any condition fails, the agent or engineer must remain in Operation 1.
 
@@ -2727,7 +2727,7 @@ flowchart TD
     C5 -- Yes --> Pass["STOP CONDITION SATISFIED:<br/>Emit FRAME-ID → Unlock Operations 2, 3, 4"]
 ```
 
-### The Five Invariant Stop Conditions
+#### 2.1.8.1. The Five Invariant Stop Conditions
 
 1.  **The Implementation Agnosticism Invariant**: The problem framing document (`FRAME-`) contains **zero proper nouns** referring to third-party software products, libraries, databases, cloud services, or network protocols (unless the integration with an existing external protocol is itself an immutable external constraint).
 2.  **The Bilateral Agreement Invariant**: Two independent engineers or agents can read `FRAME-` and propose **two fundamentally different architectural implementations** (for example, one in-memory, one database-centric) that both satisfy all stated acceptance criteria.
@@ -2737,7 +2737,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 7. Common Mistakes & Cognitive Anti-Patterns in Framing
+### 2.1.9. Common Mistakes & Cognitive Anti-Patterns in Framing
 
 When executing Operation 1, engineers and AI agents frequently fall into six recurring cognitive anti-patterns. Recognizing these anti-patterns allows immediate corrective reframing.
 
@@ -2764,44 +2764,44 @@ mindmap
       Fix: Isolate domain state mutation
 ```
 
-### Detailed Anti-Pattern Analysis
+#### 2.1.9.1. Detailed Anti-Pattern Analysis
 
-#### Anti-Pattern 1: The Maslow Hammer (Premature Solution Embedding)
+##### 2.1.9.1.1. Anti-Pattern 1: The Maslow Hammer (Premature Solution Embedding)
 
 - **Symptom**: The problem statement begins with *"We need to build/install \[Technology X\]"*.
 - **Root Cause**: Cognitive anchoring to familiar tools; conflating the mechanism with the desired outcome.
 - **Epistemic Fallout**: Eliminates 90% of the viable solution space before exploration begins; guarantees accidental complexity if the selected tool is mismatched to the true constraint.
 - **Corrective Heuristic**: Apply the **"Why Question Rule"**: Ask *"Why do we need \[Technology X\]?"* Repeat until a pure behavioral verb and observable metric emerge.
 
-#### Anti-Pattern 2: The Vague Aspiration (Unquantified Adjectives)
+##### 2.1.9.1.2. Anti-Pattern 2: The Vague Aspiration (Unquantified Adjectives)
 
 - **Symptom**: Requirements state the system must be *"highly available," "low-latency," "cloud-native," "performant,"* or *"secure."*
 - **Root Cause**: Intellectual laziness; avoiding the hard work of defining concrete failure bounds.
 - **Epistemic Fallout**: The requirement is unfalsifiable; no test or benchmark can prove whether the implementation passes or fails.
 - **Corrective Heuristic**: Replace every adjective with a 6-part Bass-Clements-Kazman Quality Attribute Scenario with explicit percentile bounds (for example, $p99.9 \le 50\text{ ms}$).
 
-#### Anti-Pattern 3: The False Invariant (Treating Accidental Architecture as Immutable Law)
+##### 2.1.9.1.3. Anti-Pattern 3: The False Invariant (Treating Accidental Architecture as Immutable Law)
 
 - **Symptom**: The team asserts *"We cannot change the database schema,"* or *"All communication must go through the enterprise ESB,"* when these are merely historical organizational conventions.
 - **Root Cause**: Status quo bias; confusion between physical/business laws and temporary legacy design choices.
 - **Epistemic Fallout**: Forces the new architecture to adopt complex workarounds (for example, polling, distributed transactions) to circumvent an artificial constraint.
 - **Corrective Heuristic**: Classify every constraint as **Physical/Domain** (immutable), **Regulatory/Legal** (immutable), or **Architectural/Organizational** (mutable at a cost).
 
-#### Anti-Pattern 4: The Scope Explosion (Framing the Universe)
+##### 2.1.9.1.4. Anti-Pattern 4: The Scope Explosion (Framing the Universe)
 
 - **Symptom**: A request to fix payment retries expands into a mandate to redesign the entire company data platform and rewrite all services in a new framework.
 - **Root Cause**: Perfectionism; inability to establish a minimal functional boundary.
 - **Epistemic Fallout**: Analysis paralysis; multi-year projects that deliver zero value and collapse under their own weight.
 - **Corrective Heuristic**: Identify the **Minimal Observable Boundary** (Technique 1.3). Solve the decision at the narrowest responsible layer that satisfies the invariant.
 
-#### Anti-Pattern 5: The Single-Perspective Blindspot (Developer Tunnel Vision)
+##### 2.1.9.1.5. Anti-Pattern 5: The Single-Perspective Blindspot (Developer Tunnel Vision)
 
 - **Symptom**: A solution is designed purely for elegant code syntax or developer ergonomics, ignoring how the system will be monitored, debugged during an outage, or secured against malicious input.
 - **Root Cause**: Lack of operational and adversarial empathy; siloed engineering organizations.
 - **Epistemic Fallout**: Fragile production systems that generate un-diagnosable 3:00 AM alerts and suffer from security vulnerabilities.
 - **Corrective Heuristic**: Execute the 7-perspective sweep (Technique 1.4) before locking `FRAME-`.
 
-#### Anti-Pattern 6: The Protocol-as-Requirement Fallacy
+##### 2.1.9.1.6. Anti-Pattern 6: The Protocol-as-Requirement Fallacy
 
 - **Symptom**: The problem is framed as *"We need to send JSON over HTTP POST to /v1/orders"*.
 - **Root Cause**: Confusing the communication transport protocol with the underlying business contract and state transition.
@@ -2810,7 +2810,7 @@ mindmap
 
 ------------------------------------------------------------------------
 
-### Diagnostic Summary Table
+#### 2.1.9.2. Diagnostic Summary Table
 
 | Anti-Pattern | Tell-tale Phrase | Immediate Test | Corrective Action |
 |----|----|----|----|
@@ -2823,9 +2823,9 @@ mindmap
 
 ------------------------------------------------------------------------
 
-## Operation 2. Find the Constraint, Cause, or Contradiction
+## 2.2. Operation 2. Find the Constraint, Cause, or Contradiction
 
-### Failure First: Replicas That Made the Ledger Slower
+### 2.2.1. Failure First: Replicas That Made the Ledger Slower
 
 At peak traffic, ledger throughput plateaus at 2,400 writes/s and p99 latency climbs from 40 ms to 1.8 s. The team doubles workers from 16 to 32. Throughput falls to 1,900 writes/s because every worker spends more time contending on the same account-level lock; retry volume then doubles the offered load.
 
@@ -2836,7 +2836,7 @@ At peak traffic, ledger throughput plateaus at 2,400 writes/s and p99 latency cl
 
 Humans usually over-trust the slice of the system they can see. Agents over-trust the pattern most compatible with the supplied text. Give humans cross-boundary evidence. Give agents explicit alternative hypotheses plus intervention results.
 
-#### Formal Concept → Engineering Meaning
+#### 2.2.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -2845,9 +2845,9 @@ Humans usually over-trust the slice of the system they can see. Agents over-trus
 | Technical contradiction, $TC$ | Improving one parameter worsens another under the current mechanism. | More workers improve available parallelism but worsen lock contention. The incident is the trade-off made visible. |
 | Physical contradiction, $PC$ | One parameter must take incompatible values under different conditions. | Concurrency must be high across independent accounts and effectively one within a single account's ordered ledger. The architecture must separate those conditions. |
 
-## 1. Main Question and Purpose
+### 2.2.2. Main Question and Purpose
 
-### Main Question
+#### 2.2.2.1. Main Question
 
 > **What underlying mechanism, limiting bottleneck, or unexamined contradiction sustains the undesirable system state?**
 
@@ -2878,7 +2878,7 @@ Operation 2 is **abductive diagnosis and constraint localization**. Do not gener
 
 ------------------------------------------------------------------------
 
-## 2. Foundational Literature
+### 2.2.3. Foundational Literature
 
 Operation 2 combines five bodies of scientific and engineering thought into one diagnostic harness for software systems.
 
@@ -2899,7 +2899,7 @@ flowchart TD
     OP2 --> T4["Technique 2.4<br/>Uncover Assumptions"]
 ```
 
-### 2.1. Genrich Altshuller: Contradiction Analysis
+#### 2.2.3.1. Genrich Altshuller: Contradiction Analysis
 
 In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller states that inventive problems arise when a system contains an unresolved **contradiction**. Altshuller identified two tiers of contradiction:
 
@@ -2908,7 +2908,7 @@ In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Pro
 
 Altshuller showed that conventional engineering relies on **compromise** (a mediocre midpoint where both requirements are partly lost). Inventive engineering **resolves the contradiction**. It eliminates the conflict through separation principles (separation in time, space, condition, or system structure).
 
-### 2.2. Eliyahu M. Goldratt: Theory of Constraints and Thinking Processes
+#### 2.2.3.2. Eliyahu M. Goldratt: Theory of Constraints and Thinking Processes
 
 In [*The Goal: A Process of Ongoing Improvement* (Goldratt, 1984)](https://www.toc-goldratt.com/en/product/the-goal) and [*It's Not Luck* (Goldratt, 1994)](https://www.toc-goldratt.com/en/product/it-s-not-luck), Eliyahu M. Goldratt introduced the **Theory of Constraints (TOC)** and the **Thinking Processes**:
 
@@ -2916,7 +2916,7 @@ In [*The Goal: A Process of Ongoing Improvement* (Goldratt, 1984)](https://www.t
 - **Current Reality Tree (CRT)**: A formal causal diagram using strict sufficiency logic (*"If \[Cause A\] and \[Cause B\], then \[Effect C\]"*) to map multiple observable Undesirable Effects (UDEs) back to a single or small set of core drivers.
 - **Evaporating Cloud (Conflict Resolution Diagram)**: A structural tool to dissolve conflicts by surfacing and invalidating the hidden tacit assumptions that link necessary requirements to mutually exclusive implementation actions.
 
-### 2.3. Judea Pearl: Structural Causal Models and Causal Graphs
+#### 2.2.3.3. Judea Pearl: Structural Causal Models and Causal Graphs
 
 In [*Causality: Models, Reasoning, and Inference* (Pearl, 2009, 2nd ed., Cambridge University Press)](https://doi.org/10.1017/CBO9780511803161), Judea Pearl set the mathematical foundation of causal reasoning. Pearl formulated the **Causal Hierarchy (The Ladder of Causation)**:
 
@@ -2926,13 +2926,13 @@ In [*Causality: Models, Reasoning, and Inference* (Pearl, 2009, 2nd ed., Cambrid
 
 Pearl showed that purely observational data (telemetry, APM traces, system logs) cannot resolve confounding variables. Observational data cannot distinguish correlation from causation without an explicit **Directed Acyclic Graph (DAG)** and structural interventions.
 
-### 2.4. Gene Amdahl & Neil J. Gunther: Mathematical Physics of Software Bottlenecks
+#### 2.2.3.4. Gene Amdahl & Neil J. Gunther: Mathematical Physics of Software Bottlenecks
 
 In [*Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities* (Amdahl, 1967, AFIPS)](https://dl.acm.org/doi/10.1145/1465482.1465560), Gene Amdahl proved that the maximum speedup of a parallel system is strictly bounded by its non-parallelizable serial fraction $\sigma$.
 
 In [*Guerrilla Capacity Planning: A Metric-Driven Approach* (Gunther, 2007)](https://www.perfdynamics.com/Manifesto/USLbook.html), Neil J. Gunther generalized Amdahl's Law into the **Universal Scalability Law (USL)**. USL adds the quadratic penalty of inter-node coherency and crosstalk ($\kappa$). USL is a closed-form equation. It predicts when adding concurrency or compute nodes will not only plateau, but cause **throughput collapse (retrograde scalability)**.
 
-### 2.5. John Allspaw & Sidney Dekker: The Root Cause Fallacy in Complex Systems
+#### 2.2.3.5. John Allspaw & Sidney Dekker: The Root Cause Fallacy in Complex Systems
 
 In [*Web Operations: Keeping the Data on Time* (Allspaw & Robbins, 2010)](https://www.oreilly.com/library/view/web-operations/9781449377441/) and [*The Field Guide to Understanding 'Human Error'* (Dekker, 2014, 3rd ed., CRC Press)](https://www.routledge.com/The-Field-Guide-to-Understanding-Human-Error/Dekker/p/book/9781472439055), the authors dismantle the simple "Root Cause Fallacy". In complex, distributed, socio-technical software systems:
 
@@ -2941,7 +2941,7 @@ In [*Web Operations: Keeping the Data on Time* (Allspaw & Robbins, 2010)](https:
 
 ------------------------------------------------------------------------
 
-## 3. The Four Core Diagnostic Techniques
+### 2.2.4. The Four Core Diagnostic Techniques
 
 > **THE FOUR TECHNIQUES OF OPERATION 2**
 > 2.1. IDENTIFY REQUIREMENT CONTRADICTIONS
@@ -2963,9 +2963,9 @@ In [*Web Operations: Keeping the Data on Time* (Allspaw & Robbins, 2010)](https:
 
 ------------------------------------------------------------------------
 
-### Technique 2.1. Identify Requirement Contradictions
+#### 2.2.4.1. Technique 2.1. Identify Requirement Contradictions
 
-#### From compromise to contradiction statement
+##### 2.2.4.1.1. From compromise to contradiction statement
 
 When engineering requirements collide, conventional software development defaults to **compromise scoring**: a middle-ground value that degrades both requirements (for example, a 30-second cache TTL that is too stale for real-time consistency and too short to protect the database during peak traffic).
 
@@ -2985,7 +2985,7 @@ flowchart LR
     TechnicalContradiction -->|Deepen Mechanistic Analysis| PhysicalContradiction
 ```
 
-#### Taxonomy of Characteristic Software Contradictions
+##### 2.2.4.1.2. Taxonomy of Characteristic Software Contradictions
 
 Software architecture is governed by a canonical set of fundamental contradictions:
 
@@ -3000,7 +3000,7 @@ Software architecture is governed by a canonical set of fundamental contradictio
 | **CTR-07** | Forward/Backward API Compatibility | Freedom to Evolve Domain Models | Wire Format Invariance & Field Deprecation Shims |
 | **CTR-08** | Memory Footprint Efficiency | CPU Processing Throughput | Precomputed Lookups / Decompressed In-Memory State |
 
-#### Mathematical Formulation of Contradictions
+##### 2.2.4.1.3. Mathematical Formulation of Contradictions
 
 A **Technical Contradiction ($TC$)** is formalized as an ordered pair of conflicting quality attribute vectors:
 
@@ -3016,9 +3016,9 @@ Where $\mathcal{C}_1 \cap \mathcal{C}_2 = \emptyset$ represents the separation c
 
 ------------------------------------------------------------------------
 
-### Technique 2.2. Identify the Limiting Bottleneck
+#### 2.2.4.2. Technique 2.2. Identify the Limiting Bottleneck
 
-#### The Physics of Software Capacity
+##### 2.2.4.2.1. The Physics of Software Capacity
 
 In any software system processing transactions, requests, or events, performance is strictly governed by the mathematical laws of queuing and scalability.
 
@@ -3031,7 +3031,7 @@ graph LR
     end
 ```
 
-#### Little's Law
+##### 2.2.4.2.2. Little's Law
 
 For any stable queuing system, the average number of concurrent requests in the system $L$ is equal to the long-term average effective arrival rate $\lambda$ multiplied by the average time a request spends in the system $W$:
 
@@ -3039,9 +3039,9 @@ $$L = \lambda \cdot W$$
 
 If a downstream dependency increases its response time $W$ from 50 ms to 500 ms while the incoming request rate $\lambda$ remains constant at 1,000 req/sec, the in-flight concurrency $L$ must expand from $50$ to $500$ concurrent requests. If the worker thread pool or connection pool is capped at $100$, queuing is mathematically guaranteed, leading to exponential latency spikes and eventual resource starvation.
 
-#### Amdahl's Law vs. Gunther's Universal Scalability Law (USL)
+##### 2.2.4.2.3. Amdahl's Law vs. Gunther's Universal Scalability Law (USL)
 
-##### 1. Amdahl's Law (Contention Only)
+###### 2.2.4.2.3.1. Amdahl's Law (Contention Only)
 
 Amdahl's Law models the speedup $S(N)$ of a workload executed across $N$ parallel processing units:
 
@@ -3058,7 +3058,7 @@ $$\lim_{N \to \infty} S(N) = \frac{1}{\sigma}$$
 
 If only $5\%$ of a request's processing is serialized ($\sigma = 0.05$), the maximum achievable speedup is strictly capped at $20\times$, regardless of whether $100$ or $10,000$ cores are allocated.
 
-##### 2. Gunther's Universal Scalability Law (USL) (Contention + Coherency)
+###### 2.2.4.2.3.2. Gunther's Universal Scalability Law (USL) (Contention + Coherency)
 
 Amdahl's Law fails to model distributed systems because it assumes that communication and coordination between parallel workers are free. In reality, distributed worker nodes must exchange state, invalidate caches, replicate logs, and reach consensus.
 
@@ -3072,7 +3072,7 @@ Where:
 - $\sigma$ is the **contention / serialization coefficient** (time spent waiting in queue for shared serialized resources).
 - $\kappa$ is the **coherency / crosstalk coefficient** (the pairwise communication penalty incurred to maintain consistency across $N$ nodes, scaling with $\frac{N(N-1)}{2} \approx \mathcal{O}(N^2)$).
 
-##### 3. The Three Scalability Regimes
+###### 2.2.4.2.3.3. The Three Scalability Regimes
 
 The USL reveals three fundamental regimes of software scalability:
 
@@ -3087,7 +3087,7 @@ flowchart LR
 2.  **Sub-linear Asymptotic Plateau ($\sigma > 0, \kappa = 0$)**: Governed by Amdahl's Law. Throughput plateaus at $\lambda_{\max} = \frac{\gamma}{\sigma}$.
 3.  **Retrograde Scalability ($\sigma > 0, \kappa > 0$)**: Throughput reaches an optimal concurrency peak $N^\*$ and then **collapses catastrophically** due to inter-node coherency traffic (for example, distributed 2PC, gossip protocols, Redis cluster cross-slot lock contention).
 
-##### 4. Derivation of the Optimal Scaling Point ($N^*$) and Maximum Capacity ($\lambda^*$)
+###### 2.2.4.2.3.4. Derivation of the Optimal Scaling Point ($N^*$) and Maximum Capacity ($\lambda^*$)
 
 To find the exact point of maximum capacity $N^\*$, we take the first derivative of the USL equation with respect to $N$ and set it to zero:
 
@@ -3097,7 +3097,7 @@ The maximum achievable throughput $\lambda^\* = \lambda(N^\*)$ is:
 
 $$\lambda^\* = \frac{\gamma}{\sigma + 2\sqrt{\kappa(1 - \sigma)} - \kappa} \approx \frac{\gamma}{\sigma + 2\sqrt{\kappa}}$$
 
-#### The Software Bottleneck Hierarchy
+##### 2.2.4.2.4. The Software Bottleneck Hierarchy
 
 To systematically isolate a bottleneck, an engineer or AI agent must traverse the software stack from innermost execution primitives to outermost system topology:
 
@@ -3113,9 +3113,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Technique 2.3. Construct a Causal Chain / Directed Acyclic Graph
+#### 2.2.4.3. Technique 2.3. Construct a Causal Chain / Directed Acyclic Graph
 
-#### Abductive Causal Inference in Software
+##### 2.2.4.3.1. Abductive Causal Inference in Software
 
 Diagnosis is fundamentally an **abductive** reasoning process: given an observed anomaly or symptom $Y$ (for example, p99 latency spike), we infer the most probable underlying mechanism $X$ that produced $Y$.
 
@@ -3134,7 +3134,7 @@ flowchart TD
 
 In Pearl's structural causal framework, failing to account for the common confounder $U$ leads an engineer to mistakenly "fix" CPU utilization (for example, by upgrading instance sizes), only to discover that HTTP 504 timeouts persist because the true causal path flows through connection pool exhaustion $Z$.
 
-#### Goldratt's Current Reality Tree (CRT) Logic
+##### 2.2.4.3.2. Goldratt's Current Reality Tree (CRT) Logic
 
 To eliminate cognitive bias, causal chains must be constructed using **Strict Necessity and Sufficiency Logic**:
 
@@ -3160,7 +3160,7 @@ flowchart TD
     end
 ```
 
-#### Differentiating Falsification Tests ($EVDREQ-$)
+##### 2.2.4.3.3. Differentiating Falsification Tests ($EVDREQ-$)
 
 When multiple competing hypotheses ($HYP-01$ vs. $HYP-02$) explain the observed symptoms, the engineer must not argue based on intuition. Instead, design a **Differentiating Falsification Experiment**:
 
@@ -3172,9 +3172,9 @@ If the test returns $O = \text{false}$, $HYP_1$ is decisively falsified and must
 
 ------------------------------------------------------------------------
 
-### Technique 2.4. Uncover Hidden Assumptions
+#### 2.2.4.4. Technique 2.4. Uncover Hidden Assumptions
 
-#### The Nature of Tacit Architectural Premises ($ASM-$)
+##### 2.2.4.4.1. The Nature of Tacit Architectural Premises ($ASM-$)
 
 Every software architecture is anchored by implicit assumptions accepted by the development team as immutable laws of nature. When system requirements evolve or load increases by an order of magnitude, these hidden assumptions transform into invisible constraints.
 
@@ -3186,7 +3186,7 @@ Common tacit software assumptions include:
 - **The Zero-Cost Abstraction Fallacy**: *"Object-Relational Mapping (ORM) and distributed RPC calls behave identically to local in-memory function invocations."*
 - **The Strict Ordering Fallacy**: *"All incoming events must be processed in strict global FIFO order across the entire distributed cluster."*
 
-#### Goldratt's Evaporating Cloud (Conflict Resolution Diagram)
+##### 2.2.4.4.2. Goldratt's Evaporating Cloud (Conflict Resolution Diagram)
 
 The Evaporating Cloud surfaces the hidden assumptions that create the illusion of an irreconcilable conflict:
 
@@ -3211,7 +3211,7 @@ flowchart TD
     ASM_EDGE -.-> ACT2
 ```
 
-#### The Assumption Inversion Method
+##### 2.2.4.4.3. The Assumption Inversion Method
 
 To uncover and dissolve tacit assumptions:
 
@@ -3221,13 +3221,13 @@ To uncover and dissolve tacit assumptions:
 
 ------------------------------------------------------------------------
 
-## 4. Practical Case Studies
+### 2.2.5. Practical Case Studies
 
 ------------------------------------------------------------------------
 
-### Case Study 1: Tail Latency Spikes in Distributed Microservices (Fan-Out Amplification)
+#### 2.2.5.1. Case Study 1: Tail Latency Spikes in Distributed Microservices (Fan-Out Amplification)
 
-#### 1. Symptoms & Observed Anomalies (`OBS-`)
+##### 2.2.5.1.1. Symptoms & Observed Anomalies (`OBS-`)
 
 An e-commerce platform's search and checkout recommendation service exhibits severe p99 latency degradation during promotional campaigns:
 
@@ -3237,12 +3237,12 @@ An e-commerce platform's search and checkout recommendation service exhibits sev
 - Aggregated user-facing p99 latency: **$1,450\text{ ms}$** (Unacceptable SLA breach; timeout threshold is $1,000\text{ ms}$).
 - Aggregated user-facing p99.9 latency: **$4,800\text{ ms}$**.
 
-#### 2. Naive Diagnostic Guess vs. Epistemic Investigation
+##### 2.2.5.1.2. Naive Diagnostic Guess vs. Epistemic Investigation
 
 - **Naive Guess**: *"The recommendation microservice needs more CPU cores and a larger JVM heap."*
 - **Epistemic Diagnostic Path**: The gateway service executes an aggregation query that fans out in parallel to $M = 40$ backend microservices and worker partitions.
 
-#### 3. Mathematical Causal Modeling: The Fan-Out Tail Amplification Law
+##### 2.2.5.1.3. Mathematical Causal Modeling: The Fan-Out Tail Amplification Law
 
 Let $p$ be the probability that an individual downstream service takes longer than latency threshold $T$. The probability $P_{\text{slow}}$ that an aggregate user request (requiring responses from **all** $M$ services) experiences a delay $> T$ is:
 
@@ -3256,7 +3256,7 @@ $$P_{\text{slow}} = 1 - (1 - 0.01)^{40} = 1 - (0.99)^{40} = 1 - 0.6689 = 33.11\%
 
 **Result**: A $1\%$ single-service p99 anomaly is amplified into a **$33.1\%$ user-facing failure rate**. The p99 user request is not hitting the downstream p99; it is hitting the downstream **p99.975** tail!
 
-#### 4. USL Coherency & Contention Analysis
+##### 2.2.5.1.4. USL Coherency & Contention Analysis
 
 Profiling the gateway under high load reveals:
 
@@ -3284,7 +3284,7 @@ graph TD
     CTR1 --> PC1["CTR-01 (Physical): Fan-out wait time must be unbounded (for 100% data)<br/>and <= 100ms (for SLA)"]:::ctr
 ```
 
-#### 5. Epistemic Deliverable: Diagnostic Map `DIAG-01`
+##### 2.2.5.1.5. Epistemic Deliverable: Diagnostic Map `DIAG-01`
 
 - **`HYP-01`**: Latency is driven by the probabilistic tail of $M=40$ fan-out dependencies, compounded by synchronous blocking wait.
 - **`CTR-01` (Physical Contradiction)**: The gateway must wait for all 40 responses to ensure complete recommendation quality ($C_1$), and must NOT wait longer than 80 ms to ensure p99 SLA compliance ($C_2$).
@@ -3292,9 +3292,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Distributed Lock Contention & Throughput Collapse in High-Volume Financial Ledger
+#### 2.2.5.2. Case Study 2: Distributed Lock Contention & Throughput Collapse in High-Volume Financial Ledger
 
-#### 1. Symptoms & Observed Anomalies (`OBS-`)
+##### 2.2.5.2.1. Symptoms & Observed Anomalies (`OBS-`)
 
 A payment processing core handles balance updates across 5,000,000 accounts:
 
@@ -3302,7 +3302,7 @@ A payment processing core handles balance updates across 5,000,000 accounts:
 - At $N = 32$ concurrent worker instances: Throughput = $6,100\text{ TPS}$, p99 Latency = $120\text{ ms}$.
 - At $N = 64$ concurrent worker instances: Throughput = **$2,800\text{ TPS}$ (54% Drop!)**, p99 Latency = **$1,850\text{ ms}$**.
 
-#### 2. Bottleneck Analysis via Universal Scalability Law
+##### 2.2.5.2.2. Bottleneck Analysis via Universal Scalability Law
 
 Plotting the empirical data against Gunther's USL:
 
@@ -3332,7 +3332,7 @@ graph TD
     EVD2 -->|supports| HYP4
 ```
 
-#### 3. Evaporating Cloud & Assumption Surfacing
+##### 2.2.5.2.3. Evaporating Cloud & Assumption Surfacing
 
 - **Objective ($O$)**: High-throughput, zero-overdraft ledger.
 - **Requirement 1 ($R_1$)**: Guarantee balance never drops below zero $\implies$ **Action 1 ($P_1$)**: Acquire exclusive lock on Account ID across all nodes.
@@ -3342,9 +3342,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Cache Stampedes (Thundering Herd) and Dogpiling in High-Traffic Content Delivery
+#### 2.2.5.3. Case Study 3: Cache Stampedes (Thundering Herd) and Dogpiling in High-Traffic Content Delivery
 
-#### 1. Symptoms & Observed Anomalies (`OBS-`)
+##### 2.2.5.3.1. Symptoms & Observed Anomalies (`OBS-`)
 
 A sports streaming platform experiences catastrophic backend database outages occurring periodically at the top of the hour (for example, 20:00:00 UTC):
 
@@ -3352,7 +3352,7 @@ A sports streaming platform experiences catastrophic backend database outages oc
 - 20:00:01 UTC database CPU load: **$100\%$ (Crash / Connection Pool Exhausted)**.
 - Cache hit ratio drops from $99.4\%$ to $42.1\%$ for a 5-second interval.
 
-#### 2. Causal Chain & Current Reality Tree Analysis
+##### 2.2.5.3.2. Causal Chain & Current Reality Tree Analysis
 
 ``` mermaid
 flowchart TD
@@ -3368,14 +3368,14 @@ flowchart TD
     C7 --> C4
 ```
 
-#### 3. Physical Contradiction Formulation
+##### 2.2.5.3.3. Physical Contradiction Formulation
 
 - **Parameter ($P$)**: Cache Time-To-Live (TTL).
 - **Physical Contradiction (`CTR-03`)**:
   - TTL must be **short** ($P = S$) under condition $\mathcal{C}_1$ (live game score is changing) to ensure data freshness.
   - TTL must be **infinite / non-expiring** ($P = \neg S$) under condition $\mathcal{C}_2$ (peak traffic surge) to prevent 10,000 concurrent workers from hitting the database simultaneously.
 
-#### 4. Theoretical & Mathematical Resolution: The XFetch Algorithm
+##### 2.2.5.3.4. Theoretical & Mathematical Resolution: The XFetch Algorithm
 
 Rather than relying on naive fixed TTLs or heavy distributed mutexes, the optimal solution applies the **XFetch Probabilistic Early Expiration Algorithm** ([Vattani, Chierichetti, & Lowenstein, 2015](https://en.wikipedia.org/wiki/Consistent_hashing)):
 
@@ -3393,15 +3393,15 @@ As $\text{TTL} \to 0$, the probability of a worker proactively and asynchronousl
 
 ------------------------------------------------------------------------
 
-### Case Study 4: Long Release Cycles in Enterprise Monoliths (Delivery Pipeline Bottleneck)
+#### 2.2.5.4. Case Study 4: Long Release Cycles in Enterprise Monoliths (Delivery Pipeline Bottleneck)
 
-#### 1. Symptoms & Observed Anomalies (`OBS-`)
+##### 2.2.5.4.1. Symptoms & Observed Anomalies (`OBS-`)
 
 An enterprise financial platform reports that delivering a two-line business logic change takes an average of **14 working days** from merge to production deployment.
 
 - Team Lead Hypothesis: *"Our automated test suite is too slow; we need to parallelize CI runners."*
 
-#### 2. Goldratt Current Reality Tree (CRT) Diagnosis
+##### 2.2.5.4.2. Goldratt Current Reality Tree (CRT) Diagnosis
 
 Constructing the causal tree of the delivery pipeline:
 
@@ -3420,7 +3420,7 @@ flowchart TD
     TEST -.->|No Significant Causal Link| UDE
 ```
 
-#### 3. Epistemic Breakthrough
+##### 2.2.5.4.3. Epistemic Breakthrough
 
 The test suite duration ($18\text{ minutes}$) is an insignificant fraction ($0.08\%$) of the 14-day lead time. The true system constraint is the **staging environment serialization bottleneck** caused by **coupled database schema migrations**.
 
@@ -3429,7 +3429,7 @@ The test suite duration ($18\text{ minutes}$) is an insignificant fraction ($0.0
 
 ------------------------------------------------------------------------
 
-## 5. Operational Deliverable: Map of Causes, Constraints, and Contradictions
+### 2.2.6. Operational Deliverable: Map of Causes, Constraints, and Contradictions
 
 The output of Operation 2 is the formal working artifact: **Map of Causes, Constraints, and Contradictions (`DIAG-ID`)**.
 
@@ -3496,7 +3496,7 @@ flowchart TD
 
 ---
 
-## 6. Stop Conditions & Falsification Criteria
+### 2.2.7. Stop Conditions & Falsification Criteria
 
 ``` mermaid
 flowchart TD
@@ -3509,7 +3509,7 @@ flowchart TD
 ```
 
 
-### Popperian Falsifiability Rule
+#### 2.2.7.1. Popperian Falsifiability Rule
 A diagnostic claim that cannot be disproved by any conceivable empirical test is an **epistemic hallucination**. If an agent states *"The system is slow due to microservice complexity,"* this statement is non-falsifiable. 
 
 To satisfy Operation 2, the claim must be translated into:
@@ -3517,7 +3517,7 @@ To satisfy Operation 2, the claim must be translated into:
 
 ---
 
-## 7. Common Mistakes & Diagnostic Anti-Patterns
+### 2.2.8. Common Mistakes & Diagnostic Anti-Patterns
 
 ```mermaid
 graph TD
@@ -3529,33 +3529,34 @@ graph TD
     E4["<b>4. Local Sub-Optimization</b><br/>Optimizing non-bottleneck code (Amdahl serial fraction ignored)"]:::err
     E5["<b>5. Premature Compromise</b><br/>Settling for a mediocre trade-off instead of resolving the contradiction"]:::err
     E6["<b>6. Confabulated Telemetry</b><br/>Cherry-picking log lines that confirm pre-existing biases"]:::err
+```
 
-### 1. The Root Cause Fallacy (Allspaw & Dekker)
+#### 2.2.8.1. The Root Cause Fallacy (Allspaw & Dekker)
 
 - **Error**: Declaring that a complex multi-service outage was caused by *"a developer typing a typo in a config file"* or *"a single slow database query"*.
 - **Remedy**: Recognize that outages in distributed systems require a **confluence of latent conditions**: inadequate validation in CI, absent circuit breakers, aggressive retry storms, and unbuffered socket queues. Map the complete causal graph.
 
-### 2. Symptomatic Monkey-Patching ("Whack-A-Mole")
+#### 2.2.8.2. Symptomatic Monkey-Patching ("Whack-A-Mole")
 
 - **Error**: Increasing connection pool sizes, doubling JVM memory limits, or lengthening HTTP client timeouts to "fix" timeout errors.
 - **Remedy**: Recognize that increasing queue capacity or timeouts merely delays the failure, transforming a fast failure into a catastrophic system-wide thread lockup and memory exhaustion.
 
-### 3. Conflating Correlation with Causation (Pearl's Collider/Confounder Bias)
+#### 2.2.8.3. Conflating Correlation with Causation (Pearl's Collider/Confounder Bias)
 
 - **Error**: Observing that CPU spikes to $99\%$ during high latency, and concluding that CPU is the bottleneck.
 - **Remedy**: Determine whether high CPU is the *cause* of the latency or a *common symptom* of a thread spin-lock loop caused by lock starvation.
 
-### 4. Local Sub-Optimization of Non-Constraints (Goldratt)
+#### 2.2.8.4. Local Sub-Optimization of Non-Constraints (Goldratt)
 
 - **Error**: Spending three weeks optimizing a JSON serialization routine from $4\text{ ms}$ to $1\text{ ms}$, when the request spends $450\text{ ms}$ waiting for a database row lock.
 - **Remedy**: Calculate Amdahl's serial fraction and locate the single system constraint before optimizing any code.
 
-### 5. The Anti-TRIZ Compromise Fallacy
+#### 2.2.8.5. The Anti-TRIZ Compromise Fallacy
 
 - **Error**: Splitting the difference between consistency and availability by introducing arbitrary delays, sleepy retries, or semi-stale caches.
 - **Remedy**: Elevate the trade-off into a Physical Contradiction and apply separation principles (in time, space, state ownership, or operational mode).
 
-### 6. Confabulated Telemetry and Confirmation Bias
+#### 2.2.8.6. Confabulated Telemetry and Confirmation Bias
 
 - **Error**: Searching through gigabytes of logs to find a single error message that supports a favored theory, ignoring thousands of contradictory telemetry metrics.
 - **Remedy**: Define the differentiating test and its falsification criteria **before** inspecting the telemetry data.
@@ -3564,9 +3565,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-## Operation 3. Transform the Existing Software System
+## 2.3. Operation 3. Transform the Existing Software System
 
-### Failure First: The Queue That Turned Latency into Data Loss Risk
+### 2.3.1. Failure First: The Queue That Turned Latency into Data Loss Risk
 
 A synchronous telemetry writer misses its latency SLO during bursts. The intuitive redesign inserts a broker, a consumer service, a schema registry, and a retry topic. Request latency improves, but duplicate delivery corrupts counters, lag hides freshness failures, and three new stateful systems enter the on-call rotation. The original need was only to absorb a bounded ten-second burst.
 
@@ -3577,7 +3578,7 @@ A synchronous telemetry writer misses its latency SLO during bursts. The intuiti
 
 The human correction is an incentives and review problem. The agent correction is a search-order constraint. Both must preserve invariants. Both must minimize new code, state, coordination, and operators.
 
-#### Formal Concept → Engineering Meaning
+#### 2.3.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -3586,13 +3587,13 @@ The human correction is an incentives and review problem. The agent correction i
 | Trimming | Elimination of a component with its function removed, delegated, or performed by the object itself. | Deleting a pass-through ingestion service is valid only if validation and partition routing are demonstrably carried elsewhere. |
 | Ideality | Useful effects relative to harmful effects and lifecycle cost. | A ten-second database-backed buffer may deliver the same burst tolerance with fewer pages, upgrades, schemas, and replay hazards than a broker platform. |
 
-## Main Question
+### 2.3.2. Main Question
 
 > **How can we transform the structure, state ownership, and execution dynamics of the software system without anchoring to the first obvious implementation or resorting to unguided technological cycling?**
 
 When engineers find a bottleneck, a design problem, or a missing function, they often add a service, cache, message broker, or new language. Each addition adds operational work and more states to manage. It might not resolve the structural contradiction.
 
-**Operation 3 (Transform the Existing Software System)** changes topology, component boundaries, execution time, and resource use. Apply its five transformation operators to the problem model from [Operation 1](#operation-1-frame-and-model-the-software-problem) and the causal mechanisms from [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction). Start with removal, delegation, or a smaller boundary change before you add a component.
+**Operation 3 (Transform the Existing Software System)** changes topology, component boundaries, execution time, and resource use. Apply its five transformation operators to the problem model from [Operation 1](#21-operation-1-frame-and-model-the-software-problem) and the causal mechanisms from [Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction). Start with removal, delegation, or a smaller boundary change before you add a component.
 
 ``` mermaid
 flowchart TD
@@ -3628,11 +3629,11 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.3.3. Theoretical Grounding
 
 Systematic transformation in software engineering rests on theories of modularity, refinement, transaction semantics, and inventive problem solving.
 
-### 1.1. The Law of Ideality and Component Trimming
+#### 2.3.3.1. The Law of Ideality and Component Trimming
 
 In classical TRIZ, [Altshuller (1984) *Creativity as an Exact Science*](https://en.wikipedia.org/wiki/TRIZ) formulated the **Law of Increasing Ideality**: every technical system evolves toward increasing its degree of ideality ($I$), defined as the ratio of the sum of useful functions ($\sum F_u$) to the sum of harmful effects ($\sum F_h$) and resource expenditures ($\sum C$):
 
@@ -3646,15 +3647,15 @@ In software engineering:
 
 The ultimate ideal system is an **Ideal Final Result (IFR)**: *the component itself does not exist (zero code, zero infrastructure, zero operational maintenance), yet its useful function is fully performed.* Operation 3 reaches ideality through **Trimming**: remove redundant modules, proxies, and layers. Move indispensable functions to existing host resources (the database engine, kernel, compiler, or client).
 
-### 1.2. Program Refactoring and Behavioral Invariance
+#### 2.3.3.2. Program Refactoring and Behavioral Invariance
 
 [Fowler (1999) *Refactoring: Improving the Design of Existing Code*](https://martinfowler.com/books/refactoring.html) formalized restructuring software without changing observable behavior. Fowler's catalog provides micro-transformations (*Inline Class*, *Collapse Hierarchy*, *Remove Middle Man*, *Separate Query from Modifier*). These are building blocks for architectural trimming and delegation. Operation 3 scales refactoring from object-oriented ASTs to distributed topologies, data layers, and asynchronous pipelines.
 
-### 1.3. Object-Oriented and Structural Design Patterns
+#### 2.3.3.3. Object-Oriented and Structural Design Patterns
 
 [Gamma, Helm, Johnson & Vlissides (1994) *Design Patterns: Elements of Reusable Object-Oriented Software*](https://www.informit.com/store/design-patterns-elements-of-reusable-object-oriented-9780201633610) codified structural, creational, and behavioral mechanisms that decouple interfaces from implementations. Patterns such as *Proxy*, *Adapter*, *Facade*, *Strategy*, and *Observer* are structural manifestations of function delegation and mechanism replacement.
 
-### 1.4. Distributed Systems, Transactions, and Concurrency
+#### 2.3.3.4. Distributed Systems, Transactions, and Concurrency
 
 Transformation of state and communication topology relies on the foundational theorems of distributed computing:
 
@@ -3662,13 +3663,13 @@ Transformation of state and communication topology relies on the foundational th
 - [Bernstein, Hadzilacos & Goodman (1987) *Concurrency Control and Recovery in Database Systems*](https://books.google.com/books?id=m05RAAAAMAAJ) formalized serializability theory, two-phase locking (2PL), multiversion concurrency control (MVCC), and logging protocols (ARIES), providing the theoretical foundation for replacing locking with optimistic or multiversion mechanisms.
 - [Kleppmann (2017) *Designing Data-Intensive Applications*](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) unified batch, stream, and transactional storage paradigms, demonstrating how unbundling the database into append-only logs, derived views, and change data capture (CDC) resolves fundamental scalability contradictions.
 
-### 1.5. Stepwise Refinement and Algorithmic Geometry
+#### 2.3.3.5. Stepwise Refinement and Algorithmic Geometry
 
 [Wirth (1971) *Program Development by Stepwise Refinement*](https://dl.acm.org/doi/10.1145/362575.362577) established that system architecture is refined through successive decomposition and restructuring of data representations and algorithmic steps. Operation 3 adapts this concept to temporal and spatial rearrangements: reordering computations, shifting evaluation times (lazy vs. eager), and batching operations to maximize hardware mechanical sympathy.
 
 ------------------------------------------------------------------------
 
-## 2. The Software Separation Principles
+### 2.3.4. The Software Separation Principles
 
 Physical contradictions (a single parameter must exist in state $A$ and state $\neg A$ at the same time) appear in software as conflicting quality attributes. A system cannot be fully synchronized across all nodes and instantaneously available during network partitions ([Gilbert & Lynch, 2002](https://dl.acm.org/doi/10.1145/564585.564601)).
 
@@ -3690,7 +3691,7 @@ graph TD
     SP --> P4["4. Separation of Parts from Whole<br/>(Vectorization vs. Streaming, Gossip vs. Raft)"]
 ```
 
-### 2.1. Principle 1: Separation in Time
+#### 2.3.4.1. Principle 1: Separation in Time
 
 The conflicting requirements are satisfied in distinct temporal windows or lifecycle phases.
 
@@ -3698,7 +3699,7 @@ The conflicting requirements are satisfied in distinct temporal windows or lifec
 - **OLTP vs. OLAP (Materialized Views & ETL):** Operational transactions require sub-millisecond execution without analytical query interference; analytical queries require deep aggregate scans. Transactions execute against row-oriented transactional tables in real-time, while data is transformed and loaded into columnar analytical engines (for example, ClickHouse, Snowflake) via continuous asynchronous change streams.
 - **Speculative Execution vs. Verification:** Fast path executes immediately based on predicted outcomes; validation occurs asynchronously, with rollback/compensation executed only upon conflict.
 
-### 2.2. Principle 2: Separation in Space and State Ownership
+#### 2.3.4.2. Principle 2: Separation in Space and State Ownership
 
 The conflicting requirements are satisfied in distinct memory addresses, storage volumes, physical nodes, or domain boundaries.
 
@@ -3706,7 +3707,7 @@ The conflicting requirements are satisfied in distinct memory addresses, storage
 - **Hot Path vs. Cold Path Partitioning:** High-frequency transaction paths operate purely in RAM (for example, LMAX Disruptor ring buffers, non-blocking single-writer threads), while cold audit history and infrequently accessed metadata are partitioned into distributed object storage (for example, AWS S3).
 - **Process and Privilege Isolation:** Kernel-level separation (namespaces, cgroups, seccomp filters) and hardware-level memory protection (enclaves, ring 0 vs. ring 3) ensure that high-privilege operations execute within dedicated address spaces without compromising general application throughput.
 
-### 2.3. Principle 3: Separation on Condition and Operating Mode
+#### 2.3.4.3. Principle 3: Separation on Condition and Operating Mode
 
 The system switches its internal computational mechanism based on operational parameters, workload intensity, or environmental health.
 
@@ -3714,7 +3715,7 @@ The system switches its internal computational mechanism based on operational pa
 - **Adaptive Batching (for example, Nagle's Algorithm, Kafka Producer):** Under low throughput, messages are dispatched immediately to maintain low latency. When request arrival rate exceeds a threshold ($\lambda > \theta$), the transport layer automatically coalesces messages into contiguous buffers to maximize network bandwidth and compression ratios.
 - **Circuit Breakers and Graceful Degradation:** In nominal operating conditions, rich remote RPC calls are executed. If error rates exceed an SLO threshold, the client degrades gracefully to local heuristic fallbacks or cached snapshots without blocking calling threads.
 
-### 2.4. Principle 4: Separation of Parts from the Whole (Micro vs. Macro Separation)
+#### 2.3.4.4. Principle 4: Separation of Parts from the Whole (Micro vs. Macro Separation)
 
 The aggregate system exhibits a macro-property that is explicitly absent or inverted at the level of individual sub-components.
 
@@ -3724,7 +3725,7 @@ The aggregate system exhibits a macro-property that is explicitly absent or inve
 
 ------------------------------------------------------------------------
 
-## 3. Deep Analysis of the Five Transformation Techniques
+### 2.3.5. Deep Analysis of the Five Transformation Techniques
 
 ``` mermaid
 classDiagram
@@ -3757,19 +3758,19 @@ classDiagram
     FunctionCarrierMap --> SystemResource : delegates to
 ```
 
-### Technique 3.1. Remove or Reduce (Component Trimming & Abstraction Pruning)
+#### 2.3.5.1. Technique 3.1. Remove or Reduce (Component Trimming & Abstraction Pruning)
 
-#### Formal Definition
+##### 2.3.5.1.1. Formal Definition
 
 Trimming is the systematic elimination of an architectural component, layer, proxy, or intermediate state while preserving or reallocating its indispensable useful functions to remaining components or the execution platform.
 
-#### Trimming Rules (Adapted from Altshuller's Trimming Rules for Software)
+##### 2.3.5.1.2. Trimming Rules (Adapted from Altshuller's Trimming Rules for Software)
 
 1.  **Rule A (Function Obsolete):** The component can be removed if its useful function is no longer required by any upstream business invariant or downstream consumer.
 2.  **Rule B (Object Performs Function):** The component can be removed if the object of the action (the data or client) performs the function itself.
 3.  **Rule C (Carrier Performs Function):** The component can be removed if another existing system component (for example, the database, the OS kernel, the reverse proxy) can absorb its function using spare capacity or native primitives.
 
-#### Concrete Targets for Software Trimming
+##### 2.3.5.1.3. Concrete Targets for Software Trimming
 
 - **Pass-Through Microservices:** Services that merely validate and forward requests without executing distinct domain logic.
 - **Intermediate DTO / Mapping Layers:** Redundant translation layers (for example, Entity $\rightarrow$ Domain Model $\rightarrow$ DTO $\rightarrow$ View Model) where properties pass through unmodified.
@@ -3777,7 +3778,7 @@ Trimming is the systematic elimination of an architectural component, layer, pro
 - **Distributed Lock Managers (for example, ZooKeeper, Consul):** Replaced by atomic database operations (`UPDATE ... WHERE version = ?`) or partition-based single-writer architectures.
 - **Synchronous Distributed Orchestrators:** Replaced by choreographed asynchronous state progression or immutable event streams.
 
-#### Before vs. After Architecture: Trimming a Pass-Through Ingestion Service
+##### 2.3.5.1.4. Before vs. After Architecture: Trimming a Pass-Through Ingestion Service
 
 ``` mermaid
 flowchart TD
@@ -3794,7 +3795,7 @@ flowchart TD
     end
 ```
 
-#### Function Carrier Redistribution Mapping
+##### 2.3.5.1.5. Function Carrier Redistribution Mapping
 
 When trimming components, every original function must be accounted for:
 
@@ -3807,15 +3808,15 @@ When trimming components, every original function must be accounted for:
 
 ------------------------------------------------------------------------
 
-### Technique 3.2. Split or Localize (Decoupling Along Natural Fault Lines)
+#### 2.3.5.2. Technique 3.2. Split or Localize (Decoupling Along Natural Fault Lines)
 
-#### Formal Definition
+##### 2.3.5.2.1. Formal Definition
 
 Splitting is the decomposition of a monolithic, multiplexed, or tightly coupled module into distinct, specialized components separated by time, state ownership, lifecycle, or security domains.
 
-#### Core Dimensions of Software Splitting
+##### 2.3.5.2.2. Core Dimensions of Software Splitting
 
-##### 1. Read / Write Splitting (CQRS)
+###### 2.3.5.2.2.1. Read / Write Splitting (CQRS)
 
 Separating the command model (responsible for maintaining relational invariants and transactional consistency) from the read model (optimized for projection, filtering, and latency).
 
@@ -3845,7 +3846,7 @@ type PagedResult<T> = { items: T[]; nextCursor?: string };
 type OrderSummaryView = { id: OrderId };
 ```
 
-##### 2. Hot Path vs. Cold Path Splitting
+###### 2.3.5.2.2.2. Hot Path vs. Cold Path Splitting
 
 Isolating low-latency, high-throughput execution loops from background auditing, telemetry, and reporting.
 
@@ -3873,15 +3874,15 @@ flowchart LR
     SEQ -.->|"Zero-Copy Push"| RING
 ```
 
-##### 3. Privilege and Security Boundary Splitting
+###### 2.3.5.2.2.3. Privilege and Security Boundary Splitting
 
 Decomposing monolithic execution units into unprivileged workers and isolated cryptographic/privileged modules following the Principle of Least Privilege ([Saltzer & Schroeder, 1975](https://dl.acm.org/doi/10.1145/361011.361067)).
 
 ------------------------------------------------------------------------
 
-### Technique 3.3. Combine, Co-locate, or Delegate Function (Harnessing Native Resources)
+#### 2.3.5.3. Technique 3.3. Combine, Co-locate, or Delegate Function (Harnessing Native Resources)
 
-#### Formal Definition
+##### 2.3.5.3.1. Formal Definition
 
 Combining and delegating is the process of reallocating software responsibilities to existing platforms, operating system kernels, hardware subsystems, database engines, or programming language type systems, thereby eliminating bespoke application logic.
 
@@ -3907,20 +3908,20 @@ flowchart TD
     AL4 -->|"Delegate to"| R4
 ```
 
-#### Primary Delegation Targets and Mechanisms
+##### 2.3.5.3.2. Primary Delegation Targets and Mechanisms
 
-##### 1. Delegation to the Database Engine
+###### 2.3.5.3.2.1. Delegation to the Database Engine
 
 - **Idempotency & Deduplication:** Replace distributed cache checks with `INSERT ... ON CONFLICT DO NOTHING` or conditional upserts.
 - **Temporal Validity & Audit:** Use SQL:2011 temporal tables (`SYSTEM_TIME`) and database triggers rather than application-managed audit histories.
 - **Materialized Aggregations:** Replace application-level scheduled recalculations with database incremental materialized views.
 
-##### 2. Delegation to the Operating System and Hardware
+###### 2.3.5.3.2.2. Delegation to the Operating System and Hardware
 
 - **Zero-Copy Data Transfer:** Replace userspace read-write buffer loops with `sendfile(2)`, `splice(2)`, or `io_uring`, eliminating CPU context switches and L1/L2 cache pollution.
 - **Network Packet Filtering:** Delegate firewalling, rate-limiting, and metric collection from application proxies to in-kernel **eBPF (Extended Berkeley Packet Filter)** hooks.
 
-##### 3. Delegation to the Type System and Compiler
+###### 2.3.5.3.2.3. Delegation to the Type System and Compiler
 
 - **State Machine Invariants:** Encode lifecycle states into Rust/TypeScript phantom types or algebraic data types (ADTs), making invalid state transitions mathematically unrepresentable at compile time.
 
@@ -3949,9 +3950,9 @@ const published = Post.draft(1, "Text").submitForModeration().publish();
 
 ------------------------------------------------------------------------
 
-### Technique 3.4. Replace the Mechanism (Computational & Algorithmic Substitution)
+#### 2.3.5.4. Technique 3.4. Replace the Mechanism (Computational & Algorithmic Substitution)
 
-#### Formal Definition
+##### 2.3.5.4.1. Formal Definition
 
 Replacing the mechanism preserves the external contract and functional requirements while replacing the underlying algorithmic strategy, concurrency model, communication topology, or storage format with a superior computational paradigm.
 
@@ -3967,7 +3968,7 @@ flowchart TD
     end
 ```
 
-#### Canonical Substitution Taxonomy
+##### 2.3.5.4.2. Canonical Substitution Taxonomy
 
 | Legacy Mechanism | Replacement Mechanism | Eliminated Bottleneck / Contradiction | Trade-off / Cost |
 |----|----|----|----|
@@ -3979,9 +3980,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Technique 3.5. Change Quantity, Order, Time, or Placement (Structural Geometry)
+#### 2.3.5.5. Technique 3.5. Change Quantity, Order, Time, or Placement (Structural Geometry)
 
-#### Formal Definition
+##### 2.3.5.5.1. Formal Definition
 
 Altering the geometric parameters of computation: changing the granularity of operations (batching vs. streaming), the temporal sequencing (eager vs. lazy vs. speculative), the execution direction (forward vs. compensating rollback), or the physical placement of execution (client vs. edge vs. origin vs. background daemon).
 
@@ -3995,33 +3996,33 @@ flowchart TD
     end
 ```
 
-#### 1. Quantity Transformations
+##### 2.3.5.5.2. Quantity Transformations
 
 - **Dynamic Micro-Batching:** Grouping $N$ discrete network I/O calls or database inserts into a single contiguous vector operation (`executemany` or multi-row `INSERT`), amortizing network round-trip time (RTT) and disk fsync overhead.
 - **Pipelining (for example, Redis Pipelining, HTTP/2 Multiplexing):** Transmitting multiple requests over a single connection without waiting for individual responses, saturating bandwidth capacity.
 
-#### 2. Order Transformations
+##### 2.3.5.5.3. Order Transformations
 
 - **Out-of-Order Execution & Reconciliation:** Allowing concurrent operations to apply out of order using Conflict-Free Replicated Data Types (CRDTs) or monotonic lattices, eliminating synchronization barriers.
 - **Reverse Execution (Sagas):** Structuring failures not as complex distributed rollbacks, but as forward execution of pre-defined compensating actions ($C_1, C_2, \dots, C_n$).
 
-#### 3. Time Transformations
+##### 2.3.5.5.4. Time Transformations
 
 - **Lazy Evaluation vs. Eager Precomputation:** Deferring expensive cryptographic verification, image transformation, or report compilation until requested, or eagerly pre-computing static assets during CI/CD build phases.
 - **Write-Behind Caching (Write-Back):** Acknowledging writes immediately in non-volatile RAM while asynchronously flushing dirty blocks to durable persistent storage.
 
-#### 4. Placement Transformations
+##### 2.3.5.5.5. Placement Transformations
 
 - **Resident Daemon vs. Ephemeral Serverless:** Consolidating hundreds of cold-start-heavy ephemeral serverless functions into long-running, resident daemon containers that maintain hot in-memory state, persistent DB connection pools, and zero-allocation object buffers.
 - **Edge Compute Offloading:** Pushing authorization token validation, A/B testing routing, and image resizing to CDN edge workers (for example, Cloudflare Workers, Fastly Compute@Edge).
 
 ------------------------------------------------------------------------
 
-## 4. Practical Case Studies
+### 2.3.6. Practical Case Studies
 
-### Case Study 1: Transforming Expensive Database Backups
+#### 2.3.6.1. Case Study 1: Transforming Expensive Database Backups
 
-#### Problem Model & Diagnostic Contradiction
+##### 2.3.6.1.1. Problem Model & Diagnostic Contradiction
 
 A mission-critical PostgreSQL database holding 12 TB of transactional customer records executes a daily logical dump (`pg_dump`) to an AWS S3 bucket.
 
@@ -4044,7 +4045,7 @@ flowchart TD
     end
 ```
 
-#### Application of Transformation Techniques
+##### 2.3.6.1.2. Application of Transformation Techniques
 
 1.  **Technique 3.1 (Trimming):** Eliminate `pg_dump` and logical query extraction entirely. Trim backups for ephemeral tables (session caches, temporary analytics).
 2.  **Technique 3.2 (Split in Space & Tiering):** Partition database tablespaces by RPO/RTO tiers: static reference data (infrequent snapshot) vs. high-velocity transactional ledgers (continuous stream).
@@ -4052,7 +4053,7 @@ flowchart TD
 4.  **Technique 3.4 (Replace Mechanism):** Replace logical SQL extraction with continuous **Write-Ahead Log (WAL) Streaming** (Point-in-Time Recovery via tools like `pgBackRest` or `WAL-G`).
 5.  **Technique 3.5 (Change Time & Quantity):** Alter backup timing: 1 baseline snapshot per week + continuous micro-batch streaming of 16 MB WAL segments.
 
-#### Verification & Measurable Delta
+##### 2.3.6.1.3. Verification & Measurable Delta
 
 - Backup window reduced from 14 hours to 0 seconds of user-visible degradation.
 - Effective RPO improved from 24 hours to $< 1$ second (streaming WAL).
@@ -4060,9 +4061,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Zero-Copy Networking and High-Throughput I/O
+#### 2.3.6.2. Case Study 2: Zero-Copy Networking and High-Throughput I/O
 
-#### Problem Model & Diagnostic Contradiction
+##### 2.3.6.2.1. Problem Model & Diagnostic Contradiction
 
 A high-throughput file distribution gateway serves multi-gigabyte media assets and binary artifacts to thousands of concurrent clients.
 
@@ -4085,13 +4086,13 @@ flowchart TD
     end
 ```
 
-#### Application of Transformation Techniques
+##### 2.3.6.2.2. Application of Transformation Techniques
 
 1.  **Technique 3.1 (Trimming):** Trim the userspace application buffer (`byte[]` array) entirely. The application thread no longer touches data bytes.
 2.  **Technique 3.3 (Delegate to Kernel):** Delegate data transfer directly to the Linux kernel via `sendfile(2)` or `splice(2)`.
 3.  **Technique 3.4 (Replace Mechanism):** Replace standard synchronous POSIX `read`/`write` system call loops with asynchronous **`io_uring`** with registered fixed buffers (`IORING_REGISTER_BUFFERS`).
 
-#### Code Transformation Pattern: Linux Zero-Copy Implementation
+##### 2.3.6.2.3. Code Transformation Pattern: Linux Zero-Copy Implementation
 
 ``` typescript
 // Before: userspace copying reads and writes each chunk twice.
@@ -4114,7 +4115,7 @@ async function streamFileZeroCopy(
 }
 ```
 
-#### Verification & Measurable Delta
+##### 2.3.6.2.4. Verification & Measurable Delta
 
 - CPU utilization dropped from 100% to 11% at identical 12 Gbps load.
 - Maximum network throughput reached 38.5 Gbps (96% of theoretical NIC line rate).
@@ -4122,9 +4123,9 @@ async function streamFileZeroCopy(
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Eliminating Distributed Dual-Writes with Transactional Outbox & CDC
+#### 2.3.6.3. Case Study 3: Eliminating Distributed Dual-Writes with Transactional Outbox & CDC
 
-#### Problem Model & Diagnostic Contradiction
+##### 2.3.6.3.1. Problem Model & Diagnostic Contradiction
 
 An e-commerce order checkout system must persist an `Order` entity to a PostgreSQL database and publish an `OrderCreated` event to an Apache Kafka cluster to trigger inventory reservation and billing.
 
@@ -4147,14 +4148,14 @@ flowchart TD
     end
 ```
 
-#### Application of Transformation Techniques
+##### 2.3.6.3.2. Application of Transformation Techniques
 
 1.  **Technique 3.1 (Trimming):** Trim the direct Kafka producer client code and retry loops from the synchronous request handling path.
 2.  **Technique 3.3 (Delegate to RDBMS Engine):** Delegate atomicity to PostgreSQL's native ACID transaction engine by writing the event payload into a local `outbox_table` within the same database transaction as the business entity.
 3.  **Technique 3.4 (Replace Mechanism):** Replace synchronous Dual-Writing with **Change Data Capture (CDC)** reading the PostgreSQL Write-Ahead Log (WAL) via logical decoding (`pgoutput`).
 4.  **Technique 3.5 (Change Time & Order):** Shift Kafka publication from synchronous inline execution ($t_0$) to asynchronous out-of-band streaming ($t_1$) with at-least-once delivery guarantees and idempotent consumers.
 
-#### Concrete Outbox DDL & CDC Schema
+##### 2.3.6.3.3. Concrete Outbox DDL & CDC Schema
 
 ``` typescript
 const sqlExample = String.raw`
@@ -4188,7 +4189,7 @@ COMMIT;
 `;
 ```
 
-#### Verification & Measurable Delta
+##### 2.3.6.3.4. Verification & Measurable Delta
 
 - Data inconsistency rate dropped to absolute 0.00%.
 - API p99 latency decreased from 145 ms (waiting on Kafka roundtrip and acks) to 18 ms (pure local DB transaction).
@@ -4196,9 +4197,9 @@ COMMIT;
 
 ------------------------------------------------------------------------
 
-### Case Study 4: Serverless Function Orchestration vs. Resident Daemon Consolidation
+#### 2.3.6.4. Case Study 4: Serverless Function Orchestration vs. Resident Daemon Consolidation
 
-#### Problem Model & Diagnostic Contradiction
+##### 2.3.6.4.1. Problem Model & Diagnostic Contradiction
 
 A fintech payment validation pipeline is composed of 45 granular AWS Lambda functions chained via AWS Step Functions.
 
@@ -4230,14 +4231,14 @@ flowchart TD
     end
 ```
 
-#### Application of Transformation Techniques
+##### 2.3.6.4.2. Application of Transformation Techniques
 
 1.  **Technique 3.1 (Trimming):** Trim the Step Function state machine, 45 individual API gateway bindings, and intermediate JSON DTO network payloads.
 2.  **Technique 3.2 (Split in Time & Phase):** Separate the real-time synchronous payment approval path (Auth + Fraud + Ledger) from the asynchronous post-settlement path (Notifications, Analytics, Ledger Reconciliation).
 3.  **Technique 3.3 (Combine & Co-locate):** Combine the 45 granular functions into a single modular **Resident Daemon** container running on AWS ECS/Fargate or Kubernetes.
 4.  **Technique 3.5 (Change Placement & Geometry):** Replace ephemeral containers with long-running worker processes holding persistent, warm connection pools to PostgreSQL and local in-memory rule caches.
 
-#### Architectural Comparison Matrix
+##### 2.3.6.4.3. Architectural Comparison Matrix
 
 | Architectural Dimension | Fragmented Serverless (45 Lambdas) | Consolidated Resident Daemon | Performance / Cost Delta |
 |----|----|----|----|
@@ -4249,11 +4250,11 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 5. Operational Deliverables
+### 2.3.7. Operational Deliverables
 
 Operation 3 produces two formal artifacts in the Ariadne epistemic overlay: the **Transformation Log (`TRF-*`)** and the **Candidate Mechanisms Registry (`CAN-*`)**.
 
-### 5.1. Transformation Log Schema (`TRF-*`)
+#### 2.3.7.1. Transformation Log Schema (`TRF-*`)
 
 The Transformation Log records every structural operation applied to the system model, ensuring that every eliminated or modified component has its useful functions accounted for.
 
@@ -4286,7 +4287,7 @@ const example =
 } as const;
 ```
 
-#### Comprehensive Transformation Log Table
+##### 2.3.7.1.1. Comprehensive Transformation Log Table
 
 | Code | Original Element | Applied Transformation | Lost Function | New Function Carrier | Expected Benefit | New Risk | Minimal Check |
 |----|----|----|----|----|----|----|----|
@@ -4298,9 +4299,9 @@ const example =
 
 ------------------------------------------------------------------------
 
-### 5.2. Candidate Mechanisms Registry (`CAN-*`)
+#### 2.3.7.2. Candidate Mechanisms Registry (`CAN-*`)
 
-Candidate Mechanisms represent structurally distinct solution archetypes generated by Operation 3 and passed to [Operation 4 (Explore the Solution Space)](#operation-4-explore-the-space-of-architectures-and-implementations) and [Operation 8 (Determine Engineering Value)](#operation-8-determine-engineering-value-and-select).
+Candidate Mechanisms represent structurally distinct solution archetypes generated by Operation 3 and passed to [Operation 4 (Explore the Solution Space)](#24-operation-4-explore-the-space-of-architectures-and-implementations) and [Operation 8 (Determine Engineering Value)](#28-operation-8-determine-engineering-value-and-select).
 
 ``` typescript
 const example =
@@ -4323,64 +4324,64 @@ const example =
 
 ------------------------------------------------------------------------
 
-## 6. Stop Conditions and Resource Exhaustion Criteria
+### 2.3.8. Stop Conditions and Resource Exhaustion Criteria
 
 An agent or engineering team must not brainstorm transformations indefinitely. Operation 3 terminates when specific epistemic stop conditions are met:
 
-### 6.1. Mechanistic Divergence Criterion
+#### 2.3.8.1. Mechanistic Divergence Criterion
 
 Operation 3 is complete only when at least **three structurally distinct candidate mechanisms (`CAN-*`)** have been formulated across different architectural paradigms (for example, in-database delegation vs. async outbox streaming vs. client-side CRDT reconciliation).
 
 - *Failure Condition:* Generating five variants that all rely on "different message brokers" (RabbitMQ vs. Kafka vs. Pulsar vs. AWS SQS) violates this criterion.
 
-### 6.2. Invariant Preservation Proof
+#### 2.3.8.2. Invariant Preservation Proof
 
 For every trimmed component or replaced mechanism, the Transformation Log (`TRF-*`) must explicitly demonstrate:
 
 1.  Which remaining component or platform resource absorbs the lost useful function.
 2.  An automated, executable verification check (`EVDREQ-*`) designed to test the invariant under maximum load or failure injection.
 
-### 6.3. Bounded Search Budget
+#### 2.3.8.3. Bounded Search Budget
 
-If after 5 transformation iterations no candidate resolves the diagnosed contradiction ([Operation 2](#operation-2-find-the-constraint-cause-or-contradiction)) without introducing unacceptable collateral risks, stop and trigger **Epistemic Backtracking**:
+If after 5 transformation iterations no candidate resolves the diagnosed contradiction ([Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction)) without introducing unacceptable collateral risks, stop and trigger **Epistemic Backtracking**:
 
-- Re-examine the problem boundary in [Operation 1](#operation-1-frame-and-model-the-software-problem).
-- Falsify the underlying causal hypothesis in [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction).
+- Re-examine the problem boundary in [Operation 1](#21-operation-1-frame-and-model-the-software-problem).
+- Falsify the underlying causal hypothesis in [Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction).
 
 ------------------------------------------------------------------------
 
-## 7. Common Mistakes and Transformation Anti-Patterns
+### 2.3.9. Common Mistakes and Transformation Anti-Patterns
 
-### Anti-Pattern 1: The "Resume-Driven Refactoring"
+#### 2.3.9.1. Anti-Pattern 1: The "Resume-Driven Refactoring"
 
 - **Description:** Replacing a functional system component with a trendy technology stack (for example, rewriting a Python service in Rust, or replacing MySQL with a distributed NoSQL engine) without changing the underlying computational mechanism or state ownership model.
 - **Remedy:** Force formulation of the exact mechanical delta: *What mathematical, algorithmic, or concurrency invariant changes between the old and new implementation?*
 
-### Anti-Pattern 2: The "Orphaned Function" (Trimming Without Carrier Reallocation)
+#### 2.3.9.2. Anti-Pattern 2: The "Orphaned Function" (Trimming Without Carrier Reallocation)
 
 - **Description:** Deleting an intermediate service or proxy to simplify architecture, while forgetting non-functional responsibilities previously handled by that proxy (for example, TLS termination, rate-limiting, CORS headers, distributed trace context propagation).
 - **Remedy:** Maintain a strict **Function Carrier Matrix**. No component may be trimmed until every single functional and non-functional responsibility is mapped to an explicit target carrier.
 
-### Anti-Pattern 3: The "Cargo-Cult Microservice Split"
+#### 2.3.9.3. Anti-Pattern 3: The "Cargo-Cult Microservice Split"
 
 - **Description:** Decomposing a system into microservices along arbitrary code lines rather than bounded domain contexts, resulting in a "distributed monolith" with high network latency, distributed transaction hell, and coupled release cycles.
 - **Remedy:** Apply Technique 3.2 (Split) strictly along data ownership and lifecycle boundaries. If two services require synchronous two-phase commits to maintain consistency, they must be combined (Technique 3.3).
 
-### Anti-Pattern 4: The "Accidental Distributed Transaction"
+#### 2.3.9.4. Anti-Pattern 4: The "Accidental Distributed Transaction"
 
 - **Description:** Replacing an ACID database transaction with asynchronous microservice calls without implementing compensating transactions (Sagas), idempotency keys, or outbox tables, leading to silent data corruption.
 - **Remedy:** Apply Technique 3.4 with formal transactional guarantees (Outbox pattern + CDC or Event Sourcing).
 
-### Anti-Pattern 5: The "Premature Edge Delegation"
+#### 2.3.9.5. Anti-Pattern 5: The "Premature Edge Delegation"
 
 - **Description:** Delegating state validation or business logic to the client or CDN edge without considering Byzantine failure modes, untrusted client environments, or eventual consistency conflicts.
 - **Remedy:** Ensure that edge delegation is restricted to stateless projections, read caching, and optimistic UI updates, while authoritative invariant enforcement remains pinned to the verified domain owner.
 
 ------------------------------------------------------------------------
 
-## 8. Summary Checklist for Operation 3
+### 2.3.10. Summary Checklist for Operation 3
 
-Before advancing to [Operation 4 (Explore the Space of Architectures)](#operation-4-explore-the-space-of-architectures-and-implementations), verify that the transformation reasoning satisfies this checklist:
+Before advancing to [Operation 4 (Explore the Space of Architectures)](#24-operation-4-explore-the-space-of-architectures-and-implementations), verify that the transformation reasoning satisfies this checklist:
 
 - [ ] **Functional Essence Isolated:** The transformation addresses the core required behavior identified in Operation 1, stripped of implementation bias.
 - [ ] **Trimming Exhausted:** All non-essential proxies, intermediate DTOs, pass-through services, and redundant caches have been evaluated for elimination (Technique 3.1).
@@ -4392,9 +4393,9 @@ Before advancing to [Operation 4 (Explore the Space of Architectures)](#operatio
 
 ------------------------------------------------------------------------
 
-## Operation 4. Explore the Space of Architectures and Implementations
+## 2.4. Operation 4. Explore the Space of Architectures and Implementations
 
-### Failure First: Five Candidates with One Shared Failure
+### 2.4.1. Failure First: Five Candidates with One Shared Failure
 
 A team must prevent overselling inventory across three regions. Its design review compares five candidates: three cloud databases, two cache products, and several RPC libraries. Every candidate still performs a synchronous global availability check before checkout. During a network partition all five must either exceed the latency SLO or reject healthy regional orders; vendor diversity has not created mechanism diversity.
 
@@ -4405,7 +4406,7 @@ A team must prevent overselling inventory across three regions. Its design revie
 
 Humans prune too early by organizational feasibility. Agents converge too early by probability. Humans need a protected divergence step. Agents need explicit dimensions, forbidden near-duplicates, and invariant-based pruning.
 
-#### Formal Concept → Engineering Meaning
+#### 2.4.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -4414,9 +4415,9 @@ Humans prune too early by organizational feasibility. Agents converge too early 
 | Candidate mechanism, $CAN$ | A coherent selection of dimension values with a causal account of how it preserves invariants. | “Regional escrow quotas with asynchronous rebalance” is a mechanism; “use Vendor X” is not until authority and failure behavior are specified. |
 | Constraint pruning | Removal of combinations that violate hard invariants or internal compatibility. | A design that can oversell beyond the bounded loss limit is removed before cost scoring, regardless of its latency. |
 
-## 1. Main Question and Purpose
+### 2.4.2. Main Question and Purpose
 
-### Main Question
+#### 2.4.2.1. Main Question
 
 > **What distinct classes of software solutions exist, and what regions of the solution space have we not yet explored?**
 
@@ -4486,7 +4487,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 2. Foundational Literature
+### 2.4.3. Foundational Literature
 
 Operation 4 combines research in morphology, axiomatic systems design, distributed computing theorems, and architectural pattern languages.
 
@@ -4531,7 +4532,7 @@ classDiagram
     PatternArchitectures <|-- Operation4_Exploration : Topology Catalog
 ```
 
-### 2.1. Fritz Zwicky: Morphological Analysis and Systematic Field Generation
+#### 2.4.3.1. Fritz Zwicky: Morphological Analysis and Systematic Field Generation
 
 In [*Discovery, Invention, Research Through the Morphological Approach* (Zwicky, 1969, Macmillan)](https://books.google.com/books?id=m05RAAAAMAAJ), Fritz Zwicky described **General Morphological Analysis (GMA)**. GMA is a method to explore complex problems that do not have one numeric answer.
 
@@ -4541,7 +4542,7 @@ $$\mathcal{S} = D_1 \times D_2 \times \dots \times D_n$$
 
 People usually explore familiar combinations first and can miss valid alternatives. Zwicky used **Cross-Consistency Assessment (CCA)** to remove combinations that cannot work together. The result is a smaller set of valid options.
 
-### 2.2. Nam P. Suh: Axiomatic Design and the Independence Axiom
+#### 2.4.3.2. Nam P. Suh: Axiomatic Design and the Independence Axiom
 
 In [*The Principles of Design* (Suh, 1990, Oxford University Press)](https://global.oup.com/academic/product/the-principles-of-design-9780195043457), Nam P. Suh gave two rules for architecture design:
 
@@ -4558,7 +4559,7 @@ Suh described three forms of $[A]$:
 - **Decoupled design:** $[A]$ is triangular. The team can change parameters in a defined order without a cycle.
 - **Coupled design:** $[A]$ is full or arbitrary. A change to one parameter changes several requirements. This causes regression defects and makes the system hard to change. Operation 4 should remove such options where possible.
 
-### 2.3. Eric Brewer, Seth Gilbert & Nancy Lynch: The CAP Theorem and Distributed State Bounds
+#### 2.4.3.3. Eric Brewer, Seth Gilbert & Nancy Lynch: The CAP Theorem and Distributed State Bounds
 
 In [*Towards Robust Distributed Systems* (Brewer, 2000, ACM PODC)](https://doi.org/10.1145/343477.343502) and [*CAP Twelve Years Later: How the "Rules" Have Changed* (Brewer, 2012, IEEE Computer)](https://doi.org/10.1109/MC.2012.37), Eric Brewer described a limit of distributed data systems. During a network partition, a system cannot give both **linearizable consistency** and **availability** for every request.
 
@@ -4569,7 +4570,7 @@ In [*Towards Robust Distributed Systems* (Brewer, 2000, ACM PODC)](https://doi.o
 
 Use CAP as a filter in Operation 4. Remove a candidate that claims that it can preserve linearizable consistency and return a successful response for every request across an untrusted network partition.
 
-### 2.4. Daniel J. Abadi: The PACELC Theorem and Normal-State Latency Trade-offs
+#### 2.4.3.4. Daniel J. Abadi: The PACELC Theorem and Normal-State Latency Trade-offs
 
 In [*Consistency Tradeoffs in Modern Distributed Database System Design: CAP is Only Part of the Story* (Abadi, 2012, IEEE Computer, DOI: 10.1109/MC.2012.33)](https://doi.org/10.1109/MC.2012.33), Daniel J. Abadi showed that CAP does not describe the normal case. Partitions are not the only design condition.
 
@@ -4590,7 +4591,7 @@ flowchart TD
 
 PACELC makes the normal-case trade-off explicit. Even when the network is healthy, linearizable consistency needs round-trip coordination. For example, it can need synchronous quorum replication or two-phase commit. This adds latency.
 
-### 2.5. Martin Kleppmann: Unbundling Data Systems and Derived State
+#### 2.4.3.5. Martin Kleppmann: Unbundling Data Systems and Derived State
 
 In [*Designing Data-Intensive Applications* (Kleppmann, 2017, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/), Martin Kleppmann describes complex data systems as **unbundled databases**. The system can separate:
 
@@ -4600,7 +4601,7 @@ In [*Designing Data-Intensive Applications* (Kleppmann, 2017, O'Reilly)](https:/
 
 This model lets Operation 4 separate storage, indexing, and synchronization decisions instead of treating the database as one indivisible component.
 
-### 2.6. Buschmann et al.: Pattern-Oriented Software Architecture (POSA)
+#### 2.4.3.6. Buschmann et al.: Pattern-Oriented Software Architecture (POSA)
 
 In [*Pattern-Oriented Software Architecture: A System of Patterns* (Buschmann, Meunier, Rohnert, Sommerlad & Stal, 1996, Wiley)](https://www.wiley.com/en-us/Pattern+Oriented+Software+Architecture%2C+Volume+1%2C+A+System+of+Patterns-p-9780471958697), the authors list architectural styles, structural patterns, and communication patterns.
 
@@ -4608,7 +4609,7 @@ POSA describes *Layers*, *Pipes and Filters*, *Blackboard*, *Broker*, *Microkern
 
 ------------------------------------------------------------------------
 
-## 3. Mathematical Formulation of the Morphological Solution Space
+### 2.4.4. Mathematical Formulation of the Morphological Solution Space
 
 To liberate architectural exploration from informal brainstorming, Operation 4 establishes a formal mathematical foundation for the software solution space.
 
@@ -4643,7 +4644,7 @@ flowchart LR
     PRUNE --> ADMISSIBLE
 ```
 
-### 3.1. The Morphological Field Equation
+#### 2.4.4.1. The Morphological Field Equation
 
 Let an architectural problem model possess $n$ orthogonal design dimensions:
 
@@ -4667,19 +4668,19 @@ $$\|\mathcal{S}\| = \prod_{i=1}^n k_i$$
 
 Even a modest design problem with $n = 6$ dimensions and an average of $k = 4$ options per dimension yields $\|\mathcal{S}\| = 4^6 = 4,096$ theoretical configurations.
 
-### 3.2. Two-Tier Compatibility Matrix and Constraint Satisfaction
+#### 2.4.4.2. Two-Tier Compatibility Matrix and Constraint Satisfaction
 
 The raw space $\mathcal{S}$ contains configurations that are physically impossible, logically contradictory, or in direct violation of mandatory system invariants. To filter these, Operation 4 applies a **Two-Tier Constraint Satisfaction Filter**:
 
-#### Tier 1: Invariant & Physical Feasibility Filter ($F_{\text{inv}}$)
+##### 2.4.4.2.1. Tier 1: Invariant & Physical Feasibility Filter ($F_{\text{inv}}$)
 
-Let $\mathcal{I} = \{I_1, I_2, \dots, I_m\}$ be the set of non-negotiable safety, liveness, and hardware invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem). The unary predicate $F_{\text{inv}}(s)$ evaluates whether candidate vector $s$ violates any hard invariant:
+Let $\mathcal{I} = \{I_1, I_2, \dots, I_m\}$ be the set of non-negotiable safety, liveness, and hardware invariants established in [Operation 1](#21-operation-1-frame-and-model-the-software-problem). The unary predicate $F_{\text{inv}}(s)$ evaluates whether candidate vector $s$ violates any hard invariant:
 
 $$F_{\text{inv}}(s) = \begin{cases} 1 & \text{if } \forall I \in \mathcal{I}, s \models I \\ 0 & \text{otherwise} \end{cases}$$
 
 *Example:* If invariant $I_{\text{audit}}$ mandates "Zero data loss under total datacenter power loss," any vector assigning $v_{\text{durability}} = \text{In-Memory Only}$ evaluates to $F_{\text{inv}}(s) = 0$.
 
-#### Tier 2: Binary Compatibility Matrix ($C$)
+##### 2.4.4.2.2. Tier 2: Binary Compatibility Matrix ($C$)
 
 Cross-Consistency Assessment evaluates the pairwise compatibility of discrete mechanisms across distinct dimensions. For any two values $v_{i,a} \in D_i$ and $v_{j,b} \in D_j$ ($i \neq j$), the compatibility function is defined as:
 
@@ -4691,7 +4692,7 @@ The **Admissible Solution Space** $\mathcal{S}_{\text{admissible}}$ is the subse
 
 $$\mathcal{S}_{\text{admissible}} = \left\{ s \in \mathcal{S} \middle| F_{\text{inv}}(s) = 1 \land \forall i, j \in \{1, \dots, n\}, (i < j \implies C(s[i], s[j]) = 1) \right\}$$
 
-### 3.3. Axiomatic Decoupling Matrix Verification
+#### 2.4.4.3. Axiomatic Decoupling Matrix Verification
 
 For every candidate vector $s \in \mathcal{S}_{\text{admissible}}$, the candidate's structural modularity is verified against the system's Functional Requirements $\mathbf{FR} = [FR_1, FR_2, \dots, FR_m]^T$ using Suh's Design Matrix $[A_s]$:
 
@@ -4703,13 +4704,13 @@ $$\text{Reorderable}([A_s]) \in \{\text{Diagonal}, \text{Triangular}\}$$
 
 If $[A_s]$ contains non-eliminable cross-functional feedback loops (coupled design), the candidate is flagged as an anti-pattern (Spaghetti Architecture) and pruned.
 
-### 3.4. Candidate Vector Orthogonality Metric
+#### 2.4.4.4. Candidate Vector Orthogonality Metric
 
 To ensure that surviving candidates represent genuinely distinct architectural classes rather than cosmetic clones, Operation 4 computes the **Normalized Hamming Distance** between any two candidate vectors $s_a, s_b \in \mathcal{S}_{\text{admissible}}$:
 
 $$d_H(s_a, s_b) = \frac{1}{n} \sum_{i=1}^n \delta(s_a[i], s_b[i]), \quad \text{where } \delta(x, y) = \begin{cases} 0 & \text{if } x = y \\ 1 & \text{if } x \neq y \end{cases}$$
 
-#### Diversity Rule:
+##### 2.4.4.4.1. Diversity Rule:
 
 A proposed candidate set $\mathcal{C} = \{s_1, s_2, \dots, s_m\}$ satisfies the **Orthogonality Criterion** if and only if:
 
@@ -4719,7 +4720,7 @@ Where the diversity threshold $\theta_{\text{diversity}} \ge 0.50$ (that is, any
 
 ------------------------------------------------------------------------
 
-## 4. Escaping Local Design Optima & Overcoming Cognitive Anchoring
+### 2.4.5. Escaping Local Design Optima & Overcoming Cognitive Anchoring
 
 The greatest hurdle in architectural exploration is the cognitive bias of engineers and AI models toward **paradigm monoculture**.
 
@@ -4750,7 +4751,7 @@ graph TD
     ESCAPE ==> ORTHOGONAL
 ```
 
-### 4.1. The Monoculture Bias in LLMs and Software Teams
+#### 2.4.5.1. The Monoculture Bias in LLMs and Software Teams
 
 When asked to design a system, standard LLMs and human engineering teams routinely generate variations of the single design pattern that dominates modern enterprise web applications:
 
@@ -4761,11 +4762,11 @@ When asked to design a system, standard LLMs and human engineering teams routine
 
 While this stack is versatile, treating it as the universal default blindfolds the engineer to structural alternatives that may be orders of magnitude more performant, reliable, and cost-effective. When an AI agent generates five options that all share this topology (differing only in language runtime, framework, or cloud vendor), it has generated **one** candidate five times.
 
-### 4.2. The Four Systematic Divergence Operators
+#### 2.4.5.2. The Four Systematic Divergence Operators
 
 To force the exploration engine out of local optima, Operation 4 applies four mathematical divergence operators:
 
-#### 1. Dimension Inversion (Orthogonal Parameter Inversion)
+##### 2.4.5.2.1. Dimension Inversion (Orthogonal Parameter Inversion)
 
 For every dimension $D_i$, identify the conventional default value $v_{i,\text{default}}$ and systematically force the evaluation of its structural polar opposite:
 
@@ -4774,7 +4775,7 @@ For every dimension $D_i$, identify the conventional default value $v_{i,\text{d
 - If default is **Mutable In-Place Updates** $\implies$ Force **Immutable Append-Only Log with Deterministic State Machine Replay**.
 - If default is **Application-Layer Authorization** $\implies$ Force **Cryptographic Token Verification in OS Kernel (eBPF)** or **Hardware Enclave (SGX)**.
 
-#### 2. Extreme Boundary Pushing (Stress-Testing the Extremes)
+##### 2.4.5.2.2. Extreme Boundary Pushing (Stress-Testing the Extremes)
 
 Examine what happens when a system parameter is pushed to its absolute theoretical limit ($0$ or $\infty$):
 
@@ -4783,7 +4784,7 @@ Examine what happens when a system parameter is pushed to its absolute theoretic
 - *Zero Application Code:* What if the entire transformation is executed directly within the database engine via declarative SQL views and triggers, or at the network edge via Cloudflare Workers?
 - *Infinite Durability:* What if every state mutation is stored immutably forever on append-only content-addressable storage (IPFS/S3 Glacier) without delete operations?
 
-#### 3. Cross-Domain Morphological Transposition
+##### 2.4.5.2.3. Cross-Domain Morphological Transposition
 
 Import computational mechanisms from radically different computing domains:
 
@@ -4791,7 +4792,7 @@ Import computational mechanisms from radically different computing domains:
 - *From Operating System Kernels:* Apply copy-on-write page tables, virtual memory paging, seccomp sandboxing, and zero-copy `splice()` socket transfers to application data pipelines.
 - *From Financial Accounting:* Apply double-entry bookkeeping ledgers and immutable transaction journals to distributed saga coordination and inventory allocation.
 
-#### 4. Function Unbundling and Composable Reassembly
+##### 2.4.5.2.4. Function Unbundling and Composable Reassembly
 
 Disassemble monolithic database features into independent structural components ([Kleppmann, 2017](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/)):
 
@@ -4801,7 +4802,7 @@ Disassemble monolithic database features into independent structural components 
 
 ------------------------------------------------------------------------
 
-## 5. Deep Analysis of the Four Core Exploration Techniques
+### 2.4.6. Deep Analysis of the Four Core Exploration Techniques
 
 > **THE FOUR TECHNIQUES OF OPERATION 4**
 > 4.1. GENERATE FUNDAMENTALLY DISTINCT DIRECTIONS
@@ -4818,7 +4819,7 @@ Disassemble monolithic database features into independent structural components 
 > - Tier 2: Eliminate vectors violating pairwise compatibility, CAP, PACELC, or Axiomatic
 > Independence (Coupled Designs).
 
-### Technique 4.1. Generate Fundamentally Distinct Directions
+#### 2.4.6.1. Technique 4.1. Generate Fundamentally Distinct Directions
 
 Technique 4.1 establishes the taxonomy of orthogonal architectural dimensions. When exploring the solution space for any software system, divergence must span nine fundamental axes:
 
@@ -4875,7 +4876,7 @@ mindmap
       Immutable Event Sourcing Journal
 ```
 
-#### Taxonomy of the Nine Primary Architectural Dimensions
+##### 2.4.6.1.1. Taxonomy of the Nine Primary Architectural Dimensions
 
 <table>
 <colgroup>
@@ -4982,7 +4983,7 @@ mindmap
 
 ------------------------------------------------------------------------
 
-### Technique 4.2. Isolate Solution Space Dimensions (Morphological Field Construction)
+#### 2.4.6.2. Technique 4.2. Isolate Solution Space Dimensions (Morphological Field Construction)
 
 Constructing a rigorous Morphological Field requires transforming informal design considerations into a structured mathematical matrix.
 
@@ -5019,16 +5020,16 @@ flowchart TD
     CHECK -- Yes --> READY["Morphological Field Ready for Synthesis"]
 ```
 
-#### The Four Rules of Dimension Discovery:
+##### 2.4.6.2.1. The Four Rules of Dimension Discovery:
 
-1.  **Rule of Exhaustive Functional Coverage:** Every mandatory system function identified in [Operation 1](#operation-1-frame-and-model-the-software-problem) must be governed by at least one dimension.
+1.  **Rule of Exhaustive Functional Coverage:** Every mandatory system function identified in [Operation 1](#21-operation-1-frame-and-model-the-software-problem) must be governed by at least one dimension.
 2.  **Rule of Mutual Orthogonality (Suh Independence):** A dimension $D_i$ must represent an independent structural decision. If choosing a value in $D_i$ strictly dictates the value in $D_j$, then $D_i$ and $D_j$ are not orthogonal dimensions—they are coupled manifestations of a single underlying parameter and must be merged.
 3.  **Rule of Value Exclusivity:** Within a single dimension $D_i$, the discrete values ${v_{i,1}, v_{i,2}, \dots, v_{i,k}}$ must be mutually exclusive for a single component role (for example, a storage engine cannot be simultaneously pure B-Tree and pure Append-Only Log for the identical state partition).
 4.  **Rule of Technology Neutrality:** Dimension values must specify **mechanisms**, not brand names (for example, specify "Partitioned Append-Only Commit Log," not "Kafka"; specify "Distributed Consensus State Machine," not "Raft/Consul").
 
 ------------------------------------------------------------------------
 
-### Technique 4.3. Combine Branches into Candidates
+#### 2.4.6.3. Technique 4.3. Combine Branches into Candidates
 
 Once the Morphological Field is established, candidate architectures are synthesized by selecting one discrete value from each dimension to form a complete configuration vector $s = (v_1, v_2, \dots, v_n)$.
 
@@ -5050,7 +5051,7 @@ flowchart TD
     FIELD -.-> PATHS
 ```
 
-#### Strategies for High-Value Candidate Synthesis:
+##### 2.4.6.3.1. Strategies for High-Value Candidate Synthesis:
 
 1.  **The Baseline / Conventional Candidate:** Construct the standard industry paradigm to serve as an explicit reference benchmark for complexity, cost, and latency.
 2.  **The Mechanical Sympathy / High-Throughput Candidate:** Maximize hardware efficiency by combining single-writer execution, sequential disk I/O, cache-line aligned shared memory, and lock-free ring buffers.
@@ -5059,7 +5060,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Technique 4.4. Prune Incompatible Combinations
+#### 2.4.6.4. Technique 4.4. Prune Incompatible Combinations
 
 Pruning eliminates unviable branches before investing resources in detailed design, prototyping, or benchmarking.
 
@@ -5100,7 +5101,7 @@ flowchart TD
     C3 -- No --> SURV
 ```
 
-#### The Pruning Matrix Rules:
+##### 2.4.6.4.1. The Pruning Matrix Rules:
 
 - **Rule 1 (The CAP Partition Rule):** If network boundary = WAN or Untrusted Network, eliminate any vector containing $(\text{Consistency} = \text{Linearizable}) \land (\text{Availability} = \text{Non-Blocking}) \land (\text{Partition Tolerance} = \text{Yes})$.
 - **Rule 2 (The PACELC Latency Rule):** If latency SLO $p99 < 5\text{ ms}$, eliminate any vector containing $(\text{Write Replication} = \text{Synchronous Multi-Datacenter 2PC})$.
@@ -5109,19 +5110,19 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 6. Practical Case Studies
+### 2.4.7. Practical Case Studies
 
 To demonstrate the mathematical rigor and practical execution of Operation 4, we examine four complex real-world engineering domains.
 
 ------------------------------------------------------------------------
 
-### Case Study 6.1. Distributed High-Throughput Command Ingestion Engine
+#### 2.4.7.1. Case Study 6.1. Distributed High-Throughput Command Ingestion Engine
 
-#### Context & Problem Frame (`FRAME-INGEST-01`)
+##### 2.4.7.1.1. Context & Problem Frame (`FRAME-INGEST-01`)
 
 A financial exchange requires a command ingestion subsystem capable of processing **500,000 order cancellations and placements per second** with **$p99.9 < 2\text{ ms}$ tail latency**, strict **idempotency (zero duplicate execution)**, and **zero data loss** across node crashes.
 
-#### Step 1: Construct the Morphological Field
+##### 2.4.7.1.2. Step 1: Construct the Morphological Field
 
 ``` mermaid
 graph LR
@@ -5157,7 +5158,7 @@ graph LR
 
 $$\text{Raw Theoretical Space: } \|\mathcal{S}\| = 3 \times 3 \times 3 \times 3 \times 3 = 243 \text{ configurations}$$
 
-#### Step 2: Binary Compatibility & Invariant Pruning Matrix
+##### 2.4.7.1.3. Step 2: Binary Compatibility & Invariant Pruning Matrix
 
 | Ingestion / concurrency | v2,1 Mutex | v2,2 Single-writer | v2,3 Distributed lock | v4,1 RDBMS fsync | v4,2 Direct WAL | v4,3 Raft |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -5174,7 +5175,7 @@ $$\text{Raw Theoretical Space: } \|\mathcal{S}\| = 3 \times 3 \times 3 \times 3 
 - $F_{\text{inv}}(v_{4,1}) = 0$: Synchronous RDBMS inserts yield max ~5,000 IOPS per disk; violates the 500,000 req/s throughput invariant by two orders of magnitude.
 - $F_{\text{inv}}(v_{2,3}) = 0$: Distributed lock over network incurs $1\text{ ms}$ minimum RTT; violates the $p99.9 < 2\text{ ms}$ end-to-end latency budget.
 
-#### Step 3: Synthesis of Surviving Orthogonal Candidate Mechanisms
+##### 2.4.7.1.4. Step 3: Synthesis of Surviving Orthogonal Candidate Mechanisms
 
 ``` mermaid
 flowchart TD
@@ -5201,7 +5202,7 @@ flowchart TD
     end
 ```
 
-#### Step 4: Candidate Comparison Matrix
+##### 2.4.7.1.5. Step 4: Candidate Comparison Matrix
 
 | Candidate ID | Architecture Vector | Throughput Capacity | Tail Latency ($p99.9$) | Fault Recovery Time | Operational Complexity |
 |----|----|----|----|----|----|
@@ -5213,15 +5214,15 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Case Study 6.2. Cross-Datacenter State Replication and Consensus Engine
+#### 2.4.7.2. Case Study 6.2. Cross-Datacenter State Replication and Consensus Engine
 
-#### Context & Problem Frame (`FRAME-REPL-01`)
+##### 2.4.7.2.1. Context & Problem Frame (`FRAME-REPL-01`)
 
 A global retail banking platform requires user account ledger replication across **three datacenters (US-East, EU-Central, AP-East)** with **WAN latency of 120 ms**.
 
 - **Invariants:** Zero balance overdrafts (Strict Financial Invariant), account balance queries must return in $< 10\text{ ms}$ locally, system must withstand complete loss of any single datacenter without data corruption.
 
-#### Step 1: Construct the Morphological Field
+##### 2.4.7.2.2. Step 1: Construct the Morphological Field
 
 ``` mermaid
 graph TD
@@ -5243,7 +5244,7 @@ graph TD
     end
 ```
 
-#### Step 2: Pruning and PACELC Analysis
+##### 2.4.7.2.3. Step 2: Pruning and PACELC Analysis
 
 ``` mermaid
 flowchart LR
@@ -5260,7 +5261,7 @@ flowchart LR
     PACELC_BOUND -.-> PRUNING
 ```
 
-#### Step 3: Surviving Candidate Architectures
+##### 2.4.7.2.4. Step 3: Surviving Candidate Architectures
 
 ``` mermaid
 flowchart TD
@@ -5279,7 +5280,7 @@ flowchart TD
     end
 ```
 
-#### Step 4: Axiomatic Design Evaluation
+##### 2.4.7.2.5. Step 4: Axiomatic Design Evaluation
 
 $$\mathbf{FR} = \begin{bmatrix} FR_1: \text{Prevent Overdraft} \\ FR_2: \text{Local Read Latency } < 10\text{ ms} \\ FR_3: \text{Datacenter Fault Tolerance} \end{bmatrix}$$
 
@@ -5289,15 +5290,15 @@ For `CAN-REPL-02` (Escrow Reservations): $$\begin{bmatrix} FR_1 \\ FR_2 \\ FR_3 
 
 ------------------------------------------------------------------------
 
-### Case Study 6.3. Real-Time Multi-Modal Search Indexing Pipeline
+#### 2.4.7.3. Case Study 6.3. Real-Time Multi-Modal Search Indexing Pipeline
 
-#### Context & Problem Frame (`FRAME-SEARCH-01`)
+##### 2.4.7.3.1. Context & Problem Frame (`FRAME-SEARCH-01`)
 
 An e-commerce marketplace receives **20,000 product updates per second** and serves **100,000 search queries per second** over a catalog of **50,000,000 items**.
 
 - **Invariants:** Document search visibility delay $t_{\text{visibility}} < 1.0\text{ s}$, search query response time $p95 < 25\text{ ms}$, zero lost updates during index compaction.
 
-#### Step 1: Morphological Field
+##### 2.4.7.3.2. Step 1: Morphological Field
 
 ``` mermaid
 graph TD
@@ -5318,7 +5319,7 @@ graph TD
     end
 ```
 
-#### Step 2: Pruning and Synthesis
+##### 2.4.7.3.3. Step 2: Pruning and Synthesis
 
 ``` mermaid
 flowchart TD
@@ -5334,7 +5335,7 @@ flowchart TD
     end
 ```
 
-#### Step 3: Candidate Trade-Off Map
+##### 2.4.7.3.4. Step 3: Candidate Trade-Off Map
 
 | Candidate | Freshness Latency ($t_{\text{vis}}$) | Query $p95$ | RAM Footprint | Re-indexing Time |
 |----|----|----|----|----|
@@ -5344,15 +5345,15 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Case Study 6.4. Multi-Tenant Usage Metering & Financial Billing Engine
+#### 2.4.7.4. Case Study 6.4. Multi-Tenant Usage Metering & Financial Billing Engine
 
-#### Context & Problem Frame (`FRAME-BILLING-01`)
+##### 2.4.7.4.1. Context & Problem Frame (`FRAME-BILLING-01`)
 
 A global cloud infrastructure provider meters API, compute, and storage usage across **100,000 enterprise tenants**, processing **10,000,000 usage events per minute**.
 
 - **Invariants:** Exactly-once financial billing (No double-charging or lost usage), sub-second usage quota enforcement, multi-currency conversion at historical rate, audit-proof cryptographic reconciliation.
 
-#### Step 1: Morphological Field
+##### 2.4.7.4.2. Step 1: Morphological Field
 
 | Dimension | Axis | Option 1 ($v_{i,1}$) | Option 2 ($v_{i,2}$) | Option 3 ($v_{i,3}$) |
 |----|----|----|----|----|
@@ -5361,7 +5362,7 @@ A global cloud infrastructure provider meters API, compute, and storage usage ac
 | **$D_3$** | **Ledger State Model** | Mutable Account Balances (`UPDATE`) | Immutable Double-Entry Ledger (`Append-Only`) | State Machine Event Sourcing (`Snapshots`) |
 | **$D_4$** | **Quota Enforcement** | Synchronous Centralized Check | Local Credit-Lease Bucket at Gateway | Asynchronous Soft-Limit Alerting |
 
-#### Step 2: Synthesis and Candidate Vectors
+##### 2.4.7.4.3. Step 2: Synthesis and Candidate Vectors
 
 ``` mermaid
 flowchart LR
@@ -5380,14 +5381,14 @@ flowchart LR
     end
 ```
 
-#### Step 3: Epistemic Decision Matrix
+##### 2.4.7.4.4. Step 3: Epistemic Decision Matrix
 
 - `CAN-BILLING-01` satisfies both strict real-time quota enforcement (via local credit leases) and exact-once financial correctness (via immutable double-entry accounting).
 - `CAN-BILLING-02` is selected as the cold-path audit reconciler operating in parallel with `CAN-BILLING-01` (Separation in Space and Time).
 
 ------------------------------------------------------------------------
 
-## 7. Operational Deliverables & Epistemic Schemas
+### 2.4.8. Operational Deliverables & Epistemic Schemas
 
 Operation 4 produces two primary epistemic artifacts in the Ariadne reasoning layer: the **Solution Space Map (`SPACE-`)** and **Candidate Mechanisms (`CAN-`)**.
 
@@ -5417,7 +5418,7 @@ classDiagram
     SolutionSpaceMap_SPACE "1" --> "many" CandidateMechanism_CAN : generates
 ```
 
-### 7.1. Schema: Solution Space Map (`SPACE-*`)
+#### 2.4.8.1. Schema: Solution Space Map (`SPACE-*`)
 
 ``` typescript
 const example =
@@ -5473,7 +5474,7 @@ const example =
 } as const;
 ```
 
-### 7.2. Schema: Candidate Mechanism (`CAN-*`)
+#### 2.4.8.2. Schema: Candidate Mechanism (`CAN-*`)
 
 ``` typescript
 const example =
@@ -5524,7 +5525,7 @@ const example =
 
 ------------------------------------------------------------------------
 
-## 8. Stop Conditions & Orthogonality Verification
+### 2.4.9. Stop Conditions & Orthogonality Verification
 
 ``` mermaid
 flowchart TD
@@ -5539,7 +5540,7 @@ flowchart TD
     C4 -- Yes --> PASS["STOP CONDITION MET:<br/>Proceed to Operation 5 (Knowledge) / Operation 8 (Value)"]
 ```
 
-### Quantitative & Qualitative Stop Conditions:
+#### 2.4.9.1. Quantitative & Qualitative Stop Conditions:
 
 1.  **Structural Diversity Threshold ($\theta_{\text{diversity}} \ge 0.50$):** The pairwise normalized Hamming distance between any two surviving candidate vectors must be $\ge 0.50$.
 2.  **Mechanistic Orthogonality:** No two candidates may share the same combination of state ownership model ($D_1$) and consistency guarantee ($D_2$). If two candidates differ only by library (for example, Kafka vs. Redpanda) or language (for example, Go vs. Rust), they must be collapsed into a single Candidate Mechanism.
@@ -5548,7 +5549,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 9. Common Mistakes & Search Space Anti-Patterns
+### 2.4.10. Common Mistakes & Search Space Anti-Patterns
 
 ``` mermaid
 graph TD
@@ -5561,36 +5562,36 @@ graph TD
     end
 ```
 
-### 1. The Synonym Trap (Cosmetic Permutation)
+#### 2.4.10.1. The Synonym Trap (Cosmetic Permutation)
 
 - **Defect:** Presenting "Option A: Java Spring Boot + PostgreSQL", "Option B: Go Fiber + MySQL", and "Option C: Node.js Fastify + MariaDB" as three distinct architectures.
 - **Correction:** Recognize that all three share the exact same configuration vector $(v_{\text{HTTP}}, v_{\text{Centralized RDBMS}}, v_{\text{Sync 2PL}}, v_{\text{Stateless Compute}})$. They represent **one** candidate. Force exploration into decentralized, log-centric, or single-writer paradigms.
 
-### 2. Combinatorial Explosion Without Systematic Pruning
+#### 2.4.10.2. Combinatorial Explosion Without Systematic Pruning
 
 - **Defect:** Expanding a 10-dimension morphological field into $3^{10} = 59,049$ raw combinations and attempting to evaluate all of them manually or in downstream operations.
 - **Correction:** Apply Tier-1 invariant filtering and Tier-2 binary compatibility matrices immediately during field construction to eliminate $> 98\%$ of unviable configurations.
 
-### 3. Invariant Conflation (False Constraints)
+#### 2.4.10.3. Invariant Conflation (False Constraints)
 
 - **Defect:** Treating a legacy organizational preference (for example, "All services must use Oracle DB" or "Must be hosted on Kubernetes") as a non-negotiable system invariant, thereby prematurely pruning revolutionary candidates.
-- **Correction:** Strictly segregate physical/business invariants (for example, "Zero data loss under power cut") from organizational assumptions (`ASM-*`). Challenge assumptions using [Operation 2 (Evaporating Cloud)](#operation-2-find-the-constraint-cause-or-contradiction).
+- **Correction:** Strictly segregate physical/business invariants (for example, "Zero data loss under power cut") from organizational assumptions (`ASM-*`). Challenge assumptions using [Operation 2 (Evaporating Cloud)](#22-operation-2-find-the-constraint-cause-or-contradiction).
 
-### 4. Premature Optimization of a Single Branch
+#### 2.4.10.4. Premature Optimization of a Single Branch
 
 - **Defect:** Diving into low-level thread synchronization optimizations or query tuning for Candidate 1 before establishing whether Candidate 2 (for example, changing to an append-only log) completely eliminates the need for synchronization.
 - **Correction:** Keep candidate mechanisms at the structural architecture level until the Solution Space Map is fully populated and verified.
 
-### 5. Coupled Spaghetti Generation (Violating Suh's Independence Axiom)
+#### 2.4.10.5. Coupled Spaghetti Generation (Violating Suh's Independence Axiom)
 
 - **Defect:** Synthesizing candidate vectors where multiple functional requirements are inextricably entangled across shared mutable state, creating cascading failure modes.
 - **Correction:** Construct Suh's Design Matrix $[A]$. If $[A]$ is fully coupled, reject the candidate and re-partition boundaries along natural domain fault lines.
 
 ------------------------------------------------------------------------
 
-## Operation 5. Expand Knowledge and Obtain Missing Evidence
+## 2.5. Operation 5. Expand Knowledge and Obtain Missing Evidence
 
-### Failure First: The Migration Built on a Capability That Wasn't There
+### 2.5.1. Failure First: The Migration Built on a Capability That Wasn't There
 
 A proposed multi-region migration assumes the deployed database version supports non-blocking index creation with the required uniqueness semantics. Six weeks into implementation, a staging rehearsal shows that the actual version locks writes during validation and cannot meet the zero-downtime invariant. One version check and a ten-minute rehearsal would have invalidated the plan before work began.
 
@@ -5601,7 +5602,7 @@ A proposed multi-region migration assumes the deployed database version supports
 
 The human failure is often a search-cost and status calculation. The agent failure is unmarked probabilistic completion. The controls differ. Make uncertainty safe and budgeted for people. Make provenance plus tool evidence mandatory for agents.
 
-#### Formal Concept → Engineering Meaning
+#### 2.5.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -5610,7 +5611,7 @@ The human failure is often a search-cost and status calculation. The agent failu
 | Expected value of information, $EVOI$ | Expected decision loss avoided by evidence minus the cost of obtaining it. | A ten-minute rehearsal is valuable when it can prevent a six-week dead-end; reading unrelated migration articles is not. |
 | Transitive invalidation | Falsification of a premise invalidates dependent hypotheses, candidates, and decisions. | The unsupported online-build premise reopens the migration architecture and every rollout estimate derived from it. |
 
-## 1. Why knowledge expansion comes first
+### 2.5.2. Why knowledge expansion comes first
 
 **Operation 5: Expand Knowledge and Obtain Missing Evidence** turns important unknowns into evidence. Architecture and defect work often fail because a team makes a costly or irreversible choice from an unverified assumption, a vendor claim, old knowledge, or code that nobody has inspected.
 
@@ -5651,16 +5652,16 @@ flowchart TD
 
 Engineering work commonly reaches one of these two states:
 
-- **Lack of options:** The team has enough facts, but no different architecture classes. Use [Operation 3: Transform System](#operation-3-transform-the-existing-software-system) and [Operation 4: Explore Solution Space](#operation-4-explore-the-space-of-architectures-and-implementations).
+- **Lack of options:** The team has enough facts, but no different architecture classes. Use [Operation 3: Transform System](#23-operation-3-transform-the-existing-software-system) and [Operation 4: Explore Solution Space](#24-operation-4-explore-the-space-of-architectures-and-implementations).
 - **Lack of knowledge:** The team has candidate architectures or diagnostic hypotheses, but no data to choose between them or to check their invariants.
 
 Use Operation 5 to change **engineering uncertainty** into **verified evidence** (`EVD-`). Inspect the repository, reuse a proven mechanism from another domain, or run an experiment. If evidence falsifies an assumption (`ASM-`), invalidate every candidate and decision that depends on it. This avoids late rework.
 
 ------------------------------------------------------------------------
 
-## 2. Main Question & Core Operational Calculus
+### 2.5.3. Main Question & Core Operational Calculus
 
-### Main Question
+#### 2.5.3.1. Main Question
 
 > **What unknown information prevents us from distinguishing between options or discovering a new solution class, and what is the cheapest, most decisive empirical test that can resolve it?**
 
@@ -5678,7 +5679,7 @@ Where:
 
 ------------------------------------------------------------------------
 
-## 3. Foundational Literature
+### 2.5.4. Foundational Literature
 
 Operation 5 synthesizes epistemological philosophy, decision analysis, bounded rationality, systems archaeology, and reliability engineering into a rigorous methodology for software investigation.
 
@@ -5736,7 +5737,7 @@ classDiagram
     MichaelFeathers_2004 <|-- Operation5_Epistemics : Legacy Invariant Recovery
 ```
 
-### 3.1. Karl Popper: Falsificationism and the Asymmetry of Verification
+#### 2.5.4.1. Karl Popper: Falsificationism and the Asymmetry of Verification
 
 In [*The Logic of Scientific Discovery* (Popper, 1959/1934)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper states that successful observations cannot prove an empirical hypothesis. A future observation can still fail. One reproducible counterexample can **falsify** a universal claim:
 
@@ -5748,7 +5749,7 @@ In software engineering:
 - One reproducible race condition under CPU contention falsifies the thread-safety claim.
 - For this reason, Operation 5 uses **severe tests**. A severe test is an experiment designed to expose the suspected failure mode.
 
-### 3.2. Herbert A. Simon: Bounded Rationality and Information Search in Artificial Systems
+#### 2.5.4.2. Herbert A. Simon: Bounded Rationality and Information Search in Artificial Systems
 
 In [*The Sciences of the Artificial* (Simon, 1969, MIT Press)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/), Herbert A. Simon introduced **bounded rationality** and **satisficing**:
 
@@ -5756,7 +5757,7 @@ In [*The Sciences of the Artificial* (Simon, 1969, MIT Press)](https://mitpress.
 - A team has limited time, memory, and computing capacity. It cannot inspect every architecture or every code invariant.
 - Stop collecting information when a candidate has the minimum evidence needed to meet non-negotiable safety and performance invariants.
 
-### 3.3. Ronald A. Howard: Information Value Theory and Decision Analysis
+#### 2.5.4.3. Ronald A. Howard: Information Value Theory and Decision Analysis
 
 In [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), Ronald A. Howard defined the **expected value of information (EVOI)**. Use it to decide whether to obtain more information before a decision:
 
@@ -5764,7 +5765,7 @@ In [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966
 - If a test cannot change the selected architecture, its $\text{EVOI} = 0$. Do not run it.
 - EVOI gives Operation 5 a stop condition. It prevents both unnecessary analysis and unsafe work with unknown facts.
 
-### 3.4. John Allspaw: Observability, Cognitive Triaging, and Incident Epistemics
+#### 2.5.4.4. John Allspaw: Observability, Cognitive Triaging, and Incident Epistemics
 
 In [*Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages* (Allspaw, 2015, Lund University)](https://www.thestrangeloop.com/2015/how-your-systems-will-fail.html), John Allspaw describes incident work:
 
@@ -5772,7 +5773,7 @@ In [*Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving I
 - Observability is more than dashboards. It lets the team ask new questions of the running software.
 - Operation 5 turns telemetry, logs, and distributed traces into evidence that supports or falsifies a causal hypothesis.
 
-### 3.5. Betsy Beyer et al.: Site Reliability Engineering and Production Ground Truth
+#### 2.5.4.5. Betsy Beyer et al.: Site Reliability Engineering and Production Ground Truth
 
 In [*Site Reliability Engineering: How Google Runs Production Systems* (Beyer et al., 2016, O'Reilly)](https://sre.google/sre-book/table-of-contents/), the authors make three relevant points:
 
@@ -5780,11 +5781,11 @@ In [*Site Reliability Engineering: How Google Runs Production Systems* (Beyer et
 - Blameless postmortems and incident records show hidden failure modes.
 - Use canary analysis, dark launches, and synthetic load as methods to obtain evidence.
 
-### 3.6. Diomidis Spinellis: Code Quality and Repository Mining
+#### 2.5.4.6. Diomidis Spinellis: Code Quality and Repository Mining
 
 In [*Code Quality: The Open Source Perspective* (Spinellis, 2006, Addison-Wesley)](https://www.spinellis.gr/codequality/), Diomidis Spinellis shows how to inspect source code, version-control data, build logs, and static-analysis trees. Use these sources to find invariants, hidden coupling, and technical debt. Operation 5 applies this work to both human developers and AI coding agents.
 
-### 3.7. Michael Feathers: Legacy Code Invariants and Characterization Testing
+#### 2.5.4.7. Michael Feathers: Legacy Code Invariants and Characterization Testing
 
 In [*Working Effectively with Legacy Code* (Feathers, 2004, Prentice Hall)](https://www.pearson.com/en-us/subject-catalog/p/working-effectively-with-legacy-code/P200000009472), Michael Feathers defines legacy code as "code without tests" and introduces **characterization testing**:
 
@@ -5793,7 +5794,7 @@ In [*Working Effectively with Legacy Code* (Feathers, 2004, Prentice Hall)](http
 
 ------------------------------------------------------------------------
 
-## 4. Mathematical Formulation of Knowledge Value
+### 2.5.5. Mathematical Formulation of Knowledge Value
 
 The decision to acquire knowledge in software engineering is governed by decision-analytic game theory. Every empirical test, benchmark, or repository mining task incurs an engineering cost (developer hours, cloud compute spend, delay in feature delivery). We formalize this using Howard's Information Value Theory adapted to software architecture.
 
@@ -5829,7 +5830,7 @@ flowchart TD
     DecisionGate -- No --> Proceed
 ```
 
-### 4.1. Formal Decision Model under Uncertainty
+#### 2.5.5.1. Formal Decision Model under Uncertainty
 
 Let:
 
@@ -5838,7 +5839,7 @@ Let:
 - $\mathcal{A} = \{a_1, a_2, \dots, a_m\}$ be the set of mutually exclusive candidate architectural actions (for example, $a_1 = \text{Synchronous Multi-Region Raft Consensus}$, $a_2 = \text{Asynchronous Conflict-Free Replicated Data Types (CRDTs)}$).
 - $U(a, \theta)$ be the utility function mapping action $a$ in state $\theta$ to total system value (accounting for throughput, latency, implementation complexity, operational cost, and failure penalties).
 
-### 4.2. Expected Value of Perfect Information (EVPI)
+#### 2.5.5.2. Expected Value of Perfect Information (EVPI)
 
 The **Expected Value of Perfect Information (EVPI)** represents the absolute theoretical upper bound on what an engineering team should spend to eliminate all uncertainty regarding state $\Theta$.
 
@@ -5852,7 +5853,7 @@ $$\text{Theorem 1: } \text{EVPI} \ge 0. \quad \text{EVPI} = 0 \iff \arg\max_{a \
 
 *Engineering Interpretation:* If the same architectural candidate is optimal regardless of whether network latency is high or low, measuring network latency has an $\text{EVPI} = 0$. Conducting the measurement is engineering waste.
 
-### 4.3. Expected Value of Imperfect / Sample Information (EVSI) & EVOI
+#### 2.5.5.3. Expected Value of Imperfect / Sample Information (EVSI) & EVOI
 
 Real-world experiments (benchmarks, spikes, log samples) are noisy, imperfect information sources. Let:
 
@@ -5870,7 +5871,7 @@ $$\text{Operational Decision Rule: Execute Experiment } E \iff \text{EVOI}(E) > 
 
 ------------------------------------------------------------------------
 
-## 5. The Four Core Knowledge Expansion Techniques
+### 2.5.6. The Four Core Knowledge Expansion Techniques
 
 ``` mermaid
 graph TD
@@ -5903,13 +5904,13 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Technique 5.1. Formulate Decision-Significant Unknowns
+#### 2.5.6.1. Technique 5.1. Formulate Decision-Significant Unknowns
 
-#### Formal Definition
+##### 2.5.6.1.1. Formal Definition
 
 A **Decision-Significant Unknown (`UNK-`)** is an unverified empirical parameter, behavioral invariant, or operational characteristic whose resolution has a non-zero probability of changing the optimal choice among competing candidate mechanisms or architectural topologies.
 
-#### The Decision-Significance Gate
+##### 2.5.6.1.2. The Decision-Significance Gate
 
 Engineers and AI agents must subject every proposed inquiry to the **Decision-Significance Filter**:
 
@@ -5922,7 +5923,7 @@ flowchart TD
     EVOI -->|Yes| Unknown["Register as typed unknown<br/>UNK-*"]
 ```
 
-#### Taxonomy of Decision-Significant Unknowns
+##### 2.5.6.1.3. Taxonomy of Decision-Significant Unknowns
 
 | Type Code | Category | Epistemic Focus | Concrete Software Example | Falsification Criterion |
 |----|----|----|----|----|
@@ -5933,7 +5934,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Technique 5.2. Extract Knowledge from Existing Sources (Repository & Runtime Data Mining)
+#### 2.5.6.2. Technique 5.2. Extract Knowledge from Existing Sources (Repository & Runtime Data Mining)
 
 Before constructing external experiments or writing new code, the engineer or AI subagent must extract latent evidence already embedded within the repository artifacts, version control history, schema evolution, and production runtime telemetry.
 
@@ -5958,7 +5959,7 @@ flowchart LR
     EvidenceEngine --> TypedEvidence["Verified Facts (FACT) & Evidence Results (EVD-*)"]
 ```
 
-#### 5.2.1. Git History and Churn Archaeology
+##### 2.5.6.2.1. Git History and Churn Archaeology
 
 Version control history contains direct empirical evidence regarding architectural coupling, defect hotspots, and team cognitive boundaries.
 
@@ -5983,7 +5984,7 @@ git shortlog -sn --no-merges path/to/critical_module/
 
 *Epistemic Interpretation of Co-Change Coupling:* If `OrderBillingService.ts` and `InventoryAllocationService.ts` co-change in $78\%$ of commits over 12 months, any architectural diagram claiming they are "independently deployable microservices" is empirically falsified. They constitute a single distributed monolith.
 
-#### 5.2.2. AST Analysis and Static Call Graph Extraction
+##### 2.5.6.2.2. AST Analysis and Static Call Graph Extraction
 
 Autonomous developer agents and human architects must query Abstract Syntax Trees (ASTs) to extract explicit structural guarantees and dead execution branches without executing the code.
 
@@ -6027,7 +6028,7 @@ export function extractTransactionalInvariants(sourceFile: ts.SourceFile): Map<s
 }
 ```
 
-#### 5.2.3. Schema Migration and DDL Constraint Recovery
+##### 2.5.6.2.3. Schema Migration and DDL Constraint Recovery
 
 Database schemas evolve through accretions of migrations. Querying DDL history reveals implicit domain invariants that may be absent from application-level documentation:
 
@@ -6053,7 +6054,7 @@ ORDER BY t.relname, a.attname;
 `;
 ```
 
-#### 5.2.4. Telemetry and Distributed Trace Archaeology
+##### 2.5.6.2.4. Telemetry and Distributed Trace Archaeology
 
 Distributed tracing systems (for example, OpenTelemetry, Jaeger) provide empirical call graphs with exact duration breakdowns across microservice hops.
 
@@ -6091,7 +6092,7 @@ function analyzeTraceSpans(spans: TraceSpan[]): TraceMetrics {
 
 ------------------------------------------------------------------------
 
-### Technique 5.3. Transfer Mechanisms from Other Domains (Cross-Domain Isomorphism)
+#### 2.5.6.3. Technique 5.3. Transfer Mechanisms from Other Domains (Cross-Domain Isomorphism)
 
 When a software problem appears intractable within its immediate architectural domain, the most powerful inventive technique is **Cross-Domain Isomorphism**: mapping the functional problem statement to an abstract invariant and importing proven mechanisms from operating system kernels, network protocols, financial accounting, or distributed consensus.
 
@@ -6123,7 +6124,7 @@ flowchart TD
     ImportedMechanism --> LocalProblem
 ```
 
-#### 5.3.1. Mechanism Transfer Matrix
+##### 2.5.6.3.1. Mechanism Transfer Matrix
 
 | Target Software Problem | Conflicting Invariant | Source Domain | Transferred Mechanism | Technical Implementation Details |
 |----|----|----|----|----|
@@ -6135,7 +6136,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### Technique 5.4. Generate Knowledge via Experimentation (Spikes, Benchmarks & Probes)
+#### 2.5.6.4. Technique 5.4. Generate Knowledge via Experimentation (Spikes, Benchmarks & Probes)
 
 When existing repositories, runtime telemetry, and literature cannot resolve a decision-significant unknown, the engineer or AI agent must generate empirical evidence through controlled experimental intervention.
 
@@ -6172,7 +6173,7 @@ flowchart TD
     COMP -- No --> FAL_FALSE
 ```
 
-#### 5.4.1. The Anatomy of an Epistemic Spike
+##### 2.5.6.4.1. The Anatomy of an Epistemic Spike
 
 An **Epistemic Spike** is a minimal, disposable software artifact designed solely to answer a single `UNK-` question. It must not be merged into production code.
 
@@ -6184,23 +6185,23 @@ An **Epistemic Spike** is a minimal, disposable software artifact designed solel
 
 ------------------------------------------------------------------------
 
-## 6. Practical Case Studies
+### 2.5.7. Practical Case Studies
 
-### Case Study 1: Multi-AZ Cross-Data-Center Network Latency Profiling
+#### 2.5.7.1. Case Study 1: Multi-AZ Cross-Data-Center Network Latency Profiling
 
-#### Context & Problem Framing
+##### 2.5.7.1.1. Context & Problem Framing
 
 An engineering team is designing a mission-critical financial order-matching engine deployed across AWS Availability Zones (`us-east-1a`, `us-east-1b`, `us-east-1c`).
 
 - **Candidate Mechanism 1 (`CAN-01`):** Synchronous multi-AZ Raft consensus across three AZs for every order write (guaranteeing zero RPO data loss during an entire AZ failure).
 - **Candidate Mechanism 2 (`CAN-02`):** Asynchronous replication to secondary AZs with local in-memory NVMe journaling (sub-millisecond order processing, but theoretical $10\text{ms}$ RPO exposure during sudden AZ power loss).
 
-#### The Decision-Significant Unknown
+##### 2.5.7.1.2. The Decision-Significant Unknown
 
 - **`UNK-01`:** What is the empirical $p99.9$ round-trip latency and jitter distribution of cross-AZ network packets under continuous 10Gbps cross-AZ link saturation?
 - **Decision Impact:** If cross-AZ network $p99.9 \le 2.0\text{ ms}$, `CAN-01` satisfies the non-negotiable business invariant of $p99.9 \le 5.0\text{ ms}$ total order latency. If cross-AZ network $p99.9 > 2.0\text{ ms}$, `CAN-01` is mathematically unviable and must be pruned.
 
-#### Epistemic Experiment Harness (TypeScript)
+##### 2.5.7.1.3. Epistemic Experiment Harness (TypeScript)
 
 The team deploys an isolated testing harness across two AWS Availability Zones:
 
@@ -6235,7 +6236,7 @@ function percentile(values: number[], p: number): number {
 }
 ```
 
-#### Empirical Findings & Epistemic Resolution
+##### 2.5.7.1.4. Empirical Findings & Epistemic Resolution
 
 The 24-hour test execution produces the following evidence result:
 
@@ -6256,13 +6257,13 @@ pie title Latency Budget Breakdown for Synchronous Multi-AZ Write (p99.9 = 6.85m
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Legacy Code Invariant Extraction
+#### 2.5.7.2. Case Study 2: Legacy Code Invariant Extraction
 
-#### Context & Problem Framing
+##### 2.5.7.2.1. Context & Problem Framing
 
 A large enterprise retail application relies on a 12-year-old monolithic Java billing component (`BillingEngine.java`, 8,500 lines of spaghetti code, zero unit tests). Management orders the component decomposed into a microservice. Nobody on the current engineering team understands the implicit discounting rules, tax precedence logic, or state mutation invariants embedded in the class.
 
-#### Epistemic Mining Strategy
+##### 2.5.7.2.2. Epistemic Mining Strategy
 
 The team applies **Michael Feathers' Characterization Testing Protocol** combined with **AST Dependency Mining** and **Git Commit Archaeology**.
 
@@ -6294,7 +6295,7 @@ flowchart TD
     Step3 --> Step4
 ```
 
-#### Characterization Test Implementation
+##### 2.5.7.2.3. Characterization Test Implementation
 
 ``` typescript
 import { readFile, writeFile } from "node:fs/promises";
@@ -6318,27 +6319,27 @@ type Order = { id: string };
 declare const legacyEngine: { calculateBilling(order: Order): Promise<unknown> };
 ```
 
-#### Deliverable
+##### 2.5.7.2.4. Deliverable
 
 The team extracts 14 non-obvious business invariants into typed facts (`FACT-01` through `FACT-14`), enabling a safe, risk-free rewrite of the billing service with 100% behavioral equivalence.
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Cross-Domain Mechanism Borrowing (Kernel eBPF & Congestion Control)
+#### 2.5.7.3. Case Study 3: Cross-Domain Mechanism Borrowing (Kernel eBPF & Congestion Control)
 
-#### Context & Contradiction
+##### 2.5.7.3.1. Context & Contradiction
 
 A global API gateway handles 2,000,000 requests/sec across 500 edge nodes. The system must enforce a global tenant rate-limit (for example, "Tenant X is limited to 50,000 req/sec globally").
 
 - **Attempted Solution 1:** Centralized Redis cluster. *Result:* Redis cluster CPU saturated by atomic `INCR` commands; network latency adds $15\text{ms}$ overhead to every HTTP request.
 - **Attempted Solution 2:** Local node rate limits (Global Limit / 500 nodes). *Result:* Highly bursty and uneven traffic distribution causes false-positive `429 Too Many Requests` rejections on hot nodes while total global traffic is well below the limit.
 
-#### The Contradiction (`CTR-01`)
+##### 2.5.7.3.2. The Contradiction (`CTR-01`)
 
 - Parameter $A$ (Global Limit Accuracy) requires synchronous global state sharing.
 - Parameter $B$ (Sub-Millisecond Gateway Latency) forbids synchronous network calls to a central coordinator.
 
-#### Borrowing from Linux Kernel eBPF & TCP BBR Congestion Control
+##### 2.5.7.3.3. Borrowing from Linux Kernel eBPF & TCP BBR Congestion Control
 
 The team borrows two mechanisms:
 
@@ -6365,7 +6366,7 @@ flowchart LR
     IncomingReq["Incoming HTTP Request"] -->|"Sub-microsecond Check (In-Memory Atomic CAS)"| E1
 ```
 
-#### Technical Implementation Details
+##### 2.5.7.3.4. Technical Implementation Details
 
 1.  **Local Execution (Fast Path):** Every edge node evaluates incoming requests in pure memory (zero RPCs) against a local token bucket lease. Latency penalty: $< 5\mu\text{s}$.
 2.  **Asynchronous Credit Renewal (Background Path):** Edge nodes run an asynchronous heartbeat loop every $100\text{ms}$. Nodes request credit blocks proportional to their recent arrival velocity ($V_{\text{node}} = \frac{\Delta \text{requests}}{\Delta t}$).
@@ -6373,13 +6374,13 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### Case Study 4: Spike Benchmark Falsification (Evaluating a High-Performance Distributed Cache)
+#### 2.5.7.4. Case Study 4: Spike Benchmark Falsification (Evaluating a High-Performance Distributed Cache)
 
-#### Context & Vendor Claim
+##### 2.5.7.4.1. Context & Vendor Claim
 
 A commercial distributed in-memory cache vendor claims: *"Our distributed caching engine delivers sub-millisecond p99.9 latency under 500,000 writes/sec on commodity hardware."* The architecture team considers replacing their relational database write-buffer with this engine.
 
-#### The Epistemic Spike (JMH with Coordinated Omission Protection)
+##### 2.5.7.4.2. The Epistemic Spike (JMH with Coordinated Omission Protection)
 
 The team designs an isolated TypeScript benchmark harness using a high-resolution histogram and constant-rate request generation:
 
@@ -6411,7 +6412,7 @@ function percentile(values: number[], p: number): number {
 }
 ```
 
-#### Results & Epistemic Verdict
+##### 2.5.7.4.3. Results & Epistemic Verdict
 
 When measured without open-arrival correction (closed loop), the vendor client reported $p99.9 = 0.85\text{ ms}$. When measured with **Coordinated Omission Correction**, the true distribution was revealed:
 
@@ -6426,7 +6427,7 @@ When measured without open-arrival correction (closed loop), the vendor client r
 
 ------------------------------------------------------------------------
 
-## 7. Operational Deliverable: The Knowledge and Evidence Registry
+### 2.5.8. Operational Deliverable: The Knowledge and Evidence Registry
 
 Operation 5 produces a formal, machine-readable, and human-auditable **Registry of Unknowns, Assumptions, and Evidence**.
 
@@ -6469,7 +6470,7 @@ classDiagram
     EvidenceResult ..> Assumption : falsifies / validates
 ```
 
-### 7.1. Ariadne Epistemic Registry Schema
+#### 2.5.8.1. Ariadne Epistemic Registry Schema
 
 ``` markdown
 ### Epistemic Registry: Knowledge & Evidence Log
@@ -6501,7 +6502,7 @@ classDiagram
 
 ------------------------------------------------------------------------
 
-## 8. Stop Conditions & Expected Value of Information (EVOI)
+### 2.5.9. Stop Conditions & Expected Value of Information (EVOI)
 
 Knowledge acquisition must not continue indefinitely. Operation 5 terminates when any of the following four formal stop conditions is met:
 
@@ -6518,7 +6519,7 @@ flowchart TD
     Cond4 -- No --> Continue["CONTINUE TARGETED INVESTIGATION<br/>Execute Next Highest EVOI Evidence Request"]
 ```
 
-### 8.1. The Four Formal Stop Conditions
+#### 2.5.9.1. The Four Formal Stop Conditions
 
 1.  **The Mathematical EVOI Stop Condition:** $$\text{EVOI}(E) = \mathbb{E}[\text{Value with Information}] - \mathbb{E}[\text{Value without Information}] - \text{Cost}(E) \le 0$$ When the cost of running another benchmark, trace query, or spike exceeds the financial or architectural benefit of reducing the remaining uncertainty, information gathering must stop immediately.
 
@@ -6526,11 +6527,11 @@ flowchart TD
 
 3.  **Satisficing Invariant Threshold:** When all non-negotiable safety and liveness invariants (for example, zero data loss, memory safety, legal compliance) are backed by empirical proof (`FACT` or `MEASURED`), and remaining uncertainties only affect secondary preferences (for example, whether CPU utilization is 35% vs 42%), further experimentation is unwarranted.
 
-4.  **Asymmetric Risk Bounding via Reversibility:** If a candidate mechanism can be deployed behind a feature flag or dynamic adapter with a low-cost, instantaneous rollback path, the cost of an empirical production canary is lower than the cost of prolonged staging simulation. Stop investigation and execute a canary rollout ([Operation 9](#operation-9-verify-the-solution-by-execution-and-safely-execute-the-transition)).
+4.  **Asymmetric Risk Bounding via Reversibility:** If a candidate mechanism can be deployed behind a feature flag or dynamic adapter with a low-cost, instantaneous rollback path, the cost of an empirical production canary is lower than the cost of prolonged staging simulation. Stop investigation and execute a canary rollout ([Operation 9](#29-operation-9-verify-the-solution-by-execution-and-safely-execute-the-transition)).
 
 ------------------------------------------------------------------------
 
-## 9. Common Mistakes & Epistemic Anti-Patterns
+### 2.5.10. Common Mistakes & Epistemic Anti-Patterns
 
 ``` mermaid
 mindmap
@@ -6555,39 +6556,39 @@ mindmap
       Unbounded search depth without EVOI gate
 ```
 
-### 9.1. Detailed Anti-Pattern Catalog
+#### 2.5.10.1. Detailed Anti-Pattern Catalog
 
-#### 1. Analysis Paralysis (The Quest for Omniscience)
+##### 2.5.10.1.1. Analysis Paralysis (The Quest for Omniscience)
 
 - **Symptom:** Engineering teams spending weeks reading whitepapers, evaluating dozens of libraries, and debating hypothetical failure modes without writing a single line of benchmark code or formulating a decision-significant unknown.
 - **Root Mechanism:** Fear of decision commitment combined with failure to calculate EVOI.
 - **Remediation:** Enforce the **Decision-Significance Filter**: reject any research task that cannot name the specific candidate mechanism it will invalidate upon completion.
 
-#### 2. Passive Documentation Ingestion without Executable Verification
+##### 2.5.10.1.2. Passive Documentation Ingestion without Executable Verification
 
 - **Symptom:** Reading framework or cloud provider documentation and assuming its stated throughput or consistency guarantees hold true in your specific VPC, topology, and workload.
 - **Root Mechanism:** Confusing documentation (`CLAIM`) with empirical proof (`FACT`).
 - **Remediation:** Treat all third-party and vendor claims as unverified assumptions (`ASM-`). Require a minimal executable spike (`EVDREQ-`) before committing to an architectural path.
 
-#### 3. Vendor Benchmark Gullibility
+##### 2.5.10.1.3. Vendor Benchmark Gullibility
 
 - **Symptom:** Accepting vendor-published performance benchmarks (for example, "1,000,000 ops/sec at sub-millisecond latency") that were captured under unrealistic conditions (zero network hops, tiny payloads, 100% read workloads, closed-loop generators).
 - **Root Mechanism:** Ignoring experimental confounding variables and **Coordinated Omission**.
 - **Remediation:** Execute independent, open-arrival benchmarks using realistic payload sizes, concurrent read-write mixes, and network latency injection.
 
-#### 4. The "Proof-of-Concept" Confirmation Trap
+##### 2.5.10.1.4. The "Proof-of-Concept" Confirmation Trap
 
 - **Symptom:** Building a small demo application that only exercises the happy path of a new technology, declaring success because "it worked on my machine."
 - **Root Mechanism:** Confirmatory bias—seeking evidence to verify a desired conclusion rather than attempting to falsify it.
 - **Remediation:** An experiment is only valid if it specifies a pre-committed **Falsification Threshold** (for example, "If memory usage exceeds 2GB under 50k concurrent websockets, the framework is rejected").
 
-#### 5. Conflating Absence of Evidence with Evidence of Absence
+##### 2.5.10.1.5. Conflating Absence of Evidence with Evidence of Absence
 
 - **Symptom:** Concluding that a legacy service has no race conditions because "no errors appear in the logs."
 - **Root Mechanism:** Naive reliance on un-instrumented runtime observations. Race conditions in concurrent systems often cause silent data corruption or state drift rather than explicit thrown exceptions.
 - **Remediation:** Implement explicit behavioral assertion harnesses, invariant monitors, and thread-sanitizer analysis (`TSan`).
 
-#### 6. Autonomous AI Subagent Information Rabbit Holes
+##### 2.5.10.1.6. Autonomous AI Subagent Information Rabbit Holes
 
 - **Symptom:** An autonomous AI developer agent spawns recursive web searches, reading hundreds of blog posts or traversing entire directory trees, exhausting its token context window with zero actionable decision progress.
 - **Root Mechanism:** Unconstrained epistemic prompts lacking structured stop conditions, EVOI boundaries, and typed target artifacts.
@@ -6595,7 +6596,7 @@ mindmap
 
 ------------------------------------------------------------------------
 
-## 10. Summary of Operation 5
+### 2.5.11. Summary of Operation 5
 
 <table>
 <colgroup>
@@ -6645,9 +6646,9 @@ mindmap
 
 ------------------------------------------------------------------------
 
-## Operation 6. Arrange Dependencies and Change Boundaries
+## 2.6. Operation 6. Arrange Dependencies and Change Boundaries
 
-### Failure First: The One-Day Tax Rule That Required Five Teams
+### 2.6.1. Failure First: The One-Day Tax Rule That Required Five Teams
 
 A statutory tax rule changes for one jurisdiction. Implementing it requires edits to checkout UI validation, order calculation, invoice rendering, notification templates, a shared database table, and five deployment pipelines. The code is split into services, yet the rule has a change radius larger than the monolith it replaced.
 
@@ -6658,7 +6659,7 @@ A statutory tax rule changes for one jurisdiction. Implementing it requires edit
 
 Humans tend to preserve social topology. Agents tend to mistake visible indirection for independence. Humans need authority to realign ownership. Agents need repository, schema, runtime, and history grounding before they propose a seam.
 
-#### Formal Concept → Engineering Meaning
+#### 2.6.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -6667,11 +6668,11 @@ Humans tend to preserve social topology. Agents tend to mistake visible indirect
 | Change radius, $R(M)$ | Transitive set of artifacts, services, schemas, pipelines, and owners affected by changing mechanism $M$. | Git history and deployment records show that one tax-rule edit consistently touches twelve modules and five teams. |
 | Design Structure Matrix | Matrix representation of dependency edges used to expose cycles and clusters. | A dense cyclic block predicts synchronized releases and tells the architect where a boundary claim is false. |
 
-## Purpose and Main Question
+### 2.6.2. Purpose and Main Question
 
-### The role of dependency arrangement
+#### 2.6.2.1. The role of dependency arrangement
 
-**Operation 6: Arrange Dependencies and Change Boundaries** governs the structural topology of software systems. [Operation 1](#operation-1-frame-and-model-the-software-problem) frames behavioral deltas. [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions and bottlenecks. [Operation 3](#operation-3-transform-the-existing-software-system) applies physical and structural transformations. Operation 6 resolves **structural and coupling uncertainty** ($U_{\text{dep}}$).
+**Operation 6: Arrange Dependencies and Change Boundaries** governs the structural topology of software systems. [Operation 1](#21-operation-1-frame-and-model-the-software-problem) frames behavioral deltas. [Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions and bottlenecks. [Operation 3](#23-operation-3-transform-the-existing-software-system) applies physical and structural transformations. Operation 6 resolves **structural and coupling uncertainty** ($U_{\text{dep}}$).
 
 ``` mermaid
 flowchart TD
@@ -6712,7 +6713,7 @@ Operation 6 constructs a topology where **reasons for change dictate boundaries*
 
 ------------------------------------------------------------------------
 
-### Main Question
+#### 2.6.2.2. Main Question
 
 > **Which requirements and business capabilities must change independently, and where does the current system couple them accidentally?**
 
@@ -6728,7 +6729,7 @@ If a change to a tax calculation algorithm requires a change to the checkout UI,
 
 ------------------------------------------------------------------------
 
-### The Dual Nature of Coupling: Essential vs. Accidental
+#### 2.6.2.3. The Dual Nature of Coupling: Essential vs. Accidental
 
 To structure dependencies effectively, an engineer must distinguish between two fundamental forms of coupling:
 
@@ -6749,7 +6750,7 @@ $$\text{Coupling}_{\text{total}} = \text{Coupling}_{\text{essential}} + \text{Co
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.6.3. Theoretical Grounding
 
 Operation 6 synthesizes six decades of formal computer science, modularity theory, object-oriented metrics, domain-driven design, and socio-technical systems theory.
 
@@ -6808,7 +6809,7 @@ classDiagram
 
 ------------------------------------------------------------------------
 
-### 1.1. David L. Parnas: Information Hiding and Decomposition by Reasons for Change (1972)
+#### 2.6.3.1. David L. Parnas: Information Hiding and Decomposition by Reasons for Change (1972)
 
 In his seminal paper [*On the Criteria To Be Used in Decomposing Systems into Modules* (CACM, 1972, DOI: 10.1145/361598.361623)](https://dl.acm.org/doi/10.1145/361598.361623), David L. Parnas contrasted two modularization strategies for a Keyword in Context (KWIC) index system:
 
@@ -6824,22 +6825,22 @@ Conversely, decomposing by information hiding confines volatility within module 
 
 ------------------------------------------------------------------------
 
-### 1.2. Robert C. Martin: Package Principles and the Metrics of the Main Sequence (2017)
+#### 2.6.3.2. Robert C. Martin: Package Principles and the Metrics of the Main Sequence (2017)
 
 In [*Clean Architecture: A Craftsman's Guide to Software Structure and Design* (Prentice Hall, 2017)](https://www.informit.com/store/clean-architecture-a-craftsmans-guide-to-software-9780134494166), Robert C. Martin formalized the structural principles governing component cohesion and coupling:
 
-#### Component Cohesion Principles
+##### 2.6.3.2.1. Component Cohesion Principles
 
 - **Common Closure Principle (CCP)**: *Classes that change together for the same reason should be packaged together.* (The Single Responsibility Principle scaled to architectural components).
 - **Common Reuse Principle (CRP)**: *Classes that are not used together should not be packaged together.* (Preventing consumers from depending on things they do not need).
 
-#### Component Coupling Principles & Metrics
+##### 2.6.3.2.2. Component Coupling Principles & Metrics
 
 - **Acyclic Dependencies Principle (ADP)**: *The dependency graph of components must contain no directed cycles.* Directed cycles turn all involved components into a single monolithic deployment unit.
 - **Stable Dependencies Principle (SDP)**: *Depend in the direction of stability.* A component should only depend on components that are more stable than itself.
 - **Stable Abstractions Principle (SAP)**: *A component should be as abstract as it is stable.* Stable components must be abstract (composed of interfaces) to remain extensible; unstable components can be concrete.
 
-#### The Mathematical Calculus of the Main Sequence
+##### 2.6.3.2.3. The Mathematical Calculus of the Main Sequence
 
 Let a component (package or module) $K$ possess:
 
@@ -6880,7 +6881,7 @@ $$D = \|A + I - 1\|, \quad D \in [0, 1]$$
 
 ------------------------------------------------------------------------
 
-### 1.3. Eric Evans: Domain-Driven Design and Context Mapping (2003)
+#### 2.6.3.3. Eric Evans: Domain-Driven Design and Context Mapping (2003)
 
 In [*Domain-Driven Design: Tackling Complexity in the Heart of Software* (Addison-Wesley, 2003)](https://www.domainlanguage.com/ddd/), Eric Evans demonstrated that total enterprise consistency across a single unified data model is an impossible illusion. Attempting to force a single model across multiple business units creates severe semantic coupling.
 
@@ -6915,7 +6916,7 @@ Evans classified the formal relationships between Bounded Contexts in a **Contex
 
 ------------------------------------------------------------------------
 
-### 1.4. Shyam Chidamber & Chris Kemerer: Object-Oriented Metrics Suite (1994)
+#### 2.6.3.4. Shyam Chidamber & Chris Kemerer: Object-Oriented Metrics Suite (1994)
 
 In [*A Metrics Suite for Object Oriented Design* (IEEE TSE, 1994, DOI: 10.1109/32.295895)](https://doi.org/10.1109/32.295895), Chidamber and Kemerer established the empirical metrics for structural coupling:
 
@@ -6925,7 +6926,7 @@ In [*A Metrics Suite for Object Oriented Design* (IEEE TSE, 1994, DOI: 10.1109/3
 
 ------------------------------------------------------------------------
 
-### 1.5. Carliss Baldwin & Kim Clark: Design Rules and the Power of Modularity (2000)
+#### 2.6.3.5. Carliss Baldwin & Kim Clark: Design Rules and the Power of Modularity (2000)
 
 In [*Design Rules: The Power of Modularity* (MIT Press, 2000)](https://mitpress.mit.edu/9780262024662/design-rules/), Baldwin and Clark established the economic and structural theory of modularity. A modular system partitions design parameters into two categories:
 
@@ -6936,7 +6937,7 @@ Baldwin and Clark formalized the **Design Structure Matrix (DSM)** as an $N \tim
 
 ------------------------------------------------------------------------
 
-### 1.6. Stewart Brand: Pace Layering and Shearing Layers (1994)
+#### 2.6.3.6. Stewart Brand: Pace Layering and Shearing Layers (1994)
 
 In [*How Buildings Learn: What Happens After They're Built* (Viking, 1994)](https://www.penguinrandomhouse.com/books/292676/how-buildings-learn-by-stewart-brand/), Stewart Brand observed that buildings adapt successfully over decades because they are structured into distinct **Shearing Layers** that change at fundamentally different rates:
 
@@ -6960,7 +6961,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 1.7. Melvin Conway: Socio-Technical Boundaries and Conway's Law (1968)
+#### 2.6.3.7. Melvin Conway: Socio-Technical Boundaries and Conway's Law (1968)
 
 In [*How Do Committees Invent?* (Datamation, 1968)](https://www.melconway.com/Home/Committees_Paper.html), Melvin Conway established that:
 
@@ -6970,7 +6971,7 @@ In modern software architecture ([Skelton & Pais, *Team Topologies*, IT Revoluti
 
 ------------------------------------------------------------------------
 
-## 2. Taxonomy of Dependency Vectors (The Nine Coupling Vectors)
+### 2.6.4. Taxonomy of Dependency Vectors (The Nine Coupling Vectors)
 
 Engineers often make the fatal error of evaluating dependencies solely through the lens of **source code imports** (`import`, `require`, `#include`). In production distributed systems, source code coupling represents only a fraction of the total coupling surface.
 
@@ -7019,25 +7020,25 @@ mindmap
 
 ------------------------------------------------------------------------
 
-### 2.1. Vector 1: Source Code & Compilation Coupling
+#### 2.6.4.1. Vector 1: Source Code & Compilation Coupling
 
 - **Mechanism**: Direct language-level references to concrete classes, static singletons, global functions, or shared monorepo packages.
 - **Failure Mode**: A change to a private field or method signature in package $A$ forces recompilation, relinking, or type-checking errors across packages $B, C,$ and $D$.
 - **Mitigation**: Dependency Inversion Principle (DIP); consumer-defined interfaces; abstract factories; package boundary enforcement tools (for example, Nx, Bazel visibility rules, ArchUnit).
 
-### 2.2. Vector 2: Data Model & Schema Coupling
+#### 2.6.4.2. Vector 2: Data Model & Schema Coupling
 
 - **Mechanism**: Sharing concrete Data Transfer Objects (DTOs), Protobuf definitions, or JSON schemas across boundary lines.
 - **Failure Mode**: Adding a new optional field to a shared user profile payload in the identity service unexpectedly breaks deserialization in an un-updated legacy billing consumer (for example, strict JSON schema validation rejection).
 - **Mitigation**: Tolerant Reader pattern; explicit Anti-Corruption Layers; independent boundary schemas with distinct mappings.
 
-### 2.3. Vector 3: Database & Storage Coupling
+#### 2.6.4.3. Vector 3: Database & Storage Coupling
 
 - **Mechanism**: Multiple services reading and writing directly to the same database tables, using cross-schema foreign keys, or sharing transactional locks.
 - **Failure Mode**: Team $A$ adds an index or renames a column in table `accounts` to optimize a search query, inadvertently deadlocking or crashing the batch billing job managed by Team $B$.
 - **Mitigation**: Strict single-service data ownership; eliminating cross-service direct DB access; exposing data exclusively via APIs, Change Data Capture (CDC), or asynchronous event streams.
 
-### 2.4. Vector 4: Temporal & Execution Coupling
+#### 2.6.4.4. Vector 4: Temporal & Execution Coupling
 
 - **Mechanism**: Synchronous, blocking request-reply chains ($A \to B \to C \to D$) where service $A$ cannot complete its transaction until $D$ responds, or where operations must execute in a strict lockstep chronological window.
 - **Failure Mode**: Latency summation and availability multiplication:
@@ -7048,31 +7049,31 @@ An outage or $500\text{ ms}$ latency degradation in service $D$ immediately casc
 
 - **Mitigation**: Asynchronous messaging; transactional Outbox pattern; event-driven choreography; eventual consistency; fallback caching.
 
-### 2.5. Vector 5: Configuration & Environmental Coupling
+#### 2.6.4.5. Vector 5: Configuration & Environmental Coupling
 
 - **Mechanism**: Subsystems sharing global environment variables, centralized configuration keys, or global feature flag toggles.
 - **Failure Mode**: Flipping a feature flag intended to enable a new search algorithm accidentally disables rate-limiting in the checkout service due to overlapping configuration key namespaces.
 - **Mitigation**: Scoped configuration schemas; tenant- and domain-isolated feature flagging; immutable configuration artifacts baked into deployment images.
 
-### 2.6. Vector 6: Third-Party & Binary Dependency Coupling
+#### 2.6.4.6. Vector 6: Third-Party & Binary Dependency Coupling
 
 - **Mechanism**: Multiple internal modules depending on differing versions of a shared third-party library or native runtime binary (the "Diamond Dependency" problem).
 - **Failure Mode**: Upgrading library `lib-crypto` to patch a security vulnerability in Service $A$ breaks Service $B$ because a shared core utility requires an incompatible older version of the same library.
 - **Mitigation**: Shading/vendoring; isolating third-party dependencies behind internal adapter interfaces; micro-packaging.
 
-### 2.7. Vector 7: Infrastructure & Co-location Coupling
+#### 2.6.4.7. Vector 7: Infrastructure & Co-location Coupling
 
 - **Mechanism**: Independent services sharing the same underlying Kubernetes node, network interface, database connection pool, or thread pool.
 - **Failure Mode**: "Noisy Neighbor" effect: an analytical report generation worker consumes 100% of host CPU and exhausts disk I/O IOPS, starving the co-located real-time transaction processing engine.
 - **Mitigation**: Cgroups; CPU/memory limits and requests; dedicated thread pools; storage volume QoS; physical or node-pool isolation.
 
-### 2.8. Vector 8: Release Pipeline & Deployment Coupling
+#### 2.6.4.8. Vector 8: Release Pipeline & Deployment Coupling
 
 - **Mechanism**: Multiple services bundled into a single monolithic release train, requiring simultaneous, synchronized deployments and shared CI/CD pipeline gates.
 - **Failure Mode**: A failed integration test in the blog comment module blocks a critical hotfix deployment for the payment processing engine.
 - **Mitigation**: Independent deployment pipelines; semantic versioning; backward-compatible API contracts; trunk-based development with feature flags.
 
-### 2.9. Vector 9: Socio-Technical & Team Boundary Coupling
+#### 2.6.4.9. Vector 9: Socio-Technical & Team Boundary Coupling
 
 - **Mechanism**: A single business capability or bounded context split across multiple engineering teams, requiring multi-team meetings, shared pull requests, and multi-manager sign-offs for minor feature changes.
 - **Failure Mode**: Extreme delivery lead time, coordination overhead, and diluted operational ownership.
@@ -7080,7 +7081,7 @@ An outage or $500\text{ ms}$ latency degradation in service $D$ immediately casc
 
 ------------------------------------------------------------------------
 
-## 3. The Three Core Techniques of Operation 6
+### 2.6.5. The Three Core Techniques of Operation 6
 
 > **THE THREE TECHNIQUES OF OPERATION 6**
 > 6.1. BUILD A MAP OF DEPENDENCIES AND CONTRACTS
@@ -7101,9 +7102,9 @@ An outage or $500\text{ ms}$ latency degradation in service $D$ immediately casc
 
 ------------------------------------------------------------------------
 
-### 3.1. Technique 6.1: Build a Map of Dependencies and Contracts
+#### 2.6.5.1. Technique 6.1: Build a Map of Dependencies and Contracts
 
-#### 3.1.1. Constructing the Design Structure Matrix (DSM)
+##### 2.6.5.1.1. Constructing the Design Structure Matrix (DSM)
 
 The **Design Structure Matrix (DSM)** is an $N \times N$ square matrix where rows and columns represent identical system components (modules, packages, or services).
 
@@ -7124,7 +7125,7 @@ The **Design Structure Matrix (DSM)** is an $N \times N$ square matrix where row
 | D | . | 1 | . | . | 1 | D depends on B and E |
 | E | . | . | . | . | . | E is independent |
 
-#### 3.1.2. Partitioning, Clustering, and Cycle Elimination
+##### 2.6.5.1.2. Partitioning, Clustering, and Cycle Elimination
 
 Through algorithmic **partitioning** (matrix reordering based on topological sorting and Tarjan's strongly connected components algorithm), we isolate cycles and reorder components into a strict layered hierarchy:
 
@@ -7155,7 +7156,7 @@ Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extra
 | A | . | 1 | . | 1 | . | . | Implements IA; depends on B |
 | D | 1 | . | . | 1 | . | . | Depends on E and B |
 
-#### 3.1.3. Calculating Software Package Metrics
+##### 2.6.5.1.3. Calculating Software Package Metrics
 
 For every module $M_k$ in the system, compute the structural metrics:
 
@@ -7179,7 +7180,7 @@ function distanceFromMainSequence(metrics: ComponentMetrics): number {
 }
 ```
 
-#### 3.1.4. Quantifying the Change Radius (Blast Radius)
+##### 2.6.5.1.4. Quantifying the Change Radius (Blast Radius)
 
 The **Change Radius** $R(M)$ represents the expected number of components that must be inspected, tested, or modified when module $M$ undergoes an internal modification:
 
@@ -7193,7 +7194,7 @@ Where:
 
 ------------------------------------------------------------------------
 
-### 3.2. Technique 6.2: Link Requirements to Mechanisms
+#### 2.6.5.2. Technique 6.2: Link Requirements to Mechanisms
 
 Every software requirement must be mapped to the exact set of computational mechanisms, database schemas, and network interactions that satisfy it.
 
@@ -7206,7 +7207,7 @@ Every software requirement must be mapped to the exact set of computational mech
 | REQ-02: Enforce | CAN-AUTH: Centralized ABAC | Scattered `if (user.role)` | NO: Accidental |
 | Access Control | Policy Decision Point | checks in UI, API, DB views | Ghost Coupling! |
 
-#### Exposing Ghost Dependencies and Latent Couplings
+##### 2.6.5.2.1. Exposing Ghost Dependencies and Latent Couplings
 
 A **Ghost Dependency** occurs when two components have no explicit source code or network dependencies, but are coupled through hidden shared assumptions:
 
@@ -7215,9 +7216,9 @@ A **Ghost Dependency** occurs when two components have no explicit source code o
 
 ------------------------------------------------------------------------
 
-### 3.3. Technique 6.3: Weaken Unnecessary Dependencies
+#### 2.6.5.3. Technique 6.3: Weaken Unnecessary Dependencies
 
-#### 3.3.1. Structural Decoupling: Dependency Inversion & Ports-and-Adapters
+##### 2.6.5.3.1. Structural Decoupling: Dependency Inversion & Ports-and-Adapters
 
 To decouple core domain logic from volatile infrastructure (databases, message brokers, external HTTP APIs), place the domain model at the center and invert dependency arrows:
 
@@ -7245,7 +7246,7 @@ flowchart TD
     StripeAdapter -.->|implements| PaymentPort
 ```
 
-#### 3.3.2. Data Decoupling: Anti-Corruption Layer (ACL)
+##### 2.6.5.3.2. Data Decoupling: Anti-Corruption Layer (ACL)
 
 When integrating with an unruly legacy system, third-party vendor, or external bounded context, never allow the external data structures to leak into your domain:
 
@@ -7291,7 +7292,7 @@ class CustomerAntiCorruptionLayer {
 }
 ```
 
-#### 3.3.3. Evolutionary Decoupling: Expand/Contract (Parallel Run) Pattern
+##### 2.6.5.3.3. Evolutionary Decoupling: Expand/Contract (Parallel Run) Pattern
 
 To evolve a database schema, public API, or communication contract without breaking running clients and without requiring lockstep zero-second deployments, apply the **Expand/Contract** protocol across three phases:
 
@@ -7319,13 +7320,13 @@ sequenceDiagram
 
 ------------------------------------------------------------------------
 
-## 4. Deep-Dive Practical Case Studies
+### 2.6.6. Deep-Dive Practical Case Studies
 
 ------------------------------------------------------------------------
 
-### 4.1. Case Study 1: Authorization Policy Extraction
+#### 2.6.6.1. Case Study 1: Authorization Policy Extraction
 
-#### Context & Symptom
+##### 2.6.6.1.1. Context & Symptom
 
 A high-growth fintech application embedded user role checks directly within frontend UI templates, REST controller methods, and database query filters:
 
@@ -7338,7 +7339,7 @@ if (user.role === 'FINANCE_MANAGER' || (user.role === 'AUDITOR' && record.status
 
 When compliance regulations introduced a new role (*Regional Risk Officer*) with conditional spending limits based on geography and transaction history, the engineering team had to modify **84 distinct files** across 5 repositories. The change radius $R(\text{Auth})$ spanned almost the entire codebase.
 
-#### Applying Operation 6
+##### 2.6.6.1.2. Applying Operation 6
 
 1.  **Technique 6.1 (Build Dependency Map)**: Identified that the business requirement *"Enforce Regulatory Access Control"* was coupled to presentation, routing, and database query layers.
 2.  **Technique 6.2 (Link Requirement to Mechanism)**: Extracted authorization into a dedicated **Policy Decision Point (PDP)** using Open Policy Agent (OPA) and Rego.
@@ -7377,16 +7378,16 @@ async function enforcePolicy(
 }
 ```
 
-#### Outcome
+##### 2.6.6.1.3. Outcome
 
 - **Change Radius Reduction**: Modifying compliance rules now requires changes to **1 file** (`authz.rego`) and **0 application redeployments**.
 - **Metric Shift**: $R(\text{Auth})$ dropped from $84 \to 1$. Instability and Abstractness normalized to the Main Sequence ($D = 0.04$).
 
 ------------------------------------------------------------------------
 
-### 4.2. Case Study 2: Distributed Database Schema Decoupling
+#### 2.6.6.2. Case Study 2: Distributed Database Schema Decoupling
 
-#### Context & Symptom
+##### 2.6.6.2.1. Context & Symptom
 
 An e-commerce platform decomposed its backend into 12 microservices, but left all services connected to a single monolithic PostgreSQL database. The `orders` service executed direct cross-table SQL joins against the `inventory.products` and `users.accounts` tables.
 
@@ -7406,7 +7407,7 @@ flowchart TD
     end
 ```
 
-#### Applying Operation 6
+##### 2.6.6.2.2. Applying Operation 6
 
 1.  **Technique 6.1**: Identified Vector 3 (Database Coupling) and Vector 4 (Temporal Lock Contention) as the root structural flaws.
 2.  **Technique 6.3**: Enforced **Strict Single-Service Data Ownership**. Partitioned the database into isolated physical databases (`orders_db`, `users_db`, `inventory_db`).
@@ -7450,20 +7451,20 @@ CREATE TABLE order_outbox (
 `;
 ```
 
-#### Outcome
+##### 2.6.6.2.3. Outcome
 
 - **Failure Isolation**: An outage or migration in `users_db` has zero effect on order ingestion throughput.
 - **Blast Radius**: Reduced from global cluster crash to zero cross-service lock propagation.
 
 ------------------------------------------------------------------------
 
-### 4.3. Case Study 3: Expand/Contract Schema & API Evolution
+#### 2.6.6.3. Case Study 3: Expand/Contract Schema & API Evolution
 
-#### Context & Symptom
+##### 2.6.6.3.1. Context & Symptom
 
 A B2B SaaS platform needed to split a monolithic `billing_address` field (string) into structured columns (`street`, `city`, `postal_code`, `country_iso`) in a database containing $150\text{M}$ records. A naive `ALTER TABLE` migration locked the table for 45 minutes, failing SLA guarantees.
 
-#### Applying Operation 6 (Expand/Contract Protocol)
+##### 2.6.6.3.2. Applying Operation 6 (Expand/Contract Protocol)
 
 > **EXPAND / CONTRACT SCHEMA PROGRESSION**
 > Step 1: EXPAND (Zero-Downtime DDL)
@@ -7485,15 +7486,15 @@ A B2B SaaS platform needed to split a monolithic `billing_address` field (string
 > - Remove dual-write logic (Application Code v2.0).
 > - ALTER TABLE accounts DROP COLUMN billing_address;
 
-#### Outcome
+##### 2.6.6.3.3. Outcome
 
 - Zero downtime, zero table locking during peak traffic, and complete backward-compatibility for active API consumers throughout the 14-day transition period.
 
 ------------------------------------------------------------------------
 
-### 4.4. Case Study 4: Anti-Corruption Layer (ACL) for Legacy Core Banking Modernization
+#### 2.6.6.4. Case Study 4: Anti-Corruption Layer (ACL) for Legacy Core Banking Modernization
 
-#### Context & Symptom
+##### 2.6.6.4.1. Context & Symptom
 
 A modern digital banking mobile application needed to integrate with a 35-year-old COBOL/CICS mainframe backend. The mainframe exposed fixed-width EBCDIC files via nightly batch transfers and an unstable SOAP interface with obscure field codes (`X09_TX_AMT_NET`, `FLAG_C7`).
 
@@ -7513,7 +7514,7 @@ flowchart TD
     end
 ```
 
-#### Applying Operation 6
+##### 2.6.6.4.2. Applying Operation 6
 
 Constructed a dedicated **Anti-Corruption Layer (ACL)** as a standalone edge translation service:
 
@@ -7565,20 +7566,20 @@ function translateLegacyAccount(raw: LegacySoapAccountResponse): AccountSnapshot
 }
 ```
 
-#### Outcome
+##### 2.6.6.4.3. Outcome
 
 - Complete isolation of modern microservices from legacy schema drift.
 - When the core mainframe was upgraded to a modern core banking package two years later, only the ACL adapter was rewritten; zero modern microservices required modifications.
 
 ------------------------------------------------------------------------
 
-## 5. Operational Deliverables & Epistemic Artifacts
+### 2.6.7. Operational Deliverables & Epistemic Artifacts
 
 Every execution of Operation 6 produces four concrete, verifiable engineering deliverables:
 
 ------------------------------------------------------------------------
 
-### 5.1. The Dependency & Contract Matrix (`DEP-*`)
+#### 2.6.7.1. The Dependency & Contract Matrix (`DEP-*`)
 
 **ARIADNE DEPENDENCY MATRIX (DEP-01)**
 
@@ -7594,7 +7595,7 @@ Every execution of Operation 6 produces four concrete, verifiable engineering de
 
 ------------------------------------------------------------------------
 
-### 5.2. Change Radius & Blast Radius Assessment Sheet
+#### 2.6.7.2. Change Radius & Blast Radius Assessment Sheet
 
 **CHANGE RADIUS ASSESSMENT SHEET**
 
@@ -7613,7 +7614,7 @@ Every execution of Operation 6 produces four concrete, verifiable engineering de
 
 ------------------------------------------------------------------------
 
-### 5.3. Design Structure Matrix (DSM) Specification
+#### 2.6.7.3. Design Structure Matrix (DSM) Specification
 
 **Design Structure Matrix: Core Platform (Post-Operation 6)**
 
@@ -7632,7 +7633,7 @@ Every execution of Operation 6 produces four concrete, verifiable engineering de
 
 ------------------------------------------------------------------------
 
-### 5.4. Architectural Decision Record: Boundary & Coupling Contract (`DEC-DEP-*`)
+#### 2.6.7.4. Architectural Decision Record: Boundary & Coupling Contract (`DEC-DEP-*`)
 
 ``` markdown
 # Architectural Decision Record: DEC-DEP-04
@@ -7655,7 +7656,7 @@ The billing service currently executes direct cross-database SQL queries against
 
 ------------------------------------------------------------------------
 
-## 6. Stop Conditions & Coupling Minimization Criteria
+### 2.6.8. Stop Conditions & Coupling Minimization Criteria
 
 An engineer or automated software agent must terminate Operation 6 when and only when all of the following formal criteria are satisfied:
 
@@ -7680,7 +7681,7 @@ An engineer or automated software agent must terminate Operation 6 when and only
 
 ------------------------------------------------------------------------
 
-## 7. Common Mistakes & Architectural Anti-Patterns
+### 2.6.9. Common Mistakes & Architectural Anti-Patterns
 
 ``` mermaid
 graph TD
@@ -7696,37 +7697,37 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Anti-Pattern 1: The Distributed Monolith
+#### 2.6.9.1. Anti-Pattern 1: The Distributed Monolith
 
 - **Symptom**: The organization decomposes code into dozens of Git repositories and microservices, but deploys them via a single coordinated release train and connects them all to a single shared database.
 - **Why it fails**: It combines all the operational overhead and network latency of distributed systems with all the rigidity and brittle coupling of a monolith.
 - **Correction**: Merge tightly coupled services back into a well-structured modular monolith, or enforce strict database and pipeline isolation.
 
-### Anti-Pattern 2: The Entity CRUD Service Mesh
+#### 2.6.9.2. Anti-Pattern 2: The Entity CRUD Service Mesh
 
 - **Symptom**: Services are designed as thin wrappers over database tables (`UserService`, `OrderService`, `ProductService`). Any meaningful business operation requires an external orchestrator executing a massive web of cross-service REST calls.
 - **Why it fails**: High temporal coupling, extreme latency amplification, and lack of domain encapsulation (Anemic Domain Model).
 - **Correction**: Reorganize services around **Business Capabilities and Bounded Contexts** rather than relational database entities.
 
-### Anti-Pattern 3: The "Common-Utils" Junk Drawer Library
+#### 2.6.9.3. Anti-Pattern 3: The "Common-Utils" Junk Drawer Library
 
 - **Symptom**: A single shared package (`company-common` or `shared-utils`) containing string helpers, database connection logic, auth middleware, and shared domain models, imported by every service in the enterprise.
 - **Why it fails**: Maximum Afferent Coupling ($C_a \gg 50, I \approx 0, A \approx 0 \implies D \to 1.0$). A bug fix or version bump in a utility function forces universal recompilation and redeployment across the enterprise.
 - **Correction**: Break the junk drawer into micro-libraries, inline trivial 5-line helpers, and isolate domain models into their respective bounded contexts.
 
-### Anti-Pattern 4: Leaky Domain Models & Transitive DTO Bleed
+#### 2.6.9.4. Anti-Pattern 4: Leaky Domain Models & Transitive DTO Bleed
 
 - **Symptom**: Exposing internal database ORM entities (for example, Hibernate/TypeORM classes) directly as API responses to external clients.
 - **Why it fails**: Modifying an internal database column immediately breaks external API consumers, binding database storage structure directly to public contracts.
 - **Correction**: Enforce strict separation between internal domain entities, persistence entities, and external API Data Transfer Objects (DTOs).
 
-### Anti-Pattern 5: Fake Temporal Decoupling
+#### 2.6.9.5. Anti-Pattern 5: Fake Temporal Decoupling
 
 - **Symptom**: Replacing a synchronous HTTP call with a message queue, but having the sender immediately block and wait for a correlated reply event on a response queue before returning a response to the user.
 - **Why it fails**: It retains 100% of synchronous temporal coupling while adding the complexity, latency, and failure modes of a distributed message broker.
 - **Correction**: True asynchronous handling (return `202 Accepted` with a tracking URL) or direct synchronous RPC with explicit circuit breaking.
 
-### Anti-Pattern 6: Cargo-Cult Microservices
+#### 2.6.9.6. Anti-Pattern 6: Cargo-Cult Microservices
 
 - **Symptom**: Splitting a system across network boundaries because "microservices are best practice," without understanding domain boundaries or transactional invariants.
 - **Why it fails**: Introduces distributed transaction nightmares (2PC, complex Sagas) where an in-process ACID transaction was entirely sufficient.
@@ -7734,9 +7735,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-## Operation 7. Understand System Behavior Over Time and Under Load
+## 2.7. Operation 7. Understand System Behavior Over Time and Under Load
 
-### Failure First: The Retry Policy That Outlived the Outage
+### 2.7.1. Failure First: The Retry Policy That Outlived the Outage
 
 A database slows for 30 seconds. Each timed-out request retries three times with synchronized exponential backoff, filling the worker queue and connection pool. The database recovers, but accumulated requests and retries keep utilization above saturation for another 40 minutes. The system is technically healthy and operationally unable to recover.
 
@@ -7747,7 +7748,7 @@ A database slows for 30 seconds. Each timed-out request retries three times with
 
 Humans miss dynamics because operational evidence is fragmented over time; agents miss dynamics because execution context is absent from the text. Improve temporal observability for people and provide explicit workload models plus executable simulation for agents.
 
-#### Formal Concept → Engineering Meaning
+#### 2.7.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -7756,11 +7757,11 @@ Humans miss dynamics because operational evidence is fragmented over time; agent
 | Reinforcing feedback loop | A change produces effects that amplify the original change. | Slow responses cause retries; retries add load; added load causes slower responses. Trace counters should show retry traffic rising with latency. |
 | Metastability | A self-sustaining degraded state that persists after the initiating disturbance ends. | Database latency returns to normal but useful throughput does not because the retry/queue state keeps the service saturated. |
 
-## Epistemic Purpose & Main Question
+### 2.7.2. Epistemic Purpose & Main Question
 
-### The Epistemic Role of Dynamic Modeling
+#### 2.7.2.1. The Epistemic Role of Dynamic Modeling
 
-In the Ariadne software reasoning layer, **Operation 7: Understand System Behavior Over Time and Under Load** governs the temporal, stateful, and non-linear physical realities of executing software systems. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes behavioral contracts, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses structural contradictions, and [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) defines static dependency topology, Operation 7 resolves **Dynamic and Temporal Uncertainty** ($U_{\text{dyn}}$).
+In the Ariadne software reasoning layer, **Operation 7: Understand System Behavior Over Time and Under Load** governs the temporal, stateful, and non-linear physical realities of executing software systems. While [Operation 1](#21-operation-1-frame-and-model-the-software-problem) establishes behavioral contracts, [Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction) diagnoses structural contradictions, and [Operation 6](#26-operation-6-arrange-dependencies-and-change-boundaries) defines static dependency topology, Operation 7 resolves **Dynamic and Temporal Uncertainty** ($U_{\text{dyn}}$).
 
 ``` mermaid
 flowchart TD
@@ -7809,7 +7810,7 @@ Operation 7 eliminates dynamic blindness. It transforms static designs into **st
 
 ------------------------------------------------------------------------
 
-### Main Question
+#### 2.7.2.2. Main Question
 
 > **How will the system behave under continuous repetition, resource accumulation, variable latency, extreme scale, and partial failure over time?**
 
@@ -7822,7 +7823,7 @@ When evaluating an architecture or diagnosing an incident, an engineer must move
 
 ------------------------------------------------------------------------
 
-### Static vs. Dynamic Thinking in Software Architecture
+#### 2.7.2.3. Static vs. Dynamic Thinking in Software Architecture
 
 **STATIC VS. DYNAMIC PARADIGMS**
 
@@ -7841,7 +7842,7 @@ When evaluating an architecture or diagnosing an incident, an engineer must move
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.7.3. Theoretical Grounding
 
 Operation 7 synthesizes seven decades of systems dynamics, queueing theory, distributed systems principles, and empirical site reliability engineering into an operational calculus.
 
@@ -7900,7 +7901,7 @@ classDiagram
 
 ------------------------------------------------------------------------
 
-### 1.1. Donella Meadows: Stocks, Flows, Delays, and Use Points (2008)
+#### 2.7.3.1. Donella Meadows: Stocks, Flows, Delays, and Use Points (2008)
 
 In [*Thinking in Systems: A Primer* (Meadows, 2008, Chelsea Green Publishing)](https://www.chelseagreen.com/product/thinking-in-systems/), Donella H. Meadows established the foundational grammar of dynamic systems:
 
@@ -7918,7 +7919,7 @@ In [*Thinking in Systems: A Primer* (Meadows, 2008, Chelsea Green Publishing)](h
 
 ------------------------------------------------------------------------
 
-### 1.2. John D. Sterman: System Dynamics, Feedback Loops, and Nonlinearity (2000)
+#### 2.7.3.2. John D. Sterman: System Dynamics, Feedback Loops, and Nonlinearity (2000)
 
 In [*Business Dynamics: Systems Thinking and Modeling for a Complex World* (Sterman, 2000, McGraw-Hill)](https://www.mheducation.com/highered/product/business-dynamics-systems-thinking-modeling-complex-world-sterman/M9780072389158.html), John D. Sterman formalized the mathematical simulation of feedback systems and introduced **Causal Loop Diagrams (CLD)**:
 
@@ -7944,7 +7945,7 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### 1.3. John D. C. Little: Little's Law and Invariant Flow Relations (1961)
+#### 2.7.3.3. John D. C. Little: Little's Law and Invariant Flow Relations (1961)
 
 In [*A Proof for the Queuing Formula: $L = \lambda W$* (Little, 1961, Operations Research, DOI: 10.1287/opre.9.3.383)](https://doi.org/10.1287/opre.9.3.383), John D. C. Little proved the most fundamental invariant theorem of queueing theory:
 
@@ -7972,7 +7973,7 @@ Where:
 
 ------------------------------------------------------------------------
 
-### 1.4. Leonard Kleinrock: Queuing Systems and the Non-Linear Utilization Cliff (1975)
+#### 2.7.3.4. Leonard Kleinrock: Queuing Systems and the Non-Linear Utilization Cliff (1975)
 
 In [*Queueing Systems, Volume 1: Theory* (Kleinrock, 1975, Wiley)](https://www.wiley.com/en-us/Queueing+Systems%2C+Volume+1%3A+Theory-p-9780471491101), Leonard Kleinrock established the mathematical relationship between resource utilization ($\rho$) and response time in stochastic systems.
 
@@ -8003,7 +8004,7 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### 1.5. Nathan Bronson et al.: Metastable Failures in Distributed Systems (2021)
+#### 2.7.3.5. Nathan Bronson et al.: Metastable Failures in Distributed Systems (2021)
 
 In [*Metastable Failures in Distributed Systems* (Bronson et al., 2021, ACM HotOS, DOI: 10.1145/3458336.3465286)](https://doi.org/10.1145/3458336.3465286), the authors formalized why large-scale distributed architectures suffer catastrophic outages that **persist long after the initial root cause has disappeared**:
 
@@ -8045,7 +8046,7 @@ stateDiagram-v2
 
 ------------------------------------------------------------------------
 
-### 1.6. Michael T. Nygard: Stability Patterns and Cascading Failure Arresters (2018)
+#### 2.7.3.6. Michael T. Nygard: Stability Patterns and Cascading Failure Arresters (2018)
 
 In [*Release It! Design and Deploy Production-Ready Software*, 2nd ed. (Nygard, 2018, Pragmatic Bookshelf)](https://pragprog.com/titles/mnee2/release-it-second-edition/), Michael Nygard established the core design patterns for dynamic fault containment:
 
@@ -8056,7 +8057,7 @@ In [*Release It! Design and Deploy Production-Ready Software*, 2nd ed. (Nygard, 
 
 ------------------------------------------------------------------------
 
-### 1.7. Leslie Lamport: Logical Clocks, Partial Ordering, and Causality in Distributed Time (1978)
+#### 2.7.3.7. Leslie Lamport: Logical Clocks, Partial Ordering, and Causality in Distributed Time (1978)
 
 In [*Time, Clocks, and the Ordering of Events in a Distributed System* (Lamport, 1978, CACM, DOI: 10.1145/359545.359563)](https://dl.acm.org/doi/10.1145/359545.359563), Leslie Lamport proved that in distributed software systems, physical time cannot guarantee event ordering due to clock drift and relativistic network latencies.
 
@@ -8071,7 +8072,7 @@ In dynamic modeling, Lamport ordering is essential for understanding **transient
 
 ------------------------------------------------------------------------
 
-## 2. Detailed Breakdown of the Four Techniques
+### 2.7.4. Detailed Breakdown of the Four Techniques
 
 ``` mermaid
 flowchart TD
@@ -8108,11 +8109,11 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 2.1. Technique 7.1: Model Accumulations, Flows, and Throughput
+#### 2.7.4.1. Technique 7.1: Model Accumulations, Flows, and Throughput
 
 Every software runtime is a network of interconnected **reservoirs (stocks)** and **pipelines (flows)**.
 
-#### 1. The Fundamental Stock Differential Equation
+##### 2.7.4.1.1. The Fundamental Stock Differential Equation
 
 For any resource stock $S(t)$ with finite buffer capacity $S_{\max}$:
 
@@ -8126,7 +8127,7 @@ Where:
 - $\mu(t, S(t))$ is the instantaneous service rate (outflow), which frequently **degrades** as $S(t)$ increases due to lock contention, cache thrashing, or garbage collection overhead.
 - When $S(t) = S_{\max}$, incoming requests are either dropped (Drop-Tail), rejected with backpressure (`429 Too Many Requests` / `503 Service Unavailable`), or block the upstream thread.
 
-#### 2. The Software Stock Catalog
+##### 2.7.4.1.2. The Software Stock Catalog
 
 When executing Technique 7.1, an engineer must audit and map every physical stock in the execution path:
 
@@ -8140,7 +8141,7 @@ When executing Technique 7.1, an engineer must audit and map every physical stoc
 | **DB Lock Table** | Txns requesting row locks | Txns releasing row locks | DB shared memory / timeout | Deadlock detection; Txn timeouts |
 | **Write-Ahead Log (WAL)** | Disk write IOPS | Background fsync/flush rate | NVMe IOPS / Disk storage | Transaction stall; Disk exhaustion |
 
-#### 3. Backpressure Mechanics
+##### 2.7.4.1.3. Backpressure Mechanics
 
 When $\text{Inflow} > \text{Outflow}$, an unbounded queue does not solve the problem—it merely delays failure while consuming memory and increasing tail latency. Robust architectures implement **active backpressure**:
 
@@ -8167,7 +8168,7 @@ class BoundedIngestPipeline<T> {
 
 ------------------------------------------------------------------------
 
-### 2.2. Technique 7.2: Model Feedback Loops & Nonlinear Resonances
+#### 2.7.4.2. Technique 7.2: Model Feedback Loops & Nonlinear Resonances
 
 Nonlinear feedback loops convert transient, minor fluctuations into catastrophic system failures.
 
@@ -8201,7 +8202,7 @@ flowchart TD
     end
 ```
 
-#### 1. Formal Model of a Retry Storm
+##### 2.7.4.2.1. Formal Model of a Retry Storm
 
 Let $R_0$ be the base request arrival rate. Let $p_e$ be the error/timeout probability. If clients retry up to $k$ times without backoff:
 
@@ -8209,7 +8210,7 @@ $$\lambda_{\text{total}} = R_0 \cdot \sum_{i=0}^k (p_e)^i = R_0 \cdot \frac{1 - 
 
 If service latency $W(t)$ is a function of total arrival rate $\lambda_{\text{total}}$, and $p_e = \mathbb{P}(W(t) > T_{\text{timeout}})$, then as $\lambda$ increases, $p_e \to 1.0$, and total load explodes to $(k+1) \cdot R_0$. A backend designed for $10,000\text{ req/s}$ suddenly receives $40,000\text{ req/s}$ exactly when it is least able to handle it.
 
-#### 2. Stabilizing Feedback Loops: Exponential Backoff with Full Jitter
+##### 2.7.4.2.2. Stabilizing Feedback Loops: Exponential Backoff with Full Jitter
 
 To break Reinforcing Loop $R_1$, clients must implement **Decorrelated Jittered Backoff**:
 
@@ -8240,9 +8241,9 @@ async function executeWithJitteredBackoff<T>(
 
 ------------------------------------------------------------------------
 
-### 2.3. Technique 7.3: Account for Latencies, Ordering, and Transient Phases
+#### 2.7.4.3. Technique 7.3: Account for Latencies, Ordering, and Transient Phases
 
-#### 1. Tail Latency Amplification in Distributed Microservices
+##### 2.7.4.3.1. Tail Latency Amplification in Distributed Microservices
 
 In a microservice architecture where a frontend API gateway fans out a request to $N$ independent downstream services in parallel, the total request latency is bounded by the **slowest** component:
 
@@ -8264,7 +8265,7 @@ $$P(\text{Slow}) = 1 - (1 - 0.01)^N$$
 
 > **Implication:** At $N=100$, nearly two-thirds of all user requests experience tail latency degradation, even though $99\%$ of all individual service calls are fast!
 
-#### 2. Transient Multi-Version Deployment Regimes
+##### 2.7.4.3.2. Transient Multi-Version Deployment Regimes
 
 During a rolling upgrade, the system enters a hybrid state that lasts from 10 minutes to several hours:
 
@@ -8298,7 +8299,7 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### 2.4. Technique 7.4: Account for Evolution, Adaptation, and Capacity Limits
+#### 2.7.4.4. Technique 7.4: Account for Evolution, Adaptation, and Capacity Limits
 
 A system is not static over months and years of operation. System dynamics change as data grows, usage patterns adapt, and bottlenecks shift.
 
@@ -8312,13 +8313,13 @@ flowchart TD
     end
 ```
 
-#### 1. Long-Term Data Accumulations & Performance Degradation
+##### 2.7.4.4.1. Long-Term Data Accumulations & Performance Degradation
 
 - **PostgreSQL MVCC Tombstones:** High write/update volume creates dead tuples. If `VACUUM` cannot keep pace with inflow $\lambda_{\text{write}}$, table bloat degrades index scan performance from $O(\log N)$ to $O(N)$ sequential page reads.
 - **Kafka Log Segment Retention & Consumer Offsets:** Unconsumed partitions accumulate on broker disks until disk saturation trips broker read-only modes.
 - **Index Depth Growth:** B-Tree depth increases from 3 to 4 levels, turning 10-microsecond in-memory index traversals into multi-millisecond storage reads.
 
-#### 2. The Capacity Clock Calculus
+##### 2.7.4.4.2. The Capacity Clock Calculus
 
 For every finite resource (disk space, auto-increment integer IDs, connection limits), calculate the **Time to Exhaustion ($T_{\text{exhaust}}$)**:
 
@@ -8328,13 +8329,13 @@ If an audit table consumes $50\text{ GB/month}$ on a $500\text{ GB}$ volume with
 
 ------------------------------------------------------------------------
 
-## 3. Practical Case Studies
+### 2.7.5. Practical Case Studies
 
 ------------------------------------------------------------------------
 
-### 3.1. Case Study 1: Message Queue Buildup, Poison Pills, and Reactive Backpressure in Payment Settlement
+#### 2.7.5.1. Case Study 1: Message Queue Buildup, Poison Pills, and Reactive Backpressure in Payment Settlement
 
-#### Context & Architecture
+##### 2.7.5.1.1. Context & Architecture
 
 A global fintech platform processes credit card settlements via a distributed event pipeline. The ingestion tier receives authorization events from payment gateways at peak rates of $\lambda = 15,000\text{ events/s}$ and publishes them to a Kafka cluster. A fleet of 50 settlement worker nodes consumes events, validates merchant ledgers, and writes settlement records to a distributed SQL database.
 
@@ -8346,7 +8347,7 @@ flowchart LR
     Workers --> DB[("Distributed SQL Ledger<br/>(Saturates at 13,000 write ops/s)")]
 ```
 
-#### The Dynamic Failure Cascade
+##### 2.7.5.1.2. The Dynamic Failure Cascade
 
 1.  **The Inflow Surge:** During Black Friday, ingestion traffic surged from $8,000\text{ req/s}$ to $\lambda = 18,000\text{ req/s}$.
 2.  **The Accumulation:** Worker processing capacity was capped at $\mu = 12,000\text{ req/s}$ due to database transaction lock latency. The accumulation rate in Kafka was: $$\frac{dS}{dt} = 18,000 - 12,000 = 6,000\text{ messages/second} = 360,000\text{ messages/minute}$$
@@ -8371,7 +8372,7 @@ stateDiagram-v2
     PoisonLoop --> TotalLagExplosion: Outflow drops to 150 req/s
 ```
 
-#### Applying Operation 7
+##### 2.7.5.1.3. Applying Operation 7
 
 The team applied **Technique 7.1 (Flow Modeling & Bounded Queues)** and **Technique 7.2 (Feedback Loop Arresters)**:
 
@@ -8416,16 +8417,16 @@ class ConsumerPipeline {
 declare function isTransient(error: unknown): boolean;
 ```
 
-#### Outcome
+##### 2.7.5.1.4. Outcome
 
 - Kafka consumer lag during peak events remained bounded below $50,000$ messages ($< 3.5\text{ seconds}$ residence time).
 - Poison pill records isolated within $2\text{ milliseconds}$; zero partition stalling.
 
 ------------------------------------------------------------------------
 
-### 3.2. Case Study 2: Metastable Retry Storm & Cold Cache Stampede in a Tier-1 Social Graph Service
+#### 2.7.5.2. Case Study 2: Metastable Retry Storm & Cold Cache Stampede in a Tier-1 Social Graph Service
 
-#### Context & Architecture
+##### 2.7.5.2.1. Context & Architecture
 
 A social networking platform serves user profile and friendship graph reads at $800,000\text{ queries/s}$. The read path employs a two-tier architecture: an in-memory Redis cluster ($128\text{ nodes}$) caching hot user profiles, backed by a distributed document database (Cassandra). Under steady-state conditions, the cache hit rate is $98.5\%$, meaning Cassandra receives only $12,000\text{ read queries/s}$ ($1.5\%$ of total traffic).
 
@@ -8436,7 +8437,7 @@ flowchart LR
     Cache -->|1.5% Misses: 12,000 req/s| DB[("Cassandra Cluster (64 Nodes)<br/>(Max Capacity: 35,000 req/s)")]
 ```
 
-#### The Metastable Collapse
+##### 2.7.5.2.2. The Metastable Collapse
 
 1.  **The Trigger:** A 20-second network switch flap partitioned 32 of the 128 Redis nodes from the API Gateway tier.
 2.  **The Cache Miss Shock:** Read requests routed to the partitioned nodes failed to read from cache, triggering immediate fallback to Cassandra. The miss rate jumped from $1.5\%$ to $26\%$, causing read inflow to Cassandra to surge from $12,000\text{ req/s}$ to: $$\lambda_{\text{DB}} = 800,000 \times 0.26 = 208,000\text{ req/s}$$
@@ -8456,7 +8457,7 @@ flowchart LR
 | T3 | Client Retries Maximize | 5.0% | 2.4M req/s | 100% Outage (504s) |
 | T4 | Engineers Restart App Servers | 0.0% | 2.4M req/s | Immediate Re-collapse |
 
-#### Applying Operation 7
+##### 2.7.5.2.3. Applying Operation 7
 
 The engineering team recognized that attempting to restart services or increase database capacity would not escape the metastable attractor. They executed a formal **Quench & Stabilization Protocol**:
 
@@ -8474,7 +8475,7 @@ flowchart TD
     end
 ```
 
-#### 1. Probabilistic Early Cache Expiration ($X\text{-Fetch}$)
+##### 2.7.5.2.4. Probabilistic Early Cache Expiration ($X\text{-Fetch}$)
 
 To prevent cache stampedes when hot keys expire, the gateway calculates an early refresh probability based on remaining TTL and computation time:
 
@@ -8507,16 +8508,16 @@ class XFetchCache<T> {
 }
 ```
 
-#### Outcome
+##### 2.7.5.2.5. Outcome
 
 - Zero cache stampedes during subsequent node restarts.
 - When chaos testing injected complete Redis cluster reboots, Cassandra load peaked at only $22,000\text{ req/s}$ ($63\%$ of capacity); the system remained completely within its healthy equilibrium.
 
 ------------------------------------------------------------------------
 
-### 3.3. Case Study 3: Rolling Deployment Transient States & Cross-Version Serialization Drift
+#### 2.7.5.3. Case Study 3: Rolling Deployment Transient States & Cross-Version Serialization Drift
 
-#### Context & Architecture
+##### 2.7.5.3.1. Context & Architecture
 
 An e-commerce order management system runs on a Kubernetes cluster with 200 pod replicas. Orders are submitted via a GraphQL gateway, processed by the order service, and serialized into a PostgreSQL JSONB column and an Apache Kafka stream for downstream fulfillment.
 
@@ -8535,14 +8536,14 @@ flowchart LR
     Pod_v1 -->|Fails Deserialization / Panic!| Crash["Pod Crash Loop (500 Errors)"]
 ```
 
-#### The Transient Phase Failure
+##### 2.7.5.3.2. The Transient Phase Failure
 
 1.  **The Code Change:** Version `v2.4.0` refactored the `shipping_address` field from a freeform string into a structured object (`{ street, city, postal_code, country_iso }`).
 2.  **The Asymmetric Write Hazard:** A user submitted an order routed to a `v2.4.0` pod. The pod wrote the new structured JSON payload into PostgreSQL.
 3.  **The Asymmetric Read Crash:** Two minutes later, the customer viewed their order history. The request was routed to a `v2.3.0` pod. The legacy code attempted to parse `shipping_address` as a simple string, threw an unhandled `ClassCastException`, and returned an HTTP 500.
 4.  **The Kafka Poisoning Cascade:** Simultaneously, `v2.4.0` published the structured event to Kafka. The downstream inventory and shipping services—which were still running `v2.3.0`—crashed upon consuming the event, causing a complete halt in warehouse order dispatch.
 
-#### Applying Operation 7
+##### 2.7.5.3.3. Applying Operation 7
 
 The team applied **Technique 7.3 (Account for Latencies, Ordering, and Phases)** by instituting the **Multi-Version Coexistence Rule**:
 
@@ -8569,16 +8570,16 @@ function normalizedAddress(order: OrderRecord): string {
 }
 ```
 
-#### Outcome
+##### 2.7.5.3.4. Outcome
 
 - Automated continuous integration pipeline now runs **Multi-Version Canary Matrix Tests**: tests spin up $v_{\text{current}}$ and $v_{\text{next}}$ in parallel against a shared test database and verify dual-read/dual-write invariants before deployment approval.
 - Zero rolling deployment deserialization incidents across $> 1,200$ subsequent production releases.
 
 ------------------------------------------------------------------------
 
-### 3.4. Case Study 4: Database Connection Pool Starvation & Cascading Thread Pool Exhaustion
+#### 2.7.5.4. Case Study 4: Database Connection Pool Starvation & Cascading Thread Pool Exhaustion
 
-#### Context & Architecture
+##### 2.7.5.4.1. Context & Architecture
 
 A high-throughput banking API handles loan applications. The `apply_loan` endpoint performs three sequential operations:
 
@@ -8606,7 +8607,7 @@ sequenceDiagram
     API-->>User: 200 Loan Approved
 ```
 
-#### The Dynamic Failure Cascade
+##### 2.7.5.4.2. The Dynamic Failure Cascade
 
 1.  **The External Latency Hiccup:** The credit bureau experienced an internal network slowdown, increasing its response time from $80\text{ ms}$ to $4,500\text{ ms}$ ($56\times$ increase).
 2.  **The Little's Law Concurrency Explosion:** Inflow traffic remained constant at $\lambda = 200\text{ req/s}$. By Little's Law ($L = \lambda \cdot W$), the required number of concurrent open transactions in the service exploded: $$L_{\text{normal}} = 200 \times 0.095 = 19\text{ concurrent DB connections}$$ $$L_{\text{slow}} = 200 \times 4.515 = 903\text{ concurrent DB connections}$$
@@ -8614,7 +8615,7 @@ sequenceDiagram
 4.  **Cascading Exhaustion of Unrelated Endpoints:** Unrelated lightweight endpoints (for example, `get_account_balance`, which takes $2\text{ ms}$) could not acquire a database connection. The entire banking portal stopped serving all user traffic.
 5.  **Thread Pool Exhaustion & Health Check Failure:** Incoming HTTP requests queued up in the web server worker pool, exhausting memory. The Kubernetes liveness probe (`/healthz`) timed out because all worker threads were blocked on connection pool acquisition. Kubernetes killed and restarted the pods, further exacerbating the connection storm upon reboot.
 
-#### Applying Operation 7
+##### 2.7.5.4.3. Applying Operation 7
 
 The team applied **Separation Principles across Time and Resources**:
 
@@ -8635,20 +8636,20 @@ flowchart LR
     end
 ```
 
-#### Outcome
+##### 2.7.5.4.4. Outcome
 
 - Database connection hold time decreased from $4,500\text{ ms}$ to $3.2\text{ ms}$ ($1,400\times$ improvement in connection efficiency).
 - When external credit bureau latency degraded to $10\text{ seconds}$ during chaos injection tests, account balance reads and core banking operations experienced zero latency degradation.
 
 ------------------------------------------------------------------------
 
-## 4. Operational Deliverables & Epistemic Artifacts
+### 2.7.6. Operational Deliverables & Epistemic Artifacts
 
 Every execution of Operation 7 produces four structured, verifiable dynamic deliverables:
 
 ------------------------------------------------------------------------
 
-### 4.1. The System Dynamics Map (`DYN-*`)
+#### 2.7.6.1. The System Dynamics Map (`DYN-*`)
 
 **ARIADNE SYSTEM DYNAMICS MAP (DYN-01)**
 
@@ -8664,7 +8665,7 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 ------------------------------------------------------------------------
 
-### 4.2. Stock & Flow Differential Inventory Table
+#### 2.7.6.2. Stock & Flow Differential Inventory Table
 
 ``` markdown
 # Stock & Flow Inventory: DYN-INV-03 (Payment Processing Engine)
@@ -8679,7 +8680,7 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 ------------------------------------------------------------------------
 
-### 4.3. Feedback Loop & Metastability Analysis Sheet
+#### 2.7.6.3. Feedback Loop & Metastability Analysis Sheet
 
 ``` markdown
 # Feedback Loop & Metastability Analysis: DYN-META-02
@@ -8704,7 +8705,7 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 ------------------------------------------------------------------------
 
-### 4.4. Transient Deployment & Degradation Protocol Card (`DYN-DEP-*`)
+#### 2.7.6.4. Transient Deployment & Degradation Protocol Card (`DYN-DEP-*`)
 
 ``` markdown
 # Transient Deployment Protocol: DYN-DEP-04
@@ -8725,7 +8726,7 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 ------------------------------------------------------------------------
 
-## 5. Stop Conditions & Dynamic Verification Bounds
+### 2.7.7. Stop Conditions & Dynamic Verification Bounds
 
 An engineer or automated software agent must terminate Operation 7 when and only when all five of the following formal criteria are met:
 
@@ -8748,7 +8749,7 @@ An engineer or automated software agent must terminate Operation 7 when and only
 
 ------------------------------------------------------------------------
 
-## 6. Common Mistakes & Dynamic Anti-Patterns
+### 2.7.8. Common Mistakes & Dynamic Anti-Patterns
 
 ``` mermaid
 graph TD
@@ -8764,37 +8765,37 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Anti-Pattern 1: The Unbounded In-Memory Queue
+#### 2.7.8.1. Anti-Pattern 1: The Unbounded In-Memory Queue
 
 - **Symptom**: Using unbounded channels (for example, `LinkedBlockingQueue` with no capacity limit in Java, or unbounded Go channels) to buffer incoming work.
 - **Why it fails**: Under overload ($\lambda > \mu$), the queue does not prevent failure; it consumes all heap memory, triggers severe garbage collection pauses, multiplies residence time ($W = L/\lambda$), and eventually terminates the process via an Out-of-Memory (OOM) crash.
 - **Correction**: Enforce strict bounded queue limits with active backpressure (reject or shed at the edge).
 
-### Anti-Pattern 2: The Constant-Interval Retry Loop
+#### 2.7.8.2. Anti-Pattern 2: The Constant-Interval Retry Loop
 
 - **Symptom**: Clients retry failed network calls at fixed, deterministic intervals (for example, every $500\text{ ms}$).
 - **Why it fails**: When an outage occurs, thousands of client retries synchronize into a single periodic shockwave (Thundering Herd), preventing the recovering backend from ever processing healthy requests.
 - **Correction**: Enforce **Exponential Backoff with Full Jitter** and hard retry budgets (maximum 1–2 retries).
 
-### Anti-Pattern 3: The Static Cache Capacity Assumption
+#### 2.7.8.3. Anti-Pattern 3: The Static Cache Capacity Assumption
 
 - **Symptom**: Sizing backend databases to handle only cache-miss traffic (for example, $2\%$ of load), assuming the cache will always be warm.
 - **Why it fails**: When cache nodes reboot, crash, or experience network partitions, the sudden $50\times$ surge in cache-miss traffic instantly destroys the database.
 - **Correction**: Implement probabilistic early expiration ($X\text{-Fetch}$), single-flight request coalescing, and ensure the database can shed excess read load gracefully.
 
-### Anti-Pattern 4: Average-Latency Myopia
+#### 2.7.8.4. Anti-Pattern 4: Average-Latency Myopia
 
 - **Symptom**: Designing and alerting based solely on arithmetic mean latency (for example, "average response time is $25\text{ ms}$").
 - **Why it fails**: In distributed systems with parallel fan-out, a system with a $25\text{ ms}$ average can have a $p99$ of $1,500\text{ ms}$ and a $p99.9$ of $8,000\text{ ms}$. Tail latency drives user abandonment, timeout cascades, and connection pool starvation.
 - **Correction**: Track and optimize high-percentile distributions ($p95, p99, p99.9$) using high-dynamic-range histograms (HdrHistogram).
 
-### Anti-Pattern 5: The Synchronous In-Transaction Network Call
+#### 2.7.8.5. Anti-Pattern 5: The Synchronous In-Transaction Network Call
 
 - **Symptom**: Executing third-party HTTP RPCs, email sending, or remote microservice calls inside an open relational database transaction (`BEGIN ... COMMIT`).
 - **Why it fails**: If the external service experiences a minor latency spike ($100\text{ ms} \to 3\text{ s}$), database connection hold time increases by $30\times$. Database connection pools exhaust in seconds, crashing all unrelated endpoints across the platform.
 - **Correction**: Move all remote network calls outside database transactions; use the **Transactional Outbox Pattern** for asynchronous side effects.
 
-### Anti-Pattern 6: The Blind Metric Autoscaler
+#### 2.7.8.6. Anti-Pattern 6: The Blind Metric Autoscaler
 
 - **Symptom**: Configuring Kubernetes Horizontal Pod Autoscalers (HPA) to spin up more application pods whenever CPU utilization or queue lag increases, while the underlying bottleneck is a locked database table or saturated disk.
 - **Why it fails**: Spinning up 100 new application pods creates 100 new database connection pools, multiplying lock contention and connection churn on the already dying database.
@@ -8802,9 +8803,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-## Operation 8. Determine Engineering Value and Select
+## 2.8. Operation 8. Determine Engineering Value and Select
 
-### Failure First: The Winning Score That Violated the Law
+### 2.8.1. Failure First: The Winning Score That Violated the Law
 
 Three storage candidates are scored from one to five across cost, speed, familiarity, features, and compliance. A globally replicated managed service wins 4.6 versus 4.1. It also stores personal data outside the permitted jurisdiction. The weighted sum has allowed optional benefits to compensate numerically for a non-negotiable legal constraint.
 
@@ -8815,7 +8816,7 @@ Three storage candidates are scored from one to five across cost, speed, familia
 
 Humans use numbers to rationalize; agents use numbers to complete. Human governance must expose preference ownership, while agent governance must reject unsupported quantities and preserve `UNKNOWN` rather than fabricate a score.
 
-#### Formal Concept → Engineering Meaning
+#### 2.8.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -8824,11 +8825,11 @@ Humans use numbers to rationalize; agents use numbers to complete. Human governa
 | Engineering ideality | Ratio of useful function to harmful effects plus lifecycle cost. | Count not only request throughput, but pages, mutable state, migration work, lock-in, cognitive load, and retirement cost. |
 | Expected value of information | Value of resolving uncertainty before committing. | If two viable candidates exchange rank depending on an unknown write-amplification rate, benchmark that rate before selection. |
 
-## Epistemic Purpose & Main Question
+### 2.8.2. Epistemic Purpose & Main Question
 
-### The Epistemic Role of Value Determination and Selection
+#### 2.8.2.1. The Epistemic Role of Value Determination and Selection
 
-In the Ariadne software reasoning layer, **Operation 8: Determine Engineering Value and Select** serves as the rational decision-making gateway of the engineering lifecycle. While [Operation 4](#operation-4-explore-the-space-of-architectures-and-implementations) generates structurally distinct candidate mechanisms (`CAN-*`), [Operation 5](#operation-5-expand-knowledge-and-obtain-missing-evidence) acquires empirical evidence (`EVD-*`), [Operation 6](#operation-6-arrange-dependencies-and-change-boundaries) structures boundaries and coupling, and [Operation 7](#operation-7-understand-system-behavior-over-time-and-under-load) models dynamic behavior under load, Operation 8 resolves **Value, Trade-off, and Selection Uncertainty** ($U_{\text{val}}$).
+In the Ariadne software reasoning layer, **Operation 8: Determine Engineering Value and Select** serves as the rational decision-making gateway of the engineering lifecycle. While [Operation 4](#24-operation-4-explore-the-space-of-architectures-and-implementations) generates structurally distinct candidate mechanisms (`CAN-*`), [Operation 5](#25-operation-5-expand-knowledge-and-obtain-missing-evidence) acquires empirical evidence (`EVD-*`), [Operation 6](#26-operation-6-arrange-dependencies-and-change-boundaries) structures boundaries and coupling, and [Operation 7](#27-operation-7-understand-system-behavior-over-time-and-under-load) models dynamic behavior under load, Operation 8 resolves **Value, Trade-off, and Selection Uncertainty** ($U_{\text{val}}$).
 
 ``` mermaid
 flowchart TD
@@ -8876,7 +8877,7 @@ Operation 8 provides a mathematically grounded, epistemically rigorous framework
 
 ------------------------------------------------------------------------
 
-### Main Question
+#### 2.8.2.2. Main Question
 
 > **Which viable candidate best achieves the goal when considering the full lifecycle cost of creation, modification, operation, and retirement?**
 
@@ -8885,11 +8886,11 @@ When evaluating candidate architectures or implementation strategies, an enginee
 1.  **Which candidates strictly satisfy all non-negotiable invariants and hard constraints?** (Any candidate violating a hard constraint is disqualified instantly, regardless of its other qualities).
 2.  **For the surviving viable candidates, what is the ratio of useful domain capability delivered to the total lifecycle cost and collateral harm introduced?**
 3.  **Where does each candidate lie on the multi-dimensional Pareto frontier?**
-4.  **Does the decision hinge on an unmeasured parameter?** If so, what is the Expected Value of Information (EVOI) of running a targeted spike in [Operation 5](#operation-5-expand-knowledge-and-obtain-missing-evidence) before locking the decision?
+4.  **Does the decision hinge on an unmeasured parameter?** If so, what is the Expected Value of Information (EVOI) of running a targeted spike in [Operation 5](#25-operation-5-expand-knowledge-and-obtain-missing-evidence) before locking the decision?
 
 ------------------------------------------------------------------------
 
-### The Anatomy of Software Value: The Ideality Ratio
+#### 2.8.2.3. The Anatomy of Software Value: The Ideality Ratio
 
 To evaluate software mechanisms scientifically, we adapt the classical TRIZ Law of Ideality and Suh's Axiomatic Design Information Axiom into a unified software value formulation:
 
@@ -8915,7 +8916,7 @@ An engineering choice is **optimal** not when it uses the most advanced technolo
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.8.3. Theoretical Grounding
 
 Operation 8 synthesizes foundational principles from decision theory, axiomatic design, TRIZ, software economics, bounded rationality, and empirical software engineering.
 
@@ -8968,7 +8969,7 @@ classDiagram
 
 ------------------------------------------------------------------------
 
-### 1.1. Genrich Altshuller: The Law of Increasing Ideality and the Ideal Final Result (1984)
+#### 2.8.3.1. Genrich Altshuller: The Law of Increasing Ideality and the Ideal Final Result (1984)
 
 In [*Creativity as an Exact Science: The Theory of the Solution of Inventive Problems* (Gordon and Breach, 1984)](https://en.wikipedia.org/wiki/TRIZ), Genrich Altshuller formulated the fundamental evolutionary law of technical systems: **The Law of Increasing Ideality**.
 
@@ -8990,7 +8991,7 @@ When selecting candidate mechanisms, **every new component, microservice, backgr
 
 ------------------------------------------------------------------------
 
-### 1.2. Nam Pyo Suh: The Information Axiom and Information Content (1990)
+#### 2.8.3.2. Nam Pyo Suh: The Information Axiom and Information Content (1990)
 
 In [*The Principles of Design* (Oxford University Press, 1990)](https://global.oup.com/academic/product/the-principles-of-design-9780195043457), Nam Pyo Suh established the two universal axioms of engineering design:
 
@@ -9024,11 +9025,11 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### 1.3. Ralph L. Keeney & Howard Raiffa: Multi-Attribute Utility Theory (1976 / 1993)
+#### 2.8.3.3. Ralph L. Keeney & Howard Raiffa: Multi-Attribute Utility Theory (1976 / 1993)
 
 In [*Decisions with Multiple Objectives: Preferences and Value Trade-Offs* (Cambridge University Press, 1993 / Wiley, 1976)](https://en.wikipedia.org/wiki/Multi-criteria_decision_analysis), Ralph L. Keeney and Howard Raiffa formalized the mathematical foundations of decision analysis under multiple competing objectives.
 
-#### Non-Compensatory vs. Compensatory Decision Models
+##### 2.8.3.3.1. Non-Compensatory vs. Compensatory Decision Models
 
 Keeney and Raiffa proved that multi-criteria decisions must strictly distinguish between:
 
@@ -9039,7 +9040,7 @@ $$U(x_1, x_2, \dots, x_n) = \sum_{i=1}^n w_i \cdot u_i(x_i) \quad \text{subject 
 
 Where $u_i(x_i)$ is the single-attribute utility function capturing non-linear risk preferences (for example, diminishing marginal utility of latency reductions below 5ms).
 
-#### The Pareto Dominance Criterion
+##### 2.8.3.3.2. The Pareto Dominance Criterion
 
 Let candidate $A$ and candidate $B$ be evaluated across $n$ preference attributes $\vec{v} = \langle v_1, v_2, \dots, v_n \rangle$ where higher values are preferred.
 
@@ -9064,7 +9065,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 1.4. Herbert A. Simon: Bounded Rationality and Satisficing (1956 / 1969)
+#### 2.8.3.4. Herbert A. Simon: Bounded Rationality and Satisficing (1956 / 1969)
 
 In [*Rational Choice and the Structure of the Environment* (Psychological Review, 1956)](https://doi.org/10.1037/h0042769) and [*The Sciences of the Artificial* (MIT Press, 1969)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/), Herbert A. Simon dismantled the myth of global optimization in complex systems:
 
@@ -9080,11 +9081,11 @@ In [*Rational Choice and the Structure of the Environment* (Psychological Review
 
 ------------------------------------------------------------------------
 
-### 1.5. Barry W. Boehm: Software Engineering Economics and Lifecycle TCO (1981)
+#### 2.8.3.5. Barry W. Boehm: Software Engineering Economics and Lifecycle TCO (1981)
 
 In [*Software Engineering Economics* (Prentice-Hall, 1981)](https://dl.acm.org/doi/book/10.5555/539885), Barry W. Boehm established the quantitative foundations of software cost estimation and lifecycle economics:
 
-#### The 70/30 Maintenance Rule
+##### 2.8.3.5.1. The 70/30 Maintenance Rule
 
 Boehm demonstrated that **60% to 80% of the Total Cost of Ownership (TCO) of software is incurred after the initial release**, during the maintenance, evolution, and operational phases.
 
@@ -9101,7 +9102,7 @@ Boehm demonstrated that **60% to 80% of the Total Cost of Ownership (TCO) of sof
 
 ------------------------------------------------------------------------
 
-### 1.6. Nicole Forsgren, Jez Humble & Gene Kim: Accelerate and DORA Metrics (2018)
+#### 2.8.3.6. Nicole Forsgren, Jez Humble & Gene Kim: Accelerate and DORA Metrics (2018)
 
 In [*Accelerate: The Science of Lean Software and DevOps* (IT Revolution, 2018)](https://itrevolution.com/book/accelerate/), Nicole Forsgren, Jez Humble, and Gene Kim empirically validated the relationship between architectural design and organizational performance across thousands of engineering organizations.
 
@@ -9117,7 +9118,7 @@ Key findings grounded in statistical rigor:
 
 ------------------------------------------------------------------------
 
-## 2. Useful Formulation of Ideality in Software
+### 2.8.4. Useful Formulation of Ideality in Software
 
 Building upon Altshuller and Suh, we formulate the mathematical calculus of **Software Ideality**:
 
@@ -9156,7 +9157,7 @@ graph LR
 
 ------------------------------------------------------------------------
 
-### 2.1. The Mechanism Cost Vector ($\vec{C}$)
+#### 2.8.4.1. The Mechanism Cost Vector ($\vec{C}$)
 
 In software systems, the cost of an architectural mechanism is not simply the price of cloud hosting. The cost of a mechanism is an 6-dimensional vector:
 
@@ -9187,7 +9188,7 @@ $$\vec{C} = \left\langle C_{\text{code}},\; C_{\text{state}},\; C_{\text{infra}}
 
 ------------------------------------------------------------------------
 
-### 2.2. The Three Levels of Software Ideality
+#### 2.8.4.2. The Three Levels of Software Ideality
 
     Level 1: Hardware & Infrastructure Addition (Lowest Ideality)
     - Problem: "Database queries are slow."
@@ -9206,11 +9207,11 @@ $$\vec{C} = \left\langle C_{\text{code}},\; C_{\text{state}},\; C_{\text{infra}}
 
 ------------------------------------------------------------------------
 
-## 3. Four Detailed Techniques of Operation 8
+### 2.8.5. Four Detailed Techniques of Operation 8
 
 ------------------------------------------------------------------------
 
-### Technique 8.1. Separate Hard Constraints from Preferences
+#### 2.8.5.1. Technique 8.1. Separate Hard Constraints from Preferences
 
 The most catastrophic error in software selection is **compensatory averaging of non-negotiable invariants**.
 
@@ -9230,9 +9231,9 @@ flowchart TD
     TCO --> Final["Final Candidate Selection / EVOI Experiment Gate"]
 ```
 
-#### The Lexicographic Invariant Filter
+##### 2.8.5.1.1. The Lexicographic Invariant Filter
 
-Let $\mathcal{I} = \{ INV_1, INV_2, \dots, INV_k \}$ be the set of formal hard invariants established in [Operation 1](#operation-1-frame-and-model-the-software-problem).
+Let $\mathcal{I} = \{ INV_1, INV_2, \dots, INV_k \}$ be the set of formal hard invariants established in [Operation 1](#21-operation-1-frame-and-model-the-software-problem).
 
 For each candidate $CAN_i$:
 
@@ -9243,7 +9244,7 @@ Where $\mathbb{I}(\cdot)$ is the indicator function:
 - If $\text{Viability}(CAN_i) = 0$, $CAN_i$ is instantly pruned from consideration.
 - Only candidates with $\text{Viability}(CAN_i) = 1$ proceed to preference optimization and Pareto ranking.
 
-#### Invariant vs. Preference Taxonomy in Software
+##### 2.8.5.1.2. Invariant vs. Preference Taxonomy in Software
 
 **INVARIANTS VS. PREFERENCES**
 
@@ -9257,11 +9258,11 @@ Where $\mathbb{I}(\cdot)$ is the indicator function:
 
 ------------------------------------------------------------------------
 
-### Technique 8.2. Compare Useful Effect Against Mechanism Cost
+#### 2.8.5.2. Technique 8.2. Compare Useful Effect Against Mechanism Cost
 
 Once viable candidates are isolated, their **Total Cost of Ownership (TCO)** must be computed across their projected operational lifecycle (typically 3 to 5 years).
 
-#### The TCO Cost Model Formulation
+##### 2.8.5.2.1. The TCO Cost Model Formulation
 
 $$\text{TCO}(CAN) = C_{\text{dev}}(CAN) + C_{\text{trans}}(CAN) + \sum_{t=1}^T \frac{C_{\text{infra}}(t) + C_{\text{ops}}(t) + C_{\text{maint}}(t)}{(1 + r)^t}$$
 
@@ -9274,7 +9275,7 @@ Where:
 - $C_{\text{maint}}(t)$: Software maintenance labor (dependency upgrades, bug fixes, performance tuning) in year $t$.
 - $r$: Discount rate (cost of capital).
 
-#### The Mechanism Cost Matrix (`COST-MATRIX-*`)
+##### 2.8.5.2.2. The Mechanism Cost Matrix (`COST-MATRIX-*`)
 
 **LIFECYCLE COST COMPARISON**
 
@@ -9292,7 +9293,7 @@ Where:
 
 ------------------------------------------------------------------------
 
-### Technique 8.3. Account for Losses, Harm, and Blast Radius
+#### 2.8.5.3. Technique 8.3. Account for Losses, Harm, and Blast Radius
 
 Every software mechanism brings collateral damage—undesirable side effects that degrade the surrounding system.
 
@@ -9317,7 +9318,7 @@ mindmap
       Framework-Specific Annotations
 ```
 
-#### Quantifying the Blast Radius Metric ($B_R$)
+##### 2.8.5.3.1. Quantifying the Blast Radius Metric ($B_R$)
 
 Let $N_{\text{total}}$ be the total number of business capabilities or microservices in the system. Let $N_{\text{affected}}(M)$ be the number of capabilities that experience downtime, latency degradation, or data inconsistency if mechanism $M$ fails:
 
@@ -9326,7 +9327,7 @@ $$B_R(M) = \frac{N_{\text{affected}}(M)}{N_{\text{total}}} \in [0, 1]$$
 - **$B_R \approx 0.0$ (Isolated)**: Failure of the recommendation caching layer does not disrupt the checkout flow.
 - **$B_R \to 1.0$ (Systemic)**: A shared monolithic relational database or distributed consensus coordinator failure halts 100% of enterprise operations.
 
-#### The Cognitive Load Score ($C_{\text{cog}}$)
+##### 2.8.5.3.2. The Cognitive Load Score ($C_{\text{cog}}$)
 
 Based on Sweller's Cognitive Load Theory and Team Topologies (Skelton & Pais, 2019):
 
@@ -9339,7 +9340,7 @@ In software selection:
 
 ------------------------------------------------------------------------
 
-### Technique 8.4. Decide Under Explicit Uncertainty
+#### 2.8.5.4. Technique 8.4. Decide Under Explicit Uncertainty
 
 The most dangerous anti-pattern in software architecture is **pseudo-precision**: assigning arbitrary numbers to unmeasured properties (for example, scoring "Scalability: 8.5/10" and "Maintainability: 7.2/10") to create an illusion of mathematical objectivity.
 
@@ -9353,7 +9354,7 @@ The most dangerous anti-pattern in software architecture is **pseudo-precision**
 > - Unknown properties are explicitly flagged as `UNK-*` with their Decision Significance.
 > - If two candidates overlap within their uncertainty bounds, trigger EVOI Experiment Gate.
 
-#### The Expected Value of Information (EVOI) Gate
+##### 2.8.5.4.1. The Expected Value of Information (EVOI) Gate
 
 If Candidate A and Candidate B are both on the Pareto frontier, and Candidate A is superior if network latency $L < 15\text{ms}$ while Candidate B is superior if $L \ge 15\text{ms}$:
 
@@ -9371,7 +9372,7 @@ flowchart TD
     TriggerOp5 --> ReturnOp8["Update Evidence (EVD-*) & Re-Evaluate Op 8"]
 ```
 
-#### Type 1 vs. Type 2 Decisions (Reversibility Principle)
+##### 2.8.5.4.2. Type 1 vs. Type 2 Decisions (Reversibility Principle)
 
 Following Jeff Bezos's classic architectural taxonomy:
 
@@ -9380,29 +9381,29 @@ Following Jeff Bezos's classic architectural taxonomy:
 
 ------------------------------------------------------------------------
 
-## 4. In-Depth Practical Case Studies
+### 2.8.6. In-Depth Practical Case Studies
 
 ------------------------------------------------------------------------
 
-### Case Study 1: Distributed Storage Selection for High-Throughput Fintech Ledger
+#### 2.8.6.1. Case Study 1: Distributed Storage Selection for High-Throughput Fintech Ledger
 
-#### 1. Context and Problem State
+##### 2.8.6.1.1. Context and Problem State
 
 A global payment platform processes $50,000\text{ write transactions/sec}$ at peak. The ledger must record immutable financial debits and credits across 10 million merchant accounts.
 
-#### 2. Hard Invariants (`INV-*`)
+##### 2.8.6.1.2. Hard Invariants (`INV-*`)
 
 - `INV-01 (Strict Serializability)`: Zero balance overdrafts under network partitions ($P_s = 1.0$).
 - `INV-02 (Zero Data Loss)`: Recovery Point Objective $\text{RPO} = 0$ (Multi-region synchronous persistence).
 - `INV-03 (Latency)`: p99 write latency $\le 30\text{ ms}$ within a geographic region.
 
-#### 3. Candidate Mechanisms Explored (`CAN-*`)
+##### 2.8.6.1.3. Candidate Mechanisms Explored (`CAN-*`)
 
 - `CAN-01 (Distributed SQL Cluster)`: Deploy a 24-node CockroachDB / TiDB multi-region cluster with Raft consensus per range.
 - `CAN-02 (Application-Level Sharded PostgreSQL)`: 64 independent single-node PostgreSQL instances partitioned by `merchant_id` with Vitess/Citus coordination.
 - `CAN-03 (Unbundled Log-Centric Architecture)`: Apache Kafka partitioned by `merchant_id` as the durable transaction log, with in-memory RocksDB state machines and asynchronous read projections into PostgreSQL.
 
-#### 4. Selection Analysis & Trade-off Calculus
+##### 2.8.6.1.4. Selection Analysis & Trade-off Calculus
 
 **FINTECH LEDGER SELECTION MATRIX**
 
@@ -9432,26 +9433,26 @@ graph TD
     C3 --> |"Max Ideality Ratio"| WINNER[Selected: DEC-LEDGER-01]
 ```
 
-#### 5. Selection Rationale & Decision Record
+##### 2.8.6.1.5. Selection Rationale & Decision Record
 
 - **Selected**: `CAN-03` for the core transaction sequencing engine, paired with PostgreSQL read-only projections.
 - **Ideality Rationale**: `CAN-03` leverages natural domain partitioning (`merchant_id`). By processing transactions deterministically in single-threaded partition loops, it eliminates distributed locking entirely, achieving $5\text{ms}$ latency and $B_R = 0.015$ at $34\%$ of the infrastructure cost of `CAN-01`.
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Inter-Service Communication & Workflow Coordination
+#### 2.8.6.2. Case Study 2: Inter-Service Communication & Workflow Coordination
 
-#### 1. Context and Problem State
+##### 2.8.6.2.1. Context and Problem State
 
 An e-commerce order fulfillment service must coordinate inventory reservation, payment charging, fraud screening, and shipment dispatch across four independent sub-domains.
 
-#### 2. Candidate Mechanisms Explored
+##### 2.8.6.2.2. Candidate Mechanisms Explored
 
 - `CAN-01 (Synchronous REST / gRPC Mesh)`: Direct HTTP calls with retries, exponential backoff, and Resilience4j circuit breakers.
 - `CAN-02 (Choreographed Event Mesh with Transactional Outbox)`: Domain events published to Kafka via Debezium CDC from local PostgreSQL outbox tables; each service reacts to upstream events.
 - `CAN-03 (Orchestrated Saga via Workflow Engine)`: Centralized workflow orchestrator (for example, Temporal) executing stateful workflow definitions with automated compensation steps.
 
-#### 3. Selection Evaluation across TCO and Harm Vectors
+##### 2.8.6.2.3. Selection Evaluation across TCO and Harm Vectors
 
 **WORKFLOW COORDINATION SELECTION**
 
@@ -9493,25 +9494,25 @@ async function orderFulfillmentWorkflow(
 }
 ```
 
-#### 4. Selection Justification
+##### 2.8.6.2.4. Selection Justification
 
 `CAN-03` was selected despite requiring a dedicated Temporal cluster. The centralized state machine reduces custom compensation code by $75\%$, eliminates distributed ghost state, and provides out-of-the-box auditability, reducing 3-year operational incident costs by USD 60,000.
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Platform Native Primitives vs. Custom In-House Framework
+#### 2.8.6.3. Case Study 3: Platform Native Primitives vs. Custom In-House Framework
 
-#### 1. Context and Problem State
+##### 2.8.6.3.1. Context and Problem State
 
 A software engineering organization with 120 developers needs a standard solution for API rate limiting, authentication verification, and request logging across 40 microservices.
 
-#### 2. Candidate Mechanisms Explored
+##### 2.8.6.3.2. Candidate Mechanisms Explored
 
 - `CAN-01 (Custom In-House Shared Library / Framework)`: Internal Java/Go SDK (`company-starter-kit`) imported as a library dependency into every microservice repository.
 - `CAN-02 (Platform Native Cloud API Gateway / Service Mesh)`: Envoy-based Kubernetes Gateway API with AWS API Gateway / Kong enforcing rate limits, OAuth2 JWT verification, and access logging at the network ingress boundary.
 - `CAN-03 (Sidecar Proxy Pattern)`: Dedicated custom Go sidecar proxy deployed alongside every application pod.
 
-#### 3. Total Cost of Ownership (TCO) & Dependency Impact
+##### 2.8.6.3.3. Total Cost of Ownership (TCO) & Dependency Impact
 
 **PLATFORM PRIMITIVES VS. CUSTOM SDK**
 
@@ -9526,19 +9527,19 @@ A software engineering organization with 120 developers needs a standard solutio
 | 3-YEAR TOTAL COST: | $210,000 | $32,000 |
 | SELECTION VERDICT: | REJECTED (High Friction) | SELECTED (DEC-GATEWAY-01) |
 
-#### 4. Ideality Rationale
+##### 2.8.6.3.4. Ideality Rationale
 
 `CAN-02` embodies the Ideal Final Result: rate limiting and authentication occur at the network boundary **before requests ever enter application space**. Application code contains zero lines of authentication boilerplate, reducing the blast radius of security vulnerabilities and cutting multi-service maintenance overhead by $85\%$.
 
 ------------------------------------------------------------------------
 
-## 5. Operational Deliverables & Epistemic Artifacts
+### 2.8.7. Operational Deliverables & Epistemic Artifacts
 
 Every execution of Operation 8 must produce two formal, schema-validated engineering artifacts in the Ariadne epistemic graph:
 
 ------------------------------------------------------------------------
 
-### 5.1. The Value and Selection Matrix (`VAL-SELECT-*`)
+#### 2.8.7.1. The Value and Selection Matrix (`VAL-SELECT-*`)
 
 ``` markdown
 # Epistemic Artifact: VAL-SELECT-2026-08-01
@@ -9568,7 +9569,7 @@ Every execution of Operation 8 must produce two formal, schema-validated enginee
 
 ------------------------------------------------------------------------
 
-### 5.2. The Architectural Decision Record (`DEC-*`)
+#### 2.8.7.2. The Architectural Decision Record (`DEC-*`)
 
 ``` markdown
 # Architectural Decision Record: DEC-INGEST-08
@@ -9606,7 +9607,7 @@ All producer clients emit events via the `EventPublisher` interface seam. Swappi
 
 ------------------------------------------------------------------------
 
-## 6. Stop Conditions & Selection Rules
+### 2.8.8. Stop Conditions & Selection Rules
 
 An engineer or autonomous software agent must terminate Operation 8 when and only when all six of the following conditions are satisfied:
 
@@ -9633,7 +9634,7 @@ An engineer or autonomous software agent must terminate Operation 8 when and onl
 
 ------------------------------------------------------------------------
 
-## 7. Common Mistakes & Selection Anti-Patterns
+### 2.8.9. Common Mistakes & Selection Anti-Patterns
 
 ``` mermaid
 graph TD
@@ -9649,37 +9650,37 @@ graph TD
 
 ------------------------------------------------------------------------
 
-### Anti-Pattern 1: The Weighted Checklist Fallacy (Pseudo-Precision Matrix)
+#### 2.8.9.1. Anti-Pattern 1: The Weighted Checklist Fallacy (Pseudo-Precision Matrix)
 
 - **Symptom**: Constructing a spreadsheet with 20 criteria, assigning arbitrary weights ($w_i = 0.05, 0.15$), scoring technologies from 1 to 10, and declaring the option with 8.42 over 8.35 the winner.
 - **Why it fails**: It conflates hard constraints with preferences, hides massive epistemic uncertainty behind decimal arithmetic, and invites confirmation bias (tweaking weights until the favorite option wins).
 - **Correction**: Apply non-compensatory screening for hard invariants first, then map the surviving candidates onto a Pareto frontier.
 
-### Anti-Pattern 2: Resume-Driven Architecture (RDA) & Technology Fashion
+#### 2.8.9.2. Anti-Pattern 2: Resume-Driven Architecture (RDA) & Technology Fashion
 
 - **Symptom**: Selecting a distributed microservices service mesh, GraphQL federation, and a distributed graph database for a CRUD application with 50 daily active users.
 - **Why it fails**: Drastically inflates mechanism cost ($\sum C$) and collateral harm ($\sum F_h$), destroying software ideality.
 - **Correction**: Enforce the Law of Ideality: maximize the ratio of useful function to mechanism overhead. Challenge every new infrastructure component with the Ideal Final Result.
 
-### Anti-Pattern 3: Sunk Cost Escalation & The "We Already Built It" Trap
+#### 2.8.9.3. Anti-Pattern 3: Sunk Cost Escalation & The "We Already Built It" Trap
 
 - **Symptom**: Continuing to pour hundreds of engineering hours into maintaining a buggy, custom in-house ORM because the company spent 2 years developing it.
 - **Why it fails**: Past expenditures are unrecoverable sunk costs. Economic decisions must be evaluated purely on future marginal TCO vs. future marginal utility.
 - **Correction**: Evaluate existing in-house mechanisms on equal footing with standard industry primitives in the TCO matrix.
 
-### Anti-Pattern 4: The Zero-Migration Fallacy (Ignoring $C_{\text{trans}}$)
+#### 2.8.9.4. Anti-Pattern 4: The Zero-Migration Fallacy (Ignoring $C_{\text{trans}}$)
 
 - **Symptom**: Selecting a new database or framework because its steady-state operational characteristics look attractive, while completely ignoring the 12 months of dual-writing, data backfills, and cutover risks required to get there.
 - **Why it fails**: Transition cost ($C_{\text{trans}}$) frequently exceeds the total 3-year operating savings of the new technology.
 - **Correction**: Include explicit migration pipelines, dual-write overhead, and rollback plans in the total lifecycle cost equation.
 
-### Anti-Pattern 5: The "Build vs. Buy" False Dilemma
+#### 2.8.9.5. Anti-Pattern 5: The "Build vs. Buy" False Dilemma
 
 - **Symptom**: Assuming that "buying" a SaaS or managed service has zero engineering cost.
 - **Why it fails**: Integrating a third-party vendor introduces significant $C_{\text{code}}$ (SDK wrappers, webhook handlers), high cognitive load (debugging black-box failures), and catastrophic lock-in harm ($\sum F_h$).
 - **Correction**: Treat third-party vendor solutions as Candidate Mechanisms with their own explicit TCO vectors and blast radius assessments.
 
-### Anti-Pattern 6: Local Efficiency Maximization (Suboptimization)
+#### 2.8.9.6. Anti-Pattern 6: Local Efficiency Maximization (Suboptimization)
 
 - **Symptom**: Optimizing a single microservice to achieve microsecond serialization speeds using custom binary protocols, which in turn forces 30 downstream client teams to write custom parsers.
 - **Why it fails**: A localized efficiency gain in one component imposes massive global costs and cognitive load across the wider engineering organization.
@@ -9687,9 +9688,9 @@ graph TD
 
 ------------------------------------------------------------------------
 
-## Operation 9. Verify the Solution by Execution and Safely Execute the Transition
+## 2.9. Operation 9. Verify the Solution by Execution and Safely Execute the Transition
 
-### Failure First: The Correct Schema That Broke the Rollout
+### 2.9.1. Failure First: The Correct Schema That Broke the Rollout
 
 A team renames `customer_id` to `account_id`. The new code and schema pass every unit and integration test in an isolated environment. During rolling deployment, old binaries still query `customer_id`; error rates spike. Rolling back code fails because new writes exist only in `account_id`. The target state was correct, but no safe state transition existed.
 
@@ -9700,7 +9701,7 @@ A team renames `customer_id` to `account_id`. The new code and schema pass every
 
 Humans underfund transition code because it is temporary; agents overlook it because it is outside the repository snapshot. Budget temporary architecture explicitly for people and expose deployment/state context plus hard completion gates to agents.
 
-#### Formal Concept → Engineering Meaning
+#### 2.9.1.1. Formal Concept → Engineering Meaning
 
 | Formal concept | Precise role | Engineering reading and observable evidence |
 |---|---|---|
@@ -9709,11 +9710,11 @@ Humans underfund transition code because it is temporary; agents overlook it bec
 | Transition architecture, $\mathcal{A}_{\text{trans}}$ | Temporary system that preserves invariants between current and target states. | Both columns coexist, writes remain compatible, backfill and parity checks run, traffic cuts over gradually, and the old path remains recoverable. |
 | Rollback invariant, $I_{\text{rev}}(k)$ | Property that guarantees safe reversal at transition phase $k$. | At every phase, all committed writes can still be read by the rollback version without loss or manual reconstruction. |
 
-## Epistemic Purpose & Main Question
+### 2.9.2. Epistemic Purpose & Main Question
 
-### The Epistemic Role of Verification and Safe Transition
+#### 2.9.2.1. The Epistemic Role of Verification and Safe Transition
 
-In the Ariadne Software Reasoning Layer, **Operation 9: Verify the Solution by Execution and Safely Execute the Transition** represents the empirical realization and operational proof of all preceding engineering reasoning. While [Operation 1](#operation-1-frame-and-model-the-software-problem) establishes problem models, [Operation 2](#operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions, [Operations 3–4](#operation-3-transform-the-existing-software-system) formulate candidate transformations, and [Operations 6–8](#operation-6-arrange-dependencies-and-change-boundaries) structure boundaries, dynamics, and multi-criteria selection, Operation 9 resolves **Execution, Transition, and Operational Uncertainty** ($U_{\text{exec}}, U_{\text{trans}}, U_{\text{ops}}$).
+In the Ariadne Software Reasoning Layer, **Operation 9: Verify the Solution by Execution and Safely Execute the Transition** represents the empirical realization and operational proof of all preceding engineering reasoning. While [Operation 1](#21-operation-1-frame-and-model-the-software-problem) establishes problem models, [Operation 2](#22-operation-2-find-the-constraint-cause-or-contradiction) diagnoses contradictions, [Operations 3–4](#23-operation-3-transform-the-existing-software-system) formulate candidate transformations, and [Operations 6–8](#26-operation-6-arrange-dependencies-and-change-boundaries) structure boundaries, dynamics, and multi-criteria selection, Operation 9 resolves **Execution, Transition, and Operational Uncertainty** ($U_{\text{exec}}, U_{\text{trans}}, U_{\text{ops}}$).
 
 ``` mermaid
 flowchart TD
@@ -9755,7 +9756,7 @@ In Ariadne, every architecture change and bug fix is an **unproven causal hypoth
 
 ------------------------------------------------------------------------
 
-### Main Question
+#### 2.9.2.2. Main Question
 
 > **Does the change deliver the promised behavior and preserve all system invariants under real execution, and can we transition to it safely from the current state without service disruption or data loss?**
 
@@ -9768,7 +9769,7 @@ When an engineering team or AI agent evaluates a candidate, do not ask only *"Do
 
 ------------------------------------------------------------------------
 
-### The Dual Nature of Transition: Target Architecture vs. Transition Architecture
+#### 2.9.2.3. The Dual Nature of Transition: Target Architecture vs. Transition Architecture
 
 Teams often confuse the **target architecture** ($\mathcal{A}_{\text{target}}$) with the **transition architecture** ($\mathcal{A}_{\text{trans}}$).
 
@@ -9790,7 +9791,7 @@ If an engineer designs only $\mathcal{A}_{\text{target}}$, the rollout can becom
 
 ------------------------------------------------------------------------
 
-## 1. Theoretical Grounding
+### 2.9.3. Theoretical Grounding
 
 Operation 9 synthesizes the philosophy of science, formal software testing theory, mutation analysis, distributed systems reliability patterns, and chaos engineering into a unified operational discipline.
 
@@ -9857,7 +9858,7 @@ classDiagram
 
 ------------------------------------------------------------------------
 
-### 1.1. Karl Popper: The Asymmetry of Falsification and Severe Testing (1959/1934)
+#### 2.9.3.1. Karl Popper: The Asymmetry of Falsification and Severe Testing (1959/1934)
 
 In [*The Logic of Scientific Discovery* (Popper, 1959/1934, Routledge, DOI: 10.4324/9780203746639)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper established the fundamental asymmetry between verification (confirmation) and falsification:
 
@@ -9875,7 +9876,7 @@ Testing only the "happy path" has $\mathbb{P}\left(\text{Test Fails} \mid \neg \
 
 ------------------------------------------------------------------------
 
-### 1.2. Edsger W. Dijkstra: The Humble Programmer and the Limits of Testing (1972)
+#### 2.9.3.2. Edsger W. Dijkstra: The Humble Programmer and the Limits of Testing (1972)
 
 In his ACM Turing Lecture [*The Humble Programmer* (CACM, 1972, DOI: 10.1145/355604.361591)](https://dl.acm.org/doi/10.1145/355604.361591), Edsger W. Dijkstra articulated the immortal aphorism:
 
@@ -9889,7 +9890,7 @@ Dijkstra warned that even a small program has too many possible inputs for exhau
 
 ------------------------------------------------------------------------
 
-### 1.3. Koen Claessen & John Hughes: Property-Based Testing and Automated Shrinking (2000)
+#### 2.9.3.3. Koen Claessen & John Hughes: Property-Based Testing and Automated Shrinking (2000)
 
 In [*QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs* (ACM ICFP, 2000, DOI: 10.1145/351240.351266)](https://doi.org/10.1145/351240.351266), Koen Claessen and John Hughes introduced **property-based testing (PBT)**:
 
@@ -9902,7 +9903,7 @@ $$\forall x \in \mathcal{D}, \quad \text{Invariant}(f(x)) \equiv \text{True}$$
 
 ------------------------------------------------------------------------
 
-### 1.4. Richard DeMillo, Richard Lipton & Frederick Sayward: Mutation Analysis and the Coupling Effect (1978)
+#### 2.9.3.4. Richard DeMillo, Richard Lipton & Frederick Sayward: Mutation Analysis and the Coupling Effect (1978)
 
 In [*Hints on Test Data Selection: Help for the Practicing Programmer* (IEEE Computer, 1978, DOI: 10.1109/C-M.1978.218136)](https://doi.org/10.1109/C-M.1978.218136), DeMillo, Lipton, and Sayward describe the basis of **mutation testing**:
 
@@ -9917,7 +9918,7 @@ In Operation 9, a mutation score must meet the required threshold ($MS \ge 0.85$
 
 ------------------------------------------------------------------------
 
-### 1.5. Paul Ammann & Jeff Offutt: The RIPR Model of Software Faults (2016)
+#### 2.9.3.5. Paul Ammann & Jeff Offutt: The RIPR Model of Software Faults (2016)
 
 In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 2016)](https://cs.gmu.edu/~offutt/softwaretest/), Paul Ammann and Jeff Offutt define the **RIPR model**. A test needs four conditions to expose a software fault:
 
@@ -9937,7 +9938,7 @@ If one link is missing, the test does not expose the fault. For example, the pro
 
 ------------------------------------------------------------------------
 
-### 1.6. K. Basiri et al.: Chaos Engineering in Distributed Systems (2016)
+#### 2.9.3.6. K. Basiri et al.: Chaos Engineering in Distributed Systems (2016)
 
 In [*Chaos Engineering* (IEEE Software, 2016, DOI: 10.1109/MS.2016.60)](https://doi.org/10.1109/MS.2016.60), Basiri et al. describe experiments on distributed systems under production-like faults:
 
@@ -9948,7 +9949,7 @@ In [*Chaos Engineering* (IEEE Software, 2016, DOI: 10.1109/MS.2016.60)](https://
 
 ------------------------------------------------------------------------
 
-### 1.7. Michael T. Nygard: Stability Patterns and Rollback Invariants (2018)
+#### 2.9.3.7. Michael T. Nygard: Stability Patterns and Rollback Invariants (2018)
 
 In [*Release It! Design and Deploy Production-Ready Software* (2nd ed., Pragmatic Bookshelf, 2018)](https://pragprog.com/titles/mnee2/release-it-second-edition/), Michael T. Nygard explains production failures:
 
@@ -9958,7 +9959,7 @@ In [*Release It! Design and Deploy Production-Ready Software* (2nd ed., Pragmati
 
 ------------------------------------------------------------------------
 
-### 1.8. Danilo Sato, Pramod Sadalage & Martin Fowler: Expand/Contract Pattern (2021)
+#### 2.9.3.8. Danilo Sato, Pramod Sadalage & Martin Fowler: Expand/Contract Pattern (2021)
 
 In [*Patterns of Distributed Systems: Expand-Contract* (martinfowler.com, 2021)](https://martinfowler.com/bliki/ParallelChange.html) and [*Refactoring Databases* (Addison-Wesley)](https://martinfowler.com/books/refactoringDatabases.html), Sato, Sadalage, and Fowler formalized the standard protocol for zero-downtime structural evolutions:
 
@@ -9969,7 +9970,7 @@ In [*Patterns of Distributed Systems: Expand-Contract* (martinfowler.com, 2021)]
 
 ------------------------------------------------------------------------
 
-## 2. Four Techniques of Operation 9
+### 2.9.4. Four Techniques of Operation 9
 
 ``` mermaid
 flowchart LR
@@ -10007,11 +10008,11 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### Technique 9.1. Predict Beneficial and Undesirable Consequences
+#### 2.9.4.1. Technique 9.1. Predict Beneficial and Undesirable Consequences
 
 Before executing any code modification or running a migration, the engineer or agent must explicitly model the total systemic impact of the candidate mechanism. Every software intervention produces a ripple effect across computational resources, operational profiles, and downstream dependencies.
 
-#### 1. Problem Displacement Analysis
+##### 2.9.4.1.1. Problem Displacement Analysis
 
 A common failure of naive problem solving is **Problem Displacement** (curing a symptom in component $A$ by introducing an unmanaged failure mode in component $B$):
 
@@ -10027,7 +10028,7 @@ A common failure of naive problem solving is **Problem Displacement** (curing a 
 > Sharding a monolithic database offloads disk I/O, but introduces distributed scatter-gather
 > queries, network serialization overhead, and 2-phase commit latency.
 
-#### 2. Secondary Contradictions
+##### 2.9.4.1.2. Secondary Contradictions
 
 When a candidate mechanism is applied to resolve the primary contradiction (for example, "Throughput must be high while database connection pool is limited"), it frequently generates a **Secondary Contradiction**:
 
@@ -10035,7 +10036,7 @@ When a candidate mechanism is applied to resolve the primary contradiction (for 
 - *Secondary Contradiction:* The queue decouples the load, but now the client cannot receive immediate synchronous confirmation of order acceptance, violating the user's need for deterministic feedback.
 - *Resolution:* Resolve the secondary contradiction via separation of conditions (for example, return an immediate receipt with a webhook/WebSocket subscription for final settlement status) before proceeding to implementation.
 
-#### 3. Software Failure Mode and Effects Analysis (Software FMEA)
+##### 2.9.4.1.3. Software Failure Mode and Effects Analysis (Software FMEA)
 
 For every high-impact change, calculate the **Risk Priority Number (RPN)**:
 
@@ -10051,7 +10052,7 @@ Any candidate change with $\text{RPN} > 120$ or $S \ge 9$ cannot proceed without
 
 ------------------------------------------------------------------------
 
-### Technique 9.2. Turn Assertions into Executable Verifications (The Evidentiary Ladder)
+#### 2.9.4.2. Technique 9.2. Turn Assertions into Executable Verifications (The Evidentiary Ladder)
 
 In Ariadne, an assertion in an Architecture Decision Record (ADR) or pull request is treated as ungrounded speculation until mapped to its corresponding rung on the **Evidentiary Ladder**.
 
@@ -10066,7 +10067,7 @@ flowchart BT
     R7 --> Confidence["Increasing realism, system resilience, and epistemic confidence"]
 ```
 
-#### The Rungs of the Evidentiary Ladder
+##### 2.9.4.2.1. The Rungs of the Evidentiary Ladder
 
 | Rung | Verification Method | Target Invariant / Property | Primary Tooling | Epistemic Deliverable |
 |----|----|----|----|----|
@@ -10078,7 +10079,7 @@ flowchart BT
 | **6** | **Shadow Traffic & Dark Launching** | Real-world traffic equivalence, unexpected payload handling, semantic parity. | Envoy Shadowing, Diffy, McRouter, custom proxy | Statistical parity proof ($\Delta = 0.000\%$) against live production data. |
 | **7** | **Chaos Engineering & Fault Injection** | Resilience against network partitions, downstream timeouts, disk corruption, node death. | Chaos Mesh, LitmusChaos, Toxiproxy, Gremlin | Proof of graceful degradation, circuit breaker trip, and auto-recovery. |
 
-#### The Test Oracle Problem and Differential Testing
+##### 2.9.4.2.2. The Test Oracle Problem and Differential Testing
 
 When verifying complex legacy refactorings or algorithm replacements, constructing an explicit expected-output oracle is often impossible. Operation 9 resolves this via **Differential Testing (Dual-Run Oracle)**:
 
@@ -10088,7 +10089,7 @@ Instead of hand-coding test assertions, the legacy system serves as the referenc
 
 ------------------------------------------------------------------------
 
-### Technique 9.3. Plan the Transition as a Distinct System (The 7-Phase Architecture)
+#### 2.9.4.3. Technique 9.3. Plan the Transition as a Distinct System (The 7-Phase Architecture)
 
 To eliminate the hazards of Big Bang cutovers, Operation 9 specifies the complete **7-Phase Expand/Contract Transition System Architecture**. Every breaking change (database schema, API contract, messaging format, or core algorithm) must advance through these exact seven discrete phases.
 
@@ -10117,7 +10118,7 @@ stateDiagram-v2
     end note
 ```
 
-#### Detailed Specification of the 7 Transition Phases
+##### 2.9.4.3.1. Detailed Specification of the 7 Transition Phases
 
 > **THE 7-PHASE EXPAND/CONTRACT TRANSITION PROTOCOL**
 > PHASE 1: EXPAND (Additive Infrastructure / Schema)
@@ -10158,7 +10159,7 @@ stateDiagram-v2
 > - Remove transition shims, dual-write proxy code, parity assertion engines, and feature flags.
 > - Invariant: Zero dead code, zero obsolete configuration flags, zero zombie shims.
 
-#### The Five Rollback Readiness Invariants ($\mathcal{I}_1$ to $\mathcal{I}_5$)
+##### 2.9.4.3.2. The Five Rollback Readiness Invariants ($\mathcal{I}_1$ to $\mathcal{I}_5$)
 
 At every phase $k \in [1, 5]$ of the transition system, the architecture must strictly satisfy the **Rollback Readiness Invariants**:
 
@@ -10172,11 +10173,11 @@ $$\mathcal{I}_{\text{rev}} = \bigwedge_{j=1}^{5} \mathcal{I}_j$$
 
 ------------------------------------------------------------------------
 
-### Technique 9.4. Anchor Results with Continuous Observation
+#### 2.9.4.4. Technique 9.4. Anchor Results with Continuous Observation
 
 Verification does not terminate when a pull request is merged or when a deployment reaches 100% traffic. In dynamic distributed environments, runtime behavior drifts due to cache cold starts, data skew, network topology changes, and evolving user access patterns.
 
-#### 1. SLI/SLO Canary Gates
+##### 2.9.4.4.1. SLI/SLO Canary Gates
 
 Every transition phase must be governed by automated canary analysis comparing the canary instance group ($C$) against the baseline instance group ($B$):
 
@@ -10184,7 +10185,7 @@ $$\text{Canary Gate Passed} \iff \left( \text{ErrorRate}(C) - \text{ErrorRate}(B
 
 Statistical significance is evaluated using non-parametric tests (such as the **Mann-Whitney U Test** or **Kolmogorov-Smirnov Test**) to prevent false alarms from transient network spikes while immediately catching true latency distribution shifts.
 
-#### 2. Automated Rollback Circuit Breakers
+##### 2.9.4.4.2. Automated Rollback Circuit Breakers
 
 If any non-negotiable Service Level Objective (SLO) is breached during rollout, automated deployment controllers (for example, Argo Rollouts, Flagger) trigger an immediate, automated rollback without human triage:
 
@@ -10193,7 +10194,7 @@ If any non-negotiable Service Level Objective (SLO) is breached during rollout, 
 - **Trigger 3:** Parity divergence count $> 0$ for non-idempotent financial mutations.
 - **Trigger 4:** Downstream circuit breaker trip in any Tier-1 dependency.
 
-#### 3. Decommissioning Governance (Preventing Shim Rot)
+##### 2.9.4.4.3. Decommissioning Governance (Preventing Shim Rot)
 
 Transition scaffolding that is left in the codebase permanently becomes technical debt, increases cognitive load, and creates latent bugs (for example, forgotten feature flags defaulting to unintended paths during configuration reloads).
 
@@ -10203,13 +10204,13 @@ Transition scaffolding that is left in the codebase permanently becomes technica
 
 ------------------------------------------------------------------------
 
-## 3. Practical Case Studies
+### 2.9.5. Practical Case Studies
 
 ------------------------------------------------------------------------
 
-### Case Study 1: Zero-Downtime Migration of a 50-Million-Row Financial Ledger
+#### 2.9.5.1. Case Study 1: Zero-Downtime Migration of a 50-Million-Row Financial Ledger
 
-#### Problem Context & Framing
+##### 2.9.5.1.1. Problem Context & Framing
 
 A high-throughput FinTech core banking platform processes $3,500 \text{ writes/sec}$ against a monolithic PostgreSQL `ledger_entries` table containing 50 million rows.
 
@@ -10243,9 +10244,9 @@ flowchart TD
     Parity -->|"4. Assert delta = 0.000%"| Metrics["Prometheus Parity Gauge"]
 ```
 
-#### The 7-Phase Execution Runbook
+##### 2.9.5.1.2. The 7-Phase Execution Runbook
 
-##### Phase 1: Expand
+###### 2.9.5.1.2.1. Phase 1: Expand
 
 Create the partitioned table and sub-partitions without touching existing application queries.
 
@@ -10273,7 +10274,7 @@ CREATE TABLE ledger_entries_v2_tenant_us_2026_08 PARTITION OF ledger_entries_v2_
 `;
 ```
 
-##### Phase 2: Dual-Writing
+###### 2.9.5.1.2.2. Phase 2: Dual-Writing
 
 Deploy application version `v2.4.0` containing the dual-write proxy. Primary writes commit to `ledger_entries`. A secondary non-blocking asynchronous task writes to `ledger_entries_v2`.
 
@@ -10306,7 +10307,7 @@ class LedgerRepository {
 }
 ```
 
-##### Phase 3: Background Backfill
+###### 2.9.5.1.2.3. Phase 3: Background Backfill
 
 An idempotent batch worker scans historical records in chunks of 5,000 using cursor-based pagination on `id`.
 
@@ -10328,7 +10329,7 @@ async function backfillLedgerChunk(db: Database, cursorId: number, chunkSize = 5
 }
 ```
 
-##### Phase 4: Dual-Reading & Parity Assertion
+###### 2.9.5.1.2.4. Phase 4: Dual-Reading & Parity Assertion
 
 A Kafka-based Change Data Capture (CDC) stream compares rows emitted by both tables.
 
@@ -10340,11 +10341,11 @@ Over 72 hours and 250 million processed transactions, the Parity Auditor verifie
 - Mismatches: $0$ ($\delta = 0.00000\%$)
 - $p99$ Shadow write latency: $1.4\text{ms}$
 
-##### Phase 5: Cutover (Authority Shift)
+###### 2.9.5.1.2.5. Phase 5: Cutover (Authority Shift)
 
 Via dynamic feature flag, read authority shifted to `ledger_entries_v2`. Write operations now write to `ledger_entries_v2` as primary, and reverse-shadow-write to `ledger_entries` for 48 hours.
 
-##### Phases 6 & 7: Contract & Cleanup
+###### 2.9.5.1.2.6. Phases 6 & 7: Contract & Cleanup
 
 - Reverse shadow-write disabled.
 - Application code pruned: removed legacy repository methods, dead-letter workers, and feature flags.
@@ -10353,9 +10354,9 @@ Via dynamic feature flag, read authority shifted to `ledger_entries_v2`. Write o
 
 ------------------------------------------------------------------------
 
-### Case Study 2: Dark Launching & Shadow Traffic Verification in Search Ranking
+#### 2.9.5.2. Case Study 2: Dark Launching & Shadow Traffic Verification in Search Ranking
 
-#### Problem Context & Framing
+##### 2.9.5.2.1. Problem Context & Framing
 
 An e-commerce platform with 40,000 search queries/sec redesigned its core relevance ranking engine:
 
@@ -10381,7 +10382,7 @@ flowchart LR
     end
 ```
 
-#### Implementation & Verification Protocol
+##### 2.9.5.2.2. Implementation & Verification Protocol
 
 1.  **Envoy Shadow Traffic Configuration:** Configured Envoy service proxy with `request_mirror_policies` to mirror 100% of incoming `/v1/search` traffic to the shadow cluster asynchronously. User responses are returned strictly by the Java engine; responses from the Rust engine are dropped by Envoy at the socket level.
 2.  **Differential Response Analyzer:** A dedicated comparator analyzed:
@@ -10395,9 +10396,9 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-### Case Study 3: Chaos Engineering & Fault Injection in a Distributed Payment Gateway
+#### 2.9.5.3. Case Study 3: Chaos Engineering & Fault Injection in a Distributed Payment Gateway
 
-#### Problem Context & Framing
+##### 2.9.5.3.1. Problem Context & Framing
 
 A distributed payment settlement platform connects multiple internal microservices (`OrderService`, `PaymentGateway`, `LedgerService`, `NotificationService`) and third-party acquirers.
 
@@ -10442,7 +10443,7 @@ sequenceDiagram
     Ledger-->>Ledger: Settle Balance (Zero Duplicate Charge)
 ```
 
-#### Chaos Experiment Protocol (Chaos Mesh & Toxiproxy)
+##### 2.9.5.3.2. Chaos Experiment Protocol (Chaos Mesh & Toxiproxy)
 
 ``` typescript
 const manifestExample = String.raw`
@@ -10477,7 +10478,7 @@ spec:
 `;
 ```
 
-#### Empirical Observations & Disproven Hypotheses
+##### 2.9.5.3.3. Empirical Observations & Disproven Hypotheses
 
 1.  **Hypothesis 1 (Circuit Breaker):** "When the bank times out, the circuit breaker opens and returns `PaymentPending` in $< 500\text{ms}$."
     - **Result: FALSIFIED.** The HTTP client timeout was set to $30\text{s}$, but the thread pool size was only 50. Incoming requests saturated the pool in 4 seconds, causing `OrderService` health checks to fail, triggering a cascading crash of the entire payment pod cluster.
@@ -10487,9 +10488,9 @@ spec:
 
 ------------------------------------------------------------------------
 
-### Case Study 4: Automated Metric-Gated Canary Rollout & Instant Rollback System
+#### 2.9.5.4. Case Study 4: Automated Metric-Gated Canary Rollout & Instant Rollback System
 
-#### Problem Context & Architecture
+##### 2.9.5.4.1. Problem Context & Architecture
 
 A containerized checkout service deployed on Kubernetes uses Argo Rollouts and Prometheus metrics to execute fully automated progressive delivery without human intervention.
 
@@ -10512,7 +10513,7 @@ flowchart TD
     end
 ```
 
-#### Argo Rollout Analysis Template
+##### 2.9.5.4.2. Argo Rollout Analysis Template
 
 ``` typescript
 const manifestExample = String.raw`
@@ -10545,7 +10546,7 @@ spec:
 `;
 ```
 
-#### Production Rollback Execution Record
+##### 2.9.5.4.3. Production Rollback Execution Record
 
 During a rollout of `v3.1.2`, an unindexed database query in the promotional discount calculator caused query times to scale quadratically with cart size:
 
@@ -10557,13 +10558,13 @@ During a rollout of `v3.1.2`, an unindexed database query in the promotional dis
 
 ------------------------------------------------------------------------
 
-## 4. Operational Deliverables & Epistemic Artifacts
+### 2.9.6. Operational Deliverables & Epistemic Artifacts
 
 Operation 9 requires two formal, structured epistemic deliverables before and during any production release: the **Verification Card (`VAL-*`)** and the **Transition Plan (`TRANS-*`)**.
 
 ------------------------------------------------------------------------
 
-### 4.1. Verification Card (`VAL-*`) Specification
+#### 2.9.6.1. Verification Card (`VAL-*`) Specification
 
 Every high-impact change must be accompanied by a formal Verification Card documenting the empirical proofs that validate the solution and falsify alternative failure hypotheses.
 
@@ -10578,7 +10579,7 @@ Every high-impact change must be accompanied by a formal Verification Card docum
 | **Empirical Result** | Actual recorded metric from execution. | Link to test run artifact, APM trace, or log query. |
 | **Epistemic Verdict** | Final epistemic status update. | `CORROBORATED` or `FALSIFIED`. |
 
-#### Complete Real-World Example: Verification Card `VAL-089`
+##### 2.9.6.1.1. Complete Real-World Example: Verification Card `VAL-089`
 
 ``` markdown
 # Verification Card: VAL-089
@@ -10607,7 +10608,7 @@ CORROBORATED. Candidate CAN-014 satisfies invariant INV-012 under severe failure
 
 ------------------------------------------------------------------------
 
-### 4.2. Transition Plan (`TRANS-*`) Specification
+#### 2.9.6.2. Transition Plan (`TRANS-*`) Specification
 
 Every non-trivial architectural migration must be governed by a structured, 7-phase Transition Plan.
 
@@ -10633,7 +10634,7 @@ Every non-trivial architectural migration must be governed by a structured, 7-ph
 
 ------------------------------------------------------------------------
 
-### 4.3. Evidentiary Traceability Matrix
+#### 2.9.6.3. Evidentiary Traceability Matrix
 
 Operation 9 establishes the complete traceability chain connecting requirements to empirical evidence:
 
@@ -10647,9 +10648,9 @@ Operation 9 establishes the complete traceability chain connecting requirements 
 
 ------------------------------------------------------------------------
 
-## 5. Stop Conditions & Rollback Readiness Invariants
+### 2.9.7. Stop Conditions & Rollback Readiness Invariants
 
-### Formal Stop Conditions for Operation 9
+#### 2.9.7.1. Formal Stop Conditions for Operation 9
 
 An engineering team or AI agent may conclude Operation 9 if and only if all five of the following conditions are satisfied:
 
@@ -10661,7 +10662,7 @@ An engineering team or AI agent may conclude Operation 9 if and only if all five
 
 ------------------------------------------------------------------------
 
-### Transitive Invalidation Protocol
+#### 2.9.7.2. Transitive Invalidation Protocol
 
 > **TRANSITIVE INVALIDATION PROTOCOL**
 > IF Verification Card VAL-k produces verdict FALSIFIED:
@@ -10673,7 +10674,7 @@ An engineering team or AI agent may conclude Operation 9 if and only if all five
 
 ------------------------------------------------------------------------
 
-## 6. Common Mistakes & Transition Anti-Patterns
+### 2.9.8. Common Mistakes & Transition Anti-Patterns
 
 ``` mermaid
 mindmap
@@ -10698,42 +10699,42 @@ mindmap
       Asymmetric Write Corruption
 ```
 
-### 1. The Big Bang Cutover Anti-Pattern
+#### 2.9.8.1. The Big Bang Cutover Anti-Pattern
 
 - **Symptom:** Scheduling a 6-hour weekend maintenance window, taking the database offline, executing a massive schema transformation script, deploying new binaries, and switching DNS.
 - **Root Cause:** Failure to design the Transition Architecture ($\mathcal{A}_{\text{trans}}$) as a distinct system; attempting to jump directly from $\mathcal{A}_{\text{initial}}$ to $\mathcal{A}_{\text{target}}$.
 - **Systemic Hazard:** If a critical bug is discovered 4 hours into the maintenance window, rollback is complex or impossible, resulting in extended outages, corrupted data, and emergency hot-patching in production.
 - **Ariadne Correction:** Enforce the 7-Phase Expand/Contract Protocol. Eliminate all planned maintenance windows for software deployments.
 
-### 2. Confirmatory Test Bias (The Happy-Path Trap)
+#### 2.9.8.2. Confirmatory Test Bias (The Happy-Path Trap)
 
 - **Symptom:** Writing 500 unit tests that only verify that valid inputs produce expected outputs, achieving 95% line coverage while zero edge cases, network timeouts, or concurrent race conditions are tested.
 - **Root Cause:** Adopting an inductive "proof by example" mindset rather than a Popperian severe falsification methodology.
 - **Systemic Hazard:** The system crashes on Day 1 of production release when presented with long-tail unicode inputs, null pointers, or network latency spikes.
 - **Ariadne Correction:** Mandate Property-Based Testing (QuickCheck/Hypothesis) with automated shrinking and Mutation Testing ($MS \ge 0.85$).
 
-### 3. Shim Rot & Permanent Feature Flag Debt
+#### 2.9.8.3. Shim Rot & Permanent Feature Flag Debt
 
 - **Symptom:** The codebase contains hundreds of legacy `if (FeatureFlags.isEnabled("OLD_MIGRATION_2023"))` checks, dual-write shims, and unused fallback adapters spanning years of releases.
 - **Root Cause:** Treating deployment as the final step of software delivery, omitting Phase 7 (Cleanup & Decommissioning).
 - **Systemic Hazard:** Enormous cognitive load, high risk of regression when modifying adjacent code, and potential for zombie code paths to activate unexpectedly during configuration reloads.
 - **Ariadne Correction:** Make Phase 7 mandatory with an automated linter or calendar-gated CI check that fails builds if a feature flag exceeds its 14-day post-cutover lifespan.
 
-### 4. Unbounded Backfill Table Lockout
+#### 2.9.8.4. Unbounded Backfill Table Lockout
 
 - **Symptom:** Running an unthrottled `INSERT INTO new_table SELECT * FROM old_table;` migration script against a live production database.
 - **Root Cause:** Treating backfill as an offline script rather than a rate-limited background transition worker.
 - **Systemic Hazard:** Exclusive table locks, replication lag spikes, IOPS exhaustion, and connection pool starvation leading to a total site outage.
 - **Ariadne Correction:** Implement cursor-based pagination over immutable keys with chunk size limits ($N \le 5000$) and dynamic sleep intervals based on database CPU utilization.
 
-### 5. Shadow Traffic Side-Effect Pollution
+#### 2.9.8.5. Shadow Traffic Side-Effect Pollution
 
 - **Symptom:** Mirroring production traffic to a candidate service that inadvertently sends real emails, charges real credit cards, or mutates shared cache entries during shadow testing.
 - **Root Cause:** Incomplete isolation of external egress points in the shadow environment.
 - **Systemic Hazard:** Customer confusion, financial loss, regulatory compliance violations, and contaminated analytics.
 - **Ariadne Correction:** Enforce hermetic mock gateways for all side-effecting egress protocols in shadow environments; strip authentication credentials and idempotency keys before mirroring.
 
-### 6. Untested Rollback Path (Asymmetric Write Corruption)
+#### 2.9.8.6. Untested Rollback Path (Asymmetric Write Corruption)
 
 - **Symptom:** Rolling back a canary deployment after 30 minutes of live traffic, only to find that data written by the canary during those 30 minutes cannot be read or processed by the old version.
 - **Root Cause:** Violating Rollback Invariant $\mathcal{I}_3$ (Symmetric Ingestion); cutting over without maintaining reverse-compatibility dual-writing.
@@ -10746,9 +10747,9 @@ mindmap
 
 # Part 3. How the Nine Operations Work in Software Engineering
 
-## 6. Foundations of the Nine Operations
+## 3.6. Foundations of the Nine Operations
 
-### 6.1. The Epistemic Synthesis
+### 3.6.1. The Epistemic Synthesis
 
 The Nine Operations of Systematic Inventive Thinking in Software Engineering do not constitute an ad-hoc taxonomy of software design tips, nor do they represent a linear project delivery methodology. They form an **epistemic reasoning engine** designed to systematically resolve **Engineering Uncertainty** ($U$) across the lifecycle of software systems.
 
@@ -10792,19 +10793,19 @@ flowchart TD
     AriadneCore --> ExecutableOutputs
 ```
 
-#### 1. Classical TRIZ & Systematic Innovation
+#### 3.6.1.1. Classical TRIZ & Systematic Innovation
 
 From the foundational work of [Genrich Altshuller (1984, *Creativity as an Exact Science: The Theory of the Solution of Inventive Problems*)](https://en.wikipedia.org/wiki/TRIZ), the framework inherits the **Law of Increasing Ideality**, the concept of the **Ideal Final Result (IFR)**, and the rigorous requirement to **eliminate technical and physical contradictions** rather than settling for compromise. In physical engineering, Altshuller demonstrated that breakthrough inventions occur when an engineer refuses to accept a trade-off (for example, increasing strength without increasing weight). In software engineering, the Nine Operations translate physical contradictions into conflicts between **Quality Attributes** (for example, increasing throughput without degrading tail latency; maintaining strong consistency without sacrificing availability under partition).
 
-#### 2. Theory of Constraints (TOC)
+#### 3.6.1.2. Theory of Constraints (TOC)
 
 From [Eliyahu M. Goldratt (1984, *The Goal*; 1990, *What is this thing called Theory of Constraints*)](https://www.toc-goldratt.com/en/product/what-is-this-thing-called-theory-of-constraints-and-how-should-it-be-implemented), the framework adopts the principle of **systemic bottleneck dominance**. Any software optimization applied outside the system's primary constraint is an illusion that merely generates excess work-in-progress (WIP) or shifts latency into hidden queues. Furthermore, Goldratt's *Evaporating Cloud* methodology directly informs our model of software contradiction framing: identifying the unstated assumptions that falsely link a necessary requirement to a harmful implementation prerequisite.
 
-#### 3. Systems Thinking & Dynamic Complexity
+#### 3.6.1.3. Systems Thinking & Dynamic Complexity
 
 From [Donella H. Meadows (2008, *Thinking in Systems: A Primer*)](https://www.chelseagreen.com/product/thinking-in-systems/), the framework integrates the mathematical and conceptual modeling of **stocks (accumulations), flows (rates), delays, and feedback loops**. Software systems are not static structural diagrams; they are non-linear dynamic engines where queues accumulate, client retry loops generate destructive resonance (thundering herds), and resource exhaustion triggers cascading phase shifts.
 
-#### 4. Formal Software Architecture & Systems Theory
+#### 3.6.1.4. Formal Software Architecture & Systems Theory
 
 From the seminal contributions of computer science literature:
 
@@ -10816,7 +10817,7 @@ From the seminal contributions of computer science literature:
 
 ------------------------------------------------------------------------
 
-### 6.2. The Ariadne Epistemic Model & Truth Maintenance
+### 3.6.2. The Ariadne Epistemic Model & Truth Maintenance
 
 In the Ariadne reasoning layer, software engineering is modeled as a directed acyclic graph (DAG) of epistemic claims, hypotheses, evidence, and decisions. Each node in the graph represents a typed epistemic unit:
 
@@ -10835,7 +10836,7 @@ In the Ariadne reasoning layer, software engineering is modeled as a directed ac
 | TRANS-* | Transition Plan: A temporary dual-architecture for safely reaching the target state. |
 | DEC-* | Locked Decision: An Architectural Decision Record (ADR) backed by empirical proof. |
 
-#### Transitive Invalidation
+#### 3.6.2.1. Transitive Invalidation
 
 A central feature of the Ariadne epistemic engine is **Transitive Invalidation**. If an assumption `ASM-01` ("Database network roundtrip latency is $<1\text{ ms}$ across availability zones") or a hypothesis `HYP-04` is proven false by empirical evidence `EVD-12` (`EVD-12 falsifies ASM-01`), all downstream candidate mechanisms (`CAN-02`), trade-off calculations (`VAL-03`), and decisions (`DEC-01`) that depend on that node are automatically marked **INVALIDATED** ($N_i \xrightarrow{\text{depends_on}} N_j \land \text{State}(N_j) = \text{FALSIFIED} \implies \text{State}(N_i) \leftarrow \text{INVALIDATED}$).
 
@@ -10850,7 +10851,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 6.3. The Ten Invariant Axioms of Software Invention
+### 3.6.3. The Ten Invariant Axioms of Software Invention
 
 The Nine Operations operate under ten invariant axioms that govern software design and evolution:
 
@@ -10867,9 +10868,9 @@ The Nine Operations operate under ten invariant axioms that govern software desi
 
 ------------------------------------------------------------------------
 
-## 7. How to Understand Core Concepts in Software
+## 3.7. How to Understand Core Concepts in Software
 
-### 7.1. Software System Instead of Physical Device
+### 3.7.1. Software System Instead of Physical Device
 
 Classical TRIZ was developed in the domain of mechanical, chemical, and electrical systems governed by thermodynamics, materials science, and classical mechanics. When transferring inventive operations to software engineering, we must account for the fundamental ontological divergence between physical hardware and computational systems.
 
@@ -10912,7 +10913,7 @@ Therefore, structural transformation in software operates across **state ownersh
 
 ------------------------------------------------------------------------
 
-### 7.2. A Resource is Anything Already Available to the System
+### 3.7.2. A Resource is Anything Already Available to the System
 
 In classical TRIZ, a **resource** (Substance-Field Resource) is any material, energy, space, or time already present in or around the technical system (for example, ambient heat, gravity, magnetic fields, waste materials). In software engineering, engineers routinely commit the anti-pattern of **premature infrastructural inflation**: spinning up new Redis clusters, Kafka brokers, microservices, or external SaaS tools to solve problems that can be solved by exploiting latent resources already built into the host environment.
 
@@ -10957,7 +10958,7 @@ mindmap
       Speculative Prefetching on Spare IOPS
 ```
 
-#### The Software Resources Catalog
+#### 3.7.2.1. The Software Resources Catalog
 
 **SOFTWARE RESOURCES CATALOG**
 
@@ -10992,7 +10993,7 @@ mindmap
 
 ------------------------------------------------------------------------
 
-### 7.3. Contradictions are Expressed via Quality Attributes or Operating Modes
+### 3.7.3. Contradictions are Expressed via Quality Attributes or Operating Modes
 
 In software engineering, a **Contradiction** arises when an effort to improve one system property or satisfy one stakeholder requirement degrades another critical property.
 
@@ -11029,7 +11030,7 @@ The Nine Operations resolve software contradictions through the **Four Software 
 
 ------------------------------------------------------------------------
 
-### 7.4. A Prototype Can Be an Executable Solution Branch
+### 3.7.4. A Prototype Can Be an Executable Solution Branch
 
 A defining advantage of software engineering over physical engineering is the **near-zero cost of branch creation, environment isolation, and automated measurement**. In civil or mechanical engineering, building a prototype bridge or turbine requires physical materials, tooling, and months of manufacturing. In software engineering, an engineer or AI agent can instantiate an isolated, fully functional solution branch in seconds.
 
@@ -11060,7 +11061,7 @@ sequenceDiagram
     end
 ```
 
-#### Protocol for an Executable Solution Branch
+#### 3.7.4.1. Protocol for an Executable Solution Branch
 
 1.  **Formulate Falsifiable Hypothesis (`HYP-*`)**: Define the exact quantitative or structural criteria that would disprove the candidate mechanism.
 2.  **Isolate via Ephemeral Worktree**: Execute `git worktree add -b spike/hypothesis-eval` to prevent polluting the primary development branch.
@@ -11071,7 +11072,7 @@ sequenceDiagram
 
 ------------------------------------------------------------------------
 
-## 8. Software Contradictions as a First-Class Concept
+## 3.8. Software Contradictions as a First-Class Concept
 
 To systematically solve software engineering problems, we categorize architectural trade-offs into **Six Quality Attribute Contradiction Families**, grounded in the taxonomy of [Bass, Clements & Kazman (2021)](https://www.pearson.com/en-us/subject-catalog/p/software-architecture-in-practice/P200000009477), the data systems principles of [Kleppmann (2017)](https://dataintensive.net/), and the security fundamentals of [Saltzer & Schroeder (1975)](https://doi.org/10.1109/PROC.1975.9939).
 
@@ -11089,9 +11090,9 @@ graph LR
 
 ------------------------------------------------------------------------
 
-### 8.1. Performance
+### 3.8.1. Performance
 
-#### 8.1.1. Formal Mathematical & Structural Formulations
+#### 3.8.1.1. Formal Mathematical & Structural Formulations
 
 Performance contradictions in software engineering are governed by queueing theory, concurrency limits, and resource utilization bounds:
 
@@ -11099,7 +11100,7 @@ Performance contradictions in software engineering are governed by queueing theo
 - **Kingman's Approximation for Heavy Traffic in $G/G/1$ Queues**: $$W_q \approx \left( \frac{\rho}{1 - \rho} \right) \left( \frac{C_a^2 + C_s^2}{2} \right) \frac{1}{\mu}$$ Where $\rho = \lambda / \mu$ is server utilization, $C_a$ is the coefficient of variation of inter-arrival times, $C_s$ is the coefficient of variation of service times, and $\mu$ is service rate. As utilization $\rho \to 1$, queueing delay $W_q \to \infty$.
 - **Gunther's Universal Scalability Law (USL)**: $$C(N) = \frac{N}{1 + \sigma (N - 1) + \kappa N (N - 1)}$$ Where $N$ is concurrent workers/nodes, $\sigma$ represents contention (serialization overhead, Amdahl's law), and $\kappa$ represents crosstalk (coherency delay, cross-node cache invalidation).
 
-#### 8.1.2. Systematic Contradiction Breakdown
+#### 3.8.1.2. Systematic Contradiction Breakdown
 
 **PERFORMANCE CONTRADICTION TAXONOMY**
 
@@ -11116,7 +11117,7 @@ Performance contradictions in software engineering are governed by queueing theo
 | Database Offload | to protect DB, but short to | ratio, but serves outdated data | or domain inconsistency; |
 |  | maintain data accuracy. | during concurrent mutations. | short TTL causes stampedes. |
 
-#### 8.1.3. Clean Resolution via Separation Principles
+#### 3.8.1.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11148,9 +11149,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.2. Modifiability
+### 3.8.2. Modifiability
 
-#### 8.2.1. Formal Mathematical & Structural Formulations
+#### 3.8.2.1. Formal Mathematical & Structural Formulations
 
 Modifiability reflects the cost and ripple effect of changing software components:
 
@@ -11162,7 +11163,7 @@ Modifiability reflects the cost and ripple effect of changing software component
   - **Abstractness ($A$)**: Ratio of abstract classes/interfaces to total classes.
   - **Distance from the Main Sequence ($D$)**: $$D = \|A + I - 1\|, \quad D \in [0, 1]$$ $D = 0$ represents an optimally balanced module (stable packages are abstract; unstable packages are concrete).
 
-#### 8.2.2. Systematic Contradiction Breakdown
+#### 3.8.2.2. Systematic Contradiction Breakdown
 
 **MODIFIABILITY CONTRADICTION TAXONOMY**
 
@@ -11180,7 +11181,7 @@ Modifiability reflects the cost and ripple effect of changing software component
 | Strict Encapsulation | extension, but sealed to | plugins allows external code to | depend on private details; |
 |  | preserve internal invariants. | violate domain consistency rules. | refactoring breaks plugins. |
 
-#### 8.2.3. Clean Resolution via Separation Principles
+#### 3.8.2.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11212,9 +11213,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.3. Reliability
+### 3.8.3. Reliability
 
-#### 8.3.1. Formal Mathematical & Structural Formulations
+#### 3.8.3.1. Formal Mathematical & Structural Formulations
 
 Reliability in distributed software systems is governed by probability theory and distributed consensus constraints:
 
@@ -11226,7 +11227,7 @@ Reliability in distributed software systems is governed by probability theory an
   - In a system that has partitions ($P$), one must choose between Availability ($A$) and Consistency ($C$).
   - **Else ($E$)**, when the system is running normally without partitions, one must choose between Latency ($L$) and Consistency ($C$).
 
-#### 8.3.2. Systematic Contradiction Breakdown
+#### 3.8.3.2. Systematic Contradiction Breakdown
 
 **RELIABILITY CONTRADICTION TAXONOMY**
 
@@ -11245,7 +11246,7 @@ Reliability in distributed software systems is governed by probability theory an
 | Write Latency | guarantee persistence, but | millisecond write latency; | throughput bottleneck. |
 |  | respond in sub-millisecond. | memory buffering risks loss. |  |
 
-#### 8.3.3. Clean Resolution via Separation Principles
+#### 3.8.3.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11278,9 +11279,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.4. Testability and Diagnosability
+### 3.8.4. Testability and Diagnosability
 
-#### 8.4.1. Formal Mathematical & Structural Formulations
+#### 3.8.4.1. Formal Mathematical & Structural Formulations
 
 Testability and diagnosability quantify the friction of verifying invariants and isolating runtime defects:
 
@@ -11288,7 +11289,7 @@ Testability and diagnosability quantify the friction of verifying invariants and
 - **Test Suite Execution Time vs Defect Coverage**: $$T_{\text{suite}} = \sum_{i=1}^n t_i, \quad \text{Coverage} = \frac{\|\text{Exercised Invariants}\|}{\|\text{Total Invariants}\|}$$ The objective is to maximize Defect Coverage while holding $T_{\text{suite}} \le T_{\text{threshold}}$ (for example, $<5\text{ minutes}$ for local CI loops).
 - **Flakiness Probability ($P_{\text{flake}}$)**: $$P_{\text{flake}}(\text{Suite}) = 1 - \prod_{i=1}^n (1 - p_{\text{flake}, i})$$ For a suite of 1,000 integration tests where each test has a tiny flakiness probability $p = 0.001$, the suite flakiness rate is $P = 1 - (0.999)^{1000} \approx 63.2\%$.
 
-#### 8.4.2. Systematic Contradiction Breakdown
+#### 3.8.4.2. Systematic Contradiction Breakdown
 
 **TESTABILITY CONTRADICTION TAXONOMY**
 
@@ -11307,7 +11308,7 @@ Testability and diagnosability quantify the friction of verifying invariants and
 | Real-World | but real concurrency is | inherently non-deterministic and | production; impossible to |
 | Concurrency Testing | non-deterministic. | unseeded. | debug locally. |
 
-#### 8.4.3. Clean Resolution via Separation Principles
+#### 3.8.4.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11339,9 +11340,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.5. Security
+### 3.8.5. Security
 
-#### 8.5.1. Formal Mathematical & Structural Formulations
+#### 3.8.5.1. Formal Mathematical & Structural Formulations
 
 Security contradictions are governed by access control models, cryptography, and information-theoretic privacy constraints:
 
@@ -11349,7 +11350,7 @@ Security contradictions are governed by access control models, cryptography, and
 - **Attack Surface Metric**: $$\text{AttackSurface} = \sum_{i=1}^n w_{\text{entry}} \cdot \text{EntryPoint}_i + \sum_{j=1}^m w_{\text{channel}} \cdot \text{Channel}_j + \sum_{k=1}^p w_{\text{data}} \cdot \text{UntrustedData}_k$$
 - **Cryptographic Erasure (Crypto-Shredding) Invariant**: $$\text{Data}_{\text{plaintext}} = D_k(\text{Data}_{\text{ciphertext}}), \quad \text{Destroy}(k) \implies P(\text{Recover}(\text{Data}_{\text{plaintext}})) \le \frac{1}{2^{256}}$$
 
-#### 8.5.2. Systematic Contradiction Breakdown
+#### 3.8.5.2. Systematic Contradiction Breakdown
 
 **SECURITY CONTRADICTION TAXONOMY**
 
@@ -11368,7 +11369,7 @@ Security contradictions are governed by access control models, cryptography, and
 | Throughput & Stream | CVE attacks, but streamed at | and break zero-copy network | severe ingress bandwidth |
 | Processing | multi-gigabit line rate. | streaming pipelines. | bottlenecks. |
 
-#### 8.5.3. Clean Resolution via Separation Principles
+#### 3.8.5.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11398,9 +11399,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.6. Economics
+### 3.8.6. Economics
 
-#### 8.6.1. Formal Mathematical & Structural Formulations
+#### 3.8.6.1. Formal Mathematical & Structural Formulations
 
 Software economics governs the optimization of total engineering effort, infrastructure run-costs, and organizational velocity:
 
@@ -11408,7 +11409,7 @@ Software economics governs the optimization of total engineering effort, infrast
 - **Unit Economic Efficiency ($\eta_{\text{unit}}$)**: $$\eta_{\text{unit}} = \frac{\text{Delivered Business Value (Transactions)}}{\text{Cloud Infrastructure Spend (\$) } + \text{On-Call Engineering Hours}}$$
 - **Cognitive Load ($CL$)**: $$CL = \text{Intrinsic Load} + \text{Germane Load} + \text{Extraneous Architectural Load}$$ Minimizing Extraneous Load (convoluted deployment rituals, distributed tracing debugging, manual configuration) directly increases feature delivery velocity ([Forsgren, Humble & Kim, 2018](https://itrevolution.com/product/accelerate/)).
 
-#### 8.6.2. Systematic Contradiction Breakdown
+#### 3.8.6.2. Systematic Contradiction Breakdown
 
 **ECONOMICS CONTRADICTION TAXONOMY**
 
@@ -11427,7 +11428,7 @@ Software economics governs the optimization of total engineering effort, infrast
 | Margin Compression | overhead, but lock architecture | but create vendor lock-in and | to migrate when provider |
 |  | to high vendor unit margins. | severe cost inflation at scale. | raises prices. |
 
-#### 8.6.3. Clean Resolution via Separation Principles
+#### 3.8.6.3. Clean Resolution via Separation Principles
 
 ``` mermaid
 flowchart TD
@@ -11459,7 +11460,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-### 8.7. Master Summary Matrix of Software Contradictions and Separation Mechanisms
+### 3.8.7. Master Summary Matrix of Software Contradictions and Separation Mechanisms
 
 **MASTER SOFTWARE CONTRADICTION & SEPARATION MATRIX**
 
@@ -11498,9 +11499,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 9. Software Equivalent of an Effects Database
+## 3.9. Software Equivalent of an Effects Database
 
-## 9.1. Theoretical Foundations & Epistemic Motivation
+### 3.9.1. Theoretical Foundations & Epistemic Motivation
 
 In classical engineering design and inventive problem solving, Genrich Altshuller ([Altshuller, 1984, *Creativity as an Exact Science*, Gordon and Breach Science Publishers, ISBN: 978-0677208206](https://en.wikipedia.org/wiki/TRIZ)) established that high-level inventive breakthroughs occur when an engineer maps a desired technical function $F$ to an invariant physical, chemical, or geometric effect ($F \to E \to S$), rather than engaging in random trial-and-error within a single product domain. In mechanical and civil systems, physical laws (for example, the piezoelectric effect, Bernoulli's principle, shape-memory alloys) act as stable, repeatable mechanisms that transform inputs into outputs under defined boundary conditions.
 
@@ -11530,7 +11531,7 @@ Frank Buschmann, Regine Meunier, Hans Rohnert, Peter Sommerlad, and Michael Stal
 
 ------------------------------------------------------------------------
 
-## 9.2. Formal Epistemic Structure of a Software Effect
+### 3.9.2. Formal Epistemic Structure of a Software Effect
 
 In the Ariadne epistemic ontology, a **Computational Effect** is an invariant mapping from a functional requirement and operational boundary conditions to a formal algorithmic pattern, accompanied by its inherent resource costs, failure modes, and falsification methods:
 
@@ -11548,11 +11549,11 @@ Where:
 
 ------------------------------------------------------------------------
 
-## 9.3. Populated Software Architectural & Computational Effects Database
+### 3.9.3. Populated Software Architectural & Computational Effects Database
 
 The following tables define the formal catalog across six fundamental computational functions: **Deduplication**, **Distributed Coordination**, **Caching & Latency Decoupling**, **Routing & Load Distribution**, **Consistency & State Synchronization**, and **Fault Isolation & Concurrency Control**.
 
-### 9.3.1. Function: Deduplication & Idempotency
+#### 3.9.3.1. Function: Deduplication & Idempotency
 
 > **FUNCTION: DEDUPLICATION & IDEMPOTENCY**
 > Objective: Ensure that repeated execution of an operation produces the identical system state
@@ -11568,7 +11569,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-### 9.3.2. Function: Distributed Coordination & Consensus
+#### 3.9.3.2. Function: Distributed Coordination & Consensus
 
 > **FUNCTION: DISTRIBUTED COORDINATION & CONSENSUS**
 > Objective: Achieve agreement on a single data value or execution state across multiple nodes in
@@ -11583,7 +11584,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-### 9.3.3. Function: Caching & Latency Decoupling
+#### 3.9.3.3. Function: Caching & Latency Decoupling
 
 > **FUNCTION: CACHING & LATENCY DECOUPLING**
 > Objective: Minimize response latency and downstream load by serving repeated read requests from
@@ -11598,7 +11599,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-### 9.3.4. Function: Routing & Load Distribution
+#### 3.9.3.4. Function: Routing & Load Distribution
 
 > **FUNCTION: ROUTING & LOAD DISTRIBUTION**
 > Objective: Distribute incoming computational requests across heterogeneous worker nodes to
@@ -11613,7 +11614,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-### 9.3.5. Function: Consistency & State Synchronization
+#### 3.9.3.5. Function: Consistency & State Synchronization
 
 > **FUNCTION: CONSISTENCY & STATE SYNCHRONIZATION**
 > Objective: Maintain coherent shared state across multiple execution environments and replicas
@@ -11628,7 +11629,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-### 9.3.6. Function: Fault Isolation & Concurrency Control
+#### 3.9.3.6. Function: Fault Isolation & Concurrency Control
 
 > **FUNCTION: FAULT ISOLATION & CONCURRENCY CONTROL**
 > Objective: Prevent local runtime faults, slow downstream dependencies, and resource exhaustion
@@ -11643,7 +11644,7 @@ The following tables define the formal catalog across six fundamental computatio
 
 ------------------------------------------------------------------------
 
-## 9.4. Epistemic Integration in the Ariadne Reasoning Harness
+### 3.9.4. Epistemic Integration in the Ariadne Reasoning Harness
 
 In the Ariadne reasoning layer, the Software Effects Database serves as the core transformation engine during **Operation 4: Explore the Space of Architectures and Implementations** and **Operation 3: Transform the Existing Software System**.
 
@@ -11681,9 +11682,9 @@ When an AI agent explores candidate solutions:
 
 ------------------------------------------------------------------------
 
-## 10. Why Component Elimination is Crucial in Software
+## 3.10. Why Component Elimination is Crucial in Software
 
-## 10.1. Theoretical Foundations & The Physics of Software Trimming
+### 3.10.1. Theoretical Foundations & The Physics of Software Trimming
 
 In classical TRIZ ([Altshuller, 1984](https://en.wikipedia.org/wiki/TRIZ)), the law of increasing Ideality dictates that an engineering system evolves toward delivering maximum useful function while minimizing cost and harm:
 
@@ -11712,7 +11713,7 @@ flowchart TD
     end
 ```
 
-### 10.1.1. The Compounding Carrying Cost of Software Components
+#### 3.10.1.1. The Compounding Carrying Cost of Software Components
 
 In [*Code Quality: The Open Source Perspective* (Spinellis, 2006, Addison-Wesley, ISBN: 978-0321166074)](https://www.spinellis.gr/codequality/), Diomidis Spinellis demonstrated that software code and architectural services are not assets; **they are liabilities**. Every line of code, every microservice boundary, and every external state store incurs an ongoing marginal cost:
 
@@ -11731,7 +11732,7 @@ When a software component is eliminated, $C_{\text{build}}$ is a sunk cost, but 
 
 ------------------------------------------------------------------------
 
-## 10.2. Literature Grounding on Software Elimination and Refactoring
+### 3.10.2. Literature Grounding on Software Elimination and Refactoring
 
 Software component elimination is supported by decades of foundational literature:
 
@@ -11748,7 +11749,7 @@ Software component elimination is supported by decades of foundational literatur
 
 ------------------------------------------------------------------------
 
-## 10.3. The Four Trimming Rules for Software Systems
+### 3.10.3. The Four Trimming Rules for Software Systems
 
 Adapted from Altshuller's classical trimming methodology, software trimming operates under four formal rules:
 
@@ -11765,29 +11766,29 @@ flowchart TD
     Rule4 -- No --> Keep["Retain Component C<br/>(Essential Mechanism)"]
 ```
 
-### Rule 1: Eliminate the Function ($F$ is Obsolete)
+#### 3.10.3.1. Rule 1: Eliminate the Function ($F$ is Obsolete)
 
 - **Condition:** The business requirement or historical technical constraint that necessitated the component no longer exists.
 - **Software Example:** Deleting custom polyfills or browser-compatibility shims once legacy browsers are deprecated; removing custom batching workers once database connection pooling is natively handled by the driver.
 
-### Rule 2: The Object Performs the Function on Itself ($O \to F$)
+#### 3.10.3.2. Rule 2: The Object Performs the Function on Itself ($O \to F$)
 
 - **Condition:** The recipient of the function possesses sufficient computational capacity, state, or context to execute the function directly.
 - **Software Example:** Eliminating a centralized date-formatting or input-validation microservice and performing validation and formatting directly within the client/browser runtime or edge proxy.
 
-### Rule 3: Another Existing Component or Platform Carrier Absorbs the Function ($B \to F$)
+#### 3.10.3.3. Rule 3: Another Existing Component or Platform Carrier Absorbs the Function ($B \to F$)
 
 - **Condition:** An existing infrastructure component (for example, the relational database, the operating system kernel, the web server, the compiler) can perform the function with marginal additional resource cost.
 - **Software Example:** Eliminating a custom Redis-based deduplication daemon by using PostgreSQL's native `INSERT ... ON CONFLICT DO NOTHING` with a unique index.
 
-### Rule 4: Eliminate the Object of the Function ($O$ is Removed)
+#### 3.10.3.4. Rule 4: Eliminate the Object of the Function ($O$ is Removed)
 
 - **Condition:** The state or entity upon which the component operates is restructured or eliminated entirely.
 - **Software Example:** Eliminating a complex cache-invalidation service by replacing mutable shared database records with an append-only, immutable event stream where data is never updated in-place.
 
 ------------------------------------------------------------------------
 
-## 10.4. Taxonomy of High-Yield Trimming Candidates in Modern Software
+### 3.10.4. Taxonomy of High-Yield Trimming Candidates in Modern Software
 
 The following catalog identifies ubiquitous software components that frequently represent pure accidental complexity and should be subjected to systematic trimming:
 
@@ -11801,7 +11802,7 @@ The following catalog identifies ubiquitous software components that frequently 
 
 ------------------------------------------------------------------------
 
-## 10.5. Safe Function Carrier Redistribution Protocol
+### 3.10.5. Safe Function Carrier Redistribution Protocol
 
 Component elimination must never be performed via reckless deletion. In accordance with Ariadne's **Operation 9: Verify and Safely Execute the Transition**, carrier redistribution follows a strict 6-phase protocol:
 
@@ -11846,9 +11847,9 @@ sequenceDiagram
 
 ------------------------------------------------------------------------
 
-## 11. Why Agents Must Model from Codebase and System Data
+## 3.11. Why Agents Must Model from Codebase and System Data
 
-## 11.1. Theoretical Foundations & Literature Grounding
+### 3.11.1. Theoretical Foundations & Literature Grounding
 
 In [*The Field Guide to Understanding 'Human Error'* (Dekker, 2014, 3rd ed., CRC Press, ISBN: 978-1472439055)](https://www.routledge.com/The-Field-Guide-to-Understanding-Human-Error/Dekker/p/book/9781472439055), Sidney Dekker established the **Local Rationality Principle**: human actors make decisions that make sense to them given their situational awareness, local goals, and available data at the time. When engineers post-hoc explain why a system failed or how an architecture works, their retrospective narratives are warped by hindsight bias, incomplete recall, and idealizations of the system as designed rather than the system as built.
 
@@ -11877,7 +11878,7 @@ For AI coding agents, this principle is an absolute epistemic imperative. An LLM
 
 ------------------------------------------------------------------------
 
-## 11.2. The Five-Layer Grounding Protocol for Autonomous Agents
+### 3.11.2. The Five-Layer Grounding Protocol for Autonomous Agents
 
 To guarantee that reasoning is anchored in empirical reality, an AI agent operating within the Ariadne framework MUST execute the **Five-Layer Grounding Protocol** before formulating causal hypotheses (`HYP-*`), transforming systems (`CAN-*`), or finalizing decisions (`DEC-*`).
 
@@ -11888,7 +11889,7 @@ To guarantee that reasoning is anchored in empirical reality, an AI agent operat
 > LAYER 4: HISTORICAL & CHURN GROUNDING (Git Log, Blame, Co-Change Coupling, Hotspot Analysis)
 > LAYER 5: DYNAMIC & TELEMETRY GROUNDING (OpenTelemetry Spans, p99 Latencies, Query EXPLAIN Plans)
 
-### Layer 1: Syntactic & Type Grounding (AST & Type System)
+#### 3.11.2.1. Layer 1: Syntactic & Type Grounding (AST & Type System)
 
 The agent must never guess a function signature, interface contract, or data structure. It must execute programmatic AST queries (via Tree-sitter, LSP servers, or compiler reflection):
 
@@ -11896,7 +11897,7 @@ The agent must never guess a function signature, interface contract, or data str
 - **Interface Implementations:** Enumerate all concrete classes or structs implementing an interface seam.
 - **Compiler Invariants:** Run `tsc --noEmit`, `cargo check`, or `mypy` to verify that proposed changes satisfy all type-level proofs.
 
-### Layer 2: Topological Grounding (Call Graphs & Dependency Trees)
+#### 3.11.2.2. Layer 2: Topological Grounding (Call Graphs & Dependency Trees)
 
 The agent must map the structural change radius prior to editing:
 
@@ -11904,7 +11905,7 @@ The agent must map the structural change radius prior to editing:
 - **Efferent Coupling ($C_e$):** Enumerate every module the target component depends on (what hidden dependencies are being dragged along?).
 - **Instability Metric:** $I = \frac{C_e}{C_a + C_e}$. High instability indicates components that must not be depended upon by core domain logic.
 
-### Layer 3: Persistence & State Grounding (Schemas & Migrations)
+#### 3.11.2.3. Layer 3: Persistence & State Grounding (Schemas & Migrations)
 
 The agent must inspect the physical data layer:
 
@@ -11912,14 +11913,14 @@ The agent must inspect the physical data layer:
 - **Physical Indexes:** Verify which columns have B-tree, Hash, or GIN indexes before proposing query optimizations.
 - **Foreign Key Constraints & Triggers:** Uncover hidden cascade deletes or database-level side effects.
 
-### Layer 4: Historical & Churn Grounding (Git Forensics)
+#### 3.11.2.4. Layer 4: Historical & Churn Grounding (Git Forensics)
 
 The agent must analyze version control history:
 
 - **Code Churn Analysis:** $\text{Hotspot Score} = \text{Cyclomatic Complexity} \times \text{Commit Frequency}$. Focus refactoring on high-churn, high-defect files.
 - **Temporal Coupling (Co-Change):** Identify files that are consistently modified in the same commit across historical pull requests, exposing hidden architectural couplings invisible to static import analyzers.
 
-### Layer 5: Dynamic & Telemetry Grounding (OpenTelemetry & APM)
+#### 3.11.2.5. Layer 5: Dynamic & Telemetry Grounding (OpenTelemetry & APM)
 
 The agent must ground performance and reliability claims in real runtime telemetry:
 
@@ -11929,7 +11930,7 @@ The agent must ground performance and reliability claims in real runtime telemet
 
 ------------------------------------------------------------------------
 
-## 11.3. Concrete Agent Tool Invocations and Evidence Artifacts
+### 3.11.3. Concrete Agent Tool Invocations and Evidence Artifacts
 
 The following table specifies the concrete CLI commands and inspection mechanisms required for each grounding layer:
 
@@ -11943,9 +11944,9 @@ The following table specifies the concrete CLI commands and inspection mechanism
 
 ------------------------------------------------------------------------
 
-## 12. Independent Contradiction Reviewer
+## 3.12. Independent Contradiction Reviewer
 
-## 12.1. Theoretical Foundations & The Cognitive Pathology of Solution Bias
+### 3.12.1. Theoretical Foundations & The Cognitive Pathology of Solution Bias
 
 In [*Creativity as an Exact Science* (Altshuller, 1984)](https://en.wikipedia.org/wiki/TRIZ), Altshuller warned against the primary cognitive trap of inventors: **Problem Displacement**. When an engineer devises a solution to eliminate Contradiction $A$, they frequently celebrate the victory while blinding themselves to the fact that their mechanism has merely shifted the friction into Secondary Contradiction $B$ elsewhere in the system.
 
@@ -11986,7 +11987,7 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
 
 ------------------------------------------------------------------------
 
-## 12.2. The Seven Adversarial Critique Vectors
+### 3.12.2. The Seven Adversarial Critique Vectors
 
 > **THE SEVEN ADVERSARIAL CRITIQUE VECTORS**
 > 1. COMPLEXITY DISPLACEMENT: Did code simplicity merely shift into operational fragility?
@@ -11997,43 +11998,43 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
 > 6. UNVERIFIED RESOURCE: Does the mechanism rely on a phantom API, speed, or platform primitive?
 > 7. TELEMETRY CONFABULATION: Is the design justified by synthetic mean metrics masking bursts?
 
-### Vector 1: Complexity Displacement (Code $\to$ Ops / Infrastructure)
+#### 3.12.2.1. Vector 1: Complexity Displacement (Code $\to$ Ops / Infrastructure)
 
 - **The Trap:** The developer or agent eliminates complex in-process concurrency logic by introducing an external message broker, three microservices, a distributed cache, and a service mesh. The application code looks "clean," but the operational complexity, failure modes, and debugging difficulty have increased by an order of magnitude.
 - **Reviewer Attack:** *"Does the total system complexity (code + infrastructure + deployment topology + telemetry) decrease, or did we merely export in-process complexity into distributed network failure modes?"*
 - **Falsification Check:** Count new infrastructure components, network hops, and operational runbooks required to operate the solution.
 
-### Vector 2: Hidden State & Distributed Drift
+#### 3.12.2.2. Vector 2: Hidden State & Distributed Drift
 
 - **The Trap:** A service claims to be "stateless" to achieve horizontal scaling, but delegates state to in-memory local caches, sticky load-balancer sessions, or uncoordinated background buffers that drift out of sync during network partitions.
 - **Reviewer Attack:** *"Where does state actually reside during concurrent executions, and what happens when an instance is killed abruptly during processing?"*
 - **Falsification Check:** Inject `SIGKILL` into arbitrary instances during concurrent mutations; assert zero state loss or inconsistency.
 
-### Vector 3: Invariant Weakening (The Silent Compromise)
+#### 3.12.2.3. Vector 3: Invariant Weakening (The Silent Compromise)
 
 - **The Trap:** The agent claims to have resolved a contradiction between write latency and consistency by switching from linearizable transactions to eventual consistency, without proving that the business domain can tolerate stale reads or lost updates.
 - **Reviewer Attack:** *"Did we genuinely resolve the physical/computational contradiction via inventive separation, or did we covertly redefine the problem by abandoning a non-negotiable invariant?"*
 - **Falsification Check:** Audit the Problem Framing Invariants (`FRAME-`); verify that all hard constraints remain $100\%$ satisfied.
 
-### Vector 4: Fragility Shift & Cascading Failure Potential
+#### 3.12.2.4. Vector 4: Fragility Shift & Cascading Failure Potential
 
 - **The Trap:** A synchronous timeout is replaced with an asynchronous retry loop with exponential backoff. While this eliminates immediate timeout errors, under downstream brownout conditions, the retries accumulate and trigger a catastrophic **Retry Storm (Thundering Herd)** that obliterates downstream recovery.
 - **Reviewer Attack:** *"Under steady-state degradation or downstream saturation, does this mechanism fail fast and isolate the blast radius, or does it amplify load and propagate failure upstream?"*
 - **Falsification Check:** Simulate downstream latency increase from $10\text{ ms}$ to $2000\text{ ms}$; verify that upstream memory, thread pools, and retry queues remain strictly bounded.
 
-### Vector 5: Unbudgeted Transition & Migration Impossibility
+#### 3.12.2.5. Vector 5: Unbudgeted Transition & Migration Impossibility
 
 - **The Trap:** The agent presents an elegant target architecture ($\mathcal{A}_{\text{target}}$) with a pristine relational schema and clean domain boundaries, but provides no viable, zero-downtime transition architecture ($\mathcal{A}_{\text{trans}}$) to migrate 50 million legacy records without service downtime.
 - **Reviewer Attack:** *"Can we deploy this change incrementally without a maintenance window, dual-write safely during transition, assert parity, and roll back instantly at any second?"*
 - **Falsification Check:** Inspect the Transition Plan (`TRANS-`); verify the presence of an Expand/Contract schema migration and an explicit backward-compatibility shim.
 
-### Vector 6: Unverified Resource & Phantom Capability
+#### 3.12.2.6. Vector 6: Unverified Resource & Phantom Capability
 
 - **The Trap:** The proposed architecture assumes that the database supports transactional DDL, that the filesystem guarantees atomic writes, that network round-trips across availability zones are $< 1\text{ ms}$, or that a third-party API has infinite rate limits.
 - **Reviewer Attack:** *"Which specific claims in this candidate mechanism are marked as `ASSUMED` or `PROPOSED` rather than `FACT` or `MEASURED`, and what is the cost if that assumption is false?"*
 - **Falsification Check:** Require empirical measurement (`EVDREQ-`) before decision locking; run microbenchmark on target infrastructure.
 
-### Vector 7: Telemetry Confabulation & Mean-Value Fallacy
+#### 3.12.2.7. Vector 7: Telemetry Confabulation & Mean-Value Fallacy
 
 - **The Trap:** The agent validates performance using average response times (for example, *"Mean latency is 15 ms"*), concealing the fact that the 99th percentile tail latency has spiked to $850\text{ ms}$ due to garbage collection pauses or lock contention.
 - **Reviewer Attack:** *"Are our performance and reliability claims evaluated across high-percentile distributions (p95, p99, p99.9), burst traffic, and cold-start phases, or are they masked by synthetic steady-state averages?"*
@@ -12041,7 +12042,7 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
 
 ------------------------------------------------------------------------
 
-## 12.3. The Adversarial Reviewer Protocol & Verdict State Machine
+### 3.12.3. The Adversarial Reviewer Protocol & Verdict State Machine
 
 The Adversarial Contradiction Reviewer operates as a formal state machine on candidate mechanisms (`CAN-*`):
 
@@ -12080,7 +12081,7 @@ stateDiagram-v2
     DecisionLocked --> [*]
 ```
 
-### 12.3.1. Formal Schema for Critique Node (`CRIT-*`)
+#### 3.12.3.1. Formal Schema for Critique Node (`CRIT-*`)
 
 ``` typescript
 const manifestExample = String.raw`
@@ -12132,9 +12133,9 @@ invalidation_triggers:
 
 ------------------------------------------------------------------------
 
-## 12.4. Summary: The Invariant Epistemic Cycle of Systematic Software Invention
+### 3.12.4. Summary: The Invariant Epistemic Cycle of Systematic Software Invention
 
-Sections 9 through 12 complete the bridge from abstract inventive theory to concrete, grounded software reality:
+Sections 3.9 through 3.12 complete the bridge from abstract inventive theory to concrete, grounded software reality:
 
 ``` mermaid
 flowchart LR
@@ -12155,9 +12156,9 @@ By decoupling computational mechanisms from transient commercial software, relen
 
 ------------------------------------------------------------------------
 
-## 13. Not a Project Lifecycle, but an Uncertainty Router
+## 4.13. Not a Project Lifecycle, but an Uncertainty Router
 
-## 13.1. Epistemic Routing vs. Delivery Lifecycles
+### 4.13.1. Epistemic Routing vs. Delivery Lifecycles
 
 In conventional software engineering practice, methodologies such as Waterfall, Scrum, Kanban, Extreme Programming (XP), and SAFe organize work along axes of **delivery timeboxes, resource allocation, and backlog management**. They define how tickets move across boards, how sprints are planned, how work-in-progress (WIP) is capped, and how increments are released.
 
@@ -12205,37 +12206,37 @@ The **Nine Operations of Systematic Inventive Thinking** do not constitute an al
 
 ------------------------------------------------------------------------
 
-## 13.2. Theoretical & Epistemic Foundations
+### 4.13.2. Theoretical & Epistemic Foundations
 
 The formalization of software reasoning as an uncertainty-routing trajectory is grounded in six seminal pillars of computer science, cybernetics, and management science:
 
-### 1. Bounded Rationality and State-Space Search
+#### 4.13.2.1. Bounded Rationality and State-Space Search
 
 In [*The Sciences of the Artificial* (Simon, 1969, MIT Press, ISBN: 978-0262691918)](https://mitpress.mit.edu/9780262691918/the-sciences-of-the-artificial/), Herbert A. Simon established that human designers possess bounded rationality and cannot evaluate the combinatorial totality of complex systems. Problem solving in artificial systems is fundamentally a **search through a structured state space of problem representations and solution operators**. Simon demonstrated that complex systems exhibit hierarchical decomposability and that solving "ill-structured problems" requires iterative reformulation: transforming an ambiguous initial state into a structured space where heuristic search operators can be systematically applied.
 
-### 2. Information Value Theory and Decision Under Uncertainty
+#### 4.13.2.2. Information Value Theory and Decision Under Uncertainty
 
 In [*Information Value Theory* (Howard, 1966, IEEE Transactions on Systems Science and Cybernetics, DOI: 10.1109/TSSC.1966.300074)](https://doi.org/10.1109/TSSC.1966.300074), Ronald A. Howard formulated the mathematical foundations for quantifying the economic value of reducing uncertainty before committing to irreversible actions. Howard introduced the **Expected Value of Information (EVOI)** and **Expected Value of Perfect Information (EVPI)**, demonstrating that information has zero economic value unless it possesses the potential to alter an impending decision. In software engineering, this establishes that empirical tests, prototypes, and investigations are justified strictly by their power to eliminate high-cost architectural risk.
 
-### 3. Cognitive Discipline and Mental Limitations
+#### 4.13.2.3. Cognitive Discipline and Mental Limitations
 
 In [*The Humble Programmer* (Dijkstra, 1972, ACM Turing Lecture, Communications of the ACM, DOI: 10.1145/355604.361591)](https://dl.acm.org/doi/10.1145/355604.361591), Edsger W. Dijkstra articulated that the central challenge of software engineering is the sheer disparity between the complexity of computational systems and the limited capacity of the human mind. Because human working memory is severely constrained, software engineering must be practiced as a formal discipline of mental economy: rigorously separating concerns, abstracting behavioral contracts from internal mechanisms, and constructing verifiable proofs rather than relying on unguided cleverness.
 
-### 4. Systemic Constraints and Conflict Clouds
+#### 4.13.2.4. Systemic Constraints and Conflict Clouds
 
 In [*What is this thing called Theory of Constraints and how should it be implemented?* (Goldratt, 1990, North River Press, ISBN: 978-0884271666)](https://www.toc-goldratt.com/en/product/what-is-this-thing-called-theory-of-constraints-and-how-should-it-be-implemented), Eliyahu M. Goldratt established that any manageable system is limited by a very small number of constraints (often exactly one). Attempting to optimize non-constraints yields zero systemic throughput improvement while increasing work-in-progress and operational noise. Furthermore, Goldratt's *Evaporating Cloud* (conflict resolution diagram) formalized that core conflicts are not solved through compromise, but by invalidating the hidden, erroneous assumptions that link legitimate objectives to conflicting prerequisites.
 
-### 5. Essential vs. Accidental Complexity
+#### 4.13.2.5. Essential vs. Accidental Complexity
 
 In [*No Silver Bullet: Essence and Accidents of Software Engineering* (Brooks, 1986, IEEE Computer, DOI: 10.1109/MC.1987.1663532)](https://doi.org/10.1109/MC.1987.1663532), Fred P. Brooks Jr. proved that software engineering is inherently difficult because of its *essential complexity*—the conceptual modeling of interlocking data structures, state spaces, temporal relationships, and invariant business rules. Brooks demonstrated that productivity gains cannot come from optimizing accidental syntax or tooling, but from disciplines that directly attack the conceptual construct: rapid prototyping, incremental refinement, and modular encapsulation.
 
-### 6. Empirical Feedback Loops and Decoupled Delivery
+#### 4.13.2.6. Empirical Feedback Loops and Decoupled Delivery
 
 In [*Accelerate: The Science of Lean Software and DevOps* (Forsgren, Humble & Kim, 2018, IT Revolution Press, ISBN: 978-1942788331)](https://itrevolution.com/product/accelerate/), Nicole Forsgren, Jez Humble, and Gene Kim empirically validated that high-performing technology organizations do not achieve reliability through heavyweight gatekeeping or rigid multi-month plans. Instead, high performance is driven by small batch sizes, fast automated feedback loops, loosely coupled architectures, and empirical hypothesis verification.
 
 ------------------------------------------------------------------------
 
-## 13.3. Formalization of the Epistemic Uncertainty State Space
+### 4.13.3. Formalization of the Epistemic Uncertainty State Space
 
 In the Ariadne framework, an engineering problem at any discrete instant $t$ is represented by a formal **Epistemic State** $\mathcal{S}_t$:
 
@@ -12248,7 +12249,7 @@ Where:
 3.  $\mathcal{G}_t = (\mathcal{V}_t, \mathcal{E}_t)$ is the **Typed Epistemic Dependency Graph** (DAG), where vertices $\mathcal{V}_t$ are typed nodes (`CLM-`, `HYP-`, `CTR-`, `UNK-`, `CAN-`, `DEP-`, `DYN-`, `VAL-`, `TRANS-`, `DEC-`) and edges $\mathcal{E}_t$ represent formal epistemic relationships: $$\mathcal{E}_t \subseteq \mathcal{V}_t \times \mathcal{V}_t \times {\text{supports}, \text{contradicts}, \text{depends_on}, \text{falsifies}, \text{invalidates}}$$
 4.  $\mathcal{C}_t$ is the set of active **Hard Invariants and Boundary Constraints** (for example, zero data loss under single-node crash, strict linearizability on financial balance, $p99 < 50\text{ ms}$).
 
-### 13.3.1. Operational State Transitions
+#### 4.13.3.1. Operational State Transitions
 
 A **Reasoning Operation** $\mathcal{O}_k$ (where $k \in \{1, 2, \dots, 9\}$) acts as a state transformation operator:
 
@@ -12272,7 +12273,7 @@ The execution of $\mathcal{O}_k$ consumes an input delta $\Delta_{\text{input}}$
 
 ------------------------------------------------------------------------
 
-## 13.4. Non-Linear Backtracking & Non-Monotonic Belief Revision
+### 4.13.4. Non-Linear Backtracking & Non-Monotonic Belief Revision
 
 Unlike rigid phase-gate delivery (where moving backward from testing to architecture is penalized as a project failure), epistemic routing treats **backtracking as an optimal, evidence-driven convergence mechanism**.
 
@@ -12298,7 +12299,7 @@ stateDiagram-v2
     Step9_Transition --> [*]: Sustained in Production
 ```
 
-### 13.4.1. Transitive Invalidation Mechanics
+#### 4.13.4.1. Transitive Invalidation Mechanics
 
 In formal logic and truth maintenance systems ([Doyle, 1979, *A Truth Maintenance System*, Artificial Intelligence, DOI: 10.1016/0004-3702(79)90008-0](https://doi.org/10.1016/0004-3702%2879%2990008-0)90008-0)), when a foundational premise is retracted, all beliefs derived from that premise must be systematically revised.
 
@@ -12325,7 +12326,7 @@ When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt
 
 ------------------------------------------------------------------------
 
-## 13.5. Comparative Analysis: Delivery Lifecycles vs. Epistemic Routing
+### 4.13.5. Comparative Analysis: Delivery Lifecycles vs. Epistemic Routing
 
 **DELIVERY LIFECYCLES VS. ARIADNE EPISTEMIC ROUTING**
 
@@ -12341,7 +12342,7 @@ When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt
 
 ------------------------------------------------------------------------
 
-## 14. Primary Route for an Unfamiliar Software Problem
+## 4.14. Primary Route for an Unfamiliar Software Problem
 
 When an engineer or autonomous software agent encounters an unfamiliar, highly ambiguous, or mission-critical software engineering problem, following an ad-hoc path leads to cognitive fixation, premature optimization, or unverified architectural bets.
 
@@ -12362,9 +12363,9 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## Step 0. Name the Decision
+### 4.14.1. Step 0. Name the Decision
 
-### 1. Objective & Semantic Boundary
+#### 4.14.1.1. Objective & Semantic Boundary
 
 Before any technical analysis begins, isolate the **exact architectural or algorithmic decision** that must be resolved. Formulate the decision as a clear choice of mechanism, boundary, or state model, rather than an open-ended discussion topic.
 
@@ -12373,18 +12374,18 @@ Classify the decision according to the **Type 1 / Type 2 Reversibility Taxonomy*
 - **Type 1 (Irreversible / Two-Way Door is Barred):** Changing persistent storage engines, distributed consensus algorithms, cross-datacenter partition boundaries, or public API wire protocols. Requires deep epistemic verification (Deep Mode).
 - **Type 2 (Reversible / Two-Way Door):** In-memory cache eviction policies, worker thread pool sizing, local module refactoring, or feature-flagged routing rules. Can proceed via Fast Mode.
 
-### 2. Formal Input Preconditions
+#### 4.14.1.2. Formal Input Preconditions
 
 - Initial trigger: bug report, performance regression alert, new product capability requirement, or architectural modernization mandate.
 - Epistemic state: $\mathcal{S}_0 = \langle \mathcal{K}_0, \mathbf{U}_0, \mathcal{G}_0 = \emptyset, \mathcal{C}_0 \rangle$.
 
-### 3. Cognitive Transformation
+#### 4.14.1.3. Cognitive Transformation
 
 1.  Strip passive descriptive language: convert *"We need to talk about our database performance"* into an active decision statement: *"Decide whether to shard the relational database by Tenant ID or migrate the write pipeline to an append-only event log."*
 2.  Identify the decision owner, stakeholders, and blast radius.
 3.  Establish the **Cost of Inaction (CoI)**: What is the measurable financial, operational, or reliability degradation if no decision is made for 90 days?
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.1.4. Produced Typed Epistemic Artifacts
 
 - Node: `DEC-INIT-[ID]`
 - Artifact: **Engineering Task Passport** (Section 21)
@@ -12397,25 +12398,25 @@ Classify the decision according to the **Type 1 / Type 2 Reversibility Taxonomy*
 - Cost of Inaction: Estimated $450,000/month in oversold merchandise compensation and customer churn.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.1.5. Verification Gates & Stop Conditions
 
 - **Gate 0.1:** The decision is formulated as an actionable dilemma or structural choice, not a vague goal.
 - **Gate 0.2:** Reversibility classification (Type 1 vs. Type 2) is explicitly recorded.
 
 ------------------------------------------------------------------------
 
-## Step 1. Frame Required Behavior
+### 4.14.2. Step 1. Frame Required Behavior
 
-### 1. Objective & Semantic Boundary
+#### 4.14.2.1. Objective & Semantic Boundary
 
 Isolate the **required observable behavioral delta** of the system, completely decoupled from any concrete programming language, third-party library, database product, or infrastructure service.
 
-### 2. Formal Input Preconditions
+#### 4.14.2.2. Formal Input Preconditions
 
 - Validated `DEC-INIT-*` passport.
 - Access to existing system specification, user requirements, or operational SLOs.
 
-### 3. Cognitive Transformation
+#### 4.14.2.3. Cognitive Transformation
 
 Apply the four framing techniques (Section 1):
 
@@ -12424,7 +12425,7 @@ Apply the four framing techniques (Section 1):
 3.  **Technique 1.3 (Shift System Boundaries):** Evaluate function placement across function, module, service, data tier, edge CDN, client application, and organizational process.
 4.  **Technique 1.4 (Shift Stakeholder Perspectives):** Frame behavior through the lenses of the end-user, data owner, security adversary, SRE operator, and downstream consumer.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.2.4. Produced Typed Epistemic Artifacts
 
 - Node: `FRAME-[ID]`
 - Node: `CLM-INV-[ID]` (Hard Invariant Claims)
@@ -12439,7 +12440,7 @@ Apply the four framing techniques (Section 1):
 - CLM-INV-02 (Availability Bound): Regional checkout latency must remain < 300 ms for p99 of requests.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.2.5. Verification Gates & Stop Conditions
 
 - **Gate 1.1:** Zero technology brands or specific libraries appear in the problem definition.
 - **Gate 1.2:** Invariants ($\mathcal{I}$) are mathematically or contractually testable.
@@ -12447,18 +12448,18 @@ Apply the four framing techniques (Section 1):
 
 ------------------------------------------------------------------------
 
-## Step 2. Verify Problem Mechanism Understanding
+### 4.14.3. Step 2. Verify Problem Mechanism Understanding
 
-### 1. Objective & Semantic Boundary
+#### 4.14.3.1. Objective & Semantic Boundary
 
 If the task involves a defect, regression, performance bottleneck, or unexplainable behavior, formulate a **falsifiable causal hypothesis** explaining the underlying mechanism. If the task is purely greenfield design, identify the core **Contradiction** between required quality attributes.
 
-### 2. Formal Input Preconditions
+#### 4.14.3.2. Formal Input Preconditions
 
 - `FRAME-*` artifact with defined required behavior and invariants.
 - Access to system telemetry, source code call graphs, execution traces, or historical failure logs.
 
-### 3. Cognitive Transformation
+#### 4.14.3.3. Cognitive Transformation
 
 Apply the diagnosis and contradiction techniques (Section 2):
 
@@ -12467,7 +12468,7 @@ Apply the diagnosis and contradiction techniques (Section 2):
 3.  **Technique 2.3 (Construct Causal Chain):** Map $\text{Observation} \to \text{Mechanism} \to \text{Root Physical Cause}$.
 4.  **Technique 2.4 (Expose Hidden Assumptions):** Expose unexamined beliefs that artificially force the trade-off.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.3.4. Produced Typed Epistemic Artifacts
 
 - Node: `HYP-[ID]` (Causal Hypothesis)
 - Node: `CTR-[ID]` (Formal Contradiction)
@@ -12485,16 +12486,16 @@ Apply the diagnosis and contradiction techniques (Section 2):
 - ASM-01 (Hidden Assumption): We assume every region must be able to sell from 100% of the global inventory pool at all times.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.3.5. Verification Gates & Stop Conditions
 
 - **Gate 2.1:** The causal hypothesis is specific enough that an experiment can be designed in advance to decisively disprove it.
 - **Gate 2.2:** Contradictions are stated without accepting arbitrary compromises.
 
 ------------------------------------------------------------------------
 
-## Step 3. Separate Lack of Options from Lack of Knowledge
+### 4.14.4. Step 3. Separate Lack of Options from Lack of Knowledge
 
-### 1. Objective & Semantic Boundary
+#### 4.14.4.1. Objective & Semantic Boundary
 
 Perform an epistemic triage: determine whether the primary barrier to progress is a **lack of architectural options** (requiring morphological expansion) or a **lack of empirical facts** (requiring targeted investigation or measurement).
 
@@ -12505,18 +12506,18 @@ flowchart TD
     Triage -- "Known Facts, but Homogeneous Solutions" --> LackOfOptions["<b>Lack of Options (Search Deficit)</b><br/>• Formulate Morphological Space<br/>• Execute Operation 3 & 4: Transform & Explore<br/>• Apply Software Separation Principles"]
 ```
 
-### 2. Formal Input Preconditions
+#### 4.14.4.2. Formal Input Preconditions
 
 - `FRAME-*`, `CTR-*`, and `HYP-*` nodes.
 - Initial list of team assumptions and open questions.
 
-### 3. Cognitive Transformation
+#### 4.14.4.3. Cognitive Transformation
 
 1.  Inspect the decision dependency chain: For every open question, evaluate its **Information Value**: $$\text{If Knowledge } K \text{ is resolved as } X \implies \text{Choose Candidate } A; \quad \text{If } Y \implies \text{Choose Candidate } B.$$ If resolving $K$ does not change the choice of candidate, $K$ is a *decision-insignificant unknown* and must be discarded.
 2.  If critical parameters are unknown (for example, actual cross-region network packet loss under peak load, lock contention duration), generate an **Evidence Request** (`EVDREQ-`) and invoke **Operation 5 (Expand Knowledge)** before designing architectures.
 3.  If parameters are known but all proposed architectures are minor variations of a single vendor product, proceed to **Step 4 (Candidate Generation)**.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.4.4. Produced Typed Epistemic Artifacts
 
 - Node: `UNK-[ID]` (Decision-Significant Unknown)
 - Node: `EVDREQ-[ID]` (Evidence Request)
@@ -12529,30 +12530,30 @@ flowchart TD
 - EVDREQ-01: Deploy synthetic UDP/TCP ping probes between eu-west-1 and us-east-1 logging RTT percentiles for 48 hours.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.4.5. Verification Gates & Stop Conditions
 
 - **Gate 3.1:** Every recorded `UNK-*` has a documented impact on the final decision.
 - **Gate 3.2:** No architectural candidate is selected based on an unverified high-cost assumption.
 
 ------------------------------------------------------------------------
 
-## Step 4. Generate Structurally Distinct Candidates
+### 4.14.5. Step 4. Generate Structurally Distinct Candidates
 
-### 1. Objective & Semantic Boundary
+#### 4.14.5.1. Objective & Semantic Boundary
 
 Construct a set of **mutually distinct architectural candidates** ($\text{CAN-01}, \text{CAN-02}, \dots$) that inhabit fundamentally different regions of the computational design space. Prohibit the generation of superficial variations (for example, swapping Postgres for MySQL, or Kafka for RabbitMQ) under the guise of distinct architectures.
 
-### 2. Formal Input Preconditions
+#### 4.14.5.2. Formal Input Preconditions
 
 - `FRAME-*` behavioral contract and invariants.
 - `CTR-*` contradiction model.
 - Empirical evidence resolving foundational unknowns (`EVD-*`).
 
-### 3. Cognitive Transformation
+#### 4.14.5.3. Cognitive Transformation
 
-Apply the inventive transformation and morphological exploration techniques (Sections 3 and 4):
+Apply the inventive transformation and morphological exploration techniques (Sections 2.3 and 2.4):
 
-1.  **Apply the Four Software Separation Principles (Section 8):**
+1.  **Apply the Four Software Separation Principles (Section 2.8):**
     - **Separation in Time ($S_{\text{time}}$):** Shift synchronous coordination to asynchronous post-checkout reconciliation or speculative pre-allocation.
     - **Separation in State/Data Ownership ($S_{\text{space}}$):** Partition inventory ownership by geographic region, tenant, or SKU tier.
     - **Separation in Operating Condition/Mode ($S_{\text{mode}}$):** Use low-overhead local counters when stock is high ($>100$ units); switch dynamically to strict distributed consensus when stock drops below threshold ($\le 10$ units).
@@ -12560,7 +12561,7 @@ Apply the inventive transformation and morphological exploration techniques (Sec
 2.  **Apply Component Elimination (Technique 3.1):** Eliminate dedicated distributed lock clusters and evaluate whether database constraints or partitioned event logs can absorb the coordination function.
 3.  **Construct Morphological Matrix (Technique 4.2):** Cross state ownership, consistency models, coordination timing, and communication protocols.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.5.4. Produced Typed Epistemic Artifacts
 
 - Node: `SPACE-[ID]` (Morphological Matrix)
 - Node: `CAN-01`, `CAN-02`, `CAN-03` (Structurally Distinct Candidates)
@@ -12586,25 +12587,25 @@ Apply the inventive transformation and morphological exploration techniques (Sec
 - Separation Principle: Separation in Condition (stock level threshold).
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.5.5. Verification Gates & Stop Conditions
 
 - **Gate 4.1:** At least two candidates represent fundamentally different computational paradigms (for example, consensus vs. partitioning vs. adaptive mode shifting).
 - **Gate 4.2:** All surviving candidates satisfy the non-negotiable invariants defined in `FRAME-*`.
 
 ------------------------------------------------------------------------
 
-## Step 5. Attack Candidates with Dependency Analysis
+### 4.14.6. Step 5. Attack Candidates with Dependency Analysis
 
-### 1. Objective & Semantic Boundary
+#### 4.14.6.1. Objective & Semantic Boundary
 
 Evaluate how each candidate mechanism couples with the surrounding software ecosystem. Quantify the **change radius**, identify accidental couplings, verify alignment with **Conway's Law**, and ensure that independent reasons for business change do not require synchronized multi-service deployments.
 
-### 2. Formal Input Preconditions
+#### 4.14.6.2. Formal Input Preconditions
 
 - Surviving candidate mechanisms (`CAN-01`, `CAN-02`, `CAN-03`).
 - Codebase dependency graph, service contracts, database schemas, and team ownership boundaries.
 
-### 3. Cognitive Transformation
+#### 4.14.6.3. Cognitive Transformation
 
 Apply the dependency structuring techniques (Section 6):
 
@@ -12612,7 +12613,7 @@ Apply the dependency structuring techniques (Section 6):
 2.  **Technique 6.2 (Link Requirements to Mechanisms):** Ensure that the business reason to change inventory rules does not propagate into checkout UI controllers or payment billing gateways.
 3.  **Calculate Change Radius Metric ($R_M$):** $$R_M = \frac{\text{Number of Modules / Schemas Modified}}{\text{Number of Independent Business Requirements Altered}}$$ A sound architecture maintains $R_M \approx 1$.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.6.4. Produced Typed Epistemic Artifacts
 
 - Node: `DEP-[ID]` (Dependency Analysis & Change Radius Map)
 - Artifact: **Dependency Matrix** (Section 27)
@@ -12629,25 +12630,25 @@ Apply the dependency structuring techniques (Section 6):
 | Change Radius ($R_M$) | $R_M = 3.4$ (WAN, Raft, Schema) | $R_M = 1.1$ (Isolated to Inventory Svc)| $R_M = 2.1$ (Routing layer + Inventory) |
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.6.5. Verification Gates & Stop Conditions
 
 - **Gate 5.1:** Candidates with unconstrained change radius ($R_M > 3$) or hidden distributed state coupling are flagged with architectural risk warnings.
 - **Gate 5.2:** Data ownership boundaries adhere strictly to single-writer principles.
 
 ------------------------------------------------------------------------
 
-## Step 6. Attack Candidates with Dynamics Modeling
+### 4.14.7. Step 6. Attack Candidates with Dynamics Modeling
 
-### 1. Objective & Semantic Boundary
+#### 4.14.7.1. Objective & Semantic Boundary
 
 Subject each candidate to non-linear dynamic scrutiny across time, high concurrent load, tail latency percentiles ($p99/p99.9$), resource accumulations, and cascading partial failure modes. Static architecture diagrams are strictly insufficient.
 
-### 2. Formal Input Preconditions
+#### 4.14.7.2. Formal Input Preconditions
 
 - Surviving candidate mechanisms (`CAN-01`, `CAN-02`, `CAN-03`).
 - Traffic volume profiles, peak burst multiples, read/write ratios, and network failure distributions.
 
-### 3. Cognitive Transformation
+#### 4.14.7.3. Cognitive Transformation
 
 Apply the system dynamics modeling techniques (Section 7):
 
@@ -12655,7 +12656,7 @@ Apply the system dynamics modeling techniques (Section 7):
 2.  **Technique 7.2 (Model Destructive Feedback Loops):** Map reinforcing failure loops: $$\text{Latency Spikes} \xrightarrow{+} \text{Client Retries} \xrightarrow{+} \text{Server Queue Growth} \xrightarrow{+} \text{Thread Exhaustion} \xrightarrow{+} \text{Total Outage}.$$
 3.  **Technique 7.3 (Model Transient Operating Modes):** Analyze cold starts, cache stampedes, database failovers, and dual-version protocol coexistence during rolling deployments.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.7.4. Produced Typed Epistemic Artifacts
 
 - Node: `DYN-[ID]` (Dynamic System Model)
 - Artifact: **Dynamics Map** (Section 28)
@@ -12683,27 +12684,27 @@ flowchart LR
 <!-- -->
 
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.7.5. Verification Gates & Stop Conditions
 - **Gate 6.1:** Dynamic models account for tail latency ($p99/p99.9$), client retries, and bounded queue limits.
 - **Gate 6.2:** All reinforcing failure loops have explicit balancing mechanisms (circuit breakers, rate limiters, jittered backoff, shedding).
 
 ---
 
-## Step 7. Select the Next Evidence Suite
+### 4.14.8. Step 7. Select the Next Evidence Suite
 
-### 1. Objective & Semantic Boundary
+#### 4.14.8.1. Objective & Semantic Boundary
 If multiple competing candidates survive dependency and dynamics attacks, design a focused **differentiating empirical experiment suite** to resolve the decisive trade-offs before embarking on full-scale production implementation.
 
-### 2. Formal Input Preconditions
+#### 4.14.8.2. Formal Input Preconditions
 - Evaluated candidates (`CAN-01`, `CAN-02`, `CAN-03`) with attached `DEP-*` and `DYN-*` risk models.
 - Multidimensional value criteria (performance, operational cost, cognitive load, migration friction).
 
-### 3. Cognitive Transformation
-Apply the value determination and differentiating check techniques (Sections 5 and 8):
+#### 4.14.8.3. Cognitive Transformation
+Apply the value determination and differentiating check techniques (Sections 2.5 and 2.8):
 1. **Identify the Decisive Differentiating Factor:** Find the single metric or invariant where Candidate A and Candidate B make contradictory claims (e.g., *"CAN-02 false-out-of-stock rate under asymmetric demand is $< 0.1\%$"* vs. *"CAN-03 boundary race condition causes zero double-allocations under Jepsen network partition"*).
 2. **Specify Minimal Evidence Requests (`EVDREQ-`):** Define the exact synthetic workload, failure injection script, or benchmark harness required to generate unambiguous empirical proof.
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.8.4. Produced Typed Epistemic Artifacts
 - Node: `VAL-[ID]` (Multidimensional Trade-Off Matrix)
 - Node: `EVDREQ-DIFF-[ID]` (Differentiating Evidence Requests)
 - Artifact: **Value and Selection Table** (Section 8)
@@ -12722,16 +12723,16 @@ Apply the value determination and differentiating check techniques (Sections 5 a
 - Objective: Measure CAN-02 false-out-of-stock rate under 90/10 asymmetric traffic skew, and test CAN-03 boundary race safety under 50 concurrent threads hitting stock=20.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.8.5. Verification Gates & Stop Conditions
 
 - **Gate 7.1:** The differentiating experiment is designed to be executable in $< 2$ days of engineering effort.
 - **Gate 7.2:** Explicit success/failure thresholds are committed in writing *before* executing the experiment.
 
 ------------------------------------------------------------------------
 
-## Step 8. Implement Minimal Verifiable Prototypes
+### 4.14.9. Step 8. Implement Minimal Verifiable Prototypes
 
-### 1. Objective & Semantic Boundary
+#### 4.14.9.1. Objective & Semantic Boundary
 
 Construct **isolated, minimal verifiable prototypes (spikes or solution branches)** in dedicated git worktrees to execute the evidence suite designed in Step 7. Software engineering allows hypotheses to be turned into running machine code; this step executes that superpower.
 
@@ -12750,12 +12751,12 @@ flowchart LR
     EVD_Result --> ADR["<code>DEC-01</code>: Locked Architecture Decision Record"]
 ```
 
-### 2. Formal Input Preconditions
+#### 4.14.9.2. Formal Input Preconditions
 
 - `EVDREQ-DIFF-*` specifications.
 - Clean development workspace or isolated branch environment.
 
-### 3. Cognitive Transformation
+#### 4.14.9.3. Cognitive Transformation
 
 1.  Implement the absolute minimal slice of code necessary to test the mechanism (typically 100–400 lines of code). Omit production scaffolding, authentication, and generic CRUD endpoints.
 2.  Subject the prototype to **Ascending Rungs of the Evidentiary Ladder** (Section 19):
@@ -12764,7 +12765,7 @@ flowchart LR
     - Rung 8: Fault injection and chaos testing (simulated socket delays, node kills).
 3.  Record empirical findings into typed evidence nodes (`EVD-`).
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.9.4. Produced Typed Epistemic Artifacts
 
 - Node: `EVD-[ID]` (Empirical Evidence Result)
 - Node: `DEC-[ID]` (Locked Architecture Decision Record / ADR)
@@ -12783,16 +12784,16 @@ flowchart LR
 - Justification: Empirically proven by EVD-01 to satisfy both Zero-Oversell (CLM-INV-01) and <300ms Latency (CLM-INV-02) under peak WAN partition conditions.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.9.5. Verification Gates & Stop Conditions
 
 - **Gate 8.1:** Prototype results are reproducible via automated scripts in CI or local container harnesses.
 - **Gate 8.2:** The final ADR (`DEC-*`) links directly to the empirical evidence (`EVD-*`) that justifies the selection.
 
 ------------------------------------------------------------------------
 
-## Step 9. Execute Transition
+### 4.14.10. Step 9. Execute Transition
 
-### 1. Objective & Semantic Boundary
+#### 4.14.10.1. Objective & Semantic Boundary
 
 Design and execute the **Transition System** ($\mathcal{T}_{\text{sys}}$) as a dedicated, temporary architectural artifact. Safely migrate from the legacy system state to the validated target architecture without downtime, data corruption, or irreversible cutovers.
 
@@ -12806,12 +12807,12 @@ flowchart LR
     end
 ```
 
-### 2. Formal Input Preconditions
+#### 4.14.10.2. Formal Input Preconditions
 
 - Approved `DEC-*` ADR with empirical backing.
 - Target architecture design and legacy system schema/codebase map.
 
-### 3. Cognitive Transformation
+#### 4.14.10.3. Cognitive Transformation
 
 Apply the safe transition and continuous observation techniques (Section 9):
 
@@ -12825,7 +12826,7 @@ Apply the safe transition and continuous observation techniques (Section 9):
     - Phase 7: Post-release observation via SLO dashboards.
 2.  **Technique 9.4 (Anchor Results with Continuous Observability):** Establish SLI alerts and automated rollback triggers (for example, if error rate exceeds $0.05\%$, instantly revert feature flag to legacy engine).
 
-### 4. Produced Typed Epistemic Artifacts
+#### 4.14.10.4. Produced Typed Epistemic Artifacts
 
 - Node: `TRANS-[ID]` (Transition & Migration Plan)
 - Node: `EVD-PROD-[ID]` (Production Verification Evidence)
@@ -12840,7 +12841,7 @@ Apply the safe transition and continuous observation techniques (Section 9):
 5. Phase 5 (Decommissioning): Schedule ticket `CLEANUP-104` to drop legacy Redis locking shim 14 days post-100% stable rollout.
 ```
 
-### 5. Verification Gates & Stop Conditions
+#### 4.14.10.5. Verification Gates & Stop Conditions
 
 - **Gate 9.1:** Automated rollback mechanism is tested and proven operational prior to production cutover.
 - **Gate 9.2:** Temporary transition shims have an explicit, scheduled decommissioning date.
@@ -12848,9 +12849,9 @@ Apply the safe transition and continuous observation techniques (Section 9):
 
 ------------------------------------------------------------------------
 
-## 15. How to Select the Next Operation
+## 4.15. How to Select the Next Operation
 
-## 15.1. The Principle of Highest-Cost Uncertainty
+### 4.15.1. The Principle of Highest-Cost Uncertainty
 
 When an engineer or AI agent works through a complex software task, multiple uncertainties compete simultaneously for cognitive and computational effort:
 
@@ -12866,7 +12867,7 @@ Addressing these questions haphazardly leads to immense wasted motion. The gover
 
 ------------------------------------------------------------------------
 
-## 15.2. Mathematical Formalization: Expected Value of Information (EVOI)
+### 4.15.2. Mathematical Formalization: Expected Value of Information (EVOI)
 
 Grounding the selection process in Ronald A. Howard's [*Information Value Theory* (Howard, 1966)](https://doi.org/10.1109/TSSC.1966.300074), let $\Theta$ denote the set of possible true states of the software environment (for example, actual network latency distribution, true database bottleneck mechanism, actual user concurrency patterns).
 
@@ -12876,13 +12877,13 @@ The net lifecycle value of choosing decision $d$ when the true system state is $
 
 $$V(d, \theta) = \text{Useful_Effect}(d, \theta) - \text{Lifecycle_Cost}(d, \theta) - \text{Harm}(d, \theta)$$
 
-### 1. Value Under Current Uncertainty (Prior State)
+#### 4.15.2.1. Value Under Current Uncertainty (Prior State)
 
 Without executing a new reasoning or verification operation, the engineer must choose the decision $d^\*$ that maximizes expected value under the prior probability distribution $P(\theta)$:
 
 $$V_{\text{prior}} = \max_{d \in \mathcal{D}} \mathbb{E}_{\theta \sim P(\theta)} \left[ V(d, \theta) \right] = \max_{d \in \mathcal{D}} \sum_{\theta \in \Theta} P(\theta)\, V(d, \theta)$$
 
-### 2. Value After Executing Operation $\mathcal{O}_k$ (Posterior State)
+#### 4.15.2.2. Value After Executing Operation $\mathcal{O}_k$ (Posterior State)
 
 Suppose we execute an operation $\mathcal{O}_k$ (for example, a microbenchmark spike, a causal diagnosis trace, or a dependency audit) at an engineering/computational cost $C(\mathcal{O}_k)$.
 
@@ -12894,7 +12895,7 @@ The expected value across all possible outcomes of operation $\mathcal{O}_k$ is:
 
 $$V_{\text{post}}(\mathcal{O}_k) = \sum_{\mathcal{E} \in \Omega_{\mathcal{E}}} P(\mathcal{E}) \left[ \max_{d \in \mathcal{D}} \sum_{\theta \in \Theta} P(\theta \mid \mathcal{E})\, V(d, \theta) \right]$$
 
-### 3. Net Expected Value of Information (EVOI)
+#### 4.15.2.3. Net Expected Value of Information (EVOI)
 
 The **Net Expected Value of Information** of operation $\mathcal{O}_k$ is the expected value gained by updating the decision, minus the operational cost of performing the check:
 
@@ -12902,7 +12903,7 @@ $$\text{EVOI}(\mathcal{O}_k) = V_{\text{post}}(\mathcal{O}_k) - V_{\text{prior}}
 
 $$\text{EVOI}(\mathcal{O}_k) = \sum_{\mathcal{E}} P(\mathcal{E}) \max_{d} \mathbb{E}_{\theta\mid\mathcal{E}}[V(d,\theta)] - \max_{d} \mathbb{E}_{\theta}[V(d,\theta)] - C(\mathcal{O}_k)$$
 
-### 4. Optimal Operation Dispatch Rule
+#### 4.15.2.4. Optimal Operation Dispatch Rule
 
 The uncertainty router selects the next operation $\mathcal{O}^\*$ that maximizes net EVOI:
 
@@ -12910,7 +12911,7 @@ $$\mathcal{O}^\* = \arg\max_{\mathcal{O}_k \in \{\mathcal{O}_1, \dots, \mathcal{
 
 If $\max_k \text{EVOI}(\mathcal{O}_k) \le 0$, no further empirical investigation is economically justified: the system should immediately commit to the best prior decision $d^\*$ and proceed to implementation.
 
-### 5. Practical Cost-of-Uncertainty Ratio ($\mathcal{R}_{\text{unc}}$)
+#### 4.15.2.5. Practical Cost-of-Uncertainty Ratio ($\mathcal{R}_{\text{unc}}$)
 
 For rapid heuristic estimation by human architects or AI agents, the EVOI formulation simplifies to the **Cost-of-Uncertainty Ratio**:
 
@@ -12921,7 +12922,7 @@ $$\mathcal{R}_{\text{unc}}(\mathcal{U}_i) = \frac{P(\text{Error} \mid \mathcal{U
 
 ------------------------------------------------------------------------
 
-## 15.3. The Uncertainty-to-Operation Routing Matrix
+### 4.15.3. The Uncertainty-to-Operation Routing Matrix
 
 **ARIADNE UNCERTAINTY-TO-OPERATION ROUTING MATRIX**
 
@@ -12950,32 +12951,32 @@ $$\mathcal{R}_{\text{unc}}(\mathcal{U}_i) = \frac{P(\text{Error} \mid \mathcal{U
 
 ------------------------------------------------------------------------
 
-## 15.4. Dynamic Dispatch Heuristics for Human Architects and Autonomous AI Agents
+### 4.15.4. Dynamic Dispatch Heuristics for Human Architects and Autonomous AI Agents
 
-### 15.4.1. Heuristics for Human Architects
+#### 4.15.4.1. Heuristics for Human Architects
 
 1.  **The Habitual Anchor Breaker:** Whenever the team begins a meeting debating whether to use Kafka, Redis, or DynamoDB, halt the conversation and force the execution of **Operation 1 (Frame Required Behavior)**. Strip all product names until the observable behavioral contract is agreed upon.
 2.  **The 1-Hour Spike Rule:** If an architectural debate exceeds 45 minutes of theoretical speculation regarding a performance or consistency property, immediately stop debating. Formulate an `EVDREQ-*` and assign one engineer to build a 50-line benchmark spike in an isolated branch (**Operation 5 / Operation 8**). Return when `EVD-*` is in hand.
-3.  **Adversarial Contradiction Pairing:** When reviewing a major proposal, assign one architect the dedicated role of **Adversarial Reviewer** (Section 12) to attack the candidate with **Operation 6 (Dependencies)** and **Operation 7 (Dynamics)**.
+3.  **Adversarial Contradiction Pairing:** When reviewing a major proposal, assign one architect the dedicated role of **Adversarial Reviewer** (Section 3.12) to attack the candidate with **Operation 6 (Dependencies)** and **Operation 7 (Dynamics)**.
 
-### 15.4.2. Heuristics for Autonomous AI Developer Agents
+#### 4.15.4.2. Heuristics for Autonomous AI Developer Agents
 
 1.  **Token-Efficient Two-Stage Routing:** Never load the full catalog of engineering rules into the system prompt at once. The agent must inspect the active `U_*` vector, match it against the Uncertainty Routing Matrix, and dynamically load only the specific skill rule file required for that operation.
 2.  **Strict Claim Provenance (`CLM-` / `FACT` / `ASSUMED`):** An AI agent is prone to confusing plausible text generation with empirical truth. The agent is forbidden from transitioning a candidate to `APPROVED` if the decision relies on a node marked `ASSUMED`. It must generate an executable verification command (`run_command`, property test, or benchmark) to elevate `ASSUMED` to `MEASURED` / `FACT`.
 3.  **Automated Backtracking on Falsification:** When an agent runs a verification tool and the test fails (`EVD-` falsifies `HYP-` or `CAN-`), the agent must not attempt random code patches. It must invoke **Transitive Invalidation** on the epistemic graph, identify the nearest valid parent node, and re-route to candidate generation (**Step 4**) or causal diagnosis (**Step 2**).
-4.  **Concrete Stop Condition:** The agent concludes its reasoning cycle when and only when all ten completion conditions in Section 20 are satisfied, and all high-cost claims in the epistemic graph are backed by executable evidence.
+4.  **Concrete Stop Condition:** The agent concludes its reasoning cycle when and only when all ten completion conditions in Section 4.20 are satisfied, and all high-cost claims in the epistemic graph are backed by executable evidence.
 
 <!-- -->
 
-**End of expanded Sections 13, 14, and 15**
+**End of expanded Sections 4.13, 4.14, and 4.15**
 
 ***
 
 ---
 
-## 16. Three Depth Modes
+## 4.16. Three Depth Modes
 
-### 16.1. The Economic Governance of Epistemic Rigor
+### 4.16.1. The Economic Governance of Epistemic Rigor
 
 A central failure mode in both human engineering organizations and autonomous multi-agent systems is **epistemic mismatch**: applying either excessive cognitive overhead to trivial, reversible tasks (analysis paralysis) or insufficient analytical and empirical rigor to irreversible, high-blast-radius architectural transformations (reckless deployment).
 
@@ -13010,11 +13011,13 @@ flowchart TD
 
     DeepMode --> DeepComplete["11 Invariants Satisfied & Deployed"]
 
+```
+
 ------------------------------------------------------------------------
 
-## 16.2. Fast Mode (Local Reversible Tasks)
+### 4.16.2. Fast Mode (Local Reversible Tasks)
 
-### 16.2.1. Scope, Boundary, and Trigger Conditions
+#### 4.16.2.1. Scope, Boundary, and Trigger Conditions
 
 Fast Mode is designated for **Type 2 ("Two-Way Door") decisions**—modifications whose blast radius is strictly contained within a single process, module, or local component, and whose effects can be rolled back in $<1\text{ commit}$ without data loss or service disruption.
 
@@ -13025,7 +13028,7 @@ Fast Mode is designated for **Type 2 ("Two-Way Door") decisions**—modification
 3.  Zero asynchronous distributed side effects (e.g., no cross-service event publishing);
 4.  Total rollback time $T_{\text{rollback}} < 5\text{ minutes}$.
 
-### 16.2.2. Streamlined 6-Step Epistemic Workflow
+#### 4.16.2.2. Streamlined 6-Step Epistemic Workflow
 
 Even in Fast Mode, unstructured "trial-and-error code thrashing" is prohibited. Fast Mode executes a compressed 6-step cycle:
 
@@ -13040,7 +13043,7 @@ Even in Fast Mode, unstructured "trial-and-error code thrashing" is prohibited. 
 | 5 | **Minimal Invariant Test** | Write a deterministic unit test or property check that fails. |
 | 6 | **Execute & Rollback Check** | Apply the selected fix, verify test passes, assert zero leak. |
 
-### 16.2.3. Concrete Fast Mode Walkthrough: In-Memory Token Bucket Leak
+#### 4.16.2.3. Concrete Fast Mode Walkthrough: In-Memory Token Bucket Leak
 
 - **Observed Symptom:** A high-throughput REST API gateway experiences gradual memory growth and eventual $OOM$ crash under burst traffic.
 - **Step 1 (Required Behavior):** Rate-limiter must enforce $\le 1000\text{ req/sec}$ per API key while maintaining bounded memory footprint $\le 50\text{ MB}$ under $10^6$ ephemeral client keys.
@@ -13055,9 +13058,9 @@ Even in Fast Mode, unstructured "trial-and-error code thrashing" is prohibited. 
 
 ------------------------------------------------------------------------
 
-## 16.3. Standard Mode (Architectural Features & Refactoring)
+### 4.16.3. Standard Mode (Architectural Features & Refactoring)
 
-### 16.3.1. Scope, Boundary, and Trigger Conditions
+#### 4.16.3.1. Scope, Boundary, and Trigger Conditions
 
 Standard Mode is designated for substantial feature implementations, internal architectural refactoring, data schema enhancements, and subsystem boundary adjustments.
 
@@ -13068,7 +13071,7 @@ Standard Mode is designated for substantial feature implementations, internal ar
 3.  Changes to internal RPC contracts, event payloads, or component lifecycles;
 4.  Modest operational risk requiring structured transition planning (e.g., dual-writing, feature flagging).
 
-### 16.3.2. Epistemic Governance & Artifact Set
+#### 4.16.3.2. Epistemic Governance & Artifact Set
 
 Standard Mode mandates the creation and validation of the core Ariadne artifact suite:
 
@@ -13085,7 +13088,7 @@ Standard Mode mandates the creation and validation of the core Ariadne artifact 
 | **Transition Plan** | Expand-Contract phases, feature flags, backward compatibility shims. |
 | **ADR Record** | Context, decision, consequences, explicit falsification conditions. |
 
-### 16.3.3. Concrete Standard Mode Walkthrough: Synchronous Ingestion to Outbox Migration
+#### 4.16.3.3. Concrete Standard Mode Walkthrough: Synchronous Ingestion to Outbox Migration
 
 - **Context:** An e-commerce checkout service synchronously calls an external payment provider and inventory service inside a relational database transaction. Under network jitter, database connection pools exhaust, cascading into full site outages.
 - **Task Passport:** Invariant: A customer order must never be committed without guaranteed inventory decrement and payment authorization; p99 checkout response time must remain $<300\text{ ms}$ regardless of external partner latency.
@@ -13103,9 +13106,9 @@ Standard Mode mandates the creation and validation of the core Ariadne artifact 
 
 ------------------------------------------------------------------------
 
-## 16.4. Deep Mode (Distributed, High-Stakes & Irreversible Systems)
+### 4.16.4. Deep Mode (Distributed, High-Stakes & Irreversible Systems)
 
-### 16.4.1. Scope, Boundary, and Trigger Conditions
+#### 4.16.4.1. Scope, Boundary, and Trigger Conditions
 
 Deep Mode is reserved for **Type 1 ("One-Way Door") decisions**—systems where failure results in catastrophic data corruption, financial loss, regulatory breach, or multi-million-dollar downtime, and where rollback is mathematically or operationally complex.
 
@@ -13117,7 +13120,7 @@ Deep Mode is reserved for **Type 1 ("One-Way Door") decisions**—systems where 
 4.  Cryptographic, security-boundary, or authorization-kernel redesigns;
 5.  Cross-datacenter or multi-region synchronization mechanisms.
 
-### 16.4.2. Deep Mode Epistemic Rigor & Multi-Agent Competition
+#### 4.16.4.2. Deep Mode Epistemic Rigor & Multi-Agent Competition
 
 In Deep Mode, single-agent reasoning is strictly prohibited. Deep Mode enforces:
 
@@ -13141,7 +13144,7 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 16.5. Comparative Governance Matrix
+### 4.16.5. Comparative Governance Matrix
 
 The following matrix establishes the operational rules, artifact budgets, and transition criteria across the three depth modes:
 
@@ -13158,9 +13161,9 @@ The following matrix establishes the operational rules, artifact budgets, and tr
 
 ------------------------------------------------------------------------
 
-## 17. Multi-Agent Reasoning
+## 4.17. Multi-Agent Reasoning
 
-## 17.1. Theoretical Foundations: Multi-Agent Systems in Software Engineering
+### 4.17.1. Theoretical Foundations: Multi-Agent Systems in Software Engineering
 
 In classical artificial intelligence and distributed systems, [Michael Wooldridge and Nicholas R. Jennings (1995, *Intelligent Agents: Theory and Practice*, Knowledge Engineering Review, DOI: 10.1017/S0269888900008122)](https://doi.org/10.1017/S0269888900008122) defined an intelligent agent as an encapsulated computational entity situated in an environment, capable of autonomous, reactive, proactive, and social action. In [*Artificial Intelligence: A Modern Approach* (Russell & Norvig, 2020, 4th ed., Pearson)](https://www.pearson.com/en-us/subject-catalog/p/artificial-intelligence-a-modern-approach/P200000003500), multi-agent architectures are established as superior to monolithic problem solvers when tackling complex, distributed search spaces subject to local epistemic biases.
 
@@ -13199,51 +13202,51 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 17.2. The 8 Specialized Epistemic Agent Roles
+### 4.17.2. The 8 Specialized Epistemic Agent Roles
 
-### 1. Framing Agent
+#### 4.17.2.1. Framing Agent
 
 - **Epistemic Responsibility:** Transform vague, solution-polluted user directives into an implementation-agnostic **Problem Passport** ($\mathcal{F}_{\text{req}}, \mathcal{I}_{\text{inv}}, \mathcal{B}_{\text{scope}}$).
 - **Prohibited Actions:** Must never suggest code, frameworks, databases, or specific algorithmic libraries.
 - **Key Deliverables:** Implementation-agnostic functional requirements, non-negotiable invariants, success metrics, system boundary passport.
 
-### 2. Diagnostic Agent
+#### 4.17.2.2. Diagnostic Agent
 
 - **Epistemic Responsibility:** Ingest observed anomalies (`OBS-`) and telemetry, formulate competing falsifiable causal hypotheses (`HYP-`), and specify differentiating evidence requests (`EVDREQ-`).
 - **Prohibited Actions:** Must never accept a symptom as a root cause; must never propose a permanent architectural fix before the causal mechanism is corroborated by empirical evidence.
 - **Key Deliverables:** Causal Map, Differentiating Experiment Specifications, Hypothesis Falsification Receipts.
 
-### 3. Exploration Agent
+#### 4.17.2.3. Exploration Agent
 
 - **Epistemic Responsibility:** Apply the 36 Systematic Inventive Thinking techniques and morphological analysis to generate $\ge 3$ structurally distinct candidate mechanisms (`CAN-`). Enforces the Law of Ideality by prioritizing in-system resource reuse.
 - **Prohibited Actions:** Must never generate minor variations of a single architectural paradigm (e.g., offering three different message brokers is a single candidate class, not three).
 - **Key Deliverables:** Solution Space Morphological Matrix, Candidate Mechanism Specifications (`CAN-01`, `CAN-02`, `CAN-03`).
 
-### 4. Architecture Agent
+#### 4.17.2.4. Architecture Agent
 
 - **Epistemic Responsibility:** Construct structural dependency matrices, quantify change radii, analyze coupling directions, and enforce David Parnas's Information Hiding principles ([Parnas, 1972, CACM](https://doi.org/10.1145/361598.361623)) and Saltzer & Schroeder's Least Common Mechanism principle ([Saltzer & Schroeder, 1975, IEEE](https://doi.org/10.1109/PROC.1975.9939)).
 - **Prohibited Actions:** Must never allow circular dependencies, leaky abstractions, or unmanaged shared mutable state across module boundaries.
 - **Key Deliverables:** Dependency Matrix, Change Radius Calculation, Coupling Decoupling Tactics.
 
-### 5. Dynamics Agent
+#### 4.17.2.5. Dynamics Agent
 
 - **Epistemic Responsibility:** Model non-linear temporal behaviors, queue accumulations, retry storms, tail latencies (p99/p99.9), resource saturation thresholds, and degraded operating modes based on Donella Meadows's Systems Dynamics framework ([Meadows, 2008](https://www.chelseagreen.com/product/thinking-in-systems/)).
 - **Prohibited Actions:** Must never evaluate a system using static steady-state assumptions alone.
 - **Key Deliverables:** Dynamics Map, Stock-and-Flow Models, Degradation Mode Specifications, Next Bottleneck Predictions.
 
-### 6. Implementation Agent
+#### 4.17.2.6. Implementation Agent
 
 - **Epistemic Responsibility:** Translate the selected candidate specification into concrete, minimal, and elegant production code, prototypes, or spikes within an isolated git worktree.
 - **Prohibited Actions:** Must never write its own acceptance verification tests (to prevent self-fulfilling test tautologies); must never alter architectural boundaries without explicit approval.
 - **Key Deliverables:** Production Code Patches, Minimal Verifiable Spikes, Backward Compatibility Shims.
 
-### 7. Verification Agent
+#### 4.17.2.7. Verification Agent
 
 - **Epistemic Responsibility:** Develop independent, adversarial verification suites spanning property-based tests ([Claessen & Hughes, 2000](https://doi.org/10.1145/351240.351266)), mutation tests ([DeMillo et al., 1978](https://doi.org/10.1109/C-M.1978.218136)), synthetic load benchmarks, and chaos fault injection ([Basiri et al., 2016](https://doi.org/10.1109/MS.2016.60)).
 - **Prohibited Actions:** Must never inspect implementation internals to write tautological unit tests; must test strictly against the behavioral invariants specified by the Framing and Architecture agents.
 - **Key Deliverables:** Invariant Test Suites, Mutation Kill Reports, Chaos Test Receipts, Performance Benchmark Profiles.
 
-### 8. Adversarial Reviewer Agent
+#### 4.17.2.8. Adversarial Reviewer Agent
 
 - **Epistemic Responsibility:** Act as an independent critic that systematically attacks the proposed solution for:
   1.  *Complexity Shifts:* Did removing code complexity merely push operational complexity into Kubernetes/Kafka?
@@ -13255,13 +13258,13 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 17.3. Structured Communication Protocols: Typed Envelopes vs. Chat Babble
+### 4.17.3. Structured Communication Protocols: Typed Envelopes vs. Chat Babble
 
 Unstructured natural language chat between LLM agents leads to **epistemic entropy**: polite pleasantries, ambiguous assertions, hallucinated consensus, and loss of critical invariant tracking.
 
 The Ariadne multi-agent protocol mandates that all agent communication take place via **Strictly Typed Epistemic Envelopes** (represented in JSON Schema or Structured Typed Markdown).
 
-### 17.3.1. JSON Schema for Epistemic Envelope
+#### 4.17.3.1. JSON Schema for Epistemic Envelope
 
 ``` typescript
 const example =
@@ -13318,9 +13321,9 @@ const example =
 } as const;
 ```
 
-### 17.3.2. Example Typed Envelope Exchange
+#### 4.17.3.2. Example Typed Envelope Exchange
 
-#### Diagnostic Agent $\to$ Verification Agent (Evidence Request)
+##### 4.17.3.2.1. Diagnostic Agent $\to$ Verification Agent (Evidence Request)
 
 ``` typescript
 const example =
@@ -13344,7 +13347,7 @@ const example =
 } as const;
 ```
 
-#### Verification Agent $\to$ Diagnostic Agent (Evidence Result)
+##### 4.17.3.2.2. Verification Agent $\to$ Diagnostic Agent (Evidence Result)
 
 ``` typescript
 const example =
@@ -13373,7 +13376,7 @@ const example =
 
 ------------------------------------------------------------------------
 
-## 17.4. Consensus through Empirical Falsification (Popperian Convergence)
+### 4.17.4. Consensus through Empirical Falsification (Popperian Convergence)
 
 In human committees and poorly designed multi-agent systems, consensus is often sought through **majority voting** or **iterative compromise**. In software architecture, both mechanisms are catastrophic:
 
@@ -13387,9 +13390,9 @@ The Ariadne multi-agent layer implements **Popperian Empirical Consensus**:
 
 ------------------------------------------------------------------------
 
-## 18. Claim Provenance Rule & Formal Provenance Algebra
+## 4.18. Claim Provenance Rule & Formal Provenance Algebra
 
-## 18.1. Epistemic Motivation
+### 4.18.1. Epistemic Motivation
 
 Large language models inherently generate text that is syntactically coherent and persuasively phrased, regardless of whether the underlying assertions are established empirical facts, mathematical deductions, or pure hallucinations.
 
@@ -13413,7 +13416,7 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-## 18.2. The 7 Canonical Provenance Types
+### 4.18.2. The 7 Canonical Provenance Types
 
 **ARIADNE CANONICAL PROVENANCE TYPES**
 
@@ -13427,53 +13430,53 @@ flowchart LR
 | `UNKNOWN` | $\mathbf{U}$ | Decision-significant missing knowledge requiring empirical discovery. |
 | `DECIDED` | $\mathbf{L}$ | Locked architectural decision recorded in an immutable ADR. |
 
-### 1. `FACT` ($\mathbf{F}$)
+#### 4.18.2.1. `FACT` ($\mathbf{F}$)
 
 - **Definition:** An assertion whose truth value is directly verifiable by inspecting static artifacts in the repository, compiler AST, dependency locks, or operating system invariants.
 - **Examples:** `"File src/auth/token.go implements the TokenValidator interface"`; `"PostgreSQL 16 is the target production engine"`.
 - **Verification Method:** Static file read, AST parser, compiler type check.
 
-### 2. `MEASURED` ($\mathbf{M}$)
+#### 4.18.2.2. `MEASURED` ($\mathbf{M}$)
 
 - **Definition:** A quantitative proposition derived from the execution of a test, microbenchmark, load test, or runtime profiling under documented, reproducible conditions.
 - **Examples:** `"p99 memory allocation is 4.2 MB per request at 10,000 RPS"`; `"Disk fsync latency p99 is 11.4 ms on EBS gp3"`.
 - **Verification Method:** Benchmark stdout, profiler flamegraph, Prometheus metric capture.
 
-### 3. `DERIVED` ($\mathbf{D}$)
+#### 4.18.2.3. `DERIVED` ($\mathbf{D}$)
 
 - **Definition:** A proposition obtained via mathematical calculation, formal deduction, or algorithmic analysis where all input premises have provenance $\mathbf{F}$ or $\mathbf{M}$.
 - **Examples:** `"Network bandwidth requirement is 80 MB/s (10,000 RPS × 8 KB payload)"`; `"Little's Law implies concurrency L = 10,000 RPS × 0.05 s = 500 in-flight requests"`.
 - **Verification Method:** Proof derivation check, dimensional analysis.
 
-### 4. `ASSUMED` ($\mathbf{A}$)
+#### 4.18.2.4. `ASSUMED` ($\mathbf{A}$)
 
 - **Definition:** A working premise adopted provisionally to continue architectural exploration in the absence of complete empirical data.
 - **Examples:** `"We assume client network latency across availability zones is < 2 ms"`; `"We assume write traffic will not exceed 500 RPS during Black Friday"`.
 - **Epistemic Constraint:** An `ASSUMED` node can never serve as justifying evidence for a locked decision ($\mathbf{L}$) in Standard or Deep mode.
 
-### 5. `PROPOSED` ($\mathbf{P}$)
+#### 4.18.2.5. `PROPOSED` ($\mathbf{P}$)
 
 - **Definition:** A candidate mechanism, architectural transformation, or refactoring strategy currently under investigation.
 - **Examples:** `"CAN-02: Use consistent hashing with virtual nodes to distribute cache partitions"`.
 
-### 6. `UNKNOWN` ($\mathbf{U}$)
+#### 4.18.2.6. `UNKNOWN` ($\mathbf{U}$)
 
 - **Definition:** An explicitly acknowledged gap in engineering knowledge that directly impacts the viability of a candidate mechanism.
 - **Examples:** `"UNK-03: What is the maximum lock hold time of PostgreSQL pg_repack during active table reorganization?"`.
 
-### 7. `DECIDED` ($\mathbf{L}$)
+#### 4.18.2.7. `DECIDED` ($\mathbf{L}$)
 
 - **Definition:** An architectural decision locked in an Architecture Decision Record (ADR), backed by empirical evidence, passing all non-negotiable invariants, and signed off by the epistemic gatekeeper.
 
 ------------------------------------------------------------------------
 
-## 18.3. Formal Provenance Algebra & Derivation Rules
+### 4.18.3. Formal Provenance Algebra & Derivation Rules
 
 Let $\mathcal{P} = \{\mathbf{U}, \mathbf{A}, \mathbf{P}, \mathbf{D}, \mathbf{M}, \mathbf{F}, \mathbf{L}\}$ be the set of provenance types, partially ordered as a lattice $\langle \mathcal{P}, \sqsubseteq \rangle$:
 
 $$\mathbf{U} \sqsubset \mathbf{A} \sqsubset \mathbf{P} \sqsubset \mathbf{D} \sqsubset \mathbf{M} \sqsubset \mathbf{F} \sqsubset \mathbf{L}$$
 
-### 18.3.1. The Weakest-Precondition Propagation Rule
+#### 4.18.3.1. The Weakest-Precondition Propagation Rule
 
 When a new claim $C$ is derived from a set of antecedent nodes ${A_1, A_2, \dots, A_n}$ via logical or mathematical deduction ($A_1 \land A_2 \land \dots \land A_n \vdash C$), the provenance of $C$ is bounded by the **weakest antecedent in the epistemic chain**:
 
@@ -13481,7 +13484,7 @@ $$\text{Prov}(C) = \begin{cases} \mathbf{DERIVED}, & \text{if } \forall i,\; \te
 
 > **Epistemic Invariant:** A logical deduction that uses even a single unverified assumption ($\mathbf{A}$) is itself strictly $\mathbf{ASSUMED}$. It cannot be promoted to $\mathbf{DERIVED}$ until that assumption is corroborated into a $\mathbf{FACT}$ or $\mathbf{MEASURED}$ node.
 
-### 18.3.2. Concrete Derivation Rules
+#### 4.18.3.2. Concrete Derivation Rules
 
 $$\frac{\text{FACT}(A) \quad \text{FACT}(B) \quad A \land B \implies C}{\text{DERIVED}(C)} \quad [\text{Rule 1: Pure Fact Deduction}]$$
 
@@ -13491,7 +13494,7 @@ $$\frac{\text{MEASURED}(E, M) \quad \text{Invariant}(I) \quad M \models I}{\text
 
 ------------------------------------------------------------------------
 
-## 18.4. Automatic Transitive Invalidation
+### 4.18.4. Automatic Transitive Invalidation
 
 Let the Epistemic State be modeled as a Directed Acyclic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$, where $\mathcal{V}$ is the set of typed nodes and $\mathcal{E}$ represents directed semantic relationships:
 
@@ -13515,7 +13518,7 @@ flowchart TD
     class CAN,DYN,DEC invalidated;
 ```
 
-### 18.4.1. Formal Invalidation Propagation Algorithm
+#### 4.18.4.1. Formal Invalidation Propagation Algorithm
 
 When an empirical evidence node $e \in \mathcal{V}$ is recorded such that $(e, v) \in \mathcal{E}_{\text{falsifies}}$ with $\text{Prov}(e) \in \{\mathbf{M}, \mathbf{F}\}$:
 
@@ -13526,9 +13529,9 @@ When an empirical evidence node $e \in \mathcal{V}$ is recorded such that $(e, v
 
 ------------------------------------------------------------------------
 
-## 19. The 10-Rung Evidentiary Ladder
+## 4.19. The 10-Rung Evidentiary Ladder
 
-## 19.1. The Epistemic Hierarchy of Software Verification
+### 4.19.1. The Epistemic Hierarchy of Software Verification
 
 In software engineering, the phrase *"the tests pass"* is epistemically ambiguous. A test suite consisting of happy-path unit tests with heavily mocked interfaces provides almost zero corroboration for high-concurrency race conditions or distributed partition safety.
 
@@ -13559,7 +13562,7 @@ flowchart BT
 
 ------------------------------------------------------------------------
 
-## 19.2. Exhaustive Specification of the 10 Rungs
+### 4.19.2. Exhaustive Specification of the 10 Rungs
 
 **THE 10-RUNG EVIDENTIARY LADDER**
 
@@ -13576,59 +13579,59 @@ flowchart BT
 | **9** | **Canary & Dark Launching** | Proves real-world behavior on live shadow traffic safely. |
 | **10** | **Production Observability** | Proves sustained SLO compliance and zero regression over time. |
 
-### Rung 1: Static Plausibility & Architectural Coherence
+#### 4.19.2.1. Rung 1: Static Plausibility & Architectural Coherence
 
 - **Mechanism:** Formal inspection of architectural models, sequence diagrams, and interface declarations against foundational invariants (e.g., CAP theorem, causality constraints).
 - **Epistemic Output:** Rejection of impossible designs (e.g., synchronous cross-region ACID transactions with $<5\text{ ms}$ latency).
 
-### Rung 2: Compilation & Static Type Checking
+#### 4.19.2.2. Rung 2: Compilation & Static Type Checking
 
 - **Mechanism:** Execution of language compilers (`rustc`, `tsc`, `javac`), AST linters, borrow checkers, and static security analyzers (SAST).
 - **Epistemic Output:** Proof that program structure adheres to type algebra, memory ownership constraints, and null-safety contracts.
 
-### Rung 3: Example-Based Unit Testing
+#### 4.19.2.3. Rung 3: Example-Based Unit Testing
 
 - **Mechanism:** Deterministic execution of discrete functions with fixed input-output assertions ($f(x_0) = y_0$).
 - **Epistemic Output:** Regression protection for known edge cases, off-by-one errors, and explicit business logic branches.
 
-### Rung 4: Property-Based & Generative Testing (PBT)
+#### 4.19.2.4. Rung 4: Property-Based & Generative Testing (PBT)
 
 - **Mechanism:** Algorithmic generation of $10^4 - 10^6$ pseudorandom inputs verifying parameterized algebraic properties: $$\forall x \in \text{Domain}, \quad \text{Invariant}(f(x)) \equiv \text{TRUE}$$
 - **Stateful PBT:** Generates randomized sequences of state-machine actions (e.g., concurrent push/pop/delete) and compares against an abstract sequential model, automatically shrinking failing traces to minimal reproducing examples.
 
-### Rung 5: Mutation Testing
+#### 4.19.2.5. Rung 5: Mutation Testing
 
 - **Mechanism:** Automated mutation engine (e.g., Mutmut, Stryker, Pitest) injects deliberate syntactic mutations (inverting conditionals, altering arithmetic operators, deleting statements) into production code and runs the test suite.
 - **Epistemic Output:** Calculates the **Mutation Score Indicator (MSI)**: $$\text{MSI} = \frac{\text{Mutants Killed}}{\text{Total Mutants Generated}} \times 100\%$$ A test suite with $100\%$ code coverage but $\text{MSI} < 70\%$ is exposed as tautological.
 
-### Rung 6: Integration & Consumer-Driven Contract Testing
+#### 4.19.2.6. Rung 6: Integration & Consumer-Driven Contract Testing
 
 - **Mechanism:** Testing across process boundaries using real ephemeral database containers (e.g., Testcontainers) and Pact consumer-driven contract verifications.
 - **Epistemic Output:** Proves SQL migration compatibility, foreign key integrity, serialization format preservation, and HTTP/gRPC contract fidelity.
 
-### Rung 7: Load, Stress & Latency Benchmark Testing
+#### 4.19.2.7. Rung 7: Load, Stress & Latency Benchmark Testing
 
 - **Mechanism:** Synthetic load drivers (k6, vegeta, JMeter) saturate the system under stepped, sustained, and spike traffic patterns while recording high-resolution HDR histograms.
 - **Epistemic Output:** Verifies throughput scaling limits, memory leak absence under load, and enforces strict latency percentiles: $$\mathcal{P}(\text{Latency} \le T_{\text{SLA}}) \ge 0.999$$
 
-### Rung 8: Fault Injection & Chaos Testing
+#### 4.19.2.8. Rung 8: Fault Injection & Chaos Testing
 
 - **Mechanism:** Deliberate, automated fault injection during active load: dropping TCP packets, introducing $500\text{ ms}$ artificial network delay, partitioning database replicas, issuing `SIGKILL` to cluster leaders, and injecting disk I/O errors (Jepsen, Chaos Mesh).
 - **Epistemic Output:** Empirical proof that the system satisfies safety invariants (no data corruption, no split-brain writes, linearizable state transitions) under catastrophic operational turbulence.
 
-### Rung 9: Canary & Dark Launching (Shadow Traffic)
+#### 4.19.2.9. Rung 9: Canary & Dark Launching (Shadow Traffic)
 
 - **Mechanism:** Deploying candidate code to a isolated production canary instance receiving a mirrored copy of live production traffic (shadow read replication) without user-visible side effects.
 - **Epistemic Output:** Bit-for-bit differential comparison between legacy and new system outputs across real, un-sanitized client payloads.
 
-### Rung 10: Production Observability & Telemetry Grounding
+#### 4.19.2.10. Rung 10: Production Observability & Telemetry Grounding
 
 - **Mechanism:** Continuous monitoring of Service Level Indicators (SLIs), distributed open-telemetry traces, and error budget burn rates post-deployment over extended time windows ($\ge 14\text{ days}$).
 - **Epistemic Output:** Conclusive proof that the system sustained its required ideality, performance, and stability in the live production supersystem.
 
 ------------------------------------------------------------------------
 
-## 19.3. Rung Selection Matrix & Confidence Metric
+### 4.19.3. Rung Selection Matrix & Confidence Metric
 
 | Depth Mode | Mandatory Rungs | Optional / High-Risk Rungs | Minimum Mutation Score ($\text{MSI}$) |
 |----|----|----|----|
@@ -13636,7 +13639,7 @@ flowchart BT
 | **Standard Mode** | Rungs 1, 2, 3, 4, 6, 7 | Rungs 5, 8, 9 | $\ge 80\%$ |
 | **Deep Mode** | Rungs 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 | Formal TLA+ Proof (where applicable) | $\ge 90\%$ |
 
-### Formal Epistemic Confidence Metric
+#### 4.19.3.1. Formal Epistemic Confidence Metric
 
 The cumulative confidence score $\mathcal{C}(\text{CAN}_k) \in [0.0, 1.0]$ of an engineering candidate is calculated as a weighted sum over verified rungs:
 
@@ -13650,9 +13653,9 @@ Where:
 
 ------------------------------------------------------------------------
 
-## 20. Completion Conditions for Entire Task
+## 4.20. Completion Conditions for Entire Task
 
-## 20.1. The 11 Formal Task Completion Invariants
+### 4.20.1. The 11 Formal Task Completion Invariants
 
 In undisciplined engineering workflows, a task is frequently declared "done" when the developer observes that a local unit test passes and pushes the branch. In the Ariadne framework, task completion is governed by **11 Uncompromising Epistemic Invariants**.
 
@@ -13678,49 +13681,49 @@ $$\Phi(\text{Task}) = \bigwedge_{i=1}^{11} \mathcal{I}_i(\text{Task}) \equiv \ma
 
 ------------------------------------------------------------------------
 
-## 20.2. Exhaustive Specification of the 11 Invariants
+### 4.20.2. Exhaustive Specification of the 11 Invariants
 
-### Invariant 1: Behavioral Decoupling ($\mathcal{I}_1$)
+#### 4.20.2.1. Invariant 1: Behavioral Decoupling ($\mathcal{I}_1$)
 
 - **Formal Statement:** The problem statement and acceptance criteria must be formulated purely in terms of observable system behavior, inputs, outputs, states, and non-negotiable invariants, without containing any reference to concrete libraries, databases, frameworks, or vendor carriers.
 - **Violation Condition:** Task description contains statements like *"Add Redis cache"* or *"Migrate table to MongoDB"* instead of *"Ensure p99 read latency $<5\text{ ms}$ under 50,000 RPS"*.
 
-### Invariant 2: Empirical Grounding ($\mathcal{I}_2$)
+#### 4.20.2.2. Invariant 2: Empirical Grounding ($\mathcal{I}_2$)
 
 - **Formal Statement:** The diagnostic explanation or constraint identification must be justified by at least one evidence node (`EVD-`) with provenance `MEASURED` ($\mathbf{M}$) or `FACT` ($\mathbf{F}$).
 - **Violation Condition:** Engineering interventions applied to unproven theoretical guesses or anecdotal developer intuition without profiling data or reproduction receipts.
 
-### Invariant 3: Morphological Exploration ($\mathcal{I}_3$)
+#### 4.20.2.3. Invariant 3: Morphological Exploration ($\mathcal{I}_3$)
 
 - **Formal Statement:** For Standard and Deep mode tasks, at least three structurally distinct candidate mechanism classes (`CAN-`) must be formally generated, characterized, and compared in a morphological matrix.
 - **Violation Condition:** Comparing three minor variations of a single technology (e.g., RabbitMQ vs. Kafka vs. Pulsar) while ignoring alternative paradigms (e.g., in-database polling, synchronous batching, client-side pagination).
 
-### Invariant 4: Decision-Significant Unknown Resolution ($\mathcal{I}_4$)
+#### 4.20.2.4. Invariant 4: Decision-Significant Unknown Resolution ($\mathcal{I}_4$)
 
 - **Formal Statement:** No decision-significant unknown node (`UNK-`) with an estimated failure impact cost exceeding the verification cost may remain unresolved prior to decision locking. All residual unknowns must be explicitly logged as accepted risks in the ADR.
 - **Violation Condition:** Locking a distributed architectural choice while an `UNK-` node regarding cross-AZ latency or cloud provider throttling limits remains unmeasured.
 
-### Invariant 5: Structural Boundary Integrity ($\mathcal{I}_5$)
+#### 4.20.2.5. Invariant 5: Structural Boundary Integrity ($\mathcal{I}_5$)
 
 - **Formal Statement:** The applied change must not introduce circular package dependencies, violate information hiding ([Parnas, 1972](https://doi.org/10.1145/361598.361623)), leak private domain state across service boundaries, or expand the change radius beyond the budget documented in the Task Passport.
 - **Violation Condition:** Modifying an internal database schema requires coordinating simultaneous code releases across three independent microservices.
 
-### Invariant 6: Dynamic Stability Under Load ($\mathcal{I}_6$)
+#### 4.20.2.6. Invariant 6: Dynamic Stability Under Load ($\mathcal{I}_6$)
 
 - **Formal Statement:** The system dynamics model must prove that queue accumulations, memory buffers, client retry loops, and thread pools remain mathematically bounded under peak load ($10\times$ baseline) and during downstream dependency outages.
 - **Violation Condition:** Unbounded in-memory retry queues that trigger Out-Of-Memory ($OOM$) crashes during downstream partner outages.
 
-### Invariant 7: Multi-Attribute Selection Justification ($\mathcal{I}_7$)
+#### 4.20.2.7. Invariant 7: Multi-Attribute Selection Justification ($\mathcal{I}_7$)
 
 - **Formal Statement:** The selection of the winning candidate must be documented in a multi-attribute utility matrix evaluating initial implementation cost, operational maintenance overhead, failure blast radius, transition complexity, and the TRIZ Ideality Ratio ($\sum \text{Useful} / (\sum \text{Cost} + \sum \text{Harm})$).
 - **Violation Condition:** Choosing a technology solely because it is novel or popular, without documenting evaluated trade-offs.
 
-### Invariant 8: Rung-Appropriate Executable Verification ($\mathcal{I}_8$)
+#### 4.20.2.8. Invariant 8: Rung-Appropriate Executable Verification ($\mathcal{I}_8$)
 
 - **Formal Statement:** The implementation must successfully execute all mandatory rungs of the Evidentiary Ladder designated for the task's depth mode, producing reproducible machine-readable execution digests (test outputs, mutation kill scores, benchmark histograms).
 - **Violation Condition:** Merging a Deep Mode distributed transaction mechanism with only example-based unit tests and zero chaos or property-based test receipts.
 
-### Invariant 9: Expand-Contract Transition Safety ($\mathcal{I}_9$)
+#### 4.20.2.9. Invariant 9: Expand-Contract Transition Safety ($\mathcal{I}_9$)
 
 - **Formal Statement:** In accordance with the Expand-Contract pattern ([Sato, Sadalage & Fowler, 2021, *Patterns of Distributed Systems: Expand-Contract*](https://martinfowler.com/bliki/ParallelChange.html)), all breaking schema modifications, protocol upgrades, and service migrations must execute via temporary dual-state transition systems that guarantee zero downtime and immediate rollback capability.
 - **Violation Condition:** Executing an in-place destructive database column rename (`ALTER TABLE RENAME`) that causes downtime for old application instances during rolling deployment.
@@ -13747,19 +13750,19 @@ sequenceDiagram
     Note over OldDB: Drop Legacy Column `name`
 ```
 
-### Invariant 10: Architectural Decision Record (ADR) Immutability ($\mathcal{I}_{10}$)
+#### 4.20.2.10. Invariant 10: Architectural Decision Record (ADR) Immutability ($\mathcal{I}_{10}$)
 
 - **Formal Statement:** The context, evaluated options, chosen candidate, empirical proof receipts, non-negotiable invariants, and anticipated consequences must be committed to the repository in a versioned, immutable ADR (`doc/adr/NNNN-*.md`).
 - **Violation Condition:** Merging major architectural changes with rationale scattered across ephemeral Slack messages or Jira comments.
 
-### Invariant 11: Decommissioning & Transition Shim Expiry ($\mathcal{I}_{11}$)
+#### 4.20.2.11. Invariant 11: Decommissioning & Transition Shim Expiry ($\mathcal{I}_{11}$)
 
 - **Formal Statement:** Every temporary backward-compatibility layer, feature flag, dual-write bridge, and CDC synchronization worker must be provisioned with an explicit **Decommissioning Milestone** and automated deletion task.
 - **Violation Condition:** Leaving dual-write shims, deprecated adapter classes, or dead feature flag conditionals in the production codebase indefinitely after successful migration.
 
 ------------------------------------------------------------------------
 
-## 20.3. Epistemic Gatekeeper Verification Protocol
+### 4.20.3. Epistemic Gatekeeper Verification Protocol
 
 Before any task branch is merged or closed, the automated Epistemic Gatekeeper script executes the following invariant check:
 
@@ -13794,13 +13797,13 @@ ALL 11 INVARIANTS SATISFIED. TASK PROVENANCE: DECIDED. READY FOR MERGE.
 
 ------------------------------------------------------------------------
 
-## Foundations of Working Artifacts in Software Engineering
+## 5.0. Foundations of Working Artifacts in Software Engineering
 
 In software engineering, reasoning cannot remain confined to ephemeral conversational context or implicit human intuition. Complex software systems operate under high concurrency, distributed state, heterogeneous network topologies, and evolving organizational constraints. In such environments, unrecorded architectural intent degrades rapidly into technical debt, accidental coupling, and catastrophic regression.
 
 Working artifacts serve as the **external cognitive memory** and **epistemic scaffolding** of engineering reasoning. Rather than functioning as bureaucratic documentation generated after the fact, working artifacts are active instruments of thought. They structure the problem space, enforce rigorous separation between proven facts and speculative assumptions, expose hidden contradictions, and maintain the conceptual integrity of the system across time, teams, and autonomous AI agents.
 
-### Theoretical Grounding
+### 5.0.1. Theoretical Grounding
 
 The design of working artifacts in this framework is grounded in five seminal foundations of computer science, cognitive psychology, and software architecture:
 
@@ -13816,7 +13819,7 @@ The design of working artifacts in this framework is grounded in five seminal fo
 
 ------------------------------------------------------------------------
 
-### The Ariadne Epistemic Model
+### 5.0.2. The Ariadne Epistemic Model
 
 Traditional project management tools track **execution state** (to-do lists, tickets, sprint points, assignees). Traditional source code repositories track **implementation state** (syntax, directory structures, commit hashes).
 
@@ -13841,28 +13844,28 @@ flowchart TD
     Phase3 -. Implementation realization .-> Ledger
 ```
 
-The working artifacts in Sections 21 through 35 represent typed nodes within an **Epistemic Graph** $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each artifact captures a discrete transformation of the problem state across the 9 Operations of Systematic Inventive Thinking.
+The working artifacts in Sections 5.21 through 5.35 represent typed nodes within an **Epistemic Graph** $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each artifact captures a discrete transformation of the problem state across the 9 Operations of Systematic Inventive Thinking.
 
 ------------------------------------------------------------------------
 
-## 21. Engineering Task Passport \[TASK-ID\]
+## 5.21. Engineering Task Passport \[TASK-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.21.1. Formal Epistemic Purpose & Role
 
 The **Engineering Task Passport** establishes the authoritative boundary and mandate for an engineering effort. Its purpose is to collapse ambiguity regarding what decision is being made, what problem or opportunity triggered the work, what invariants must never be violated, and what constitutes verified success. It explicitly bounds the modifiability envelope (what can be altered freely vs. what is fixed by organizational or regulatory constraints) and computes the concrete financial and operational cost of inaction.
 
-### Input Preconditions
+### 5.21.2. Input Preconditions
 
 - Initial trigger: Production incident report, business requirement document (PRD), architectural debt observation, or performance SLA regression.
 - Identified task owner (human engineer or agent session ID).
 
-### Consuming Downstream Operations
+### 5.21.3. Consuming Downstream Operations
 
 - **Operation 1 (Frame & Model)**: Uses the passport to isolate functional requirements from premature solutions.
 - **Operation 2 (Diagnose & Contradictions)**: Uses invariants and boundary limits to detect structural conflicts.
 - **Operation 8 (Value & Select)**: Uses success metrics and cost of inaction to calibrate trade-off scoring.
 
-### Production-Grade Template: Task Passport
+### 5.21.4. Production-Grade Template: Task Passport
 
 ``` markdown
 # TASK-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Brief Title]
@@ -13917,7 +13920,7 @@ The **Engineering Task Passport** establishes the authoritative boundary and man
 - **Strategic Risk**: [Inability to onboard enterprise customers requiring multi-region failover]
 ```
 
-### Distributed Systems Case Study Example: Global Multi-Region Payment Authorization & Ledger
+### 5.21.5. Distributed Systems Case Study Example: Global Multi-Region Payment Authorization & Ledger
 
 ``` markdown
 # TASK-2026-08-PAY-001: Multi-Region Active-Active Payment Authorization & Idempotent Ledger
@@ -13975,23 +13978,23 @@ The **Engineering Task Passport** establishes the authoritative boundary and man
 
 ------------------------------------------------------------------------
 
-## 22. Problem Framing Map \[FRAME-ID\]
+## 5.22. Problem Framing Map \[FRAME-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.22.1. Formal Epistemic Purpose & Role
 
 The **Problem Framing Map** strips premature implementation mechanisms from the engineering request and reconstructs the problem as an implementation-agnostic behavioral delta. It formalizes required behavior using the invariant tuple $(C, E, O, M, I)$ (under Conditions $C$, when Event $E$ occurs, the system must produce Outcome $O$, measured by Metric $M$, without violating Invariant $I$). It systematically shifts system boundaries across 5 architectural levels and evaluates multiple stakeholder perspectives.
 
-### Input Preconditions
+### 5.22.2. Input Preconditions
 
 - `TASK-ID` passport locked.
 - Raw requirements or initial user requests containing proposed technical solutions.
 
-### Consuming Downstream Operations
+### 5.22.3. Consuming Downstream Operations
 
 - **Operation 2 (Diagnose & Contradictions)**: Uses the implementation-agnostic function to locate true physical contradictions.
 - **Operation 4 (Explore Solution Space)**: Uses boundary variations to generate structurally distinct mechanisms.
 
-### Production-Grade Template: Problem Framing Map
+### 5.22.4. Production-Grade Template: Problem Framing Map
 
 ``` markdown
 # FRAME-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Brief Title]
@@ -14028,7 +14031,7 @@ The **Problem Framing Map** strips premature implementation mechanisms from the 
 > Under **[Conditions C]**, when **[Event E]** occurs, the system must **[Outcome O]**, ensuring **[Measurement M]** while preserving **[Invariant I]**, regardless of **[Neutralized Implementation Bias]**.
 ```
 
-### Distributed Systems Case Study Example: Multi-Region Payment Framing
+### 5.22.5. Distributed Systems Case Study Example: Multi-Region Payment Framing
 
 ``` markdown
 # FRAME-2026-08-PAY-001: Multi-Region Distributed Payment Authorization & Idempotency
@@ -14066,23 +14069,23 @@ The **Problem Framing Map** strips premature implementation mechanisms from the 
 
 ------------------------------------------------------------------------
 
-## 23. Map of Causes, Constraints, and Contradictions \[DIAG-ID\]
+## 5.23. Map of Causes, Constraints, and Contradictions \[DIAG-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.23.1. Formal Epistemic Purpose & Role
 
 The **Map of Causes, Constraints, and Contradictions** formalizes the diagnostic reasoning operation. It links observed empirical symptoms (`OBS-`) through falsifiable causal chains to validated root mechanisms (`HYP-`), isolates the binding constraint limiting system performance (Theory of Constraints), and formulates underlying physical and technical contradictions (TRIZ) where improving one critical quality attribute degrades another.
 
-### Input Preconditions
+### 5.23.2. Input Preconditions
 
 - `FRAME-ID` behavioral specification.
 - Telemetry logs, traces, crash dumps, or benchmark outputs.
 
-### Consuming Downstream Operations
+### 5.23.3. Consuming Downstream Operations
 
 - **Operation 3 (Transform System)**: Selects separation principles (Time, Space, Condition, Boundary) to eliminate formulated contradictions.
 - **Operation 5 (Knowledge & Unknowns)**: Generates differentiating experiments to resolve competing causal hypotheses.
 
-### Production-Grade Template: Diagnosis & Contradiction Map
+### 5.23.4. Production-Grade Template: Diagnosis & Contradiction Map
 
 ```` markdown
 # DIAG-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Brief Title]
@@ -14130,7 +14133,7 @@ flowchart TD
 
 ````
 
-### Distributed Systems Case Study Example: Payment Contradiction Diagnosis
+### 5.23.5. Distributed Systems Case Study Example: Payment Contradiction Diagnosis
 
 ``` markdown
 # DIAG-2026-08-PAY-001: Distributed Balance Consistency vs. Multi-Region Latency
@@ -14168,22 +14171,22 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 24. Transformation Log \[TRF-ID\]
+## 5.24. Transformation Log \[TRF-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.24.1. Formal Epistemic Purpose & Role
 
 The **Transformation Log** records the deliberate structural transformations applied to the software architecture using the 5 core transformation techniques (Remove, Split, Combine, Replace Mechanism, Reorder/Change Quantity). For every transformation, it tracks what component was eliminated, what useful function was lost, what new carrier inherited that function, what benefits were gained, what new failure modes were introduced, and how the transformation is verified.
 
-### Input Preconditions
+### 5.24.2. Input Preconditions
 
 - `DIAG-ID` with identified contradictions and hidden assumptions.
 
-### Consuming Downstream Operations
+### 5.24.3. Consuming Downstream Operations
 
 - **Operation 4 (Explore Solution Space)**: Synthesizes transformed components into coherent candidate mechanisms.
 - **Operation 6 (Dependencies)**: Verifies that transformations did not introduce circular or accidental couplings.
 
-### Production-Grade Template: Transformation Log
+### 5.24.4. Production-Grade Template: Transformation Log
 
 ``` markdown
 # TRF-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Transformation Batch Title]
@@ -14197,7 +14200,7 @@ The **Transformation Log** records the deliberate structural transformations app
 | **TRF-04** | Distributed Lock Manager | **Combine** | Dedicated Redis cluster | Separate lock management layer | Database MVCC conditional write | Reduced operational complexity | DB write throughput load | Benchmark max TPS |
 ```
 
-### Distributed Systems Case Study Example: Payment Architecture Transformations
+### 5.24.5. Distributed Systems Case Study Example: Payment Architecture Transformations
 
 ``` markdown
 # TRF-2026-08-PAY-001: Structural Transformations for Multi-Region Payment Engine
@@ -14226,23 +14229,23 @@ The **Transformation Log** records the deliberate structural transformations app
 
 ------------------------------------------------------------------------
 
-## 25. Solution Space Map \[SPACE-ID\]
+## 5.25. Solution Space Map \[SPACE-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.25.1. Formal Epistemic Purpose & Role
 
 The **Solution Space Map** executes systematic morphological analysis across orthogonal architectural dimensions. Rather than evaluating arbitrary ad-hoc ideas, it defines the full discrete combinatorial space of possible architectures, explicitly prunes invalid combinations using non-negotiable invariants, and selects a small set of **structurally distinct candidate mechanisms** (`CAN-01`, `CAN-02`, `CAN-03`) representing fundamentally different operating principles.
 
-### Input Preconditions
+### 5.25.2. Input Preconditions
 
 - `FRAME-ID` invariants and behavioral specification.
 - `TRF-ID` transformation options.
 
-### Consuming Downstream Operations
+### 5.25.3. Consuming Downstream Operations
 
 - **Operation 5 (Knowledge & Unknowns)**: Identifies unknowns that discriminate between candidates.
 - **Operation 8 (Value & Select)**: Evaluates the surviving representative candidates.
 
-### Production-Grade Template: Solution Space Map
+### 5.25.4. Production-Grade Template: Solution Space Map
 
 ``` markdown
 # SPACE-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Solution Space Title]
@@ -14266,7 +14269,7 @@ The **Solution Space Map** executes systematic morphological analysis across ort
 - **CAN-03 (Optimistic Asynchronous Ledger with Auto-Compensating Actions)**: Local fast-path authorization against cached balance; background saga execution with financial reconciliation and automated merchant reversals on over-draft.
 ```
 
-### Distributed Systems Case Study Example: Payment Solution Space
+### 5.25.5. Distributed Systems Case Study Example: Payment Solution Space
 
 ```` markdown
 # SPACE-2026-08-PAY-001: Multi-Region Payment Engine Architectural Space
@@ -14303,23 +14306,23 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 26. Registry of Unknowns and Knowledge \[UNK-ID\]
+## 5.26. Registry of Unknowns and Knowledge \[UNK-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.26.1. Formal Epistemic Purpose & Role
 
 The **Registry of Unknowns and Knowledge** enforces strict epistemic accounting. It prevents the team or AI agent from conflating unverified assumptions with verified facts. It categorizes every critical claim into typed epistemic levels (`FACT`, `MEASURED`, `DERIVED`, `ASSUMED`, `PROPOSED`, `UNKNOWN`), quantifies the **Value of Information (VoI)** and **Cost of Being Wrong**, and prescribes the cheapest empirical discovery action (spike, benchmark, trace inspection).
 
-### Input Preconditions
+### 5.26.2. Input Preconditions
 
 - Competing candidates from `SPACE-ID`.
 - Debated assertions regarding system performance, library behavior, or infrastructure capabilities.
 
-### Consuming Downstream Operations
+### 5.26.3. Consuming Downstream Operations
 
 - **Operation 5 (Expand Knowledge)**: Executes the prescribed empirical tests.
 - **Operation 8 (Value & Select)**: Uses confidence scores to weight candidate evaluations.
 
-### Production-Grade Template: Knowledge & Unknowns Registry
+### 5.26.4. Production-Grade Template: Knowledge & Unknowns Registry
 
 ``` markdown
 # UNK-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Registry Title]
@@ -14341,7 +14344,7 @@ The **Registry of Unknowns and Knowledge** enforces strict epistemic accounting.
 | **ASM-01** | ASSUMED | Less than 5% of cardholders initiate transactions in multiple regions within any 10-minute window. | Justifies bounded escrow partition in CAN-02 | MEDIUM (60%) | Historical traveler data analysis | Critical (Frequent escrow exhaustion) | SQL query across 90 days of historical logs |
 ```
 
-### Distributed Systems Case Study Example: Payment Knowledge Registry
+### 5.26.5. Distributed Systems Case Study Example: Payment Knowledge Registry
 
 ``` markdown
 # UNK-2026-08-PAY-001: Epistemic State for Multi-Region Payment Engine
@@ -14367,23 +14370,23 @@ The **Registry of Unknowns and Knowledge** enforces strict epistemic accounting.
 
 ------------------------------------------------------------------------
 
-## 27. Dependency Matrix \[DEP-ID\]
+## 5.27. Dependency Matrix \[DEP-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.27.1. Formal Epistemic Purpose & Role
 
 The **Dependency Matrix** maps **reasons for change (requirements)** to **system mechanisms and components**, exposing accidental structural, temporal, schema, deployment, and configuration couplings. It calculates the **change radius** of independent business requirements and identifies unstable dependencies where high-volatility business logic depends on fragile infrastructure details.
 
-### Input Preconditions
+### 5.27.2. Input Preconditions
 
 - System component architecture and candidate designs.
 - Historical changelog or anticipated feature evolution vectors.
 
-### Consuming Downstream Operations
+### 5.27.3. Consuming Downstream Operations
 
 - **Operation 6 (Dependencies & Boundaries)**: Inverts or severs accidental couplings.
 - **Operation 9 (Verification & Transition)**: Defines safe component deployment ordering.
 
-### Production-Grade Template: Dependency Matrix
+### 5.27.4. Production-Grade Template: Dependency Matrix
 
 ``` markdown
 # DEP-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Dependency Matrix Title]
@@ -14414,7 +14417,7 @@ flowchart TD
     Change --> Gateway["Isolated: Gateway API<br/>Zero change; accepts existing payment DTO"]
 ```
 
-### Distributed Systems Case Study Example: Payment Dependency Analysis
+### 5.27.5. Distributed Systems Case Study Example: Payment Dependency Analysis
 
 ``` markdown
 # DEP-2026-08-PAY-001: Dependency Structure for Multi-Region Payment Architecture
@@ -14437,23 +14440,23 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 28. Dynamics Map \[DYN-ID\]
+## 5.28. Dynamics Map \[DYN-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.28.1. Formal Epistemic Purpose & Role
 
 The **Dynamics Map** models system behavior across time, varying load, failure scenarios, and degraded states. It moves beyond static architectural block diagrams to analyze **stocks (accumulations)**, **inflow/outflow rates**, **delays/latencies**, **reinforcing feedback loops (vicious cycles)**, and **balancing feedback loops (control mechanisms)**. It explicitly defines behavior across 6 operating modes and forecasts the next system bottleneck post-optimization.
 
-### Input Preconditions
+### 5.28.2. Input Preconditions
 
 - `SPACE-ID` candidate mechanisms.
 - Expected traffic distributions, queue configurations, and retry policies.
 
-### Consuming Downstream Operations
+### 5.28.3. Consuming Downstream Operations
 
 - **Operation 7 (Understand Dynamics)**: Simulates race conditions, thundering herds, and queue blowups.
 - **Operation 9 (Verification & Transition)**: Designs chaos engineering and load injection scenarios.
 
-### Production-Grade Template: Dynamics Map
+### 5.28.4. Production-Grade Template: Dynamics Map
 
 ```` markdown
 # DYN-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Dynamics Map Title]
@@ -14503,7 +14506,7 @@ flowchart LR
 
 ````
 
-### Distributed Systems Case Study Example: Payment Dynamics
+### 5.28.5. Distributed Systems Case Study Example: Payment Dynamics
 
 ``` markdown
 # DYN-2026-08-PAY-001: Multi-Region Payment Engine Dynamics & Failure Modes
@@ -14520,23 +14523,23 @@ flowchart LR
 
 ------------------------------------------------------------------------
 
-## 29. Value and Selection Table \[VAL-SELECT-ID\]
+## 5.29. Value and Selection Table \[VAL-SELECT-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.29.1. Formal Epistemic Purpose & Role
 
 The **Value and Selection Table** provides a rigorous, multi-dimensional decision matrix that evaluates candidate mechanisms against hard invariants, positive preference attributes, operational overheads, transition risks, and collateral harms. It requires explicit **Confidence Levels** for each rating, preventing subjective bias from skewing the architectural selection.
 
-### Input Preconditions
+### 5.29.2. Input Preconditions
 
 - Validated candidates from `SPACE-ID`.
 - Quantitative benchmarks and measurements from `UNK-ID`.
 
-### Consuming Downstream Operations
+### 5.29.3. Consuming Downstream Operations
 
 - **Operation 8 (Determine Value & Select)**: Produces the definitive architectural choice.
 - **Operation 9 (Transition)**: Informs the complexity scope of the transition plan.
 
-### Production-Grade Template: Value and Selection Table
+### 5.29.4. Production-Grade Template: Value and Selection Table
 
 ``` markdown
 # VAL-SELECT-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Selection Title]
@@ -14567,22 +14570,22 @@ The **Value and Selection Table** provides a rigorous, multi-dimensional decisio
 
 ------------------------------------------------------------------------
 
-## 30. Verification Card \[VAL-ID\]
+## 5.30. Verification Card \[VAL-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.30.1. Formal Epistemic Purpose & Role
 
 The **Verification Card** specifies an executable, falsifiable test harness for an engineering claim or candidate mechanism. It defines the exact verification method (property-based test, benchmark, fault injection, mutation test), test preconditions, quantitative pass criteria, explicit **falsification criteria** (which immediately discard or force redesign of the candidate), observed empirical results, and a definitive verdict (`SUPPORTED`, `FALSIFIED`, `INCONCLUSIVE`).
 
-### Input Preconditions
+### 5.30.2. Input Preconditions
 
 - Selected candidate from `VAL-SELECT-ID` or critical hypothesis from `DIAG-ID`.
 
-### Consuming Downstream Operations
+### 5.30.3. Consuming Downstream Operations
 
 - **Operation 9 (Verify & Transition)**: Executes the verification test suite in CI/CD or staging environments.
 - **Epistemic Graph**: Triggers transitive invalidation if the verdict is `FALSIFIED`.
 
-### Production-Grade Template: Verification Card
+### 5.30.4. Production-Grade Template: Verification Card
 
 ```` markdown
 # VAL-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Verification Title]
@@ -14636,7 +14639,7 @@ const verificationCommand = "npm test -- --runInBand multi-region-escrow --timeo
 <!-- -->
 
 
-### Distributed Systems Case Study Example: Escrow Verification Card
+### 5.30.5. Distributed Systems Case Study Example: Escrow Verification Card
 
 ``` markdown
 # VAL-2026-08-PAY-001: Verification of Bounded CRDT Escrow Non-Negativity under Jepsen Partition
@@ -14665,21 +14668,21 @@ const verificationCommand = "npm test -- --runInBand multi-region-escrow --timeo
 
 ------------------------------------------------------------------------
 
-## 31. Transition Plan \[TRANS-ID\]
+## 5.31. Transition Plan \[TRANS-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.31.1. Formal Epistemic Purpose & Role
 
 The **Transition Plan** designs the temporary architectural mechanisms (expand/contract schema steps, dual-writing proxies, CDC backfill pipelines, feature flags, traffic shadowers, and canary splitters) necessary to evolve safely from the current system state to the target architecture. It provides an explicit rollback procedure for every step and defines clear decommissioning criteria so that temporary shims do not harden into permanent technical debt.
 
-### Input Preconditions
+### 5.31.2. Input Preconditions
 
 - Selected candidate from `VAL-SELECT-ID` and verified proofs from `VAL-ID`.
 
-### Consuming Downstream Operations
+### 5.31.3. Consuming Downstream Operations
 
 - **Operation 9 (Verify & Transition)**: Guides the live deployment and migration in production.
 
-### Production-Grade Template: Transition Plan
+### 5.31.4. Production-Grade Template: Transition Plan
 
 ```` markdown
 # TRANS-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Transition Plan Title]
@@ -14736,22 +14739,22 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-## 32. Assumption Registry \[ASM-ID\]
+## 5.32. Assumption Registry \[ASM-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.32.1. Formal Epistemic Purpose & Role
 
 The **Assumption Registry** tracks all unverified working premises accepted to proceed with design. It maps each assumption to the candidate mechanisms that depend on it, computes the financial and technical **Cost of Error**, identifies the required empirical verification action, and updates its status (`OPEN`, `VERIFIED`, `FALSIFIED`). When an assumption is marked `FALSIFIED`, it triggers **Transitive Invalidation** across all dependent nodes.
 
-### Input Preconditions
+### 5.32.2. Input Preconditions
 
 - Unproven assertions made during Framing, Diagnosis, or Solution Exploration.
 
-### Consuming Downstream Operations
+### 5.32.3. Consuming Downstream Operations
 
 - **Operation 5 (Expand Knowledge)**: Prioritizes verification of highest-risk assumptions.
 - **Epistemic Graph Invalidation Engine**: Propagates invalidation upon falsification.
 
-### Production-Grade Template: Assumption Registry
+### 5.32.4. Production-Grade Template: Assumption Registry
 
 ``` markdown
 # ASM-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Registry Title]
@@ -14767,21 +14770,21 @@ The **Assumption Registry** tracks all unverified working premises accepted to p
 
 ------------------------------------------------------------------------
 
-## 33. Decision Log / Architectural Decision Record \[DEC-ID\]
+## 5.33. Decision Log / Architectural Decision Record \[DEC-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.33.1. Formal Epistemic Purpose & Role
 
 The **Architectural Decision Record (ADR)** represents an immutable commitment to an architectural mechanism. Grounded in Nygard (2011) and Bass et al. (2021), it captures the exact context, evaluated alternatives, decisive justification, resolved contradictions, accepted trade-offs, and explicit **Review Triggers** (conditions that, if true in the future, automatically invalidate the decision and mandate re-evaluation).
 
-### Input Preconditions
+### 5.33.2. Input Preconditions
 
 - Completed `VAL-SELECT-ID` and verified `VAL-ID` cards.
 
-### Consuming Downstream Operations
+### 5.33.3. Consuming Downstream Operations
 
 - Downstream engineering teams, implementation agents, and future maintenance cycles.
 
-### Production-Grade Template: Architectural Decision Record
+### 5.33.4. Production-Grade Template: Architectural Decision Record
 
 ``` markdown
 # DEC-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Decision Title]
@@ -14816,7 +14819,7 @@ The **Architectural Decision Record (ADR)** represents an immutable commitment t
 3. **REV-03**: Regulatory mandate requires real-time centralized ledger locking for specific high-value transactions (> $100,000).
 ```
 
-### Distributed Systems Case Study Example: Multi-Region Payment ADR
+### 5.33.5. Distributed Systems Case Study Example: Multi-Region Payment ADR
 
 ``` markdown
 # DEC-2026-08-PAY-001: Adoption of Bounded CRDT Escrow for Multi-Region Payment Authorization
@@ -14841,21 +14844,21 @@ Re-evaluate this ADR if cross-region travel patterns cause regional escrow exhau
 
 ------------------------------------------------------------------------
 
-## 34. Work State Map \[STATE-ID\]
+## 5.34. Work State Map \[STATE-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.34.1. Formal Epistemic Purpose & Role
 
 The **Work State Map** tracks the immediate cognitive momentum of the engineering session. It prevents context loss across agent turns or human handoffs by maintaining an explicit record of the **Highest-Cost Uncertainty**, the **Latest Confirmed Knowledge Delta**, the **Active Operation**, current input/output artifacts, explicit stop conditions, and conditional branching paths based on test outcomes.
 
-### Input Preconditions
+### 5.34.2. Input Preconditions
 
 - Continuous execution of any of the 9 operations.
 
-### Consuming Downstream Operations
+### 5.34.3. Consuming Downstream Operations
 
 - Autonomous AI Agent runtime loop and human project leads.
 
-### Production-Grade Template: Work State Map
+### 5.34.4. Production-Grade Template: Work State Map
 
 ``` markdown
 # STATE-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Current Work State]
@@ -14883,21 +14886,21 @@ The **Work State Map** tracks the immediate cognitive momentum of the engineerin
 
 ------------------------------------------------------------------------
 
-## 35. Human-AI Handoff \[HANDOFF-ID\]
+## 5.35. Human-AI Handoff \[HANDOFF-ID\]
 
-### Formal Epistemic Purpose & Role
+### 5.35.1. Formal Epistemic Purpose & Role
 
 The **Human-AI Handoff** artifact establishes a lossless, highly structured boundary protocol for transferring cognitive control between human engineers and autonomous AI agents. Grounded in supervisory control theory, it explicitly lists verified facts, open assumptions, evaluated alternatives with rejection rationale, tool authorizations, prohibited actions (destructive operations requiring human sign-off), and strict decision gates.
 
-### Input Preconditions
+### 5.35.2. Input Preconditions
 
 - Agent completing an autonomous reasoning burst or reaching a high-consequence decision gate.
 
-### Consuming Downstream Operations
+### 5.35.3. Consuming Downstream Operations
 
 - Human architect review or subsequent agent session initialization.
 
-### Production-Grade Template: Human-AI Handoff
+### 5.35.4. Production-Grade Template: Human-AI Handoff
 
 ``` markdown
 # HANDOFF-[YYYY-MM-DD]-[DOMAIN]-[ID]: [Handoff Title]
@@ -14937,7 +14940,7 @@ The **Human-AI Handoff** artifact establishes a lossless, highly structured boun
 
 ------------------------------------------------------------------------
 
-## 36. Minimal Artifact Set for Small Tasks
+## 5.36. Minimal Artifact Set for Small Tasks
 
 Not every engineering problem justifies the full 15-artifact apparatus. When fixing a local defect, optimizing an in-memory algorithm, or implementing a bounded, single-service feature (work spanning 1 to 4 hours), maintaining 15 distinct markdown files introduces cognitive friction.
 
@@ -14950,7 +14953,7 @@ For such tasks, the **Minimal Artifact Set** collapses the 9 operations into a s
 > 4. VERIFICATION CARD: Test method, command, pass/falsification criteria
 > 5. DECISION & TRANSITION: Chosen option, code diff link, rollback trigger
 
-### Transition Rule from Lean to Full Artifact Set
+### 5.36.1. Transition Rule from Lean to Full Artifact Set
 
 An engineer or agent **MUST** immediately upgrade from a Lean Task Card to the Full Artifact Set if any of the following **Escalation Triggers** occur:
 
@@ -14961,7 +14964,7 @@ An engineer or agent **MUST** immediately upgrade from a Lean Task Card to the F
 
 ------------------------------------------------------------------------
 
-### Production-Grade Template: Lean Task Card
+### 5.36.2. Production-Grade Template: Lean Task Card
 
 ``` markdown
 # LEAN-TASK-[YYYY-MM-DD]-[ID]: [Brief Title]
@@ -14994,11 +14997,11 @@ An engineer or agent **MUST** immediately upgrade from a Lean Task Card to the F
 
 ------------------------------------------------------------------------
 
-## 37. Full Artifact Set for Complex Projects
+## 5.37. Full Artifact Set for Complex Projects
 
 For multi-month initiatives, distributed system architectures, zero-downtime platform migrations, and autonomous multi-agent engineering workflows, the full epistemic graph must be maintained with strict typing, explicit provenance, and formal lifecycle mechanics.
 
-### 1. Canonical Prefix Taxonomy
+### 5.37.1. Canonical Prefix Taxonomy
 
 Every engineering statement, observation, hypothesis, and decision must be uniquely addressable using standard prefix identifiers:
 
@@ -15027,11 +15030,11 @@ Every engineering statement, observation, hypothesis, and decision must be uniqu
 
 ------------------------------------------------------------------------
 
-### 2. Epistemic Graph Relationships & Provenance
+### 5.37.2. Epistemic Graph Relationships & Provenance
 
 The Epistemic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ is composed of typed nodes $\mathcal{V}$ with explicit **Provenance Types**, connected by directed, typed edges $\mathcal{E}$:
 
-#### Node Provenance Types
+#### 5.37.2.1. Node Provenance Types
 
 - `FACT`: Directly verified in repository code, committed schema, or active production config.
 - `MEASURED`: Quantitatively measured via reproducible benchmark or production telemetry.
@@ -15041,7 +15044,7 @@ The Epistemic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ is composed of ty
 - `UNKNOWN`: Missing information that must be resolved.
 - `DECIDED`: Human-locked or architectural decision.
 
-#### Directed Edge Types
+#### 5.37.2.2. Directed Edge Types
 
 - `supports` ($A \xrightarrow{\text{supports}} B$): Node $A$ provides justifying evidence, data, or logical derivation for Node $B$.
 - `contradicts` ($A \xleftrightarrow{\text{contradicts}} B$): Node $A$ and Node $B$ cannot be simultaneously valid in the same operational context.
@@ -15051,11 +15054,11 @@ The Epistemic Graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ is composed of ty
 
 ------------------------------------------------------------------------
 
-### 3. Transitive Invalidation Propagation Mechanics
+### 5.37.3. Transitive Invalidation Propagation Mechanics
 
 The central power of the Epistemic Graph is its ability to execute **Transitive Invalidation**. In large systems, when a foundational assumption is proven false or a cloud provider changes an SLA, engineers frequently fail to recognize all downstream decisions that depended on that assumption.
 
-#### Formal Invalidation Propagation Algorithm
+#### 5.37.3.1. Formal Invalidation Propagation Algorithm
 
 Let the Epistemic Graph be $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. When an empirical verification $EVD_k$ produces a falsification verdict:
 
@@ -15081,7 +15084,7 @@ flowchart TD
     Decision -->|triggers| Space["SPACE-01: Re-evaluate solution space<br/>Promotes CAN-02: Bounded CRDT Escrow"]
 ```
 
-#### Concrete Distributed Systems Invalidation Trace
+#### 5.37.3.2. Concrete Distributed Systems Invalidation Trace
 
 1.  **Initial State**:
 
@@ -15115,13 +15118,14 @@ flowchart TD
 
 ------------------------------------------------------------------------
 
-# Appendix 1. 36 Techniques for Software Engineering (Expanded Reference Manual)
+# Part 6. Appendices and Reference Material
+## 6.38. Appendix 1. 36 Techniques for Software Engineering (Expanded Reference Manual)
 
 The 36 techniques provide concrete, operational transformations across the nine invariant operations of systematic inventive thinking. Each technique represents a repeatable cognitive and structural mechanism for converting engineering uncertainty into verified software systems.
 
 ------------------------------------------------------------------------
 
-## Operation 1. Frame and Model the Software Problem
+### 6.38.1. Operation 1. Frame and Model the Software Problem
 
 > **OPERATION 1: PROBLEM FRAMING & BEHAVIORAL MODELING**
 > 1.1 Separate Function from Implementation
@@ -15129,7 +15133,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 1.3 Shift System Boundary (Function → Module → Service → System → Pipeline)
 > 1.4 Shift Perspective (User, Data Owner, Operator, Adversary, Downstream, Maintainer)
 
-### Technique 1.1: Separate Required Function from Current Code, Service, Library, or Infrastructure
+#### 6.38.1.1. Technique 1.1: Separate Required Function from Current Code, Service, Library, or Infrastructure
 
 - **Core Mechanism / Transformation**: Strips implementation-specific nouns, vendor products, and architectural artifacts from the problem statement, replacing them with a functional predicate: $\text{Verb} + \text{Direct Object} + \text{Bounded Constraint}$. Resolves the psychological inertia that equates the problem with a specific technology stack.
 - **Input Preconditions**: The engineering task description contains concrete technologies (e.g., "Add Redis cache," "Migrate to Kafka," "Rewrite in Rust," "Deploy Kubernetes operator").
@@ -15146,7 +15150,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 1.2: Describe Required and Actual Behavior Using Observable Conditions and Invariants
+#### 6.38.1.2. Technique 1.2: Describe Required and Actual Behavior Using Observable Conditions and Invariants
 
 - **Core Mechanism / Transformation**: Formulates the delta between actual and required behavior as a mathematically verifiable behavioral invariant under specific environmental preconditions: $$\forall s \in \mathcal{S}_{\text{valid}}, \quad \mathcal{P}_{\text{pre}}(s, e) \implies \mathcal{I}_{\text{system}}(\text{step}(s, e)) \land \mathcal{Q}_{\text{SLA}}(\Delta t)$$
 - **Input Preconditions**: Ambiguous, subjective, or narrative requirements (e.g., "The payment service must be resilient and fast").
@@ -15162,7 +15166,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 1.3: Shift the Analysis Boundary (Function → Module → Service → System → Operational Pipeline)
+#### 6.38.1.3. Technique 1.3: Shift the Analysis Boundary (Function → Module → Service → System → Operational Pipeline)
 
 - **Core Mechanism / Transformation**: Expands or contracts the system perimeter across 6 discrete abstraction layers to locate the optimal intervention plane where the problem dissolves or becomes trivial to solve.
 - **Input Preconditions**: A localized fix creates excessive complexity, or an optimization within the existing component boundary yields diminishing returns.
@@ -15180,7 +15184,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 1.4: Shift Perspective (User, Data Owner, Operator, Adversary, Adjacent Service, Future Developer)
+#### 6.38.1.4. Technique 1.4: Shift Perspective (User, Data Owner, Operator, Adversary, Adjacent Service, Future Developer)
 
 - **Core Mechanism / Transformation**: Re-evaluates system behavior across orthogonal stakeholder lenses, exposing latent requirements, hidden security vulnerabilities, operational hazards, and maintenance bottlenecks.
 - **Input Preconditions**: Problem framing has been conducted exclusively from the perspective of the feature author or primary happy-path caller.
@@ -15199,7 +15203,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 2. Find the Constraint, Cause, or Contradiction
+### 6.38.2. Operation 2. Find the Constraint, Cause, or Contradiction
 
 > **OPERATION 2: ROOT DIAGNOSIS, BOTTLENECK LOCALIZATION & CONTRADICTION FORMULATION**
 > 2.1 Identify Clashes Between Quality Attributes, Requirements, or Operating Modes (Contradictions)
@@ -15207,7 +15211,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 2.3 Construct a Causal Chain from Symptom to Testable Mechanism (5-Whys / Ishikawa)
 > 2.4 Uncover Hidden Assumptions That Make Current Architecture Seem "Inevitable"
 
-### Technique 2.1: Identify Clashes Between Quality Attributes, Requirements, or Operating Modes
+#### 6.38.2.1. Technique 2.1: Identify Clashes Between Quality Attributes, Requirements, or Operating Modes
 
 - **Core Mechanism / Transformation**: Formalizes the engineering tension into an explicit **System Contradiction** ($A \uparrow \implies B \downarrow$) or **Physical / Operational Contradiction** (Parameter $X$ must be high for requirement $R_1$, but low for requirement $R_2$). Prohibits premature compromise.
 - **Input Preconditions**: The engineering team is debating trade-offs (e.g., "Do we want high performance or strong consistency? Low memory footprint or low latency?").
@@ -15224,7 +15228,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 2.2: Locate the Limiting Bottleneck in Execution Flow, Delivery, or Decision-Making
+#### 6.38.2.2. Technique 2.2: Locate the Limiting Bottleneck in Execution Flow, Delivery, or Decision-Making
 
 - **Core Mechanism / Transformation**: Applies Goldratt's Theory of Constraints (TOC) to identify the single limiting constraint ($\tau_{\max}$) that governs the throughput, latency, or iteration speed of the entire system. Any optimization not focused on the constraint is an illusion.
 - **Input Preconditions**: System is suffering from throughput limitations, high end-to-end latency, or slow deployment cycles, but optimization efforts are scattered across multiple modules.
@@ -15241,7 +15245,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 2.3: Construct a Causal Chain from Symptom to Testable Mechanism
+#### 6.38.2.3. Technique 2.3: Construct a Causal Chain from Symptom to Testable Mechanism
 
 - **Core Mechanism / Transformation**: Builds a directed acyclic graph (DAG) of causal links connecting observable external symptoms to root physical/computational mechanisms, requiring empirical evidence for each edge: $$\text{Symptom} \xleftarrow{\text{causes}} \text{Intermediate State} \xleftarrow{\text{causes}} \text{Latent Defect} \xleftarrow{\text{causes}} \text{Root Flaw}$$
 - **Input Preconditions**: An intermittent defect, memory leak, race condition, or distributed anomaly is reported with ambiguous or conflicting diagnostic theories.
@@ -15258,7 +15262,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 2.4: Uncover Hidden Assumptions That Make Current Architecture Seem "Inevitable"
+#### 6.38.2.4. Technique 2.4: Uncover Hidden Assumptions That Make Current Architecture Seem "Inevitable"
 
 - **Core Mechanism / Transformation**: Systematically extracts implicit, unwritten organizational and technical assumptions (`ASM-*`), auditing whether historical constraints (e.g., hardware limits, network speeds, vendor limitations, team structures) still hold true.
 - **Input Preconditions**: Architecture is deemed "impossible to change" or developers state "this is just how the system has to work."
@@ -15274,7 +15278,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 3. Transform the Existing Software System
+### 6.38.3. Operation 3. Transform the Existing Software System
 
 > **OPERATION 3: INVENTIVE STRUCTURAL & COMPUTATIONAL TRANSFORMATIONS**
 > 3.1 Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination (Trimming)
@@ -15283,7 +15287,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 3.4 Replace the Computational Mechanism (Storage, Communication, Coordination, Compute)
 > 3.5 Change Quantity, Ordering, Frequency, Execution Timing, or Compute Placement
 
-### Technique 3.1: Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination
+#### 6.38.3.1. Technique 3.1: Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination
 
 - **Core Mechanism / Transformation**: Applies the TRIZ *Trimming* principle to software: eliminate a component, intermediary, or coordination layer entirely while redistributing its useful function to surviving system components or the environment.
 - **Input Preconditions**: System suffers from excessive cognitive overhead, latency accumulation across middleware layers, or fragile distributed coordination.
@@ -15300,7 +15304,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 3.2: Split by Data, Ownership, Time, Mode, Criticality, or Execution Environment
+#### 6.38.3.2. Technique 3.2: Split by Data, Ownership, Time, Mode, Criticality, or Execution Environment
 
 - **Core Mechanism / Transformation**: Partitions a monolithic, entangled component or data structure along orthogonal operational fault lines, isolating high-frequency operations from low-frequency ones, or critical invariants from best-effort paths.
 - **Input Preconditions**: A single component handles conflicting workloads (e.g., OLTP writes and OLAP reporting; high-priority fraud detection and low-priority marketing notifications).
@@ -15317,7 +15321,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 3.3: Combine Functions or Delegate a Function to an Existing System Mechanism
+#### 6.38.3.3. Technique 3.3: Combine Functions or Delegate a Function to an Existing System Mechanism
 
 - **Core Mechanism / Transformation**: Implements TRIZ *Self-Service* and *Integration*: utilizes latent capabilities of existing compilers, databases, operating systems, or networking hardware instead of writing custom application-level code.
 - **Input Preconditions**: Application codebase contains complex custom logic for caching, indexing, concurrency control, or protocol parsing that duplicates underlying infrastructure capabilities.
@@ -15334,7 +15338,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 3.4: Replace the Computational Mechanism (Storage, Communication, Coordination, Compute, Representation)
+#### 6.38.3.4. Technique 3.4: Replace the Computational Mechanism (Storage, Communication, Coordination, Compute, Representation)
 
 - **Core Mechanism / Transformation**: Swaps the underlying algorithmic, data-structural, or physical mechanism while holding functional invariants constant.
 - **Input Preconditions**: The existing mechanism has hit fundamental physical or mathematical scaling limits (e.g., $O(N^2)$ algorithmic complexity, B-Tree lock contention, JSON parsing overhead).
@@ -15351,7 +15355,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 3.5: Change Quantity, Ordering, Frequency, Execution Timing, or Compute Placement
+#### 6.38.3.5. Technique 3.5: Change Quantity, Ordering, Frequency, Execution Timing, or Compute Placement
 
 - **Core Mechanism / Transformation**: Adjusts the dimensional parameters of computation: shifting from eager to lazy execution, synchronous to batched asynchronous, polling to event-driven push, or centralized compute to edge compute.
 - **Input Preconditions**: High system overhead caused by redundant roundtrips, frequent tiny I/O operations, or premature calculation of unrequested data.
@@ -15368,7 +15372,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 4. Explore the Space of Architectures and Implementations
+### 6.38.4. Operation 4. Explore the Space of Architectures and Implementations
 
 > **OPERATION 4: SYSTEMATIC SOLUTION SPACE EXPLORATION**
 > 4.1 Generate Multiple Candidate Solutions Differing by Operating Principle (Diversity)
@@ -15376,7 +15380,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 4.3 Combine Dimension Values to Discover Unexplored Regions of the Solution Space
 > 4.4 Prune Combinations That Violate Non-Negotiable Invariants and Hard Constraints (Pruning)
 
-### Technique 4.1: Generate Multiple Candidate Solutions Differing by Underlying Operating Principle
+#### 6.38.4.1. Technique 4.1: Generate Multiple Candidate Solutions Differing by Underlying Operating Principle
 
 - **Core Mechanism / Transformation**: Forces the generation of $\ge 3$ structurally distinct candidate mechanisms (`CAN-*`), where each candidate is grounded in a fundamentally different architectural paradigm (e.g., centralized vs. peer-to-peer; synchronous vs. event-sourced; push vs. pull).
 - **Input Preconditions**: The team has converged on a single solution idea without exploring alternatives, risking confirmation bias.
@@ -15396,7 +15400,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 4.2: Isolate Orthogonal Dimensions of the Architectural Decision
+#### 6.38.4.2. Technique 4.2: Isolate Orthogonal Dimensions of the Architectural Decision
 
 - **Core Mechanism / Transformation**: Decomposes the architectural problem into independent, mutually orthogonal decision axes (e.g., Storage Engine, Concurrency Model, Communication Protocol, Consistency Model, Deployment Topology).
 - **Input Preconditions**: Architectural discussions are tangled because multiple technical choices are being debated simultaneously as an indivisible package.
@@ -15414,7 +15418,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 4.3: Combine Dimension Values to Discover Unexplored Regions of the Solution Space
+#### 6.38.4.3. Technique 4.3: Combine Dimension Values to Discover Unexplored Regions of the Solution Space
 
 - **Core Mechanism / Transformation**: Computes the Cartesian product of morphological dimensions ($D_1 \times D_2 \times \dots \times D_k$) to synthesize novel architectural configurations that would not emerge through intuitive brainstorming.
 - **Input Preconditions**: Standard, off-the-shelf architectures fail to satisfy all constraints, requiring an innovative design.
@@ -15430,7 +15434,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 4.4: Prune Combinations That Violate Non-Negotiable Invariants and Hard Constraints
+#### 6.38.4.4. Technique 4.4: Prune Combinations That Violate Non-Negotiable Invariants and Hard Constraints
 
 - **Core Mechanism / Transformation**: Filters the morphological solution space against hard constraints (regulatory compliance, SLA latency bounds, operational budget, data consistency invariants), eliminating unviable branches before deep investment.
 - **Input Preconditions**: A large morphological space of candidate architectures has been generated and needs rapid down-selection.
@@ -15446,7 +15450,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 5. Expand Knowledge and Obtain Missing Evidence
+### 6.38.5. Operation 5. Expand Knowledge and Obtain Missing Evidence
 
 > **OPERATION 5: EMPIRICAL KNOWLEDGE ACQUISITION & EVIDENCE GATHERING**
 > 5.1 Formulate Concrete Decision-Significant Unknowns (UNK-*)
@@ -15454,7 +15458,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 5.3 Maintain an Explicit Registry of Unknowns, Assumptions, and Open Questions
 > 5.4 Generate Empirical Knowledge via Benchmarks, Spikes, Prototypes, Profiling, and Telemetry
 
-### Technique 5.1: Formulate Concrete Decision-Significant Unknowns
+#### 6.38.5.1. Technique 5.1: Formulate Concrete Decision-Significant Unknowns
 
 - **Core Mechanism / Transformation**: Converts vague anxiety into an explicit, measurable **Decision-Significant Unknown** (`UNK-*`), where the answer has the power to directly flip an architectural choice between competing candidates.
 - **Input Preconditions**: Architectural debate is stalled due to conflicting speculations or unverified claims.
@@ -15470,7 +15474,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 5.2: Transfer Implementation Mechanisms from Other Software or Engineering Domains
+#### 6.38.5.2. Technique 5.2: Transfer Implementation Mechanisms from Other Software or Engineering Domains
 
 - **Core Mechanism / Transformation**: Identifies structural isomorphisms between the current problem and established mechanisms in compilers, operating system kernels, hardware graphics pipelines, database internals, or telecommunications.
 - **Input Preconditions**: The problem appears novel or intractable within the immediate application domain.
@@ -15488,7 +15492,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 5.3: Maintain an Explicit Registry of Unknowns, Assumptions, and Open Questions
+#### 6.38.5.3. Technique 5.3: Maintain an Explicit Registry of Unknowns, Assumptions, and Open Questions
 
 - **Core Mechanism / Transformation**: Maintains a structured, versioned epistemic ledger linking every assumption (`ASM-*`) to its dependent architectural decisions (`DEC-*`), enabling automatic **Transitive Invalidation** when an assumption is falsified.
 - **Input Preconditions**: Decisions are being made based on unverified premises that risk being forgotten as the project evolves.
@@ -15505,7 +15509,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 5.4: Generate Empirical Knowledge via Benchmarks, Spikes, Prototypes, Profiling, and Telemetry
+#### 6.38.5.4. Technique 5.4: Generate Empirical Knowledge via Benchmarks, Spikes, Prototypes, Profiling, and Telemetry
 
 - **Core Mechanism / Transformation**: Executes disposable, minimal executable experiments (spikes, synthetic microbenchmarks, chaos injection, trace extraction) designed specifically to extract the minimum data required to resolve `UNK-*`.
 - **Input Preconditions**: A decision-significant unknown has been defined, and theoretical analysis cannot substitute for empirical measurement.
@@ -15522,14 +15526,14 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 6. Arrange Dependencies and Change Boundaries
+### 6.38.6. Operation 6. Arrange Dependencies and Change Boundaries
 
 > **OPERATION 6: DEPENDENCY STRUCTURING & BOUNDARY RECONFIGURATION**
 > 6.1 Map Static, Dynamic, Data, and Operational Dependencies
 > 6.2 Link Every Critical Requirement to the Specific Mechanism That Enforces It (Traceability)
 > 6.3 Eliminate Accidental Co-Change Coupling and Retain Only Necessary Relationships
 
-### Technique 6.1: Map Static, Dynamic, Data, and Operational Dependencies
+#### 6.38.6.1. Technique 6.1: Map Static, Dynamic, Data, and Operational Dependencies
 
 - **Core Mechanism / Transformation**: Constructs an exhaustive multi-dimensional dependency graph capturing:
   1.  *Static Code Dependencies* (compile-time imports, inheritance);
@@ -15549,7 +15553,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 6.2: Link Every Critical Requirement to the Specific Mechanism That Enforces It
+#### 6.38.6.2. Technique 6.2: Link Every Critical Requirement to the Specific Mechanism That Enforces It
 
 - **Core Mechanism / Transformation**: Establishes strict 1-to-1 traceability between non-negotiable functional/security invariants and the concrete computational mechanisms that physically guarantee them, preventing "orphan requirements."
 - **Input Preconditions**: Invariants are documented in text but lack explicit architectural enforcement, relying on developer discipline.
@@ -15566,7 +15570,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 6.3: Eliminate Accidental Co-Change Coupling and Retain Only Necessary Relationships
+#### 6.38.6.3. Technique 6.3: Eliminate Accidental Co-Change Coupling and Retain Only Necessary Relationships
 
 - **Core Mechanism / Transformation**: Identifies and severs **Accidental Coupling** (components changing together due to shared DTOs, generic utility libraries, or copy-pasted code) while preserving **Essential Coupling** (inherent domain logic relationships).
 - **Input Preconditions**: Modifying a business rule in one domain requires synchronized PRs across multiple unrelated services.
@@ -15583,7 +15587,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 7. Understand System Behavior Over Time and Under Load
+### 6.38.7. Operation 7. Understand System Behavior Over Time and Under Load
 
 > **OPERATION 7: TEMPORAL, QUEUING, AND LOAD DYNAMICS MODELING**
 > 7.1 Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity (Little's Law)
@@ -15591,7 +15595,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 7.3 Account for Propagation Latencies, Event Ordering, Protocol Versions, and Transition Phases
 > 7.4 Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, Bottleneck Migration
 
-### Technique 7.1: Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity
+#### 6.38.7.1. Technique 7.1: Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity
 
 - **Core Mechanism / Transformation**: Applies queuing theory and system dynamics (Little's Law: $L = \lambda W$) to quantify queue buildup, memory accumulation, and buffer saturation under steady-state and burst traffic.
 - **Input Preconditions**: System incorporates asynchronous worker pools, message brokers, connection pools, or in-memory buffers.
@@ -15607,7 +15611,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 7.2: Model Feedback Loops: Retries, Throttling, Cascading Failures, Self-Reinforcement, and Recovery
+#### 6.38.7.2. Technique 7.2: Model Feedback Loops: Retries, Throttling, Cascading Failures, Self-Reinforcement, and Recovery
 
 - **Core Mechanism / Transformation**: Maps positive (destabilizing) and negative (stabilizing) feedback loops in distributed communication, modeling emergent behaviors like retry storms, thundering herds, and cache stampedes.
 - **Input Preconditions**: Distributed services communicate over unreliable networks with automated retry policies.
@@ -15624,7 +15628,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 7.3: Account for Propagation Latencies, Event Ordering, Protocol Versions, and Transition Phases
+#### 6.38.7.3. Technique 7.3: Account for Propagation Latencies, Event Ordering, Protocol Versions, and Transition Phases
 
 - **Core Mechanism / Transformation**: Models temporal inconsistencies arising from non-zero network propagation latencies, distributed clock drift, out-of-order event delivery, and coexisting protocol/schema versions during rolling deployments.
 - **Input Preconditions**: Architecture involves multi-region replication, asynchronous event buses, or zero-downtime rolling upgrades.
@@ -15641,7 +15645,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 7.4: Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, and Bottleneck Migration
+#### 6.38.7.4. Technique 7.4: Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, and Bottleneck Migration
 
 - **Core Mechanism / Transformation**: Simulates the evolution of the system over $10\times\text{–}100\times$ volume growth, identifying nonlinear inflection points where existing algorithms, indexes, or coordination mechanisms fail.
 - **Input Preconditions**: Evaluating an architecture designed for current scale to determine its longevity and failure horizons.
@@ -15657,7 +15661,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 8. Determine Engineering Value and Select
+### 6.38.8. Operation 8. Determine Engineering Value and Select
 
 > **OPERATION 8: MULTI-CRITERIA VALUE EVALUATION & SELECTION**
 > 8.1 Define Hard Constraints, Business Value, and Preference Criteria
@@ -15665,7 +15669,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 8.3 Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius
 > 8.4 Rank Viable Candidates While Preserving and Documenting Uncertainty Explicitly
 
-### Technique 8.1: Define Hard Constraints, Business Value, and Preference Criteria
+#### 6.38.8.1. Technique 8.1: Define Hard Constraints, Business Value, and Preference Criteria
 
 - **Core Mechanism / Transformation**: Categorizes decision criteria into a strict two-tier hierarchy:
   1.  *Hard Constraints (Binary Pass/Fail)*: Non-negotiable invariants (regulatory compliance, data loss tolerance $\text{RPO}=0$, budget ceiling);
@@ -15685,7 +15689,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 8.2: Compare Useful Effects Against Cost of New Mechanisms, Code, and Mutable State
+#### 6.38.8.2. Technique 8.2: Compare Useful Effects Against Cost of New Mechanisms, Code, and Mutable State
 
 - **Core Mechanism / Transformation**: Adapts the TRIZ **Ideality Formula** to software engineering: $$I_{\text{software}} = \frac{\sum \text{Useful Functional Capabilities}}{\sum \text{Operational Harms} + \sum \text{Lifecycle Costs} + \sum \text{Cognitive Overhead}}$$ The ideal system delivers all required functions with zero additional code, zero new services, and zero added mutable state.
 - **Input Preconditions**: Choosing between building a custom complex subsystem, deploying a heavy distributed infrastructure, or reusing existing primitives.
@@ -15701,7 +15705,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 8.3: Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius
+#### 6.38.8.3. Technique 8.3: Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius
 
 - **Core Mechanism / Transformation**: Explicitly maps and minimizes the collateral penalties of an architectural candidate, including on-call pager fatigue, debugging difficulty, infrastructure billing, and the blast radius of component crashes.
 - **Input Preconditions**: Candidates have satisfied functional requirements and are being compared on total cost of ownership (TCO).
@@ -15717,7 +15721,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 8.4: Rank Viable Candidates While Preserving and Documenting Uncertainty Explicitly
+#### 6.38.8.4. Technique 8.4: Rank Viable Candidates While Preserving and Documenting Uncertainty Explicitly
 
 - **Core Mechanism / Transformation**: Produces an Architectural Decision Record (ADR) that ranks candidates while attaching explicit confidence intervals and open assumptions to each score, preventing false certainty.
 - **Input Preconditions**: Final selection is being made among 2–3 top candidate mechanisms.
@@ -15733,7 +15737,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-## Operation 9. Verify Solution by Execution and Safely Execute Transition
+### 6.38.9. Operation 9. Verify Solution by Execution and Safely Execute Transition
 
 > **OPERATION 9: EXECUTABLE VERIFICATION & TRANSITION ARCHITECTURE**
 > 9.1 Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity
@@ -15741,7 +15745,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 > 9.3 Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims
 > 9.4 Anchor Results with Continuous Telemetry and Decommission Temporary Transition Shims
 
-### Technique 9.1: Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity
+#### 6.38.9.1. Technique 9.1: Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity
 
 - **Core Mechanism / Transformation**: Executes a structured adversarial pre-mortem on the chosen solution, identifying where complexity has shifted, what new failure modes have been introduced, and what operational surprises may arise.
 - **Input Preconditions**: A candidate has been selected and the team is preparing implementation.
@@ -15760,7 +15764,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 9.2: Validate Claims via Executable Code (Unit, Property, Mutation, Benchmark, Chaos, Canary)
+#### 6.38.9.2. Technique 9.2: Validate Claims via Executable Code (Unit, Property, Mutation, Benchmark, Chaos, Canary)
 
 - **Core Mechanism / Transformation**: Replaces narrative assertions with executable code that attempts to aggressively falsify the solution's core claims.
 - **Input Preconditions**: Implementation code or prototype is available for testing.
@@ -15777,7 +15781,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 9.3: Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims
+#### 6.38.9.3. Technique 9.3: Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims
 
 - **Core Mechanism / Transformation**: Treats the transition path from current state ($S_0$) to target state ($S_{\text{target}}$) as a first-class architectural deliverable (`TRANS-*`), employing temporary shims, dual-writing, expand/contract schemas, and feature flags to ensure zero downtime and instant reversibility.
 - **Input Preconditions**: The new architecture requires changes to database schemas, wire protocols, or state storage.
@@ -15797,7 +15801,7 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-### Technique 9.4: Anchor Results with Continuous Telemetry and Decommission Temporary Transition Shims
+#### 6.38.9.4. Technique 9.4: Anchor Results with Continuous Telemetry and Decommission Temporary Transition Shims
 
 - **Core Mechanism / Transformation**: Locks in verified gains through permanent SLO dashboards and alerting rules, while systematically deleting all temporary migration adapters, feature flags, and dual-run shims to eliminate transitional technical debt.
 - **Input Preconditions**: The new system is running in production and traffic cutover is complete.
@@ -15812,9 +15816,9 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ------------------------------------------------------------------------
 
-# Appendix 2. Practice × Operation Matrix (Expanded Analytical Guide)
+## 6.39. Appendix 2. Practice × Operation Matrix (Expanded Analytical Guide)
 
-## 2.1. The 15 × 9 Master Epistemic Matrix
+### 6.39.1. The 15 × 9 Master Epistemic Matrix
 
 This matrix maps 15 established software engineering disciplines across the Nine Operations of Systematic Inventive Thinking.
 
@@ -15845,107 +15849,107 @@ This matrix maps 15 established software engineering disciplines across the Nine
 
 ------------------------------------------------------------------------
 
-## 2.2. Comprehensive Discipline Profiles
+### 6.39.2. Comprehensive Discipline Profiles
 
-### 1. Architectural Design
+#### 6.39.2.1. Architectural Design
 
 - **Cognitive Strengths**: Primary mastery over **Operation 1 (Framing)**, **Operation 4 (Space Exploration)**, **Operation 6 (Dependencies)**, **Operation 7 (Dynamics)**, and **Operation 8 (Value Selection)** through Quality Attribute Workshops (QAW), Attribute-Driven Design (ADD), and Architecture Tradeoff Analysis Method (ATAM).
 - **Methodological Primitives**: Architecture Decision Records (ADRs), C4 models, fitness functions, component-and-connector views, modifiability scenarios.
 - **Epistemic Blind Spots**: Weak executable verification; often relies on static diagrams and narrative persuasion without empirical code-level validation (**Operation 9**).
 - **Ariadne Integration**: Ariadne anchors architectural proposals to executable verification cards (`VAL-*`) and empirical spikes.
 
-### 2. Domain-Driven Design (DDD)
+#### 6.39.2.2. Domain-Driven Design (DDD)
 
 - **Cognitive Strengths**: Exceptional in **Operation 1 (Framing)**, **Operation 5 (Knowledge Acquisition via Ubiquitous Language)**, **Operation 6 (Boundaries via Bounded Contexts)**, and **Operation 8 (Core Domain Value)**.
 - **Methodological Primitives**: Ubiquitous Language, Context Maps, Aggregates, Entities, Value Objects, Domain Events, Anti-Corruption Layers.
 - **Epistemic Blind Spots**: Tends to neglect physical hardware dynamics, queuing delays, memory allocation overhead, and low-level concurrency bottlenecks (**Operation 7**).
 - **Ariadne Integration**: Bounded Contexts provide the logical boundaries for Ariadne's Change Radius and Dependency Matrix (`DEP-*`).
 
-### 3. Refactoring
+#### 6.39.2.3. Refactoring
 
 - **Cognitive Strengths**: Unrivaled mastery in **Operation 3 (Transform)**, **Operation 6 (Dependency Rearrangement)**, and **Operation 9 (Behavior-Preserving Verification)**.
 - **Methodological Primitives**: Extract Function, Inline Class, Replace Conditional with Polymorphism, Separate Domain from Presentation, Code Smells taxonomy.
 - **Epistemic Blind Spots**: Assumes the existing high-level architecture and problem framing are correct; does not question whether the component should exist at all (**Operations 1, 2, 4**).
 - **Ariadne Integration**: Refactoring patterns serve as tactical implementation primitives for Ariadne's trimming and splitting transformations.
 
-### 4. Test-Driven Development (TDD)
+#### 6.39.2.4. Test-Driven Development (TDD)
 
 - **Cognitive Strengths**: Strong focus on **Operation 1 (Interface Framing via Red Tests)**, **Operation 3 (Micro-Transformations in Green/Refactor)**, **Operation 5 (Specification as Knowledge)**, and **Operation 9 (Regression Verification)**.
 - **Methodological Primitives**: Red-Green-Refactor cycle, unit assertions, test doubles (mocks, stubs, fakes), emergent design.
 - **Epistemic Blind Spots**: Suffers from local search traps; cannot explore macroscopic architectural spaces or model distributed system dynamics, queues, and network partitions (**Operations 4, 7**).
 - **Ariadne Integration**: TDD executes the local invariant verification loops mandated by Ariadne Verification Cards.
 
-### 5. Property-Based Testing
+#### 6.39.2.5. Property-Based Testing
 
 - **Cognitive Strengths**: Dominates **Operation 4 (Generative Input Space Exploration)**, **Operation 5 (Invariant Knowledge Discovery)**, and **Operation 9 (Falsification via Automated Shrinking)**.
 - **Methodological Primitives**: Generators, universal quantification ($\forall x$), state machine models, shrinking algorithms (QuickCheck, Hypothesis, PropEr).
 - **Epistemic Blind Spots**: Requires pre-formulated mathematical invariants; does not assist in business problem framing or organizational dependency mapping (**Operations 1, 6**).
 - **Ariadne Integration**: Property tests serve as the gold standard for falsifying candidate mechanisms in Deep Mode tasks.
 
-### 6. Mutation Testing
+#### 6.39.2.6. Mutation Testing
 
 - **Cognitive Strengths**: Pure diagnostic power in **Operation 2 (Diagnostic Quality Audit)**, **Operation 5 (Test Suite Epistemic Value)**, and **Operation 9 (Verification Integrity)**.
 - **Methodological Primitives**: Mutant injection (operator replacement, condition inversion, statement deletion), Mutation Score indicator.
 - **Epistemic Blind Spots**: Exclusively evaluates test quality; does not generate solutions, transform architectures, or model system dynamics (**Operations 3, 4, 7**).
 - **Ariadne Integration**: Mutation testing validates whether an Ariadne Verification Card is genuinely capable of falsifying defective candidates.
 
-### 7. Performance Engineering
+#### 6.39.2.7. Performance Engineering
 
 - **Cognitive Strengths**: Comprehensive coverage across **Operation 2 (Bottleneck Diagnosis)**, **Operation 3 (Computational Optimization)**, **Operation 5 (Profiling & Spikes)**, **Operation 7 (Dynamics & Queuing)**, and **Operation 9 (Benchmarking)**.
 - **Methodological Primitives**: Flame graphs, off-CPU profiling, hardware performance counters (PMUs), Amdahl's/Universal Scalability Law, JMH benchmarks.
 - **Epistemic Blind Spots**: Can over-optimize non-functional metrics at the expense of code readability, domain clarity, and security invariants (**Operations 1, 8**).
 - **Ariadne Integration**: Provides quantitative telemetry and profiling evidence for Ariadne Causal Maps and Decision Records.
 
-### 8. Site Reliability Engineering (SRE)
+#### 6.39.2.8. Site Reliability Engineering (SRE)
 
 - **Cognitive Strengths**: Strong mastery of **Operation 1 (SLO/SLI Framing)**, **Operation 2 (Post-Mortem Causal Analysis)**, **Operation 7 (Failure Dynamics & Error Budgets)**, **Operation 8 (Operational Harm Reduction)**, and **Operation 9 (Canary Verification & Rollback)**.
 - **Methodological Primitives**: Service Level Objectives (SLOs), Error Budgets, Incident Post-Mortems, Chaos Engineering, Canary Deployments, Load Shedding.
 - **Epistemic Blind Spots**: Focuses primarily on runtime operations; less involved in initial domain modeling or structural code refactoring (**Operations 3, 6**).
 - **Ariadne Integration**: SRE error budgets and SLOs define the non-negotiable Hard Constraints for Ariadne Selection Tables.
 
-### 9. Observability
+#### 6.39.2.9. Observability
 
 - **Cognitive Strengths**: Fundamental engine for **Operation 2 (Root Cause Diagnosis)**, **Operation 5 (Runtime Evidence Gathering)**, and **Operation 7 (Distributed Trace Dynamics)**.
 - **Methodological Primitives**: Distributed Tracing (OpenTelemetry), Structured Event Logs, High-Cardinality Metrics, Exemplars, Dynamic eBPF Profiling.
 - **Epistemic Blind Spots**: Passive observation only; does not formulate alternative architectures or execute structural transformations (**Operations 3, 4, 8**).
 - **Ariadne Integration**: Observability spans provide empirical proof for Ariadne Causal DAG edges and bottleneck hypotheses.
 
-### 10. DevOps & CI/CD
+#### 6.39.2.10. DevOps & CI/CD
 
 - **Cognitive Strengths**: Core enabler for **Operation 6 (Pipeline Dependencies)**, **Operation 7 (Deployment Dynamics)**, **Operation 8 (Delivery Lead Time Value)**, and **Operation 9 (Automated Transition & Rollback)**.
 - **Methodological Primitives**: Deployment pipelines, Infrastructure as Code (IaC), GitOps, Blue-Green deployments, automated rollback triggers.
 - **Epistemic Blind Spots**: Focuses on the delivery vehicle rather than the semantic correctness of the payload architecture (**Operations 1, 4**).
 - **Ariadne Integration**: CI/CD pipelines automate the execution of Ariadne Transition Plans (`TRANS-*`) and verification suites.
 
-### 11. Threat Modeling
+#### 6.39.2.11. Threat Modeling
 
 - **Cognitive Strengths**: Rigorous coverage of **Operation 1 (Adversarial Framing)**, **Operation 2 (Vulnerability Diagnosis)**, **Operation 4 (Attack Vector Space)**, **Operation 6 (Trust Boundaries)**, and **Operation 7 (Abuse Dynamics)**.
 - **Methodological Primitives**: STRIDE, DREAD, Attack Trees, Data Flow Diagrams (DFD), CAPEC, Mitre ATT&CK.
 - **Epistemic Blind Spots**: Focuses strictly on security risks; does not optimize performance, domain clarity, or development cost (**Operations 3, 8**).
 - **Ariadne Integration**: Threat modeling provides the adversarial critique perspective required by Ariadne Developer Agent Rule 7.
 
-### 12. Database Design
+#### 6.39.2.12. Database Design
 
 - **Cognitive Strengths**: Deep authority on **Operation 2 (Lock Contention Diagnosis)**, **Operation 3 (Storage Engine Transformations)**, **Operation 6 (Data Schemas & Referential Integrity)**, and **Operation 7 (I/O Dynamics & Replication Lag)**.
 - **Methodological Primitives**: Normalization (1NF–5NF), Indexing (B-Tree, GIN, BRIN), MVCC, Isolation Levels (ACID), Sharding, Schema Migrations.
 - **Epistemic Blind Spots**: Tends to treat the database as the center of the universe, occasionally pulling application business logic into stored procedures (**Operations 1, 3**).
 - **Ariadne Integration**: Governs the data migration and schema transition protocols in Ariadne Transition Plans.
 
-### 13. Distributed Systems Engineering
+#### 6.39.2.13. Distributed Systems Engineering
 
 - **Cognitive Strengths**: Mathematical authority on **Operation 2 (Split-Brain Diagnosis)**, **Operation 4 (Consensus Mechanisms)**, **Operation 6 (Coordination Boundaries)**, **Operation 7 (Network Latency & Partitions)**, and **Operation 9 (Formal Verification via TLA+)**.
 - **Methodological Primitives**: Consensus algorithms (Raft, Paxos), CAP/PACELC theorems, Vector Clocks, Gossip Protocols, Quorum Replication, Jepsen testing.
 - **Epistemic Blind Spots**: High theoretical complexity; can lead to over-engineering when applied to problems solvable by simpler centralized mechanisms (**Operations 3, 8**).
 - **Ariadne Integration**: Supplies the formal candidate mechanisms for high-concurrency, multi-region Ariadne decision spaces.
 
-### 14. TRIZ (Theory of Inventive Problem Solving)
+#### 6.39.2.14. TRIZ (Theory of Inventive Problem Solving)
 
 - **Cognitive Strengths**: Philosophical foundation for **Operation 1 (Functional Framing)**, **Operation 2 (Contradiction Formulation)**, **Operation 3 (Inventive Principles & Trimming)**, and **Operation 8 (Ideality Formula)**.
 - **Methodological Primitives**: 40 Inventive Principles, 4 Separation Principles, Substance-Field (Su-Field) Analysis, Trends of Engineering System Evolution (TESE), Ideality.
 - **Epistemic Blind Spots**: Originates from mechanical/physical engineering; lacks native concepts for software-specific realities (compilers, garbage collection, network latency, type systems, git worktrees) (**Operations 7, 9**).
 - **Ariadne Integration**: Ariadne translates classical TRIZ into executable software operations, grounding abstract principles in running code.
 
-### 15. Systems Thinking
+#### 6.39.2.15. Systems Thinking
 
 - **Cognitive Strengths**: Unmatched perspective on **Operation 1 (System Boundary Setting)**, **Operation 2 (Archetype Diagnosis)**, and **Operation 7 (Feedback Loops, Delays, and Accumulations)**.
 - **Methodological Primitives**: Causal Loop Diagrams (CLDs), Stock and Flow Diagrams, System Archetypes (Fixes that Fail, Shifting the Burden, Tragedy of the Commons), Leverage Points.
@@ -15954,9 +15958,9 @@ This matrix maps 15 established software engineering disciplines across the Nine
 
 ------------------------------------------------------------------------
 
-## 2.3. Operational Matrix Diagnostics & AI Knowledge Pack Router
+### 6.39.3. Operational Matrix Diagnostics & AI Knowledge Pack Router
 
-### Epistemic Blindspot Diagnostic Protocol
+#### 6.39.3.1. Epistemic Blindspot Diagnostic Protocol
 
 When an engineering team or AI agent encounters an impasse, the Practice × Operation Matrix is used as a diagnostic diagnostic tool:
 
@@ -15966,7 +15970,7 @@ When an engineering team or AI agent encounters an impasse, the Practice × Oper
     - *Cascading Production Outages*: Strong unit tests, zero queuing or feedback modeling $\rightarrow$ Route to **SRE / Systems Thinking / Dynamics (Op 7)**.
     - *Architectural Rigidity / Monolithic Coupling*: High feature additions, zero boundary structuring $\rightarrow$ Route to **DDD / Refactoring / Dependency Matrices (Op 6)**.
 
-### AI Knowledge Pack Router (Two-Stage Routing)
+#### 6.39.3.2. AI Knowledge Pack Router (Two-Stage Routing)
 
 For autonomous developer agents, the matrix functions as an automated dynamic prompt and rule loader:
 
@@ -15975,119 +15979,119 @@ For autonomous developer agents, the matrix functions as an automated dynamic pr
 
 ------------------------------------------------------------------------
 
-# Appendix 3. Glossary of Epistemic and Architectural Concepts
+## 6.40. Appendix 3. Glossary of Epistemic and Architectural Concepts
 
 > **ARIADNE EPISTEMIC & ARCHITECTURAL ONTOLOGY (34 FORMAL DEFINITIONS)**
 
-### 1. Epistemic State
+### 6.40.1. Epistemic State
 
 The explicit, auditable representation of whether an engineering claim, decision, or architectural model is justified by empirical evidence, logical deduction, or unverified working assumptions. Distinguishes verified knowledge from speculative belief.
 
 **Engineering reading:** On an incident board, “the timeout began after deploy X” is not allowed to look identical to “deploy X caused the timeout”; provenance labels and linked traces expose the difference.
 
-### 2. Engineering Uncertainty
+### 6.40.2. Engineering Uncertainty
 
 A measurable state of incomplete, contradictory, or unproven information regarding system behavior, requirements, or architecture that introduces risk and requires explicit causal hypotheses or empirical experiments to resolve.
 
 **Engineering reading:** If the team cannot say whether duplicate charges originate before or after the commit boundary, that gap is an actionable unknown, not a reason to guess a fix.
 
-### 3. Causal Hypothesis (`HYP-`)
+### 6.40.3. Causal Hypothesis (`HYP-`)
 
 A testable, falsifiable proposition explaining the underlying physical, algorithmic, or structural mechanism responsible for an observed symptom, defect, or performance regression.
 
 **Engineering reading:** “A serialized account lock caps throughput” becomes engineering only when a contention trace or partitioning experiment can make the claim fail.
 
-### 4. Contradiction (`CTR-`)
+### 6.40.4. Contradiction (`CTR-`)
 
 An engineering trade-off where improving one required system parameter or quality attribute under the current design degrades another (System Contradiction), or where a single parameter must exhibit opposing characteristics under different conditions (Physical/Operational Contradiction).
 
 **Engineering reading:** Increasing concurrency improves independent-account throughput but worsens same-account ordering contention; the architecture must separate those operating conditions rather than average them.
 
-### 5. Reasoning Operation
+### 6.40.5. Reasoning Operation
 
 One of the nine formal cognitive and structural transformations of an engineering problem model derived from systematic inventive thinking and formal software methods (Frame, Diagnose, Transform, Explore, Knowledge, Dependencies, Dynamics, Value, Verify).
 
 **Engineering reading:** It is the next kind of work needed to reduce the present uncertainty—for example, run a causal probe instead of producing another architecture when the incident mechanism is still unknown.
 
-### 6. Candidate Mechanism (`CAN-`)
+### 6.40.6. Candidate Mechanism (`CAN-`)
 
 A structurally distinct, concrete solution variant that implements a required system function using a specific computational algorithm, state ownership model, data representation, or architectural boundary.
 
 **Engineering reading:** “Regional escrow quotas with asynchronous rebalance” is a candidate because it names authority and failure behavior; “use another database vendor” is usually only a product substitution.
 
-### 7. Decision-Significant Unknown (`UNK-`)
+### 6.40.7. Decision-Significant Unknown (`UNK-`)
 
 An unverified fact, missing measurement, or empirical unknown whose resolution has the power to directly alter the choice of candidate mechanism or invalidate an architectural path.
 
 **Engineering reading:** Whether the deployed database version locks writes during index validation is decision-significant if a zero-downtime migration depends on the answer.
 
-### 8. Falsification
+### 6.40.8. Falsification
 
 The empirical process or test outcome that definitively disproves a causal hypothesis, invalidates an architectural assumption, or demonstrates that a candidate mechanism violates a non-negotiable invariant.
 
 **Engineering reading:** A mixed-version rehearsal that makes old binaries fail against the expanded schema falsifies the claim that the rollout is backward-compatible.
 
-### 9. Transitive Invalidation
+### 6.40.9. Transitive Invalidation
 
 The automatic propagation of invalidation down the epistemic dependency graph when a foundational assumption (`ASM-*`) or causal hypothesis (`HYP-*`) is falsified, immediately flagging all dependent candidates, decisions, and ADRs as ungrounded.
 
 **Engineering reading:** When the assumed non-blocking migration capability is absent, the rollout plan, capacity estimate, selected candidate, and ADR that depend on it all return to review.
 
-### 10. Epistemic Overlay
+### 6.40.10. Epistemic Overlay
 
 A lightweight, typed metadata layer attached to engineering tasks, pull requests, and architecture plans that records claims, evidence requirements, and validation statuses without modifying host project management systems.
 
 **Engineering reading:** The pull request still lives in the existing workflow, but each important statement carries “measured,” “assumed,” or “unknown” plus a link to its check.
 
-### 11. Degradation by Capability
+### 6.40.11. Degradation by Capability
 
 The formal operational capability of the reasoning layer to function gracefully across four distinct tooling environments (Mode A: Full Tooling, Mode B: GSD Only, Mode C: Skills Only, Mode D: Standalone) using available host primitives rather than halting.
 
 **Engineering reading:** If telemetry access is unavailable, the process narrows its claim and records the missing runtime check instead of inventing a production observation or stopping all work.
 
-### 12. Evidence Request (`EVDREQ-`)
+### 6.40.12. Evidence Request (`EVDREQ-`)
 
 A concrete, executable specification of an automated test, benchmark, repository inspection, or runtime telemetry query required to prove or falsify a specific engineering claim.
 
 **Engineering reading:** “Run 2,000 writes/s against the production schema clone and reject the candidate if lock wait exceeds 100 ms” is an evidence request; “investigate performance” is not.
 
-### 13. Evidence Result (`EVD-`)
+### 6.40.13. Evidence Result (`EVD-`)
 
 The empirical artifact, quantitative measurement, execution trace, or test verdict produced by executing an Evidence Request.
 
 **Engineering reading:** The benchmark log, trace ID, schema diff, or failing property-test seed is the result; a summary that says “looks good” is not.
 
-### 14. Transition System / Architecture (`TRANS-`)
+### 6.40.14. Transition System / Architecture (`TRANS-`)
 
 The temporary, backward-compatible software mechanisms (dual-writing interceptors, feature flags, expand/contract schemas, canary proxies) designed specifically to migrate a running system safely from state $S_0$ to state $S_{\text{target}}$ with zero downtime and instant rollback capability.
 
 **Engineering reading:** During a column rename, both names coexist, reads and writes remain compatible, parity is measured, and either binary version can serve traffic until cutover is proven safe.
 
-### 15. Adversarial Critique
+### 6.40.15. Adversarial Critique
 
 A structured evaluation method where an engineer or agent assumes the role of an adversary to actively discover hidden mutable states, operational failure modes, shifted complexity, weakened invariants, or unverified assumptions in a proposed design.
 
 **Engineering reading:** Before approval, a reviewer tries to make the “safe” cache serve revoked authorization, make the backfill starve live traffic, or make rollback read an incompatible write.
 
-### 16. Two-Stage Routing
+### 6.40.16. Two-Stage Routing
 
 A token-efficient knowledge discovery architecture where a compact root index dynamically detects the active engineering operation and loads only the specific specialized rules and domain knowledge packs required for that step.
 
 **Engineering reading:** A retry storm routes first to dynamics and SRE rules; it does not load migration, UI, and domain-modeling material that cannot change the diagnosis.
 
-### 17. GSD Adapter
+### 6.40.17. GSD Adapter
 
 The integration module that detects host project planning structures (e.g., `.planning/`), projecting task requirements and milestone phases into the Ariadne epistemic overlay without creating conflicting source-of-truth state.
 
 **Engineering reading:** Existing phase files remain authoritative while Ariadne records which requirement, hypothesis, and evidence each phase depends on; no second backlog is created.
 
-### 18. Matt Module Ingestion
+### 6.40.18. Matt Module Ingestion
 
 The automated normalization of external engineering skill artifacts (reproduction scripts, interface designs, test logs) into typed Ariadne evidence nodes (`EVD-*`).
 
 **Engineering reading:** A bug reproducer becomes a linked evidence result with command, environment, and verdict rather than an unstructured attachment that later agents cannot evaluate.
 
-### 19. Separation Principles
+### 6.40.19. Separation Principles
 
 The four inventive principles adapted from TRIZ to software engineering:
 
@@ -16098,55 +16102,55 @@ The four inventive principles adapted from TRIZ to software engineering:
 
 **Engineering reading:** Keep strict coordination inside one account but allow parallelism across accounts; the lock-contention trace should change without weakening ordering.
 
-### 20. Downstream Handoff
+### 6.40.20. Downstream Handoff
 
 The deterministic transition of validated decisions (`DEC-*`), verified code, and epistemic state into downstream delivery workflows (e.g., pull requests, release pipelines, or spec-driven execution).
 
 **Engineering reading:** The receiving implementer gets the chosen decision, rejected alternatives, open unknowns, test commands, and rollback boundary—not merely a prose conclusion.
 
-### 21. Invariant
+### 6.40.21. Invariant
 
 A non-negotiable formal property that must remain true across all valid states and executions of the software system (e.g., "Account balances must never be negative").
 
 **Engineering reading:** It is a property whose single counterexample rejects the candidate, such as one generated event sequence producing a negative settled balance.
 
-### 22. Change Radius
+### 6.40.22. Change Radius
 
 The quantified set of files, modules, database schemas, configuration files, and network contracts that must be modified to satisfy a single change in requirements.
 
 **Engineering reading:** A tax-rule change touching twelve modules, three schemas, and five pipelines has a large change radius even if the deployment diagram shows many “independent” services.
 
-### 23. Blast Radius
+### 6.40.23. Blast Radius
 
 The total scope of services, data stores, API endpoints, and end-users impacted when a specific software component or infrastructure node suffers a complete failure.
 
 **Engineering reading:** Disable the component in a fault test and count which user journeys, tenants, and data paths degrade; that observed set is the blast radius.
 
-### 24. Ideality (Software TRIZ)
+### 6.40.24. Ideality (Software TRIZ)
 
 The ratio of total delivered functional value to the sum of operational harms, infrastructure costs, and cognitive maintenance overhead: $$I = \frac{\sum \text{Useful Capabilities}}{\sum \text{Harms} + \sum \text{Costs} + \sum \text{Cognitive Overhead}}$$
 
 **Engineering reading:** A mechanism is less ideal when the same SLO requires more state, pages, upgrades, migration work, and specialist knowledge, even if its benchmark is faster.
 
-### 25. Morphological Space
+### 6.40.25. Morphological Space
 
 The multidimensional combinatorial solution space constructed by defining orthogonal architectural decision axes ($D_1, D_2, \dots, D_k$) and evaluating their cross-product configurations.
 
 **Engineering reading:** A `SPACE-*` table makes it visible that the team varied database vendors but never varied state authority, reconciliation timing, or failure policy.
 
-### 26. Accidental Coupling
+### 6.40.26. Accidental Coupling
 
 Coupling between software components that arises from shared implementation artifacts, copy-pasted data models, or generic utility libraries rather than genuine business domain relationships.
 
 **Engineering reading:** Billing and notifications require synchronized deployment because they import the same generated persistence model, not because the domain requires atomic change.
 
-### 27. Essential Coupling
+### 6.40.27. Essential Coupling
 
 Inherent, unavoidable dependencies dictated by the fundamental nature of the business domain or mathematical logic.
 
 **Engineering reading:** Settlement must receive the authorized amount and currency; a smaller contract may express the dependency, but architecture cannot honestly erase it.
 
-### 28. Provenance Type
+### 6.40.28. Provenance Type
 
 The explicit epistemic classification assigned to any claim:
 
@@ -16160,38 +16164,38 @@ The explicit epistemic classification assigned to any claim:
 
 **Engineering reading:** A claim without a source is visibly `ASSUMED` or `UNKNOWN`; it cannot silently acquire the authority of a measured production fact.
 
-### 29. Epistemic Risk Governance
+### 6.40.29. Epistemic Risk Governance
 
 The economic principle governing the depth of analytical and empirical rigor applied to a task based on the product of defect probability, failure blast radius, and rollback irreversibility.
 
 **Engineering reading:** A reversible CSS change may need one browser check; a ledger migration needs replay, load, mixed-version, and rollback evidence because failure is costly and hard to undo.
 
-### 30. Two-Way Door vs. One-Way Door Decision
+### 6.40.30. Two-Way Door vs. One-Way Door Decision
 
 - *Two-Way Door (Type 2)*: A reversible decision with low blast radius that can be rolled back quickly at near-zero cost.
 - *One-Way Door (Type 1)*: An irreversible or highly expensive decision (e.g., public API contract, distributed consensus model, multi-terabyte database schema change) requiring deep epistemic verification before execution.
 
 **Engineering reading:** If a feature flag restores the old behavior without data repair, decide quickly; if clients or stored data make reversal expensive, demand stronger evidence first.
 
-### 31. Dark Launch / Shadow Traffic
+### 6.40.31. Dark Launch / Shadow Traffic
 
 A verification technique where real production traffic is mirrored to a new candidate system in the background, executing the new code path without returning its responses to end-users to measure real-world performance and error rates safely.
 
 **Engineering reading:** The candidate processes copied requests, its outputs and latency are diffed against authority, and side effects are disabled so users cannot observe the trial.
 
-### 32. Rollback Invariant
+### 6.40.32. Rollback Invariant
 
 The formal guarantee that a deployment can be completely reverted to its prior stable state at any point during rollout without data corruption, schema incompatibility, or service downtime.
 
 **Engineering reading:** After every rollout phase, run the old binary against newly written data; failure means rollback exists only on the runbook, not in the system.
 
-### 33. Transition Shim
+### 6.40.33. Transition Shim
 
 A temporary architectural adapter, proxy, or dual-write interceptor deployed specifically to facilitate zero-downtime migration, tracked with an explicit expiration date and decommissioning criteria.
 
 **Engineering reading:** A dual-write adapter remains only until backfill, parity, cutover, and rollback windows close; an owner and removal gate keep it from becoming permanent architecture.
 
-### 34. Blast Radius Containment
+### 6.40.34. Blast Radius Containment
 
 Architectural isolation mechanisms (bulkheading, rate limiting, circuit breakers, sandboxing) that prevent a localized failure from propagating across system boundaries.
 
@@ -16199,7 +16203,7 @@ Architectural isolation mechanisms (bulkheading, rate limiting, circuit breakers
 
 ------------------------------------------------------------------------
 
-# Appendix 4. Engineering Task Template (Instantiable Specification)
+## 6.41. Appendix 4. Engineering Task Template (Instantiable Specification)
 
 The following template can be instantiated in any repository as `engineering-task.md` or `.planning/engineering-task.md` to guide complex software engineering tasks through the nine operations.
 
@@ -16362,13 +16366,15 @@ The following template can be instantiated in any repository as `engineering-tas
     - Test Suite: [Test command and execution receipt]
     - Telemetry Dashboard: [Dashboard link / Prometheus query]
 
+````
+
 ------------------------------------------------------------------------
 
-# Appendix 5. Rules for the Developer Agent (Operational Standard)
+## 6.42. Appendix 5. Rules for the Developer Agent (Operational Standard)
 
 > **ARIADNE DEVELOPER AGENT OPERATIONAL STANDARD (12 INVARIANT RULES)**
 
-### Agent Rule 1. Do Not Start with Code Modifications If the Task Contains a Premature Solution
+### 6.42.1. Agent Rule 1. Do Not Start with Code Modifications If the Task Contains a Premature Solution
 
 - **Statement**: If an incoming prompt mandates a specific implementation mechanism (e.g., "Add Redis cache," "Extract microservice," "Use Kafka"), the agent must not immediately write code. It must first execute **Operation 1 (Framing)** to establish the required behavioral invariant and observable delta.
 - **Operational Preconditions**: Task prompt contains technology nouns instead of behavioral predicates, AND the task is not a pre-locked ADR execution task.
@@ -16384,7 +16390,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 2. Inspect the Repository Before Making Causal Claims
+### 6.42.2. Agent Rule 2. Inspect the Repository Before Making Causal Claims
 
 - **Statement**: The agent must never speculate about codebase structure, call hierarchies, schema definitions, or bug mechanisms based on memory or file names. Every diagnostic assertion must cite verified file paths and line ranges.
 - **Operational Preconditions**: Prior to formulating any `HYP-*`, `DIAG-*`, or `DEP-*` claim.
@@ -16400,7 +16406,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 3. Tag the Provenance of Every Significant Claim
+### 6.42.3. Agent Rule 3. Tag the Provenance of Every Significant Claim
 
 - **Statement**: All analytical claims, requirements, and findings in agent artifacts must be prefixed with explicit provenance types: `FACT`, `MEASURED`, `DERIVED`, `ASSUMED`, `PROPOSED`, `UNKNOWN`, `DECIDED`.
 - **Operational Preconditions**: Active on all generated artifacts and reasoning outputs.
@@ -16417,7 +16423,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 4. Separate Diagnostic Hypotheses from Fixes
+### 6.42.4. Agent Rule 4. Separate Diagnostic Hypotheses from Fixes
 
 - **Statement**: When debugging or investigating regressions, the agent must define an empirical falsification test for the causal hypothesis before proposing or applying any code fix.
 - **Operational Preconditions**: Task involves a bug, regression, crash, or unexpected behavior.
@@ -16434,7 +16440,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 5. Do Not Mistake Quantity of Options for Breadth of Search
+### 6.42.5. Agent Rule 5. Do Not Mistake Quantity of Options for Breadth of Search
 
 - **Statement**: When exploring solution spaces (**Operation 4**), the agent must generate candidates that differ by fundamental computational mechanism, state ownership model, or execution boundary, not minor syntax or vendor variations.
 - **Operational Preconditions**: Generating `CAN-*` candidates in Standard or Deep mode.
@@ -16452,7 +16458,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 6. Exhaust Existing System Resources Before Adding New Mechanisms
+### 6.42.6. Agent Rule 6. Exhaust Existing System Resources Before Adding New Mechanisms
 
 - **Statement**: The agent must evaluate whether the required function can be achieved using existing database features, OS capabilities, type systems, atomic primitives, or execution reordering before adding new libraries, services, or dependencies.
 - **Operational Preconditions**: Formulating candidate mechanisms (`CAN-*`).
@@ -16467,7 +16473,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 7. Construct at Least One Adversarial Critique for Any Significant Decision
+### 6.42.7. Agent Rule 7. Construct at Least One Adversarial Critique for Any Significant Decision
 
 - **Statement**: Before locking an architectural decision (`DEC-*`), the agent must perform an adversarial evaluation, actively attempting to prove that the proposed solution shifts complexity, creates hidden state, degrades resilience, or introduces migration risks.
 - **Operational Preconditions**: Standard or Deep mode architectural selection.
@@ -16486,7 +16492,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 8. Match Claims to the Appropriate Verification Method
+### 6.42.8. Agent Rule 8. Match Claims to the Appropriate Verification Method
 
 - **Statement**: The agent must select the verification method whose physical capabilities match the nature of the claim being verified.
 - **Operational Preconditions**: Formulating Verification Cards (`VAL-*`).
@@ -16506,7 +16512,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 9. Prefer Falsifying Tests
+### 6.42.9. Agent Rule 9. Prefer Falsifying Tests
 
 - **Statement**: Every verification test must be designed with an explicit, observable condition that will cause the candidate solution to be rejected (falsified).
 - **Operational Preconditions**: Constructing test suites and verification scripts.
@@ -16521,7 +16527,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 10. Maintain Competing Candidates for High-Cost Decisions
+### 6.42.10. Agent Rule 10. Maintain Competing Candidates for High-Cost Decisions
 
 - **Statement**: For high-blast-radius, irreversible decisions (Deep Mode), the agent must maintain competing candidate mechanisms in isolated branches/worktrees and evaluate them against identical empirical benchmarks.
 - **Operational Preconditions**: Deep Mode tasks with high rollback costs.
@@ -16536,7 +16542,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 11. Make the Transition System Explicit
+### 6.42.11. Agent Rule 11. Make the Transition System Explicit
 
 - **Statement**: If a change requires schema migrations, wire protocol updates, or dual-running services, the transition architecture must be designed as a first-class deliverable with explicit rollback and decommissioning procedures.
 - **Operational Preconditions**: Any modification affecting persistent state, schemas, or public API contracts.
@@ -16551,7 +16557,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 ------------------------------------------------------------------------
 
-### Agent Rule 12. Conclude with Empirical Proof, Not Narrative
+### 6.42.12. Agent Rule 12. Conclude with Empirical Proof, Not Narrative
 
 - **Statement**: The final handoff of any engineering task must be grounded in executable proof: modified file paths, passing test logs, benchmark measurements, and locked ADRs.
 - **Operational Preconditions**: Task completion and handoff.
@@ -16568,11 +16574,9 @@ The following template can be instantiated in any repository as `engineering-tas
   - Agent executes `npm test` and `npm run bench`, includes the exact terminal output showing $100\%$ passing tests and $4.2\times$ throughput speedup, and links the updated ADR.
 - **Enforcement / Validation**: Task completion gate rejects handoffs lacking terminal execution receipts.
 
-````
-
 ------------------------------------------------------------------------
 
-# Conclusion: The Synthesis of Inventive Thought and Executable Software
+## 6.43. Conclusion: The Synthesis of Inventive Thought and Executable Software
 
 Software engineering stands at a historic inflection point. For decades, the discipline has oscillated between two opposing extremes: abstract architectural design divorced from runtime realities, and ad-hoc trial-and-error code thrashing disguised as "agile development."
 
@@ -16596,11 +16600,11 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-# Master Bibliography
+## 6.44. Master Bibliography
 
 > **MASTER ACADEMIC & ENGINEERING BIBLIOGRAPHY (CATEGORIZED BY DOMAIN)**
 
-## 1. Architecture, Modularity, and Software Design
+### 6.44.1. Architecture, Modularity, and Software Design
 
 1.  **Bass, L., Clements, P., & Kazman, R.** (2021). *Software Architecture in Practice* (4th ed.). Addison-Wesley Professional. [ISBN: 978-0136886006](https://www.oreilly.com/library/view/software-architecture-in/9780136886006/).
 2.  **Brooks, F. P.** (1987). No Silver Bullet: Essence and Accidents of Software Engineering. *IEEE Computer*, 20(4), 10–19. [DOI: 10.1109/MC.1987.1663532](https://doi.org/10.1109/MC.1987.1663532).
@@ -16613,7 +16617,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 2. Distributed Systems, Concurrency, and Data-Intensive Computing
+### 6.44.2. Distributed Systems, Concurrency, and Data-Intensive Computing
 
 9.  **Brewer, E. A.** (2012). CAP Twelve Years Later: How the "Rules" Have Changed. *IEEE Computer*, 45(2), 23–29. [DOI: 10.1109/MC.2012.37](https://doi.org/10.1109/MC.2012.37).
 10. **Gray, J., & Reuter, A.** (1992). *Transaction Processing: Concepts and Techniques*. Morgan Kaufmann. [ISBN: 978-1558601901](https://dl.acm.org/doi/book/10.5555/573304).
@@ -16626,7 +16630,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 3. Verification, Formal Methods, Program Analysis, and Testing
+### 6.44.3. Verification, Formal Methods, Program Analysis, and Testing
 
 17. **Claessen, K., & Hughes, J.** (2000). QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs. *ACM SIGPLAN Notices (ICFP '00)*, 35(9), 268–279. [DOI: 10.1145/351240.351266](https://doi.org/10.1145/351240.351266).
 18. **Dijkstra, E. W.** (1976). *A Discipline of Programming*. Prentice-Hall. [ISBN: 978-0132158718](https://dl.acm.org/doi/book/10.5555/540129).
@@ -16638,7 +16642,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 4. Reliability, SRE, Performance Engineering, and Chaos
+### 6.44.4. Reliability, SRE, Performance Engineering, and Chaos
 
 24. **Allspaw, J.** (2015). *Trade-Offs Under Pressure: Heuristics and Observations of Teams Resolving Internet Service Outages*. Lund University. [Lund Repository](https://www.thestrangeloop.com/2015/how-your-systems-will-fail.html).
 25. **Beyer, B., Jones, C., Petoff, J., & Murphy, N. R.** (2016). *Site Reliability Engineering: How Google Runs Production Systems*. O'Reilly Media. [ISBN: 978-1491929124](https://sre.google/sre-book/table-of-contents/).
@@ -16649,7 +16653,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 5. Systems Thinking, Theory of Constraints, and Systematic Innovation / TRIZ
+### 6.44.5. Systems Thinking, Theory of Constraints, and Systematic Innovation / TRIZ
 
 30. **Altshuller, G.** (1984). *Creativity as an Exact Science: The Theory of the Solution of Inventive Problems*. Gordon and Breach Science Publishers. [ISBN: 978-0677212302](https://dl.acm.org/doi/book/10.5555/539824).
 31. **Goldratt, E. M.** (1984). *The Goal: A Process of Ongoing Improvement*. North River Press. [ISBN: 978-0884271956](https://www.tocinstitute.org/the-goal.html).
@@ -16660,7 +16664,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 6. Security, Threat Modeling, Safety-Critical Systems, and Human Factors
+### 6.44.6. Security, Threat Modeling, Safety-Critical Systems, and Human Factors
 
 36. **Anderson, R.** (2020). *Security Engineering: A Guide to Building Dependable Distributed Systems* (3rd ed.). John Wiley & Sons. [ISBN: 978-1119642787](https://www.cl.cam.ac.uk/~rja14/book.html).
 37. **McGraw, G.** (2006). *Software Security: Building Security In*. Addison-Wesley Professional. [ISBN: 978-0321356703](https://www.oreilly.com/library/view/software-security-building/0321356705/).
@@ -16669,7 +16673,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 ------------------------------------------------------------------------
 
-## 7. Artificial Intelligence, Cognitive Architectures, and Automated Reasoning
+### 6.44.7. Artificial Intelligence, Cognitive Architectures, and Automated Reasoning
 
 40. **Newell, A., & Simon, H. A.** (1976). Computer Science as Empirical Inquiry: Symbols and Search. *Communications of the ACM*, 19(3), 113–126. [DOI: 10.1145/360018.360022](https://doi.org/10.1145/360018.360022).
 41. **Pearl, J.** (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press. [DOI: 10.1017/CBO9780511803161](https://doi.org/10.1017/CBO9780511803161).
