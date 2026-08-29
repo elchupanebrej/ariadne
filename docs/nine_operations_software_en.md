@@ -2913,23 +2913,24 @@ In [*Web Operations: Keeping the Data on Time* (Allspaw & Robbins, 2010)](https:
 
 ### 2.2.4. The Four Core Diagnostic Techniques
 
-> **THE FOUR TECHNIQUES OF OPERATION 2**
-> 2.1. IDENTIFY REQUIREMENT CONTRADICTIONS
-> - Formulate Technical Contradictions: TC = <Parameter_A ↑, Parameter_B ↓>
-> - Deepen into Physical Contradictions: Parameter P must be S (under C1) and ¬S (under C2)
-> - Reject compromise; frame separation conditions (Time, Space, Mode, Boundary).
-> 2.2. IDENTIFY THE LIMITING BOTTLENECK
-> - Apply Little's Law (L = λW) to localize queuing accumulations.
-> - Compute Amdahl Serial Fraction (σ) and Gunther USL Coherency Penalty (κ).
-> - Trace the bottleneck hierarchy: Hardware → OS → Runtime → Sync → Data → Network.
-> 2.3. CONSTRUCT A CAUSAL CHAIN / DIRECTED ACYCLIC GRAPH
-> - Separate Observations [OBS-] from Causal Hypotheses [HYP-].
-> - Build Pearl Structural Causal Models (SCMs) & Goldratt Current Reality Trees (CRTs).
-> - Design Differentiating Falsification Tests [EVDREQ-] to eliminate competing hypotheses.
-> 2.4. UNCOVER HIDDEN ASSUMPTIONS
-> - Apply Goldratt's Evaporating Cloud to extract tacit premises underlying requirements.
-> - Stress-test implicit invariants (synchronicity, statefulness, ordering, colocation).
-> - Trigger Transitive Invalidation on unproven assumptions [ASM-].
+**THE FOUR TECHNIQUES OF OPERATION 2**
+
+1. **2.1. Identify Requirement Contradictions**
+   - Formulate technical contradictions: $TC = \langle \text{Parameter}_A \uparrow, \text{Parameter}_B \downarrow \rangle$.
+   - Deepen into physical contradictions: parameter $P$ must be $S$ under $C_1$ and $\neg S$ under $C_2$.
+   - Reject compromise; define separation conditions in time, space, mode, or boundary.
+2. **2.2. Identify the Limiting Bottleneck**
+   - Apply Little's Law ($L = \lambda W$) to localize queuing accumulations.
+   - Compute the Amdahl serial fraction ($\sigma$) and Gunther USL coherency penalty ($\kappa$).
+   - Trace the bottleneck hierarchy: hardware → operating system → runtime → synchronization → data → network.
+3. **2.3. Construct a Causal Chain / Directed Acyclic Graph**
+   - Separate observations (`OBS-*`) from causal hypotheses (`HYP-*`).
+   - Build Pearl structural causal models (SCMs) and Goldratt Current Reality Trees (CRTs).
+   - Design differentiating falsification tests (`EVDREQ-*`) to eliminate competing hypotheses.
+4. **2.4. Uncover Hidden Assumptions**
+   - Apply Goldratt's Evaporating Cloud to extract tacit premises underlying requirements.
+   - Stress-test implicit invariants: synchronicity, statefulness, ordering, and colocation.
+   - Trigger transitive invalidation on unproven assumptions (`ASM-*`).
 
 ------------------------------------------------------------------------
 
