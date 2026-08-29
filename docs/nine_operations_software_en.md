@@ -5,6 +5,8 @@
 **Edition: August 2026**  
 **Writing target:** ASD-STE100 Simplified Technical English, Issue 9
 
+**Code examples:** All executable examples use TypeScript. Mermaid diagrams and Markdown artifact templates keep their native syntax.
+
 ------------------------------------------------------------------------
 
 ## Abstract
@@ -344,41 +346,41 @@ sequenceDiagram
     Note over AnalyticsDB: Schema validation & tenant partitioning<br/>handled at edge gateway & native DB engine
 ```
 
-``` python
-# ==============================================================================
-# BEFORE: Unnecessary Intermediary Service (Redundant DTO translation & hops)
-# ==============================================================================
+``` typescript
+type TelemetryPayload = { meta: { tenant_id: string } };
 
-class TelemetryEnricherService:
-    """Intermediary microservice that introduces extra network hops and serialization."""
-    def __init__(self, schema_registry: SchemaRegistry, kafka_producer: KafkaProducer):
-        self.registry = schema_registry
-        self.producer = kafka_producer
+interface SchemaRegistry {
+  validate(payload: unknown): TelemetryPayload;
+}
+interface MessageProducer {
+  send(topic: string, value: Uint8Array): Promise<void>;
+}
 
-    async def handle_payload(self, raw_bytes: bytes) -> None:
-        payload = json.loads(raw_bytes)  # Deserialization overhead
-        validated = self.registry.validate(payload)
-        tenant_id = validated["meta"]["tenant_id"]
-        # Redundant republishing hop
-        await self.producer.send(topic=f"telemetry-{tenant_id}", value=json.dumps(validated).encode())
+class TelemetryEnricherService {
+  constructor(private registry: SchemaRegistry, private producer: MessageProducer) {}
 
-# ==============================================================================
-# AFTER: Component Eliminated; Functions Redistributed (Operation 3 / Trimming)
-# Validation redistributed to Edge Gateway; Partitioning redistributed to DB
-# ==============================================================================
+  async handlePayload(rawBytes: Uint8Array): Promise<void> {
+    const payload = JSON.parse(new TextDecoder().decode(rawBytes));
+    const validated = this.registry.validate(payload);
+    const tenantId = validated.meta.tenant_id;
+    await this.producer.send(
+      "telemetry-" + tenantId,
+      new TextEncoder().encode(JSON.stringify(validated))
+    );
+  }
+}
 
-class EdgeGatewayIngestHandler:
-    """Direct zero-copy streaming: Function redistributed to gateway & storage."""
-    def __init__(self, memory_mapped_writer: DirectParquetWriter):
-        self.writer = memory_mapped_writer
+class EdgeGatewayIngestHandler {
+  constructor(private writer: { appendZeroCopy(record: Uint8Array): Promise<void> }) {}
 
-    async def handle_stream(self, stream_reader: ByteStream) -> None:
-        # Zero-copy validation via SIMD-accelerated binary schema check
-        binary_record = await stream_reader.read_exact()
-        if not fast_verify_header(binary_record):
-            raise SchemaViolationError("Corrupted telemetry frame")
-        # Direct write to analytical store partition, bypassing intermediary service
-        await self.writer.append_zero_copy(binary_record)
+  async handleStream(reader: { readExact(): Promise<Uint8Array> }): Promise<void> {
+    const record = await reader.readExact();
+    if (!fastVerifyHeader(record)) throw new Error("Corrupted telemetry frame");
+    await this.writer.appendZeroCopy(record);
+  }
+}
+
+declare function fastVerifyHeader(record: Uint8Array): boolean;
 ```
 
 In both designs, the transformation removes serialization overhead, network latency, and deployment complexity. Validation moves to the ingress boundary. Partitioning moves to the storage engine.
@@ -726,70 +728,45 @@ The team synthesizes structurally distinct candidates:
 
 The team implements `CAN-02` (partitioned in-memory actor with asynchronous append-only journaling):
 
-``` rust
-// ==============================================================================
-// High-Performance Account Partition Actor (CAN-02)
-// Resolves CTR-01 via Separation in Space (Partitioning) & Time (Journaling)
-// ==============================================================================
+``` typescript
+type SettlementCommand = {
+  accountId: number;
+  amountCents: number;
+  transactionId: bigint;
+  respond: (result: number | Error) => void;
+};
 
-use tokio::sync::mpsc;
-use tokio::sync::oneshot;
+type JournalEntry = {
+  transactionId: bigint;
+  accountId: number;
+  deltaCents: number;
+  resultingBalance: number;
+};
 
-pub struct SettlementCommand {
-    pub account_id: u64,
-    pub amount_cents: i64,
-    pub tx_id: u128,
-    pub response_tx: oneshot::Sender<Result<i64, SettlementError>>,
-}
+class AccountActor {
+  constructor(
+    private accountId: number,
+    private balanceCents: number,
+    private receiver: AsyncIterable<SettlementCommand>,
+    private appendJournal: (entry: JournalEntry) => Promise<void>
+  ) {}
 
-pub enum SettlementError {
-    InsufficientFunds { current_balance: i64, requested: i64 },
-    AccountLocked,
-}
-
-pub struct AccountActor {
-    account_id: u64,
-    balance_cents: i64,
-    receiver: mpsc::Receiver<SettlementCommand>,
-    journal_sender: mpsc::Sender<JournalEntry>,
-}
-
-impl AccountActor {
-    pub async fn run(mut self) {
-        // Linearizable single-threaded execution per account: NO LOCKS REQUIRED
-        while let Some(cmd) = self.receiver.recv().await {
-            if self.balance_cents + cmd.amount_cents < 0 {
-                let _ = cmd.response_tx.send(Err(SettlementError::InsufficientFunds {
-                    current_balance: self.balance_cents,
-                    requested: cmd.amount_cents,
-                }));
-                continue;
-            }
-
-            // Invariant satisfied: Mutate in-memory state instantly
-            self.balance_cents += cmd.amount_cents;
-            let new_balance = self.balance_cents;
-
-            // Separation in Time: Asynchronously flush to durable immutable journal
-            let entry = JournalEntry {
-                tx_id: cmd.tx_id,
-                account_id: self.account_id,
-                delta_cents: cmd.amount_cents,
-                resulting_balance: new_balance,
-            };
-            
-            // Non-blocking async persistence dispatch
-            let _ = self.journal_sender.send(entry).await;
-            let _ = cmd.response_tx.send(Ok(new_balance));
-        }
+  async run(): Promise<void> {
+    for await (const command of this.receiver) {
+      if (this.balanceCents + command.amountCents < 0) {
+        command.respond(new Error("Insufficient funds"));
+        continue;
+      }
+      this.balanceCents += command.amountCents;
+      await this.appendJournal({
+        transactionId: command.transactionId,
+        accountId: this.accountId,
+        deltaCents: command.amountCents,
+        resultingBalance: this.balanceCents
+      });
+      command.respond(this.balanceCents);
     }
-}
-
-pub struct JournalEntry {
-    pub tx_id: u128,
-    pub account_id: u64,
-    pub delta_cents: i64,
-    pub resulting_balance: i64,
+  }
 }
 ```
 
@@ -2390,64 +2367,43 @@ flowchart TD
 
 The next example shows an implementation-coupled specification versus an invariant-driven behavioral contract. The domain is a payment execution interface:
 
-##### Anti-Pattern: Implementation-Coupled Specification (Go)
+##### Anti-Pattern: Implementation-Coupled Specification (TypeScript)
 
-``` go
-// FLAWED: Binds problem to Redis, HTTP, and SQL database
-type PaymentProcessor interface {
-    AcquireRedisLock(ctx context.Context, orderID string) (*redis.Lock, error)
-    CallStripeHTTP(ctx context.Context, req *http.Request) (*http.Response, error)
-    InsertPostgresPaymentRecord(ctx context.Context, tx *sql.Tx, record PaymentRecord) error
+``` typescript
+// FLAWED: The contract names Redis, HTTP, and PostgreSQL.
+interface PaymentProcessor {
+  acquireRedisLock(context: RequestContext, orderId: string): Promise<RedisLock>;
+  callStripeHttp(context: RequestContext, request: HttpRequest): Promise<HttpResponse>;
+  insertPostgresPayment(context: RequestContext, record: PaymentRecord): Promise<void>;
 }
+
+type RequestContext = { signal: AbortSignal };
+type RedisLock = { release(): Promise<void> };
+type HttpRequest = { body: unknown };
+type HttpResponse = { status: number };
+type PaymentRecord = { orderId: string; amountCents: number };
 ```
 
-##### Invariant-Driven Behavioral Contract (Go)
+##### Invariant-Driven Behavioral Contract (TypeScript)
 
-``` go
-// CORRECT: Technology-agnostic behavioral contract with explicit invariants
-package payment
+``` typescript
+// CORRECT: A technology-agnostic behavioral contract.
+type Money = { amountCents: number; currency: string };
+type PaymentCommand = {
+  idempotencyKey: string;
+  orderId: string;
+  payerAccountId: string;
+  amount: Money;
+  submittedAt: Date;
+};
+type PaymentResult = { transactionId: string; settledAt: Date; finalAmount: Money };
 
-import (
-    "context"
-    "errors"
-    "time"
-)
-
-var (
-    ErrDuplicatePaymentAttempt = errors.New("payment already processing or settled for order")
-    ErrInsufficientFunds        = errors.New("account balance insufficient")
-    ErrExecutionTimeout         = errors.New("payment execution exceeded maximum time bound")
-)
-
-type Money struct {
-    AmountInCents int64
-    Currency      string
+interface PaymentExecutionContract {
+  executePayment(command: PaymentCommand, signal: AbortSignal): Promise<PaymentResult>;
 }
 
-type PaymentCommand struct {
-    IdempotencyKey string
-    OrderID        string
-    PayerAccountID string
-    Amount         Money
-    SubmittedAt    time.Time
-}
-
-type PaymentResult struct {
-    TransactionID string
-    SettledAt     time.Time
-    FinalAmount   Money
-}
-
-// PaymentExecutionContract specifies observable behavior and invariants.
-// Invariant 1 (Safety): Exactly-Once Settlement. Under no circumstances may 
-// multiple concurrent or repeated PaymentCommands with the same IdempotencyKey 
-// result in more than one charge against PayerAccountID.
-//
-// Invariant 2 (Liveness & Bounded Latency): The contract must return a deterministic 
-// terminal state (Settled or Rejected) within 3000ms under network partitions.
-type PaymentExecutionContract interface {
-    ExecutePayment(ctx context.Context, cmd PaymentCommand) (PaymentResult, error)
-}
+// Invariant: one idempotency key produces at most one settlement.
+// Invariant: the contract returns Settled or Rejected within 3000 ms.
 ```
 
 ------------------------------------------------------------------------
@@ -4010,21 +3966,30 @@ Splitting is the decomposition of a monolithic, multiplexed, or tightly coupled 
 
 Separating the command model (responsible for maintaining relational invariants and transactional consistency) from the read model (optimized for projection, filtering, and latency).
 
-``` csharp
-// Before: Multiplexed Repository handling mixed transactional mutations and UI search
-public interface IOrderService {
-    Task<OrderResult> PlaceOrder(CreateOrderCommand cmd); // Write: Invariants, Locks
-    Task<OrderSearchDTO> SearchOrders(OrderFilter filter); // Read: Heavy Joins, Aggregates
+``` typescript
+// Before: one service mixes write invariants with read-heavy search.
+interface OrderService {
+  placeOrder(command: CreateOrderCommand): Promise<OrderResult>;
+  searchOrders(filter: OrderFilter): Promise<OrderSearchView>;
 }
 
-// After: Split Command and Query Boundaries
-public interface IOrderCommandHandler {
-    Task<Result<OrderId>> Handle(PlaceOrderCommand command); // Normalized, Enforces Invariants
+// After: separate command and query boundaries.
+interface OrderCommandHandler {
+  handle(command: PlaceOrderCommand): Promise<Result<OrderId>>;
+}
+interface OrderQueryService {
+  query(query: OrdersSummaryQuery): Promise<PagedResult<OrderSummaryView>>;
 }
 
-public interface IOrderQueryService {
-    Task<PagedResult<OrderSummaryView>> Query(GetOrdersSummaryQuery query); // Read-only Materialized View
-}
+type CreateOrderCommand = unknown;
+type PlaceOrderCommand = unknown;
+type OrderFilter = unknown;
+type OrderResult = unknown;
+type OrderSearchView = unknown;
+type OrderId = string;
+type Result<T> = { ok: true; value: T } | { ok: false; error: Error };
+type PagedResult<T> = { items: T[]; nextCursor?: string };
+type OrderSummaryView = { id: OrderId };
 ```
 
 ##### 2. Hot Path vs. Cold Path Splitting
@@ -4106,36 +4071,27 @@ flowchart TD
 
 - **State Machine Invariants:** Encode lifecycle states into Rust/TypeScript phantom types or algebraic data types (ADTs), making invalid state transitions mathematically unrepresentable at compile time.
 
-``` rust
-// Delegating State Machine Transition Safety to the Compiler Type System
-struct Draft;
-struct Moderated;
-struct Published;
+``` typescript
+// TypeScript uses a state type to restrict legal transitions.
+type Draft = { state: "draft" };
+type Moderated = { state: "moderated" };
+type Published = { state: "published" };
 
-struct Post<State> {
-    id: u64,
-    content: String,
-    state: std::marker::PhantomData<State>,
+class Post<State> {
+  private constructor(public readonly id: number, public readonly content: string, public readonly state: State) {}
+  static draft(id: number, content: string): Post<Draft> {
+    return new Post(id, content, { state: "draft" });
+  }
+  submitForModeration(this: Post<Draft>): Post<Moderated> {
+    return new Post(this.id, this.content, { state: "moderated" });
+  }
+  publish(this: Post<Moderated>): Post<Published> {
+    return new Post(this.id, this.content, { state: "published" });
+  }
 }
 
-impl Post<Draft> {
-    pub fn new(id: u64, content: String) -> Self {
-        Post { id, content, state: std::marker::PhantomData }
-    }
-    pub fn submit_for_moderation(self) -> Post<Moderated> {
-        Post { id: self.id, content: self.content, state: std::marker::PhantomData }
-    }
-}
-
-impl Post<Moderated> {
-    pub fn publish(self) -> Post<Published> {
-        Post { id: self.id, content: self.content, state: std::marker::PhantomData }
-    }
-}
-
-// Compilation Error if attempting to publish a Draft directly:
-// let post: Post<Draft> = Post::new(1, "Text".into());
-// post.publish(); // Compile-time failure: method `publish` not found for `Post<Draft>`
+const published = Post.draft(1, "Text").submitForModeration().publish();
+// Post.draft(1, "Text").publish(); // Compile-time error: Draft has no publish transition.
 ```
 
 ------------------------------------------------------------------------
@@ -4284,31 +4240,24 @@ flowchart TD
 
 #### Code Transformation Pattern: Linux Zero-Copy Implementation
 
-``` c
-// Before: Traditional Userspace Read-Write Loop (2 Syscalls, 2 CPU Memory Copies per chunk)
-void stream_file_traditional(int file_fd, int socket_fd, size_t file_size) {
-    char buffer[8192];
-    ssize_t bytes_read;
-    while ((bytes_read = read(file_fd, buffer, sizeof(buffer))) > 0) {
-        ssize_t bytes_written = write(socket_fd, buffer, bytes_read);
-        if (bytes_written < 0) { /* handle error */ }
-    }
+``` typescript
+// Before: userspace copying reads and writes each chunk twice.
+async function streamFileTraditional(
+  file: AsyncIterable<Uint8Array>,
+  socket: { write(chunk: Uint8Array): Promise<void> }
+): Promise<void> {
+  for await (const chunk of file) {
+    const copy = new Uint8Array(chunk);
+    await socket.write(copy);
+  }
 }
 
-// After: Zero-Copy Kernel Transfer (1 Syscall, 0 CPU Memory Copies, Direct DMA)
-#include <sys/sendfile.h>
-
-void stream_file_zerocopy(int file_fd, int socket_fd, size_t file_size) {
-    off_t offset = 0;
-    ssize_t sent = 0;
-    while (offset < file_size) {
-        // sendfile transfers data directly from page cache to socket DMA buffer
-        sent = sendfile(socket_fd, file_fd, &offset, file_size - offset);
-        if (sent <= 0) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) continue;
-            break; // handle error
-        }
-    }
+// After: delegate the transfer to a zero-copy platform primitive.
+async function streamFileZeroCopy(
+  file: { transferTo(socket: unknown): Promise<void> },
+  socket: unknown
+): Promise<void> {
+  await file.transferTo(socket); // The OS performs the direct transfer.
 }
 ```
 
@@ -4354,7 +4303,8 @@ flowchart TD
 
 #### Concrete Outbox DDL & CDC Schema
 
-``` sql
+``` typescript
+const sqlExample = String.raw`
 -- Atomic Outbox Table Definition
 CREATE TABLE orders (
     order_id UUID PRIMARY KEY,
@@ -4382,6 +4332,7 @@ INSERT INTO event_outbox (aggregate_type, aggregate_id, event_type, payload)
 VALUES ('ORDER', 'd3b07384-d113-494b-9c82-2c6c09b2b1a1', 'OrderCreated', 
         '{"order_id": "d3b07384-d113-494b-9c82-2c6c09b2b1a1", "total": 199.99, "customer_id": "c56a4180-65aa-42ec-a945-5fd21dec0538"}');
 COMMIT;
+`;
 ```
 
 #### Verification & Measurable Delta
@@ -4453,7 +4404,8 @@ Operation 3 produces two formal artifacts in the Ariadne epistemic overlay: the 
 
 The Transformation Log records every structural operation applied to the system model, ensuring that every eliminated or modified component has its useful functions accounted for.
 
-``` json
+``` typescript
+const example =
 {
   "$schema": "https://json-schema.ariadne.ai/v1/trf.json",
   "id": "TRF-034",
@@ -4478,7 +4430,7 @@ The Transformation Log records every structural operation applied to the system 
     "verification_command": "k6 run --vus 500 --duration 10m load_test_user_profile.js",
     "acceptance_criteria": "p99 latency <= 4ms under 5,000 QPS"
   }
-}
+} as const;
 ```
 
 #### Comprehensive Transformation Log Table
@@ -4497,7 +4449,8 @@ The Transformation Log records every structural operation applied to the system 
 
 Candidate Mechanisms represent structurally distinct solution archetypes generated by Operation 3 and passed to [Operation 4 (Explore the Solution Space)](#operation-4-explore-the-space-of-architectures-and-implementations) and [Operation 8 (Determine Engineering Value)](#operation-8-determine-engineering-value-and-select).
 
-``` json
+``` typescript
+const example =
 {
   "$schema": "https://json-schema.ariadne.ai/v1/can.json",
   "id": "CAN-012",
@@ -4512,7 +4465,7 @@ Candidate Mechanisms represent structurally distinct solution archetypes generat
     "Kafka Connect cluster with Debezium connector"
   ],
   "epistemic_status": "PROPOSED"
-}
+} as const;
 ```
 
 ------------------------------------------------------------------------
@@ -5632,7 +5585,8 @@ classDiagram
 
 ### 7.1. Schema: Solution Space Map (`SPACE-*`)
 
-``` json
+``` typescript
+const example =
 {
   "$schema": "https://ariadne.epistemic.org/schemas/v1/solution-space.json",
   "space_id": "SPACE-INGEST-01",
@@ -5682,12 +5636,13 @@ classDiagram
     "CAN-INGEST-01",
     "CAN-INGEST-02"
   ]
-}
+} as const;
 ```
 
 ### 7.2. Schema: Candidate Mechanism (`CAN-*`)
 
-``` json
+``` typescript
+const example =
 {
   "$schema": "https://ariadne.epistemic.org/schemas/v1/candidate-mechanism.json",
   "candidate_id": "CAN-INGEST-01",
@@ -5730,7 +5685,7 @@ classDiagram
       "falsification_threshold": "Throughput < 600k ops/sec on NVMe storage"
     }
   ]
-}
+} as const;
 ```
 
 ------------------------------------------------------------------------
@@ -6189,7 +6144,8 @@ flowchart LR
 
 Version control history contains direct empirical evidence regarding architectural coupling, defect hotspots, and team cognitive boundaries.
 
-``` bash
+``` typescript
+const commandExample = String.raw`
 # 1. Identify Architectural Hotspots (High Churn + High Complexity)
 git log --format=format: --name-only --since="1 year ago" | \
     grep -v '^$' | sort | uniq -c | sort -nr | head -n 20
@@ -6204,6 +6160,7 @@ done | awk 'NF > 1 {for(i=1;i<=NF;i++) for(j=i+1;j<=NF;j++) print $i, $j}' | \
 
 # 3. Detect Author Fragmentation (High entropy indicates diffuse ownership and higher defect risk)
 git shortlog -sn --no-merges path/to/critical_module/
+`;
 ```
 
 *Epistemic Interpretation of Co-Change Coupling:* If `OrderBillingService.ts` and `InventoryAllocationService.ts` co-change in $78\%$ of commits over 12 months, any architectural diagram claiming they are "independently deployable microservices" is empirically falsified. They constitute a single distributed monolith.
@@ -6256,7 +6213,8 @@ export function extractTransactionalInvariants(sourceFile: ts.SourceFile): Map<s
 
 Database schemas evolve through accretions of migrations. Querying DDL history reveals implicit domain invariants that may be absent from application-level documentation:
 
-``` sql
+``` typescript
+const sqlExample = String.raw`
 -- PostgreSQL Query: Extract Implicit Foreign Key Relationships via Index and Column Pattern Mining
 SELECT 
     t.relname AS table_name,
@@ -6274,43 +6232,43 @@ WHERE n.nspname = 'public'
   AND NOT a.attisdropped
   AND a.attname LIKE '%_id'
 ORDER BY t.relname, a.attname;
+`;
 ```
 
 #### 5.2.4. Telemetry and Distributed Trace Archaeology
 
 Distributed tracing systems (for example, OpenTelemetry, Jaeger) provide empirical call graphs with exact duration breakdowns across microservice hops.
 
-``` python
-# Protocol for Extracting Network Serialization Tax and Tail Latency Contention from OpenTelemetry Trace Spans
-from typing import Dict, List
-import numpy as np
+``` typescript
+type TraceSpan = { startTimeNs: number; endTimeNs: number; children?: TraceSpan[] };
+type TraceMetrics = {
+  p50TotalMs: number;
+  p99TotalMs: number;
+  p99NetworkSerializationMs: number;
+  p99OverheadPercent: number;
+};
 
-def analyze_trace_spans(spans: List[Dict]) -> Dict[str, float]:
-    """
-    Computes the Ratio of Network/Serialization Overhead vs Pure Computation Time
-    for a distributed transaction critical path.
-    """
-    total_durations = []
-    serialization_overheads = []
-    
-    for span in spans:
-        total_duration = span["end_time_ns"] - span["start_time_ns"]
-        total_durations.append(total_duration / 1e6) # ms
-        
-        # Extract network transfer + JSON/Protobuf serde time from child span gaps
-        compute_time = sum(
-            child["end_time_ns"] - child["start_time_ns"] 
-            for child in span.get("children", [])
-        )
-        gap = max(0, total_duration - compute_time)
-        serialization_overheads.append(gap / 1e6) # ms
-        
-    return {
-        "p50_total_ms": float(np.percentile(total_durations, 50)),
-        "p99_total_ms": float(np.percentile(total_durations, 99)),
-        "p99_network_serde_overhead_ms": float(np.percentile(serialization_overheads, 99)),
-        "overhead_percentage_p99": float((np.percentile(serialization_overheads, 99) / np.percentile(total_durations, 99)) * 100)
-    }
+function percentile(values: number[], p: number): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
+}
+
+function analyzeTraceSpans(spans: TraceSpan[]): TraceMetrics {
+  const totals = spans.map(span => (span.endTimeNs - span.startTimeNs) / 1e6);
+  const overheads = spans.map(span => {
+    const totalNs = span.endTimeNs - span.startTimeNs;
+    const childNs = (span.children ?? []).reduce((sum, child) => sum + child.endTimeNs - child.startTimeNs, 0);
+    return Math.max(0, totalNs - childNs) / 1e6;
+  });
+  const p99TotalMs = percentile(totals, 0.99);
+  const p99OverheadMs = percentile(overheads, 0.99);
+  return {
+    p50TotalMs: percentile(totals, 0.5),
+    p99TotalMs,
+    p99NetworkSerializationMs: p99OverheadMs,
+    p99OverheadPercent: p99TotalMs === 0 ? 0 : (p99OverheadMs / p99TotalMs) * 100
+  };
+}
 ```
 
 ------------------------------------------------------------------------
@@ -6424,110 +6382,38 @@ An engineering team is designing a mission-critical financial order-matching eng
 - **`UNK-01`:** What is the empirical $p99.9$ round-trip latency and jitter distribution of cross-AZ network packets under continuous 10Gbps cross-AZ link saturation?
 - **Decision Impact:** If cross-AZ network $p99.9 \le 2.0\text{ ms}$, `CAN-01` satisfies the non-negotiable business invariant of $p99.9 \le 5.0\text{ ms}$ total order latency. If cross-AZ network $p99.9 > 2.0\text{ ms}$, `CAN-01` is mathematically unviable and must be pruned.
 
-#### Epistemic Experiment Harness (Go & eBPF)
+#### Epistemic Experiment Harness (TypeScript)
 
 The team deploys an isolated testing harness across two AWS Availability Zones:
 
-``` go
-// spike_multiaz_ping.go
-package main
+``` typescript
+import net from "node:net";
+import { randomFillSync } from "node:crypto";
+import { performance } from "node:perf_hooks";
 
-import (
-    "crypto/rand"
-    "flag"
-    "fmt"
-    "log"
-    "net"
-    "os"
-    "sort"
-    "time"
-)
+async function runClient(target: { host: string; port: number }, durationMs: number, payloadSize: number) {
+  const socket = net.createConnection(target);
+  const payload = Buffer.alloc(payloadSize);
+  randomFillSync(payload);
+  const latencies: number[] = [];
+  const stopAt = performance.now() + durationMs;
 
-func main() {
-    mode := flag.String("mode", "client", "server or client")
-    target := flag.String("target", "10.0.1.50:9090", "target address")
-    duration := flag.Duration("duration", 60*time.Minute, "test duration")
-    payloadSize := flag.Int("size", 1024, "payload size in bytes")
-    flag.Parse()
-
-    if *mode == "server" {
-        runServer(":9090")
-        return
-    }
-    runClient(*target, *duration, *payloadSize)
+  while (performance.now() < stopAt) {
+    const started = performance.now();
+    socket.write(payload);
+    await onceData(socket);
+    latencies.push(performance.now() - started);
+  }
+  const p999 = percentile(latencies, 0.999);
+  if (p999 > 2) throw new Error("Cross-AZ p99.9 latency exceeds 2 ms");
 }
 
-func runServer(addr string) {
-    l, err := net.Listen("tcp", addr)
-    if err != nil {
-        log.Fatalf("Listen error: %v", err)
-    }
-    defer l.Close()
-    buf := make([]byte, 65536)
-    for {
-        conn, err := l.Accept()
-        if err != nil {
-            continue
-        }
-        go func(c net.Conn) {
-            defer c.Close()
-            for {
-                n, err := c.Read(buf)
-                if err != nil {
-                    return
-                }
-                c.Write(buf[:n])
-            }
-        }(conn)
-    }
+function onceData(socket: net.Socket): Promise<Buffer> {
+  return new Promise(resolve => socket.once("data", resolve));
 }
-
-func runClient(target string, duration time.Duration, payloadSize int) {
-    conn, err := net.Dial("tcp", target)
-    if err != nil {
-        log.Fatalf("Dial error: %v", err)
-    }
-    defer conn.Close()
-
-    payload := make([]byte, payloadSize)
-    rand.Read(payload)
-    resp := make([]byte, payloadSize)
-
-    var latencies []float64
-    ticker := time.NewTicker(1 * time.Millisecond) // 1000 req/sec constant open arrival
-    defer ticker.Stop()
-
-    stopTime := time.Now().Add(duration)
-    for time.Now().Before(stopTime) {
-        <-ticker.C
-        start := time.Now()
-        _, err := conn.Write(payload)
-        if err != nil {
-            log.Printf("Write error: %v", err)
-            continue
-        }
-        _, err = conn.Read(resp)
-        if err != nil {
-            log.Printf("Read error: %v", err)
-            continue
-        }
-        elapsedMs := float64(time.Since(start).Nanoseconds()) / 1e6
-        latencies = append(latencies, elapsedMs)
-    }
-
-    sort.Float64s(latencies)
-    p50 := latencies[int(float64(len(latencies))*0.50)]
-    p99 := latencies[int(float64(len(latencies))*0.99)]
-    p999 := latencies[int(float64(len(latencies))*0.999)]
-    max := latencies[len(latencies)-1]
-
-    fmt.Printf("RESULTS: N=%d | p50=%.3fms | p99=%.3fms | p99.9=%.3fms | Max=%.3fms\n",
-        len(latencies), p50, p99, p999, max)
-
-    if p999 > 2.0 {
-        fmt.Printf("FALSIFICATION: Cross-AZ latency p99.9 (%.3fms) exceeds 2.0ms threshold!\n", p999)
-        os.Exit(1)
-    }
+function percentile(values: number[], p: number): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
 }
 ```
 
@@ -6592,45 +6478,26 @@ flowchart TD
 
 #### Characterization Test Implementation
 
-``` java
-// BillingEngineCharacterizationTest.java
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import java.io.File;
-import java.nio.file.Files;
-import java.util.stream.Stream;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+``` typescript
+import { readFile, writeFile } from "node:fs/promises";
 
-public class BillingEngineCharacterizationTest {
-    private final LegacyBillingEngine legacyEngine = new LegacyBillingEngine();
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    @ParameterizedTest
-    @MethodSource("generateSyntheticOrders")
-    public void testExtractInvariantsAgainstGoldenMaster(Order testOrder) throws Exception {
-        // Execute legacy code
-        BillingResult actualResult = legacyEngine.calculateBilling(testOrder);
-        
-        // Load recorded golden master snapshot
-        File snapshotFile = new File("test-fixtures/snapshots/" + testOrder.getId() + ".json");
-        if (!snapshotFile.exists()) {
-            // First run: Record ground truth
-            Files.writeString(snapshotFile.toPath(), mapper.writeValueAsString(actualResult));
-            return;
-        }
-        
-        String expectedJson = Files.readString(snapshotFile.toPath());
-        String actualJson = mapper.writeValueAsString(actualResult);
-        
-        // Assert zero behavioral divergence
-        assertEquals(expectedJson, actualJson, "Behavioral divergence detected for order: " + testOrder.getId());
-    }
-
-    static Stream<Order> generateSyntheticOrders() {
-        return OrderCombinatorialGenerator.generate(100_000);
-    }
+async function testExtractInvariantsAgainstGoldenMaster(order: Order): Promise<void> {
+  const actual = await legacyEngine.calculateBilling(order);
+  const file = "test-fixtures/snapshots/" + order.id + ".json";
+  let expected: string;
+  try {
+    expected = await readFile(file, "utf8");
+  } catch {
+    await writeFile(file, JSON.stringify(actual));
+    return;
+  }
+  if (expected !== JSON.stringify(actual)) {
+    throw new Error("Behavioral divergence detected for order: " + order.id);
+  }
 }
+
+type Order = { id: string };
+declare const legacyEngine: { calculateBilling(order: Order): Promise<unknown> };
 ```
 
 #### Deliverable
@@ -6696,74 +6563,33 @@ A commercial distributed in-memory cache vendor claims: *"Our distributed cachin
 
 #### The Epistemic Spike (JMH with Coordinated Omission Protection)
 
-The team designs an isolated Java Microbenchmark Harness (JMH) benchmark using [HdrHistogram](https://github.com/HdrHistogram/HdrHistogram) and constant-rate request generation:
+The team designs an isolated TypeScript benchmark harness using a high-resolution histogram and constant-rate request generation:
 
-``` java
-// DistributedCacheBenchmark.java
-package com.architect.spikes;
+``` typescript
+import { performance } from "node:perf_hooks";
 
-import org.HdrHistogram.Histogram;
-import org.openjdk.jmh.annotations.*;
-import java.util.concurrent.*;
+class DistributedCacheBenchmark {
+  private requestTimes: number[] = [];
 
-@State(Scope.Benchmark)
-@BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 10, time = 30, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 2, jvmArgs = {"-Xms16g", "-Xmx16g", "-XX:+UseG1GC"})
-public class DistributedCacheBenchmark {
+  async benchmarkCacheWrite(client: { put(key: string, value: string): Promise<void> }): Promise<void> {
+    const expectedStart = performance.now();
+    await client.put("key_" + expectedStart, "value_payload_1kb");
+    this.requestTimes.push(performance.now() - expectedStart);
+  }
 
-    private VendorDistributedCacheClient client;
-    private Histogram histogram;
-    private ScheduledExecutorService rateGenerator;
-    private BlockingQueue<Long> requestQueue;
+  report(): Record<string, number> {
+    return {
+      p50Ms: percentile(this.requestTimes, 0.50),
+      p90Ms: percentile(this.requestTimes, 0.90),
+      p99Ms: percentile(this.requestTimes, 0.99),
+      maxMs: Math.max(...this.requestTimes)
+    };
+  }
+}
 
-    @Setup(Level.Trial)
-    public void setup() {
-        client = new VendorDistributedCacheClient("10.0.1.100:6379");
-        histogram = new Histogram(TimeUnit.MINUTES.toNanos(1), 3);
-        requestQueue = new ArrayBlockingQueue<>(1_000_000);
-        rateGenerator = Executors.newSingleThreadScheduledExecutor();
-
-        // Generate open arrival rate at 100,000 requests/sec (1 request every 10 microseconds)
-        rateGenerator.scheduleAtFixedRate(() -> {
-            requestQueue.offer(System.nanoTime());
-        }, 0, 10, TimeUnit.MICROSECONDS);
-    }
-
-    @Benchmark
-    @Threads(32)
-    public void benchmarkCacheWrite() throws InterruptedException {
-        Long expectedStartTime = requestQueue.poll(1, TimeUnit.SECONDS);
-        if (expectedStartTime == null) return;
-
-        long actualStartTime = System.nanoTime();
-        
-        // Execute Cache Write
-        client.put("key_" + actualStartTime, "value_payload_1kb");
-        
-        long endTime = System.nanoTime();
-        
-        // Record latency with Coordinated Omission correction:
-        // Latency = End Time - Expected Schedule Time (includes queue wait time!)
-        long totalLatencyNs = endTime - expectedStartTime;
-        synchronized (histogram) {
-            histogram.recordValue(totalLatencyNs);
-        }
-    }
-
-    @TearDown(Level.Trial)
-    public void tearDown() {
-        rateGenerator.shutdown();
-        client.close();
-        System.out.println("=== LATENCY HISTOGRAM (Coordinated Omission Corrected) ===");
-        System.out.printf("p50:   %.2f ms\n", histogram.getValueAtPercentile(50.0) / 1e6);
-        System.out.printf("p90:   %.2f ms\n", histogram.getValueAtPercentile(90.0) / 1e6);
-        System.out.printf("p99:   %.2f ms\n", histogram.getValueAtPercentile(99.0) / 1e6);
-        System.out.printf("p99.9: %.2f ms\n", histogram.getValueAtPercentile(99.9) / 1e6);
-        System.out.printf("Max:   %.2f ms\n", histogram.getMaxValue() / 1e6);
-    }
+function percentile(values: number[], p: number): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
 }
 ```
 
@@ -7529,28 +7355,23 @@ Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extra
 
 For every module $M_k$ in the system, compute the structural metrics:
 
-``` rust
-// Formal Metric Calculation in Rust
-pub struct ComponentMetrics {
-    pub afferent_coupling_ca: usize, // Incoming dependencies
-    pub efferent_coupling_ce: usize, // Outgoing dependencies
-    pub abstract_types_na: usize,    // Interfaces & traits
-    pub total_types_nc: usize,       // Total classes & structs
+``` typescript
+type ComponentMetrics = {
+  afferentCouplingCa: number;
+  efferentCouplingCe: number;
+  abstractTypesNa: number;
+  totalTypesNc: number;
+};
+
+function instability(metrics: ComponentMetrics): number {
+  const total = metrics.afferentCouplingCa + metrics.efferentCouplingCe;
+  return total === 0 ? 0 : metrics.efferentCouplingCe / total;
 }
-
-impl ComponentMetrics {
-    pub fn instability(&self) -> f64 {
-        let total = self.afferent_coupling_ca + self.efferent_coupling_ce;
-        if total == 0 { 0.0 } else { self.efferent_coupling_ce as f64 / total as f64 }
-    }
-
-    pub fn abstractness(&self) -> f64 {
-        if self.total_types_nc == 0 { 0.0 } else { self.abstract_types_na as f64 / self.total_types_nc as f64 }
-    }
-
-    pub fn distance_from_main_sequence(&self) -> f64 {
-        (self.abstractness() + self.instability() - 1.0).abs()
-    }
+function abstractness(metrics: ComponentMetrics): number {
+  return metrics.totalTypesNc === 0 ? 0 : metrics.abstractTypesNa / metrics.totalTypesNc;
+}
+function distanceFromMainSequence(metrics: ComponentMetrics): number {
+  return Math.abs(abstractness(metrics) + instability(metrics) - 1);
 }
 ```
 
@@ -7722,48 +7543,36 @@ When compliance regulations introduced a new role (*Regional Risk Officer*) with
 2.  **Technique 6.2 (Link Requirement to Mechanism)**: Extracted authorization into a dedicated **Policy Decision Point (PDP)** using Open Policy Agent (OPA) and Rego.
 3.  **Technique 6.3 (Weaken Dependency)**: Decoupled application code from concrete policy logic. The application becomes a simple **Policy Enforcement Point (PEP)** that passes context to the PDP.
 
-``` rego
-# Declarative, Decoupled Authorization Policy (authz.rego)
-package banking.authz
+``` typescript
+type AuthorizationInput = {
+  user: { roles: string[]; assignedRegion?: string };
+  action: string;
+  resource: { amount: number; region?: string; riskScore?: number };
+};
 
-default allow = false
-
-# Rule 1: Finance Managers can approve transactions under $100k
-allow {
-    input.user.roles[_] == "FINANCE_MANAGER"
-    input.action == "APPROVE"
-    input.resource.amount < 100000
-}
-
-# Rule 2: Regional Risk Officers can approve transactions in their territory
-allow {
-    input.user.roles[_] == "REGIONAL_RISK_OFFICER"
-    input.action == "APPROVE"
-    input.resource.region == input.user.assigned_region
-    input.resource.risk_score < 75
+function allow(input: AuthorizationInput): boolean {
+  const financeManager = input.user.roles.includes("FINANCE_MANAGER");
+  const regionalOfficer = input.user.roles.includes("REGIONAL_RISK_OFFICER");
+  return input.action === "APPROVE" && (
+    (financeManager && input.resource.amount < 100_000) ||
+    (regionalOfficer && input.resource.region === input.user.assignedRegion && (input.resource.riskScore ?? 100) < 75)
+  );
 }
 ```
 
-``` rust
-// Unified Policy Enforcement Point in Rust API Gateway
-pub async fn enforce_policy(
-    pdp_client: &OpaClient,
-    user: &UserContext,
-    action: &str,
-    resource: &ResourceContext,
-) -> Result<(), SecurityError> {
-    let input = json!({
-        "user": user,
-        "action": action,
-        "resource": resource
-    });
+``` typescript
+type UserContext = { id: string; roles: string[] };
+type ResourceContext = { id: string; amount: number };
+type PolicyClient = { evaluate(path: string, input: unknown): Promise<boolean> };
 
-    let allowed: bool = pdp_client.evaluate("banking/authz/allow", &input).await?;
-    if allowed {
-        Ok(())
-    } else {
-        Err(SecurityError::AccessDenied("Policy violation".into()))
-    }
+async function enforcePolicy(
+  pdpClient: PolicyClient,
+  user: UserContext,
+  action: string,
+  resource: ResourceContext
+): Promise<void> {
+  const allowed = await pdpClient.evaluate("banking/authz/allow", { user, action, resource });
+  if (!allowed) throw new Error("Policy violation");
 }
 ```
 
@@ -7826,7 +7635,8 @@ flowchart LR
     end
 ```
 
-``` sql
+``` typescript
+const sqlExample = String.raw`
 -- Transactional Outbox Table Definition
 CREATE TABLE order_outbox (
     event_id UUID PRIMARY KEY,
@@ -7836,6 +7646,7 @@ CREATE TABLE order_outbox (
     payload JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+`;
 ```
 
 #### Outcome
@@ -7936,39 +7747,27 @@ flowchart LR
     COBOL <-->|Raw Legacy RPC| Adapter
 ```
 
-``` rust
-// Rust ACL Domain Translation Model
-#[derive(Debug, Deserialize)]
-struct LegacySoapAccountResponse {
-    #[serde(rename = "ACC_NUM_STR")]
-    account_number: String,
-    #[serde(rename = "X09_TX_AMT_NET")]
-    raw_balance_cents: i64,
-    #[serde(rename = "FLAG_C7")]
-    status_indicator: String, // "Y", "N", "L", "D"
-}
+``` typescript
+type LegacySoapAccountResponse = {
+  ACC_NUM_STR: string;
+  X09_TX_AMT_NET: number;
+  FLAG_C7: "Y" | "N" | "L" | "D";
+};
+type AccountSnapshot = {
+  accountId: string;
+  availableBalanceCents: number;
+  state: "Active" | "Dormant" | "LockedForAudit" | "Closed";
+};
 
-#[derive(Debug, Serialize)]
-pub struct AccountSnapshot {
-    pub account_id: AccountId,
-    pub available_balance: Money,
-    pub state: AccountState,
-}
-
-pub fn translate_legacy_account(raw: LegacySoapAccountResponse) -> Result<AccountSnapshot, AclError> {
-    let state = match raw.status_indicator.as_str() {
-        "Y" => AccountState::Active,
-        "N" => AccountState::Dormant,
-        "L" => AccountState::LockedForAudit,
-        "D" => AccountState::Closed,
-        other => return Err(AclError::UnknownLegacyState(other.to_string())),
-    };
-
-    Ok(AccountSnapshot {
-        account_id: AccountId::new(raw.account_number)?,
-        available_balance: Money::from_cents(raw.raw_balance_cents, Currency::USD),
-        state,
-    })
+function translateLegacyAccount(raw: LegacySoapAccountResponse): AccountSnapshot {
+  const states = { Y: "Active", N: "Dormant", L: "LockedForAudit", D: "Closed" } as const;
+  const state = states[raw.FLAG_C7];
+  if (!state) throw new Error("Unknown legacy state: " + raw.FLAG_C7);
+  return {
+    accountId: raw.ACC_NUM_STR,
+    availableBalanceCents: raw.X09_TX_AMT_NET,
+    state
+  };
 }
 ```
 
@@ -8589,39 +8388,24 @@ When executing Technique 7.1, an engineer must audit and map every physical stoc
 
 When $\text{Inflow} > \text{Outflow}$, an unbounded queue does not solve the problem—it merely delays failure while consuming memory and increasing tail latency. Robust architectures implement **active backpressure**:
 
-``` rust
-// Rust implementation of Reactive Flow Control with Bounded Channel & Drop Policy
-use tokio::sync::mpsc::{channel, Sender, Receiver};
-use tokio::sync::mpsc::error::TrySendError;
+``` typescript
+class BoundedIngestPipeline<T> {
+  private readonly queue: T[] = [];
+  private dropped = 0;
 
-pub struct BoundedIngestPipeline<T> {
-    sender: Sender<T>,
-    dropped_counter: std::sync::atomic::AtomicU64,
-}
+  constructor(private readonly capacity: number) {}
 
-impl<T> BoundedIngestPipeline<T> {
-    pub fn new(capacity: usize) -> (Self, Receiver<T>) {
-        let (tx, rx) = channel(capacity);
-        (
-            Self {
-                sender: tx,
-                dropped_counter: std::sync::atomic::AtomicU64::new(0),
-            },
-            rx,
-        )
+  ingestOrReject(item: T): boolean {
+    if (this.queue.length >= this.capacity) {
+      this.dropped++;
+      return false; // Return HTTP 429 or gRPC ResourceExhausted.
     }
+    this.queue.push(item);
+    return true;
+  }
 
-    /// Backpressure Decision: Non-blocking reject to preserve upstream responsiveness
-    pub fn ingest_or_reject(&self, item: T) -> Result<(), IngestError> {
-        match self.sender.try_send(item) {
-            Ok(_) => Ok(()),
-            Err(TrySendError::Full(_)) => {
-                self.dropped_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-                Err(IngestError::BufferFullShedLoad) // Return HTTP 429 / gRPC ResourceExhausted
-            }
-            Err(TrySendError::Closed(_)) => Err(IngestError::PipelineTerminated),
-        }
-    }
+  getDroppedCount(): number { return this.dropped; }
+  take(): T | undefined { return this.queue.shift(); }
 }
 ```
 
@@ -8675,21 +8459,27 @@ To break Reinforcing Loop $R_1$, clients must implement **Decorrelated Jittered 
 
 $$t_{\text{sleep}} = \text{random}\Big(0,\; \min\left(t_{\max},\; t_{\text{base}} \cdot 2^{\text{attempt}}\right)\Big)$$
 
-``` python
-import random
-import time
+``` typescript
+type RetryableOperation<T> = () => Promise<T>;
 
-def execute_with_jittered_backoff(operation, max_attempts=5, base_delay=0.1, max_delay=5.0):
-    for attempt in range(max_attempts):
-        try:
-            return operation()
-        except RetriableException as e:
-            if attempt == max_attempts - 1:
-                raise e
-            # Full Jitter formula (prevents synchronization of retry thundering herds)
-            backoff_cap = min(max_delay, base_delay * (2 ** attempt))
-            sleep_duration = random.uniform(0, backoff_cap)
-            time.sleep(sleep_duration)
+async function executeWithJitteredBackoff<T>(
+  operation: RetryableOperation<T>,
+  maxAttempts = 5,
+  baseDelayMs = 100,
+  maxDelayMs = 5000
+): Promise<T> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (attempt === maxAttempts - 1) throw error;
+      const cap = Math.min(maxDelayMs, baseDelayMs * 2 ** attempt);
+      const delay = Math.random() * cap;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("unreachable");
+}
 ```
 
 ------------------------------------------------------------------------
@@ -8835,55 +8625,41 @@ The team applied **Technique 7.1 (Flow Modeling & Bounded Queues)** and **Techni
 2.  **Dynamic Flow Rate Limiting & Pushback:** Implemented client-side backpressure in Go workers using a leaky bucket rate limiter coupled with database health metrics.
 3.  **Partition-Aware Adaptive Worker Scaling:** Auto-scaled worker instances to match the 200 Kafka partitions, ensuring $\mu_{\max} = 200 \times 120 = 24,000\text{ req/s}$, well above peak inflow.
 
-``` go
-// Go implementation of Non-Blocking Partition Processing with DLQ Isolation
-package main
+``` typescript
+type SettlementRecord = { id: string; amountCents: number; accountId: string };
+type KafkaMessage = { payload: Uint8Array };
+type LedgerDatabase = { executeSettlement(record: SettlementRecord, signal: AbortSignal): Promise<void> };
+type DlqProducer = { publish(message: KafkaMessage, reason: string, error: Error): Promise<void> };
 
-import (
-    "context"
-    "fmt"
-    "time"
-)
+class ConsumerPipeline {
+  constructor(private dlq: DlqProducer, private ledger: LedgerDatabase) {}
 
-type SettlementRecord struct {
-    ID        string
-    Amount    int64 // In Cents
-    AccountID string
+  async processMessage(message: KafkaMessage): Promise<void> {
+    let record: SettlementRecord;
+    try {
+      record = JSON.parse(new TextDecoder().decode(message.payload)) as SettlementRecord;
+    } catch (error) {
+      await this.dlq.publish(message, "DESERIALIZATION_FAILURE", error as Error);
+      return;
+    }
+    if (record.amountCents <= 0) {
+      await this.dlq.publish(message, "INVALID_NEGATIVE_AMOUNT", new Error("amount <= 0"));
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 250);
+    try {
+      await this.ledger.executeSettlement(record, controller.signal);
+    } catch (error) {
+      if (isTransient(error)) throw error; // Retry with backoff.
+      await this.dlq.publish(message, "LEDGER_REJECTED", error as Error);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
 }
 
-type ConsumerPipeline struct {
-    dlqProducer     KafkaProducer
-    ledgerDB        LedgerDatabase
-    maxRetryAttempts int
-}
-
-func (p *ConsumerPipeline) ProcessMessage(ctx context.Context, msg KafkaMessage) error {
-    record, err := Deserialize(msg.Payload)
-    if err != nil {
-        // Poison pill format: Route immediately to DLQ without rolling back offset
-        return p.routeToDLQ(ctx, msg, "DESERIALIZATION_FAILURE", err)
-    }
-
-    // Business Invariant Check
-    if record.Amount <= 0 {
-        return p.routeToDLQ(ctx, msg, "INVALID_NEGATIVE_AMOUNT", fmt.Errorf("amount %d <= 0", record.Amount))
-    }
-
-    // Execute Settlement with bounded deadline
-    dbCtx, cancel := context.WithTimeout(ctx, 250*time.Millisecond)
-    defer cancel()
-
-    if err := p.ledgerDB.ExecuteSettlement(dbCtx, record); err != nil {
-        if isTransient(err) {
-            // Transient DB error: return error to trigger backoff retry
-            return err
-        }
-        // Non-transient DB error: isolate to DLQ
-        return p.routeToDLQ(ctx, msg, "LEDGER_REJECTED", err)
-    }
-
-    return nil
-}
+declare function isTransient(error: unknown): boolean;
 ```
 
 #### Outcome
@@ -8954,32 +8730,29 @@ $$\text{ShouldRefresh} = -\beta \cdot \delta \cdot \ln(\text{random}(0, 1)) > \t
 
 Where $\delta$ is the time taken to compute/fetch from database, and $\beta > 0$ is an aggressiveness multiplier.
 
-``` python
-import math
-import random
-import time
+``` typescript
+type CachedValue<T> = { value: T; fetchDurationMs: number; expiresAtMs: number };
 
-class XFetchCache:
-    def __init__(self, redis_client, db_client, beta=1.0):
-        self.redis = redis_client
-        self.db = db_client
-        self.beta = beta
+class XFetchCache<T> {
+  constructor(
+    private readonly redis: { get(key: string): Promise<CachedValue<T> | undefined> },
+    private readonly fetchFromDb: (userId: string) => Promise<T>,
+    private readonly refresh: (userId: string) => Promise<void>,
+    private readonly beta = 1
+  ) {}
 
-    def get_profile(self, user_id):
-        key = f"profile:{user_id}"
-        cached = self.redis.get(key)
-        
-        if cached is not None:
-            val, delta, expiry_time = cached # delta = time to fetch from DB
-            ttl_remaining = expiry_time - time.time()
-            
-            # X-Fetch algorithm: asynchronously refresh before key actually expires
-            if -self.beta * delta * math.log(random.random()) > ttl_remaining:
-                self.async_refresh(user_id, key)
-            return val
-            
-        # Cache Miss: Synchronous Fetch with Single-Flight Mutex
-        return self.synchronized_db_fetch(user_id, key)
+  async getProfile(userId: string): Promise<T> {
+    const key = "profile:" + userId;
+    const cached = await this.redis.get(key);
+    if (cached) {
+      const ttl = cached.expiresAtMs - Date.now();
+      const threshold = -this.beta * cached.fetchDurationMs * Math.log(Math.random());
+      if (threshold > ttl) void this.refresh(userId);
+      return cached.value;
+    }
+    return this.fetchFromDb(userId); // Cache miss; use a single-flight guard in production.
+  }
+}
 ```
 
 #### Outcome
@@ -9038,40 +8811,18 @@ The team applied **Technique 7.3 (Account for Latencies, Ordering, and Phases)**
     │ - Deprecate and remove legacy reading logic.                                                     │
     └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-``` rust
-// Rust implementation of Forward/Backward Compatible Tolerant Reader
-use serde::{Deserialize, Serialize};
+``` typescript
+type ShippingAddress =
+  | { kind: "structured"; street: string; city: string; postalCode: string; countryIso: string }
+  | { kind: "legacy"; value: string };
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ShippingAddressPayload {
-    // New Structured Format (v2.4.0)
-    Structured {
-        street: String,
-        city: String,
-        postal_code: String,
-        country_iso: String,
-    },
-    // Legacy String Format (v2.3.0)
-    LegacyString(String),
-}
+type OrderRecord = { orderId: string; customerId: string; shippingAddress: ShippingAddress };
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct OrderRecord {
-    pub order_id: String,
-    pub customer_id: String,
-    pub shipping_address: ShippingAddressPayload,
-}
-
-impl OrderRecord {
-    pub fn normalized_address(&self) -> String {
-        match &self.shipping_address {
-            ShippingAddressPayload::Structured { street, city, postal_code, country_iso } => {
-                format!("{}, {}, {} {}", street, city, postal_code, country_iso)
-            }
-            ShippingAddressPayload::LegacyString(raw) => raw.clone(),
-        }
-    }
+function normalizedAddress(order: OrderRecord): string {
+  const address = order.shippingAddress;
+  return address.kind === "structured"
+    ? [address.street, address.city, address.postalCode + " " + address.countryIso].join(", ")
+    : address.value;
 }
 ```
 
@@ -10032,28 +9783,30 @@ An e-commerce order fulfillment service must coordinate inventory reservation, p
     │ SELECTION VERDICT:   │ REJECTED (Harm)    │ REJECTED (Trace)   │ SELECTED (DEC-WF-02)            │
     └──────────────────────┴────────────────────┴────────────────────┴─────────────────────────────────┘
 
-``` rust
-// Selected Mechanism (CAN-03): Type-Safe Deterministic Workflow Definition
-#[workflow]
-pub async fn order_fulfillment_workflow(ctx: WorkflowContext, order: OrderRequest) -> Result<FulfillmentReceipt, OrderError> {
-    // Step 1: Reserve Inventory with automatic Compensation registration
-    let reservation = ctx.execute_activity(ReserveInventoryActivity, &order.items).await?;
-    ctx.register_compensation(ReleaseInventoryActivity, &reservation);
+``` typescript
+type OrderRequest = { id: string; items: string[]; paymentDetails: unknown; shippingAddress: unknown };
+type FulfillmentReceipt = { orderId: string; paymentId: string; trackingNumber: string };
+type WorkflowContext = {
+  executeActivity<T>(activity: string, input: unknown): Promise<T>;
+  registerCompensation(activity: string, input: unknown): void;
+  compensateAll(): Promise<void>;
+};
 
-    // Step 2: Charge Payment
-    let payment = match ctx.execute_activity(ChargePaymentActivity, &order.payment_details).await {
-        Ok(receipt) => receipt,
-        Err(err) => {
-            // Trigger automatic compensation cascade across prior steps
-            ctx.compensate_all().await;
-            return Err(OrderError::PaymentFailed(err));
-        }
-    };
-
-    // Step 3: Dispatch Shipment
-    let shipment = ctx.execute_activity(DispatchShipmentActivity, &order.shipping_address).await?;
-
-    Ok(FulfillmentReceipt { order_id: order.id, payment_id: payment.id, tracking_number: shipment.tracking })
+async function orderFulfillmentWorkflow(
+  context: WorkflowContext,
+  order: OrderRequest
+): Promise<FulfillmentReceipt> {
+  const reservation = await context.executeActivity("ReserveInventory", order.items);
+  context.registerCompensation("ReleaseInventory", reservation);
+  let payment: { id: string };
+  try {
+    payment = await context.executeActivity("ChargePayment", order.paymentDetails);
+  } catch (error) {
+    await context.compensateAll();
+    throw error;
+  }
+  const shipment = await context.executeActivity<{ tracking: string }>("DispatchShipment", order.shippingAddress);
+  return { orderId: order.id, paymentId: payment.id, trackingNumber: shipment.tracking };
 }
 ```
 
@@ -10849,7 +10602,8 @@ flowchart TD
 
 Create the partitioned table and sub-partitions without touching existing application queries.
 
-``` sql
+``` typescript
+const sqlExample = String.raw`
 -- Phase 1: Target schema expansion (Zero locks on legacy table)
 CREATE TABLE ledger_entries_v2 (
     entry_id UUID NOT NULL,
@@ -10869,77 +10623,62 @@ CREATE TABLE ledger_entries_v2_tenant_us PARTITION OF ledger_entries_v2
 
 CREATE TABLE ledger_entries_v2_tenant_us_2026_08 PARTITION OF ledger_entries_v2_tenant_us
     FOR VALUES FROM ('2026-08-01 00:00:00+00') TO ('2026-09-01 00:00:00+00');
+`;
 ```
 
 ##### Phase 2: Dual-Writing
 
 Deploy application version `v2.4.0` containing the dual-write proxy. Primary writes commit to `ledger_entries`. A secondary non-blocking asynchronous task writes to `ledger_entries_v2`.
 
-``` python
-# Dual-write implementation with failure isolation
-class LedgerRepository:
-    def __init__(self, db_pool, shadow_executor, metrics):
-        self.db = db_pool
-        self.shadow_executor = shadow_executor
-        self.metrics = metrics
+``` typescript
+type LedgerEntry = { tenantId: string; amount: number };
 
-    async def record_entry(self, entry: LedgerEntry) -> int:
-        # 1. Primary synchronous write (Legacy Authority)
-        legacy_id = await self._insert_legacy(entry)
-        
-        # 2. Asynchronous shadow write to target schema
-        if FeatureFlags.is_enabled("LEDGER_DUAL_WRITE", tenant=entry.tenant_id):
-            self.shadow_executor.submit(self._safe_shadow_insert, legacy_id, entry)
-            
-        return legacy_id
+class LedgerRepository {
+  constructor(
+    private readonly insertLegacy: (entry: LedgerEntry) => Promise<number>,
+    private readonly insertV2: (id: number, entry: LedgerEntry) => Promise<void>,
+    private readonly dualWriteEnabled: (tenantId: string) => boolean
+  ) {}
 
-    async def _safe_shadow_insert(self, legacy_id: int, entry: LedgerEntry):
-        try:
-            # Map legacy float to exact numeric and generate deterministic UUIDv7
-            v2_entry = entry.to_v2_schema(legacy_id=legacy_id)
-            await self._insert_v2(v2_entry)
-            self.metrics.increment("ledger.dual_write.success")
-        except Exception as ex:
-            # Crucial: Never fail the primary transaction!
-            self.metrics.increment("ledger.dual_write.error")
-            logger.error("Shadow write failed for legacy_id=%s: %s", legacy_id, ex)
-            await self.dead_letter_queue.publish({"legacy_id": legacy_id, "error": str(ex)})
+  async recordEntry(entry: LedgerEntry): Promise<number> {
+    const legacyId = await this.insertLegacy(entry); // Primary authority.
+    if (this.dualWriteEnabled(entry.tenantId)) {
+      void this.safeShadowInsert(legacyId, entry); // Never fail the primary request.
+    }
+    return legacyId;
+  }
+
+  private async safeShadowInsert(id: number, entry: LedgerEntry): Promise<void> {
+    try {
+      await this.insertV2(id, entry);
+    } catch (error) {
+      console.error("Shadow write failed", { id, error });
+      // Publish to a dead-letter queue in the real implementation.
+    }
+  }
+}
 ```
 
 ##### Phase 3: Background Backfill
 
 An idempotent batch worker scans historical records in chunks of 5,000 using cursor-based pagination on `id`.
 
-``` python
-# Idempotent Backfill Worker
-async def backfill_ledger_chunk(cursor_id: int, chunk_size: int = 5000) -> int:
-    async with db.transaction():
-        # Fetch chunk without locking tables
-        records = await db.fetch(
-            """
-            SELECT id, tenant_id, account_id, amount::numeric(18,4), currency, entry_type, created_at
-            FROM ledger_entries
-            WHERE id > $1
-            ORDER BY id ASC
-            LIMIT $2
-            """,
-            cursor_id, chunk_size
-        )
-        
-        if not records:
-            return -1 # Backfill complete
-            
-        # Idempotent upsert into target partitioned table
-        await db.executemany(
-            """
-            INSERT INTO ledger_entries_v2 (entry_id, tenant_id, account_id, amount, currency, entry_type, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (tenant_id, created_at, entry_id) DO NOTHING
-            """,
-            [map_to_v2(r) for r in records]
-        )
-        
-        return records[-1]['id'] # New cursor
+``` typescript
+type BackfillRow = { id: number; tenantId: string; accountId: string; amount: number };
+type Database = {
+  fetch(sql: string, values: unknown[]): Promise<BackfillRow[]>;
+  upsert(rows: BackfillRow[]): Promise<void>;
+};
+
+async function backfillLedgerChunk(db: Database, cursorId: number, chunkSize = 5000): Promise<number> {
+  const rows = await db.fetch(
+    "SELECT id, tenant_id, account_id, amount FROM ledger_entries WHERE id > $1 ORDER BY id LIMIT $2",
+    [cursorId, chunkSize]
+  );
+  if (rows.length === 0) return -1;
+  await db.upsert(rows); // Idempotent conflict handling belongs in the repository.
+  return rows[rows.length - 1].id;
+}
 ```
 
 ##### Phase 4: Dual-Reading & Parity Assertion
@@ -11058,7 +10797,8 @@ sequenceDiagram
 
 #### Chaos Experiment Protocol (Chaos Mesh & Toxiproxy)
 
-``` yaml
+``` typescript
+const manifestExample = String.raw`
 # Chaos Mesh Experiment: Inject 15s latency and 30% packet loss into Bank Acquirer egress
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
@@ -11087,6 +10827,7 @@ spec:
       labelSelectors:
         app: mock-bank-acquirer
   duration: '10m'
+`;
 ```
 
 #### Empirical Observations & Disproven Hypotheses
@@ -11126,7 +10867,8 @@ flowchart TD
 
 #### Argo Rollout Analysis Template
 
-``` yaml
+``` typescript
+const manifestExample = String.raw`
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -11153,6 +10895,7 @@ spec:
         address: http://prometheus-k8s.monitoring:9090
         query: |
           histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{app="checkout",pod=~"checkout-canary.*"}[1m])) by (le))
+`;
 ```
 
 #### Production Rollback Execution Record
@@ -12784,7 +12527,8 @@ stateDiagram-v2
 
 ### 12.3.1. Formal Schema for Critique Node (`CRIT-*`)
 
-``` yaml
+``` typescript
+const manifestExample = String.raw`
 id: CRIT-042
 target_candidate: CAN-008
 target_contradiction: CTR-015
@@ -12809,11 +12553,11 @@ vector_evaluations:
     severity: CRITICAL
   unbudgeted_migration:
     status: WARN
-    finding: "Requires dropping column `legacy_status`; lacks 2-phase expand/contract migration plan."
+    finding: "Requires dropping column \`legacy_status\`; lacks 2-phase expand/contract migration plan."
     severity: HIGH
   unverified_resource:
     status: PASS
-    finding: "Postgres 16 `SKIP LOCKED` capability verified directly in repository Docker environment."
+    finding: "Postgres 16 \`SKIP LOCKED\` capability verified directly in repository Docker environment."
     severity: NONE
   telemetry_confabulation:
     status: FAIL
@@ -12822,12 +12566,13 @@ vector_evaluations:
 
 verdict: REJECTED_DISPLACED_COMPLEXITY
 required_actions:
-  - "Eliminate in-memory worker maps; redistribute deduplication state to Postgres `ON CONFLICT`."
+  - "Eliminate in-memory worker maps; redistribute deduplication state to Postgres \`ON CONFLICT\`."
   - "Add full randomized jitter to retry backoff calculation."
   - "Execute EVDREQ-089: Run concurrent load test at 1,000 RPS with 50 concurrent worker threads."
 invalidation_triggers:
   - "invalidates(CAN-008, CTR-015)"
   - "needs_review(DEC-004)"
+`;
 ```
 
 ------------------------------------------------------------------------
@@ -13991,7 +13736,8 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
 
 ### 17.3.1. JSON Schema for Epistemic Envelope
 
-``` json
+``` typescript
+const example =
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "AriadneEpistemicEnvelope",
@@ -14042,14 +13788,15 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
       }
     }
   }
-}
+} as const;
 ```
 
 ### 17.3.2. Example Typed Envelope Exchange
 
 #### Diagnostic Agent $\to$ Verification Agent (Evidence Request)
 
-``` json
+``` typescript
+const example =
 {
   "envelope_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
   "correlation_id": "TASK-ORDER-LEAK-402",
@@ -14067,12 +13814,13 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
       "If pool utilization remains < 60% and p99 acquire time < 2ms, HYP-004 is falsified."
     ]
   }
-}
+} as const;
 ```
 
 #### Verification Agent $\to$ Diagnostic Agent (Evidence Result)
 
-``` json
+``` typescript
+const example =
 {
   "envelope_id": "a8c2f1e4-1290-4c3e-b871-ef3892189a02",
   "correlation_id": "TASK-ORDER-LEAK-402",
@@ -14093,7 +13841,7 @@ The Ariadne multi-agent protocol mandates that all agent communication take plac
       "reproducible_environment": "Linux 6.8.0, Go 1.24, Redis 7.2 (Docker, 2 CPUs, 4GB RAM)"
     }
   }
-}
+} as const;
 ```
 
 ------------------------------------------------------------------------
@@ -14494,7 +14242,8 @@ sequenceDiagram
 
 Before any task branch is merged or closed, the automated Epistemic Gatekeeper script executes the following invariant check:
 
-``` bash
+``` typescript
+const commandExample = String.raw`
 # Ariadne Epistemic Gatekeeper Automated Verification Run
 $ ariadne check-invariants --task=TASK-402 --mode=Standard
 
@@ -14513,6 +14262,7 @@ $ ariadne check-invariants --task=TASK-402 --mode=Standard
 ================================================================================
 ALL 11 INVARIANTS SATISFIED. TASK PROVENANCE: DECIDED. READY FOR MERGE.
 ================================================================================
+`;
 ```
 
 ------------------------------------------------------------------------
@@ -15312,8 +15062,8 @@ The **Verification Card** specifies an executable, falsifiable test harness for 
 
 ## 2. Verification Methodology
 - **Test Category**: [Unit | Property-Based | Integration | Benchmark | Chaos Injection | Canary Simulation]
-- **Test Harness / Tool**: [for example, QuickCheck, k6, Chaos Mesh, Jepsen, custom Go harness]
-- **Repository Location**: [`tests/verification/multi_region_escrow_test.go`]
+- **Test Harness / Tool**: [for example, Vitest, k6, Chaos Mesh, Jepsen, custom TypeScript harness]
+- **Repository Location**: [`tests/verification/multi_region_escrow_test.ts`]
 
 ## 3. Test Conditions & Parameters
 - **Concurrency Level**: [for example, 10,000 virtual users across 3 simulated regions]
@@ -15331,8 +15081,8 @@ The **Verification Card** specifies an executable, falsifiable test harness for 
   3. P99 latency > 120ms under healthy network conditions.
 
 ## 5. Executable Test Script / Command
-```bash
-go test -v -tags=chaos -run TestMultiRegionEscrowPartition -timeout 30m ./tests/chaos/...
+```typescript
+const verificationCommand = "npm test -- --runInBand multi-region-escrow --timeout=30m";
 ```
 
 ## 6. Empirical Results & Artifacts
