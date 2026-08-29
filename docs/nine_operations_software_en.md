@@ -1171,17 +1171,17 @@ Operation 4 expands the solution frontier across distinct design paradigms. The 
 
 <!-- -->
 
-    ┌─────────────────────────┬─────────────────────────────────────────────────────────────┐
-    │ Architectural Dimension │ Discrete Values                                             │
-    ├─────────────────────────┼─────────────────────────────────────────────────────────────┤
-    │ 1. State Model          │ [A] Single Leader DB  │ [B] Partitioned Log  │ [C] Client CRDT│
-    │ 2. Communication        │ [1] Synchronous gRPC  │ [2] Asynch Events    │ [3] Shared Mem │
-    │ 3. Consistency          │ [X] Linearizable      │ [Y] Causal           │ [Z] Eventual   │
-    └─────────────────────────┴─────────────────────────────────────────────────────────────┘
-      Selected Contrasting Candidates:
-      - Candidate 1 (Traditional):     [A] + [1] + [X] (RDBMS + gRPC + Strict Serializability)
-      - Candidate 2 (Event-Driven):    [B] + [2] + [Y] (Kafka Log + Outbox Pattern + Causal)
-      - Candidate 3 (Local-First):     [C] + [2] + [Z] (Client SQLite + CRDT Sync + Eventual)
+| Dimension | Option A | Option B | Option C |
+| --- | --- | --- | --- |
+| State model | Single leader DB | Partitioned log | Client CRDT |
+| Communication | Synchronous gRPC | Asynchronous events | Shared memory |
+| Consistency | Linearizable | Causal | Eventual |
+
+**Selected contrasting candidates**
+
+- **Candidate 1 (traditional):** State model A + communication 1 + consistency X (RDBMS, gRPC, strict serializability).
+- **Candidate 2 (event-driven):** State model B + communication 2 + consistency Y (Kafka log, outbox pattern, causal consistency).
+- **Candidate 3 (local-first):** State model C + communication 2 + consistency Z (client SQLite, CRDT sync, eventual consistency).
 
 #### Deliverable
 
@@ -1405,20 +1405,16 @@ Operation 8 selects among competing candidate mechanisms (`CAN-`). The selection
 
 <!-- -->
 
-    ┌────────────────────────────────────────────────────────────────────────┐
-    │                        IDEALITY EVALUATION MATRIX                      │
-    ├───────────────────┬──────────────┬──────────────┬──────────────────────┤
-    │ Metric / Vector   │ Candidate 1  │ Candidate 2  │ Candidate 3          │
-    │                   │ (Monolith DB)│ (Micro+Kafka)│ (Partitioned WAL)    │
-    ├───────────────────┼──────────────┼──────────────┼──────────────────────┤
-    │ Useful Functions  │ High (ACID)  │ High (Scale) │ High (Scale + ACID)  │
-    │ Direct Costs      │ Low          │ High (Infra) │ Medium               │
-    │ Harmful Effects   │ High (Locks) │ High (Async) │ Low (Isolated state) │
-    │ Cognitive Load    │ Low          │ Very High    │ Medium               │
-    │ Reversibility     │ Easy         │ Very Hard    │ Medium               │
-    ├───────────────────┼──────────────┼──────────────┼──────────────────────┤
-    │ IDEALITY SCORE    │ 0.62         │ 0.45         │ 0.88 (OPTIMAL)       │
-    └───────────────────┴──────────────┴──────────────┴──────────────────────┤
+**IDEALITY EVALUATION MATRIX**
+
+| Metric / vector | Candidate 1 (monolith DB) | Candidate 2 (microservices + Kafka) | Candidate 3 (partitioned WAL) |
+| --- | --- | --- | --- |
+| Useful Functions | High (ACID) | High (Scale) | High (Scale + ACID) |
+| Direct Costs | Low | High (Infra) | Medium |
+| Harmful Effects | High (Locks) | High (Async) | Low (Isolated state) |
+| Cognitive Load | Low | Very High | Medium |
+| Reversibility | Easy | Very Hard | Medium |
+| IDEALITY SCORE | 0.62 | 0.45 | 0.88 (OPTIMAL) |
 
 #### Deliverable
 
@@ -1628,61 +1624,17 @@ If Operations dictate *what epistemic transformation must occur*, **Techniques**
 
 #### The 36 Techniques Taxonomy
 
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 1: FRAME AND MODEL THE SOFTWARE PROBLEM                                                |
-    |   1.1. Separate Function from Implementation (Verb-Object abstraction without naming mechanisms)  |
-    |   1.2. Describe Required vs. Actual Behavior (Observable preconditions, inputs, outputs, bounds)  |
-    |   1.3. Shift the System Boundary (Function -> Module -> Process -> Service -> System -> Pipeline) |
-    |   1.4. Shift Perspective (User, Data Owner, Operator/SRE, Adversary, Downstream Client)           |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 2: FIND THE CONSTRAINT, CAUSE, OR CONTRADICTION                                         |
-    |   2.1. Identify Requirement Contradictions (Parameter A improves while Parameter B degrades)     |
-    |   2.2. Identify the Limiting Bottleneck (Serialized sections, lock contention, I/O pools)        |
-    |   2.3. Construct a Causal Chain (Directed acyclic graph linking observable symptom to mechanism)  |
-    |   2.4. Uncover Hidden Assumptions (Exposing unverified premises that make current design seem fixed)|
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 3: TRANSFORM THE EXISTING SOFTWARE SYSTEM                                               |
-    |   3.1. Remove or Reduce (Eliminate intermediate layers, caches, DTOs, coordination, or services) |
-    |   3.2. Split or Localize (Separation in Time, State/Ownership, Operating Mode, or Boundary)      |
-    |   3.3. Combine, Co-locate, or Delegate Function (Offload logic to DB, runtime, compiler, client)  |
-    |   3.4. Replace the Mechanism (Polling -> Push, Snapshot -> Log, Mutex -> Single-Writer/CAS)       |
-    |   3.5. Change Quantity, Order, Time, or Placement (Batching, speculative execution, lazy eval)    |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 4: EXPLORE THE SPACE OF ARCHITECTURES AND IMPLEMENTATIONS                               |
-    |   4.1. Generate Fundamentally Distinct Directions (State ownership, consistency, compute location)|
-    |   4.2. Isolate Solution Space Dimensions (Deconstruct decision into orthogonal axes)              |
-    |   4.3. Combine Dimension Values (Systematic morphological exploration of unvisited combinations)  |
-    |   4.4. Prune Non-Viable Combinations (Early elimination via hard invariant violations)           |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 5: EXPAND KNOWLEDGE AND OBTAIN MISSING EVIDENCE                                         |
-    |   5.1. Formulate Decision-Significant Unknowns (Identify missing facts that alter the decision)   |
-    |   5.2. Transfer Implementation Mechanisms (Cross-domain mapping from OS, DB, or hardware)        |
-    |   5.3. Maintain an Explicit Registry of Assumptions and Unknowns (Typed provenance tracking)     |
-    |   5.4. Generate Empirical Knowledge via Spikes and Telemetry (Targeted differentiating tests)     |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 6: ARRANGE DEPENDENCIES AND CHANGE BOUNDARIES                                           |
-    |   6.1. Map Static, Dynamic, Data, and Operational Dependencies (Exposing hidden couplings)        |
-    |   6.2. Link Every Critical Requirement to its Enforcement Mechanism (Direct traceability)         |
-    |   6.3. Eliminate Accidental Co-Change Coupling (Invert dependencies, isolate unstable contracts)  |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 7: UNDERSTAND SYSTEM BEHAVIOR OVER TIME AND UNDER LOAD                                  |
-    |   7.1. Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity (Stock-and-flow dynamics)  |
-    |   7.2. Model Feedback Loops (Retry storms, thundering herds, backpressure, circuit breakers)      |
-    |   7.3. Account for Propagation Latencies, Event Ordering, and Version Drifts                      |
-    |   7.4. Account for Scale Growth, Workload Shifts, and Bottleneck Migration                        |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 8: DETERMINE ENGINEERING VALUE AND SELECT                                               |
-    |   8.1. Define Hard Constraints, Business Value, and Preference Criteria (Multi-attribute scoring)|
-    |   8.2. Compare Useful Effects Against New Mechanism Costs (State overhead, operational debt)     |
-    |   8.3. Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius          |
-    |   8.4. Rank Viable Candidates While Preserving Explicit Uncertainty (Pareto frontier analysis)    |
-    +---------------------------------------------------------------------------------------------------+
-    | OPERATION 9: VERIFY SOLUTION BY EXECUTION AND SAFELY EXECUTE TRANSITION                           |
-    |   9.1. Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity                 |
-    |   9.2. Validate Claims via Executable Code (Unit, Property, Mutation, Benchmarks, Chaos)         |
-    |   9.3. Design Transition Architecture (Dual-writing, feature flags, dark launches, schema shims)  |
-    |   9.4. Anchor Results with Continuous Telemetry and Decommission Shims                            |
-    +---------------------------------------------------------------------------------------------------+
+| Operation | Techniques |
+|---|---|
+| **1. Frame and model the software problem** | 1.1 Separate function from implementation.<br/>1.2 Describe required and actual behavior.<br/>1.3 Shift the system boundary.<br/>1.4 Shift perspective. |
+| **2. Find the constraint, cause, or contradiction** | 2.1 Identify requirement contradictions.<br/>2.2 Identify the limiting bottleneck.<br/>2.3 Construct a causal chain.<br/>2.4 Uncover hidden assumptions. |
+| **3. Transform the existing software system** | 3.1 Remove or reduce.<br/>3.2 Split or localize.<br/>3.3 Combine, co-locate, or delegate.<br/>3.4 Replace the mechanism.<br/>3.5 Change quantity, order, time, or placement. |
+| **4. Explore the space of architectures and implementations** | 4.1 Generate distinct directions.<br/>4.2 Isolate solution-space dimensions.<br/>4.3 Combine dimension values.<br/>4.4 Prune non-viable combinations. |
+| **5. Expand knowledge and obtain missing evidence** | 5.1 Formulate decision-significant unknowns.<br/>5.2 Transfer implementation mechanisms across domains.<br/>5.3 Maintain a typed registry of assumptions and unknowns.<br/>5.4 Generate empirical knowledge with spikes and telemetry. |
+| **6. Arrange dependencies and change boundaries** | 6.1 Map static, dynamic, data, and operational dependencies.<br/>6.2 Link requirements to enforcement mechanisms.<br/>6.3 Eliminate accidental co-change coupling. |
+| **7. Understand system behavior over time and under load** | 7.1 Model queues, accumulations, rates, and capacity.<br/>7.2 Model feedback loops.<br/>7.3 Account for propagation latency, ordering, and version drift.<br/>7.4 Account for scale growth and bottleneck migration. |
+| **8. Determine engineering value and select** | 8.1 Define constraints, value, and preference criteria.<br/>8.2 Compare useful effects with mechanism cost.<br/>8.3 Minimize operational harm, cognitive load, spend, and blast radius.<br/>8.4 Rank candidates with Pareto analysis. |
+| **9. Verify the solution by execution and execute the transition safely** | 9.1 Predict benefits, new failure modes, and shifted complexity.<br/>9.2 Validate claims with executable code.<br/>9.3 Design transition architecture.<br/>9.4 Anchor results with telemetry and decommission shims. |
 
 #### The Four Software Separation Principles
 
@@ -2899,30 +2851,24 @@ Humans usually over-trust the slice of the system they can see. Agents over-trus
 
 > **What underlying mechanism, limiting bottleneck, or unexamined contradiction sustains the undesirable system state?**
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   OPERATION 2: EPISTEMIC MAPPING                                 │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  INPUT:                                                                                          │
-    │    - Problem Passport [TASK-ID] & Behavioral Model [FRAME-ID]                                    │
-    │    - Undesirable Symptoms, Anomalies, Error Logs, Trace Spans, Metric Spikes [OBS-]              │
-    │    - Current Architectural Topology & Environmental Constraints                                  │
-    │                                                                                                  │
-    │  COGNITIVE & STRUCTURAL TRANSFORMATION:                                                          │
-    │    - Abductive Causal Modeling (Pearl Structural Causal Models & DAGs)                           │
-    │    - Bottleneck Identification (Goldratt TOC, Amdahl's Law, Gunther's USL)                      │
-    │    - Requirement Conflict Formalization (Altshuller Technical & Physical Contradictions)        │
-    │    - Tacit Assumption Extraction (Goldratt Evaporating Cloud & Inversion)                        │
-    │                                                                                                  │
-    │  OUTPUT:                                                                                         │
-    │    - Map of Causes, Constraints, and Contradictions [DIAG-ID]                                    │
-    │    - Falsifiable Causal Hypotheses [HYP-] with Differentiating Evidence Requests [EVDREQ-]       │
-    │    - Formal Contradictions [CTR-] (Technical & Physical)                                         │
-    │    - Surfaced Assumptions [ASM-] with Invalidation Conditions                                    │
-    │                                                                                                  │
-    │  STOP CONDITION:                                                                                 │
-    │    - The primary causal hypothesis is mathematically grounded, bounded by verified invariants,   │
-    │      and paired with a differentiating test whose negative outcome decisively disproves it.     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 2: EPISTEMIC MAPPING**
+> INPUT:
+> - Problem Passport [TASK-ID] & Behavioral Model [FRAME-ID]
+> - Undesirable Symptoms, Anomalies, Error Logs, Trace Spans, Metric Spikes [OBS-]
+> - Current Architectural Topology & Environmental Constraints
+> COGNITIVE & STRUCTURAL TRANSFORMATION:
+> - Abductive Causal Modeling (Pearl Structural Causal Models & DAGs)
+> - Bottleneck Identification (Goldratt TOC, Amdahl's Law, Gunther's USL)
+> - Requirement Conflict Formalization (Altshuller Technical & Physical Contradictions)
+> - Tacit Assumption Extraction (Goldratt Evaporating Cloud & Inversion)
+> OUTPUT:
+> - Map of Causes, Constraints, and Contradictions [DIAG-ID]
+> - Falsifiable Causal Hypotheses [HYP-] with Differentiating Evidence Requests [EVDREQ-]
+> - Formal Contradictions [CTR-] (Technical & Physical)
+> - Surfaced Assumptions [ASM-] with Invalidation Conditions
+> STOP CONDITION:
+> - The primary causal hypothesis is mathematically grounded, bounded by verified invariants,
+> and paired with a differentiating test whose negative outcome decisively disproves it.
 
 The most costly failures often start when a team treats a symptom as its cause, or accepts a trade-off without making the contradiction clear.
 
@@ -2997,29 +2943,23 @@ In [*Web Operations: Keeping the Data on Time* (Allspaw & Robbins, 2010)](https:
 
 ## 3. The Four Core Diagnostic Techniques
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 THE FOUR TECHNIQUES OF OPERATION 2                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  2.1. IDENTIFY REQUIREMENT CONTRADICTIONS                                                        │
-    │       - Formulate Technical Contradictions: TC = <Parameter_A ↑, Parameter_B ↓>                 │
-    │       - Deepen into Physical Contradictions: Parameter P must be S (under C1) and ¬S (under C2)   │
-    │       - Reject compromise; frame separation conditions (Time, Space, Mode, Boundary).           │
-    │                                                                                                  │
-    │  2.2. IDENTIFY THE LIMITING BOTTLENECK                                                           │
-    │       - Apply Little's Law (L = λW) to localize queuing accumulations.                           │
-    │       - Compute Amdahl Serial Fraction (σ) and Gunther USL Coherency Penalty (κ).               │
-    │       - Trace the bottleneck hierarchy: Hardware → OS → Runtime → Sync → Data → Network.         │
-    │                                                                                                  │
-    │  2.3. CONSTRUCT A CAUSAL CHAIN / DIRECTED ACYCLIC GRAPH                                          │
-    │       - Separate Observations [OBS-] from Causal Hypotheses [HYP-].                              │
-    │       - Build Pearl Structural Causal Models (SCMs) & Goldratt Current Reality Trees (CRTs).     │
-    │       - Design Differentiating Falsification Tests [EVDREQ-] to eliminate competing hypotheses.  │
-    │                                                                                                  │
-    │  2.4. UNCOVER HIDDEN ASSUMPTIONS                                                                 │
-    │       - Apply Goldratt's Evaporating Cloud to extract tacit premises underlying requirements.    │
-    │       - Stress-test implicit invariants (synchronicity, statefulness, ordering, colocation).     │
-    │       - Trigger Transitive Invalidation on unproven assumptions [ASM-].                          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE FOUR TECHNIQUES OF OPERATION 2**
+> 2.1. IDENTIFY REQUIREMENT CONTRADICTIONS
+> - Formulate Technical Contradictions: TC = <Parameter_A ↑, Parameter_B ↓>
+> - Deepen into Physical Contradictions: Parameter P must be S (under C1) and ¬S (under C2)
+> - Reject compromise; frame separation conditions (Time, Space, Mode, Boundary).
+> 2.2. IDENTIFY THE LIMITING BOTTLENECK
+> - Apply Little's Law (L = λW) to localize queuing accumulations.
+> - Compute Amdahl Serial Fraction (σ) and Gunther USL Coherency Penalty (κ).
+> - Trace the bottleneck hierarchy: Hardware → OS → Runtime → Sync → Data → Network.
+> 2.3. CONSTRUCT A CAUSAL CHAIN / DIRECTED ACYCLIC GRAPH
+> - Separate Observations [OBS-] from Causal Hypotheses [HYP-].
+> - Build Pearl Structural Causal Models (SCMs) & Goldratt Current Reality Trees (CRTs).
+> - Design Differentiating Falsification Tests [EVDREQ-] to eliminate competing hypotheses.
+> 2.4. UNCOVER HIDDEN ASSUMPTIONS
+> - Apply Goldratt's Evaporating Cloud to extract tacit premises underlying requirements.
+> - Stress-test implicit invariants (synchronicity, statefulness, ordering, colocation).
+> - Trigger Transitive Invalidation on unproven assumptions [ASM-].
 
 ------------------------------------------------------------------------
 
@@ -4480,33 +4420,27 @@ Humans prune too early by organizational feasibility. Agents converge too early 
 
 > **What distinct classes of software solutions exist, and what regions of the solution space have we not yet explored?**
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   OPERATION 4: EPISTEMIC MAPPING                                 │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  INPUT:                                                                                          │
-    │    - Problem Framing Map [FRAME-ID] (System Invariants, Behavioral Delta, Invariant Boundaries)   │
-    │    - Map of Causes, Constraints, & Contradictions [DIAG-ID] (Core Bottleneck, Technical &        │
-    │      Physical Contradictions [CTR-], Surfaced Assumptions [ASM-])                                │
-    │    - Transformation Log [TRF-*] & System Resource Inventory (From Operation 3)                  │
-    │                                                                                                  │
-    │  COGNITIVE & STRUCTURAL TRANSFORMATION:                                                          │
-    │    - Morphological Field Construction (Zwicky Morphological Analysis: S = D1 × D2 × ... × Dn)   │
-    │    - Axiomatic Independence Verification (Suh's Axiomatic Design & Design Matrix [A])            │
-    │    - Trade-off Space Bounding (Brewer CAP Theorem, Abadi PACELC Theorem)                        │
-    │    - Systematic Divergence & Paradigm Inversion (Escaping Local Design Optima)                   │
-    │    - Two-Tier Invariant & Compatibility Pruning (Constraint Satisfaction Filtering)              │
-    │    - Orthogonal Candidate Vector Synthesis (Synthesizing Coherent Structural Mechanisms)        │
-    │                                                                                                  │
-    │  OUTPUT:                                                                                         │
-    │    - Solution Space Map [SPACE-ID] (Orthogonal Dimensions, Discretized Values, Pruning Rules)    │
-    │    - Structurally Distinct Candidate Mechanisms [CAN-*] (Architecture Vectors, Trade-offs)      │
-    │    - Orthogonality & Axiomatic Decoupling Scorecard                                              │
-    │                                                                                                  │
-    │  STOP CONDITION:                                                                                 │
-    │    - Surviving candidates span at least 3 fundamentally distinct architectural classes whose     │
-    │      pairwise Hamming distance across orthogonal dimensions exceeds the diversity threshold,    │
-    │      and no two candidates differ solely by third-party library, vendor, or language syntax.     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 4: EPISTEMIC MAPPING**
+> INPUT:
+> - Problem Framing Map [FRAME-ID] (System Invariants, Behavioral Delta, Invariant Boundaries)
+> - Map of Causes, Constraints, & Contradictions [DIAG-ID] (Core Bottleneck, Technical &
+> Physical Contradictions [CTR-], Surfaced Assumptions [ASM-])
+> - Transformation Log [TRF-*] & System Resource Inventory (From Operation 3)
+> COGNITIVE & STRUCTURAL TRANSFORMATION:
+> - Morphological Field Construction (Zwicky Morphological Analysis: S = D1 × D2 × ... × Dn)
+> - Axiomatic Independence Verification (Suh's Axiomatic Design & Design Matrix [A])
+> - Trade-off Space Bounding (Brewer CAP Theorem, Abadi PACELC Theorem)
+> - Systematic Divergence & Paradigm Inversion (Escaping Local Design Optima)
+> - Two-Tier Invariant & Compatibility Pruning (Constraint Satisfaction Filtering)
+> - Orthogonal Candidate Vector Synthesis (Synthesizing Coherent Structural Mechanisms)
+> OUTPUT:
+> - Solution Space Map [SPACE-ID] (Orthogonal Dimensions, Discretized Values, Pruning Rules)
+> - Structurally Distinct Candidate Mechanisms [CAN-*] (Architecture Vectors, Trade-offs)
+> - Orthogonality & Axiomatic Decoupling Scorecard
+> STOP CONDITION:
+> - Surviving candidates span at least 3 fundamentally distinct architectural classes whose
+> pairwise Hamming distance across orthogonal dimensions exceeds the diversity threshold,
+> and no two candidates differ solely by third-party library, vendor, or language syntax.
 
 The usual architecture failure is an **early choice of one familiar design**. A team can face a high-throughput ingestion engine, a replication protocol, a real-time search index, or a multi-tenant billing engine. Both engineers and LLMs can then anchor on the design they know best. They produce small variants of it. For example, they change parts of an HTTP service with a relational database and Redis cache.
 
@@ -4869,26 +4803,20 @@ Disassemble monolithic database features into independent structural components 
 
 ## 5. Deep Analysis of the Four Core Exploration Techniques
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 THE FOUR TECHNIQUES OF OPERATION 4                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  4.1. GENERATE FUNDAMENTALLY DISTINCT DIRECTIONS                                                 │
-    │       - Establish orthogonal divergence across the 9 primary architectural axes.                 │
-    │       - Reject cosmetic variations; enforce structural diversity across paradigms.               │
-    │                                                                                                  │
-    │  4.2. ISOLATE SOLUTION SPACE DIMENSIONS (MORPHOLOGICAL ANALYSIS)                                 │
-    │       - Construct the Morphological Field S = D1 × D2 × ... × Dn.                                │
-    │       - Discretize dimensions into mutually exclusive, unambiguous mechanisms.                   │
-    │                                                                                                  │
-    │  4.3. COMBINE BRANCHES INTO COHERENT CANDIDATES                                                  │
-    │       - Synthesize configuration vectors s = (v1, v2, ..., vn) spanning the field.               │
-    │       - Construct boundary and unconventional candidate architectures.                           │
-    │                                                                                                  │
-    │  4.4. PRUNE INCOMPATIBLE COMBINATIONS (TWO-TIER FILTERING)                                       │
-    │       - Tier 1: Eliminate vectors violating hard business, safety, and physical invariants.     │
-    │       - Tier 2: Eliminate vectors violating pairwise compatibility, CAP, PACELC, or Axiomatic   │
-    │         Independence (Coupled Designs).                                                          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE FOUR TECHNIQUES OF OPERATION 4**
+> 4.1. GENERATE FUNDAMENTALLY DISTINCT DIRECTIONS
+> - Establish orthogonal divergence across the 9 primary architectural axes.
+> - Reject cosmetic variations; enforce structural diversity across paradigms.
+> 4.2. ISOLATE SOLUTION SPACE DIMENSIONS (MORPHOLOGICAL ANALYSIS)
+> - Construct the Morphological Field S = D1 × D2 × ... × Dn.
+> - Discretize dimensions into mutually exclusive, unambiguous mechanisms.
+> 4.3. COMBINE BRANCHES INTO COHERENT CANDIDATES
+> - Synthesize configuration vectors s = (v1, v2, ..., vn) spanning the field.
+> - Construct boundary and unconventional candidate architectures.
+> 4.4. PRUNE INCOMPATIBLE COMBINATIONS (TWO-TIER FILTERING)
+> - Tier 1: Eliminate vectors violating hard business, safety, and physical invariants.
+> - Tier 2: Eliminate vectors violating pairwise compatibility, CAP, PACELC, or Axiomatic
+> Independence (Coupled Designs).
 
 ### Technique 4.1. Generate Fundamentally Distinct Directions
 
@@ -5231,12 +5159,13 @@ $$\text{Raw Theoretical Space: } \|\mathcal{S}\| = 3 \times 3 \times 3 \times 3 
 
 #### Step 2: Binary Compatibility & Invariant Pruning Matrix
 
-                    v2,1 (Mutex)  v2,2 (Single-Writer)  v2,3 (Dist Lock)  v4,1 (RDBMS fsync)  v4,2 (Direct WAL)  v4,3 (Raft)
-    v1,1 (HTTP)          1               1                    1                  1                  1               1
-    v1,3 (Raw TCP)       0               1                    0                  0                  1               1
-    v2,1 (Mutex)         -               -                    -                  1                  0               0
-    v2,2 (Single-Writer) -               -                    -                  0                  1               1
-    v2,3 (Dist Lock)     -               -                    -                  1                  0               0
+| Ingestion / concurrency | v2,1 Mutex | v2,2 Single-writer | v2,3 Distributed lock | v4,1 RDBMS fsync | v4,2 Direct WAL | v4,3 Raft |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| v1,1 HTTP | 1 | 1 | 1 | 1 | 1 | 1 |
+| v1,3 Raw TCP | 0 | 1 | 0 | 0 | 1 | 1 |
+| v2,1 Mutex | - | - | - | 1 | 0 | 0 |
+| v2,2 Single-writer | - | - | - | 0 | 1 | 1 |
+| v2,3 Distributed lock | - | - | - | 1 | 0 | 0 |
 
 *Pruning Rationale:*
 
@@ -6805,22 +6734,18 @@ To structure dependencies effectively, an engineer must distinguish between two 
 
 $$\text{Coupling}_{\text{total}} = \text{Coupling}_{\text{essential}} + \text{Coupling}_{\text{accidental}}$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                ESSENTIAL VS. ACCIDENTAL COUPLING                                 │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  ESSENTIAL COUPLING (Semantic & Domain Invariant)                                                │
-    │  - Inherent to the business problem domain.                                                      │
-    │  - Cannot be eliminated without altering the fundamental requirements of the system.             │
-    │  - Example: A Payment Settlement engine MUST know the final authorized amount of an Order.       │
-    │  - Strategy: Make explicit, strongly typed, minimal, and bounded by formal domain contracts.     │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  ACCIDENTAL COUPLING (Structural, Technological, & Artifactual)                                  │
-    │  - Introduced by implementation choices, shared infrastructure, or convenience shortcuts.       │
-    │  - Can be eliminated without changing any business requirement.                                 │
-    │  - Example: Payment Service and Catalog Service share a single PostgreSQL database instance and   │
-    │    execute direct SQL joins across `orders` and `product_inventory` tables.                      │
-    │  - Strategy: Eliminate via Dependency Inversion, Anti-Corruption Layers, and Event Projections. │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **ESSENTIAL VS. ACCIDENTAL COUPLING**
+> ESSENTIAL COUPLING (Semantic & Domain Invariant)
+> - Inherent to the business problem domain.
+> - Cannot be eliminated without altering the fundamental requirements of the system.
+> - Example: A Payment Settlement engine MUST know the final authorized amount of an Order.
+> - Strategy: Make explicit, strongly typed, minimal, and bounded by formal domain contracts.
+> ACCIDENTAL COUPLING (Structural, Technological, & Artifactual)
+> - Introduced by implementation choices, shared infrastructure, or convenience shortcuts.
+> - Can be eliminated without changing any business requirement.
+> - Example: Payment Service and Catalog Service share a single PostgreSQL database instance and
+> execute direct SQL joins across `orders` and `product_inventory` tables.
+> - Strategy: Eliminate via Dependency Inversion, Anti-Corruption Layers, and Event Projections.
 
 ------------------------------------------------------------------------
 
@@ -7157,27 +7082,22 @@ An outage or $500\text{ ms}$ latency degradation in service $D$ immediately casc
 
 ## 3. The Three Core Techniques of Operation 6
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 THE THREE TECHNIQUES OF OPERATION 6                              │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  6.1. BUILD A MAP OF DEPENDENCIES AND CONTRACTS                                                  │
-    │       - Construct the Design Structure Matrix (DSM) across all 9 dependency vectors.             │
-    │       - Perform topological sorting, partitioning, and clustering to expose cycles.              │
-    │       - Calculate package metrics: Afferent (Ca), Efferent (Ce), Instability (I),                │
-    │         Abstractness (A), and Distance from the Main Sequence (D).                               │
-    │       - Quantify the Change Radius R(M) for critical modification scenarios.                     │
-    │                                                                                                  │
-    │  6.2. LINK REQUIREMENTS TO MECHANISMS                                                            │
-    │       - Map each functional and quality requirement directly to its supporting mechanism.        │
-    │       - Enforce the "Single Reason to Change" rule: 1 Requirement Delta = 1 Module Modified.     │
-    │       - Expose Ghost Dependencies where logical independence is betrayed by hidden coupling.     │
-    │                                                                                                  │
-    │  6.3. WEAKEN UNNECESSARY DEPENDENCIES                                                            │
-    │       - Apply Dependency Inversion Principle (DIP) and Ports-and-Adapters.                       │
-    │       - Construct Anti-Corruption Layers (ACL) for external/legacy integrations.                 │
-    │       - Execute the Expand/Contract (Parallel Run) pattern for zero-downtime evolution.           │
-    │       - Transform synchronous temporal coupling into asynchronous event-driven flows.            │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE THREE TECHNIQUES OF OPERATION 6**
+> 6.1. BUILD A MAP OF DEPENDENCIES AND CONTRACTS
+> - Construct the Design Structure Matrix (DSM) across all 9 dependency vectors.
+> - Perform topological sorting, partitioning, and clustering to expose cycles.
+> - Calculate package metrics: Afferent (Ca), Efferent (Ce), Instability (I),
+> Abstractness (A), and Distance from the Main Sequence (D).
+> - Quantify the Change Radius R(M) for critical modification scenarios.
+> 6.2. LINK REQUIREMENTS TO MECHANISMS
+> - Map each functional and quality requirement directly to its supporting mechanism.
+> - Enforce the "Single Reason to Change" rule: 1 Requirement Delta = 1 Module Modified.
+> - Expose Ghost Dependencies where logical independence is betrayed by hidden coupling.
+> 6.3. WEAKEN UNNECESSARY DEPENDENCIES
+> - Apply Dependency Inversion Principle (DIP) and Ports-and-Adapters.
+> - Construct Anti-Corruption Layers (ACL) for external/legacy integrations.
+> - Execute the Expand/Contract (Parallel Run) pattern for zero-downtime evolution.
+> - Transform synchronous temporal coupling into asynchronous event-driven flows.
 
 ------------------------------------------------------------------------
 
@@ -7194,21 +7114,25 @@ The **Design Structure Matrix (DSM)** is an $N \times N$ square matrix where row
 
 <!-- -->
 
-    Initial Unpartitioned DSM (With Cycles)
-            A   B   C   D   E
-        A [ .   1   .   .   . ]   <- Component A depends on B
-        B [ .   .   1   .   . ]   <- Component B depends on C
-        C [ 1   .   .   .   . ]   <- Component C depends on A  (CYCLE: A -> B -> C -> A!)
-        D [ .   1   .   .   1 ]   <- Component D depends on B and E
-        E [ .   .   .   .   . ]   <- Component E is independent
+**Initial Unpartitioned DSM (With Cycles)**
+
+| Component | A | B | C | D | E | Dependency note |
+|---|---:|---:|---:|---:|---:|---|
+| A | . | 1 | . | . | . | A depends on B |
+| B | . | . | 1 | . | . | B depends on C |
+| C | 1 | . | . | . | . | C depends on A; cycle: A → B → C → A |
+| D | . | 1 | . | . | 1 | D depends on B and E |
+| E | . | . | . | . | . | E is independent |
 
 #### 3.1.2. Partitioning, Clustering, and Cycle Elimination
 
 Through algorithmic **partitioning** (matrix reordering based on topological sorting and Tarjan's strongly connected components algorithm), we isolate cycles and reorder components into a strict layered hierarchy:
 
-    Partitioned & Clustered DSM
-              E   [A   B   C]   D
-          E [ .     .   .   .   . ]  (Layer 0: Core Foundation / Zero Dependencies)
+**Partitioned and clustered DSM**
+
+| Layer | Component | E | A | B | C | D | Meaning |
+|---|---|---:|---:|---:|---:|---:|---|
+| 0 | E | . | . | . | . | . | Core foundation; zero dependencies |
 ``` mermaid
 flowchart TD
     A["A"] --> B["B"] --> C["C"] --> A
@@ -7220,14 +7144,16 @@ flowchart TD
 
 Applying the **Dependency Inversion Principle (DIP)** breaks the cycle: we extract an abstract interface $I_A$ from Component $A$. Now, Component $C$ depends on interface $I_A$, and Component $A$ implements $I_A$. The transformed matrix becomes purely lower-triangular:
 
-    Cycle-Free Lower-Triangular DSM
-              E   IA   C   B   A   D
-          E [ .    .   .   .   .   . ]
-         IA [ .    .   .   .   .   . ]  (Pure Abstract Interface)
-          C [ .    1   .   .   .   . ]  (Depends on Interface IA)
-          B [ .    .   1   .   .   . ]  (Depends on C)
-          A [ .    1   .   1   .   . ]  (Implements IA, depends on B)
-          D [ 1    .   .   1   .   . ]  (Depends on E and B)
+**Cycle-free lower-triangular DSM**
+
+| Component | E | IA | C | B | A | D | Meaning |
+|---|---:|---:|---:|---:|---:|---:|---|
+| E | . | . | . | . | . | . | Core foundation |
+| IA | . | . | . | . | . | . | Pure abstract interface |
+| C | . | 1 | . | . | . | . | Depends on interface IA |
+| B | . | . | 1 | . | . | . | Depends on C |
+| A | . | 1 | . | 1 | . | . | Implements IA; depends on B |
+| D | 1 | . | . | 1 | . | . | Depends on E and B |
 
 #### 3.1.3. Calculating Software Package Metrics
 
@@ -7271,17 +7197,14 @@ Where:
 
 Every software requirement must be mapped to the exact set of computational mechanisms, database schemas, and network interactions that satisfy it.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                               REQUIREMENT-TO-MECHANISM AUDIT TABLE                               │
-    ├───────────────────┬────────────────────────────┬─────────────────────────────┬───────────────────┤
-    │ Requirement (REQ) │ Supporting Mechanism (CAN) │ Physical Carriers           │ Change Isolation? │
-    ├───────────────────┼────────────────────────────┼─────────────────────────────┼───────────────────┤
-    │ REQ-01: Calculate │ CAN-TAX: Dynamic Jurisdiction│ `tax-engine` library,       │ YES: Isolated to  │
-    │ Sales Tax Rate    │ Rule Evaluator             │ `jurisdiction_rules` table  │ tax domain.       │
-    ├───────────────────┼────────────────────────────┼─────────────────────────────┼───────────────────┤
-    │ REQ-02: Enforce   │ CAN-AUTH: Centralized ABAC │ Scattered `if (user.role)`  │ NO: Accidental    │
-    │ Access Control    │ Policy Decision Point      │ checks in UI, API, DB views │ Ghost Coupling!   │
-    └───────────────────┴────────────────────────────┴─────────────────────────────┴───────────────────┘
+**REQUIREMENT-TO-MECHANISM AUDIT TABLE**
+
+| Requirement (REQ) | Supporting Mechanism (CAN) | Physical Carriers | Change Isolation? |
+| --- | --- | --- | --- |
+| REQ-01: Calculate | CAN-TAX: Dynamic Jurisdiction | `tax-engine` library, | YES: Isolated to |
+| Sales Tax Rate | Rule Evaluator | `jurisdiction_rules` table | tax domain. |
+| REQ-02: Enforce | CAN-AUTH: Centralized ABAC | Scattered `if (user.role)` | NO: Accidental |
+| Access Control | Policy Decision Point | checks in UI, API, DB views | Ghost Coupling! |
 
 #### Exposing Ghost Dependencies and Latent Couplings
 
@@ -7542,32 +7465,25 @@ A B2B SaaS platform needed to split a monolithic `billing_address` field (string
 
 #### Applying Operation 6 (Expand/Contract Protocol)
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                             EXPAND / CONTRACT SCHEMA PROGRESSION                                 │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ Step 1: EXPAND (Zero-Downtime DDL)                                                               │
-    │   ALTER TABLE accounts                                                                           │
-    │     ADD COLUMN street VARCHAR(255),                                                              │
-    │     ADD COLUMN city VARCHAR(128),                                                                │
-    │     ADD COLUMN postal_code VARCHAR(32),                                                          │
-    │     ADD COLUMN country_iso VARCHAR(2);                                                           │
-    │                                                                                                  │
-    │ Step 2: DUAL WRITE (Application Code v1.1)                                                       │
-    │   - Write path writes to BOTH `billing_address` AND structured fields.                           │
-    │   - Read path falls back to parsing `billing_address` if structured fields are null.             │
-    │                                                                                                  │
-    │ Step 3: ASYNC BACKFILL (Background Job)                                                          │
-    │   - Process batches of 5,000 rows during off-peak hours.                                         │
-    │   - Parse legacy strings into structured columns.                                                │
-    │                                                                                                  │
-    │ Step 4: SWITCH READS (Application Code v1.2)                                                     │
-    │   - Read path exclusively uses structured fields.                                                │
-    │   - Dual write maintained for safety buffer.                                                     │
-    │                                                                                                  │
-    │ Step 5: CONTRACT (Final Cleanup DDL)                                                             │
-    │   - Remove dual-write logic (Application Code v2.0).                                             │
-    │   - ALTER TABLE accounts DROP COLUMN billing_address;                                            │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **EXPAND / CONTRACT SCHEMA PROGRESSION**
+> Step 1: EXPAND (Zero-Downtime DDL)
+> ALTER TABLE accounts
+> ADD COLUMN street VARCHAR(255),
+> ADD COLUMN city VARCHAR(128),
+> ADD COLUMN postal_code VARCHAR(32),
+> ADD COLUMN country_iso VARCHAR(2);
+> Step 2: DUAL WRITE (Application Code v1.1)
+> - Write path writes to BOTH `billing_address` AND structured fields.
+> - Read path falls back to parsing `billing_address` if structured fields are null.
+> Step 3: ASYNC BACKFILL (Background Job)
+> - Process batches of 5,000 rows during off-peak hours.
+> - Parse legacy strings into structured columns.
+> Step 4: SWITCH READS (Application Code v1.2)
+> - Read path exclusively uses structured fields.
+> - Dual write maintained for safety buffer.
+> Step 5: CONTRACT (Final Cleanup DDL)
+> - Remove dual-write logic (Application Code v2.0).
+> - ALTER TABLE accounts DROP COLUMN billing_address;
 
 #### Outcome
 
@@ -7664,60 +7580,55 @@ Every execution of Operation 6 produces four concrete, verifiable engineering de
 
 ### 5.1. The Dependency & Contract Matrix (`DEP-*`)
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                       ARIADNE DEPENDENCY MATRIX (DEP-01)                                         │
-    ├────────┬─────────────────┬───────────────────┬──────────────┬─────────────┬───────────┬───────────┬──────────────┤
-    │ ID     │ Source Module   │ Target Dependency │ Vector Type  │ Coupling    │ Stability │ Contract  │ Mitigation   │
-    │        │                 │                   │              │ Strength    │ Delta (D) │ Type      │ Status       │
-    ├────────┼─────────────────┼───────────────────┼──────────────┼─────────────┼───────────┼───────────┼──────────────┤
-    │ DEP-01 │ `order-service` │ `payment-gateway` │ Synchronous  │ HIGH        │ D = 0.42  │ HTTP REST │ Replace with │
-    │        │                 │                   │ Network RPC  │ (Blocking)  │ (Pain)    │ (OpenAPI) │ Outbox/Event │
-    ├────────┼─────────────────┼───────────────────┼──────────────┼─────────────┼───────────┼───────────┼──────────────┤
-    │ DEP-02 │ `billing-worker`│ `user-db`         │ Database /   │ CRITICAL    │ D = 0.68  │ Direct    │ Implement    │
-    │        │                 │                   │ Shared Table │ (Deadlocks) │ (Pain)    │ SQL Join  │ User CDC API │
-    ├────────┼─────────────────┼───────────────────┼──────────────┼─────────────┼───────────┼───────────┼──────────────┤
-    │ DEP-03 │ `mobile-client` │ `catalog-service` │ Schema /     │ LOW         │ D = 0.05  │ Protobuf  │ VERIFIED     │
-    │        │                 │                   │ Async Stream │ (Tolerant)  │ (Optimal) │ v2 Schema │ (Invariant)  │
-    └────────┴─────────────────┴───────────────────┴──────────────┴─────────────┴───────────┴───────────┴──────────────┘
+**ARIADNE DEPENDENCY MATRIX (DEP-01)**
+
+| ID | Source Module | Target Dependency | Vector Type | Coupling | Stability | Contract | Mitigation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  | Strength | Delta (D) | Type | Status |
+| DEP-01 | `order-service` | `payment-gateway` | Synchronous | HIGH | D = 0.42 | HTTP REST | Replace with |
+|  |  |  | Network RPC | (Blocking) | (Pain) | (OpenAPI) | Outbox/Event |
+| DEP-02 | `billing-worker` | `user-db` | Database / | CRITICAL | D = 0.68 | Direct | Implement |
+|  |  |  | Shared Table | (Deadlocks) | (Pain) | SQL Join | User CDC API |
+| DEP-03 | `mobile-client` | `catalog-service` | Schema / | LOW | D = 0.05 | Protobuf | VERIFIED |
+|  |  |  | Async Stream | (Tolerant) | (Optimal) | v2 Schema | (Invariant) |
 
 ------------------------------------------------------------------------
 
 ### 5.2. Change Radius & Blast Radius Assessment Sheet
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   CHANGE RADIUS ASSESSMENT SHEET                                 │
-    ├──────────────────────────┬───────────────────────────────────────────────────────────────────────┤
-    │ Target Component:        │ `core-auth-token-generator`                                            │
-    │ Current Metric Profile:  │ Ca = 18, Ce = 2, I = 0.10, A = 0.05, D = 0.85 (Zone of Pain)          │
-    ├──────────────────────────┼───────────────────────────────────────────────────────────────────────┤
-    │ Modification Scenario:   │ Upgrade JWT signing algorithm from RS256 to Ed25519.                  │
-    │ Direct Dependents (N1):  │ 18 microservices (API Gateways, Internal Service Clients).             │
-    │ Transitive Dependents:   │ 42 downstream workers and background batch processors.                │
-    │ Raw Blast Radius:        │ 60 services (100% of internal infrastructure).                        │
-    ├──────────────────────────┼───────────────────────────────────────────────────────────────────────┤
-    │ Decoupling Plan:         │ 1. Implement JWKS (JSON Web Key Set) endpoint for public key rotation.│
-    │                          │ 2. Support dual-key verification in all downstream verification libs.  │
-    │                          │ 3. Invert token generation behind `TokenSigner` abstract interface.   │
-    │ Target Metric Profile:   │ Ca = 18, Ce = 0, I = 0.00, A = 0.95, D = 0.05 (Main Sequence)          │
-    │ Post-Decoupling Radius:  │ R(M) = 1 (Zero downstream service redeployments).                     │
-    └──────────────────────────┴───────────────────────────────────────────────────────────────────────┘
+**CHANGE RADIUS ASSESSMENT SHEET**
+
+| Target Component: | `core-auth-token-generator` |
+| --- | --- |
+| Current Metric Profile: | Ca = 18, Ce = 2, I = 0.10, A = 0.05, D = 0.85 (Zone of Pain) |
+| Modification Scenario: | Upgrade JWT signing algorithm from RS256 to Ed25519. |
+| Direct Dependents (N1): | 18 microservices (API Gateways, Internal Service Clients). |
+| Transitive Dependents: | 42 downstream workers and background batch processors. |
+| Raw Blast Radius: | 60 services (100% of internal infrastructure). |
+| Decoupling Plan: | 1. Implement JWKS (JSON Web Key Set) endpoint for public key rotation. |
+|  | 2. Support dual-key verification in all downstream verification libs. |
+|  | 3. Invert token generation behind `TokenSigner` abstract interface. |
+| Target Metric Profile: | Ca = 18, Ce = 0, I = 0.00, A = 0.95, D = 0.05 (Main Sequence) |
+| Post-Decoupling Radius: | R(M) = 1 (Zero downstream service redeployments). |
 
 ------------------------------------------------------------------------
 
 ### 5.3. Design Structure Matrix (DSM) Specification
 
-    Design Structure Matrix: Core Platform (Post-Operation 6)
-          1   2   3   4   5   6   7   8
-    1. [  .   .   .   .   .   .   .   . ]  Domain Interfaces (A=1.0, I=0.0)
-    2. [  1   .   .   .   .   .   .   . ]  Common Invariants & Value Objects
-    3. [  1   1   .   .   .   .   .   . ]  Order Domain Core
-    4. [  1   1   .   .   .   .   .   . ]  Billing Domain Core
-    5. [  1   1   1   .   .   .   .   . ]  Order Application Use Cases
-    6. [  1   1   .   1   .   .   .   . ]  Billing Application Use Cases
-    7. [  .   .   .   .   1   .   .   . ]  HTTP Order Controller (Adapter)
-    8. [  .   .   .   .   .   1   .   . ]  RabbitMQ Billing Consumer (Adapter)
+**Design Structure Matrix: Core Platform (Post-Operation 6)**
 
-    Property: Pure Lower-Triangular Form (Zero Directed Cycles; Max Distance to Main Sequence D <= 0.12)
+| Component | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | Meaning |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1 | . | . | . | . | . | . | . | . | Domain interfaces (A=1.0, I=0.0) |
+| 2 | 1 | . | . | . | . | . | . | . | Common invariants and value objects |
+| 3 | 1 | 1 | . | . | . | . | . | . | Order domain core |
+| 4 | 1 | 1 | . | . | . | . | . | . | Billing domain core |
+| 5 | 1 | 1 | 1 | . | . | . | . | . | Order application use cases |
+| 6 | 1 | 1 | . | 1 | . | . | . | . | Billing application use cases |
+| 7 | . | . | . | . | 1 | . | . | . | HTTP order controller (adapter) |
+| 8 | . | . | . | . | . | 1 | . | . | RabbitMQ billing consumer (adapter) |
+
+**Property:** Pure lower-triangular form (zero directed cycles; maximum distance to the main sequence $D \le 0.12$).
 
 ------------------------------------------------------------------------
 
@@ -7748,32 +7659,24 @@ The billing service currently executes direct cross-database SQL queries against
 
 An engineer or automated software agent must terminate Operation 6 when and only when all of the following formal criteria are satisfied:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                  OPERATION 6 STOP CONDITIONS                                     │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. ACYCLIC TOPOLOGY                                                                              │
-    │    - The Design Structure Matrix (DSM) is strictly lower-triangular; all directed component      │
-    │      cycles (A -> B -> ... -> A) are eliminated via Dependency Inversion.                        │
-    │                                                                                                  │
-    │ 2. MAIN SEQUENCE BALANCE                                                                         │
-    │    - All core architectural packages exhibit a Normalized Distance from the Main Sequence        │
-    │      D = |A + I - 1| <= 0.20. No critical component resides in the Zone of Pain or Uselessness. │
-    │                                                                                                  │
-    │ 3. BOUNDED CHANGE RADIUS                                                                         │
-    │    - For every identified independent business requirement (REQ-*), the expected Change Radius   │
-    │      is strictly bounded: R(REQ) <= Threshold (typically <= 2 modules).                         │
-    │                                                                                                  │
-    │ 4. ZERO CROSS-BOUNDARY DATABASE SHARING                                                          │
-    │    - No two independent services share direct read/write access to the same database tables.      │
-    │                                                                                                  │
-    │ 5. FORMAL CONTEXT MAP COMPLETE                                                                   │
-    │    - All external and legacy integrations are protected by explicit Anti-Corruption Layers (ACL) │
-    │      or Published Languages with automated contract tests.                                       │
-    │                                                                                                  │
-    │ 6. EPISTEMIC SOUNDNESS                                                                           │
-    │    - Every dependency vector is explicitly documented in a `DEP-*` artifact with no unverified    │
-    │      ghost dependencies or hidden temporal assumptions.                                          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 6 STOP CONDITIONS**
+> 1. ACYCLIC TOPOLOGY
+> - The Design Structure Matrix (DSM) is strictly lower-triangular; all directed component
+> cycles (A → B → … → A) are eliminated via Dependency Inversion.
+> 2. MAIN SEQUENCE BALANCE
+> - All core architectural packages exhibit a Normalized Distance from the Main Sequence
+> D = |A + I - 1| <= 0.20. No critical component resides in the Zone of Pain or Uselessness.
+> 3. BOUNDED CHANGE RADIUS
+> - For every identified independent business requirement (REQ-*), the expected Change Radius
+> is strictly bounded: R(REQ) <= Threshold (typically <= 2 modules).
+> 4. ZERO CROSS-BOUNDARY DATABASE SHARING
+> - No two independent services share direct read/write access to the same database tables.
+> 5. FORMAL CONTEXT MAP COMPLETE
+> - All external and legacy integrations are protected by explicit Anti-Corruption Layers (ACL)
+> or Published Languages with automated contract tests.
+> 6. EPISTEMIC SOUNDNESS
+> - Every dependency vector is explicitly documented in a `DEP-*` artifact with no unverified
+> ghost dependencies or hidden temporal assumptions.
 
 ------------------------------------------------------------------------
 
@@ -7921,26 +7824,20 @@ When evaluating an architecture or diagnosing an incident, an engineer must move
 
 ### Static vs. Dynamic Thinking in Software Architecture
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 STATIC VS. DYNAMIC PARADIGMS                                     │
-    ├──────────────────────────────────┬───────────────────────────────────────────────────────────────┤
-    │ STATIC ARCHITECTURAL THINKING    │ DYNAMIC SYSTEM THINKING (OPERATION 7)                         │
-    ├──────────────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ System is a set of static blocks │ System is a network of stocks, flows, buffers, and latencies. │
-    │ and synchronous RPC links.       │ Every wire has propagation delay; every node has finite mass. │
-    ├──────────────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ Evaluates average (mean) latency │ Evaluates tail distributions (p95, p99, p99.9) and fan-out   │
-    │ and nominal steady-state load.   │ amplification under multi-tenant contention and jitter.       │
-    ├──────────────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ Assumes linear scaling:          │ Models non-linear phase changes: saturation cliffs, queue     │
-    │ 2x traffic = 2x server instances.│ explosions (Little's Law), lock contention, and GC thrashing. │
-    ├──────────────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ Failures are modeled as clean    │ Failures are modeled as self-sustaining feedback loops:       │
-    │ binary states (UP or DOWN).      │ retry storms, slow-death degradation, and metastable traps.   │
-    ├──────────────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ Deployments are atomic switches  │ Deployments are continuous transient phases: dual-version     │
-    │ from Version A to Version B.     │ RPCs, schema drift, canary warming, and cold-cache recovery.  │
-    └──────────────────────────────────┴───────────────────────────────────────────────────────────────┘
+**STATIC VS. DYNAMIC PARADIGMS**
+
+| STATIC ARCHITECTURAL THINKING | DYNAMIC SYSTEM THINKING (OPERATION 7) |
+| --- | --- |
+| System is a set of static blocks | System is a network of stocks, flows, buffers, and latencies. |
+| and synchronous RPC links. | Every wire has propagation delay; every node has finite mass. |
+| Evaluates average (mean) latency | Evaluates tail distributions (p95, p99, p99.9) and fan-out |
+| and nominal steady-state load. | amplification under multi-tenant contention and jitter. |
+| Assumes linear scaling: | Models non-linear phase changes: saturation cliffs, queue |
+| 2x traffic = 2x server instances. | explosions (Little's Law), lock contention, and GC thrashing. |
+| Failures are modeled as clean | Failures are modeled as self-sustaining feedback loops: |
+| binary states (UP or DOWN). | retry storms, slow-death degradation, and metastable traps. |
+| Deployments are atomic switches | Deployments are continuous transient phases: dual-version |
+| from Version A to Version B. | RPCs, schema drift, canary warming, and cold-cache recovery. |
 
 ------------------------------------------------------------------------
 
@@ -8061,22 +7958,17 @@ Where:
 
 <!-- -->
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 LITTLE'S LAW ARCHITECTURAL INVARIANT                             │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ - Mathematical Invariance: Little's Law holds for ANY queueing discipline (FIFO, LIFO, Priority),│
-    │   ANY arrival distribution (Poisson, Burst, Pareto), and ANY service time distribution,          │
-    │   provided the system is stationary and requests are not lost/created within the boundary.       │
-    │                                                                                                  │
-    │ - The Concurrency Trap: If downstream service latency doubles (W: 100ms -> 200ms) at constant    │
-    │   throughput (λ = 10,000 req/s), the required concurrency L MUST double:                         │
-    │   L = 10,000 * 0.100 = 1,000 concurrent requests                                                 │
-    │   L = 10,000 * 0.200 = 2,000 concurrent requests                                                 │
-    │                                                                                                  │
-    │ - Exhaustion Corollary: If maximum concurrency L_max is bounded (for example, thread pool = 1,000),      │
-    │   then as latency W increases, throughput λ MUST collapse:                                       │
-    │   λ_max = L_max / W = 1,000 / 0.200 = 5,000 req/s (50% throughput drop!)                         │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **LITTLE'S LAW ARCHITECTURAL INVARIANT**
+> - Mathematical Invariance: Little's Law holds for ANY queueing discipline (FIFO, LIFO, Priority),
+> ANY arrival distribution (Poisson, Burst, Pareto), and ANY service time distribution,
+> provided the system is stationary and requests are not lost/created within the boundary.
+> - The Concurrency Trap: If downstream service latency doubles (W: 100 ms → 200 ms) at constant
+> throughput (λ = 10,000 req/s), the required concurrency L MUST double:
+> L = 10,000 * 0.100 = 1,000 concurrent requests
+> L = 10,000 * 0.200 = 2,000 concurrent requests
+> - Exhaustion Corollary: If maximum concurrency L_max is bounded (for example, thread pool = 1,000),
+> then as latency W increases, throughput λ MUST collapse:
+> λ_max = L_max / W = 1,000 / 0.200 = 5,000 req/s (50% throughput drop!)
 
 ------------------------------------------------------------------------
 
@@ -8115,28 +8007,22 @@ flowchart LR
 
 In [*Metastable Failures in Distributed Systems* (Bronson et al., 2021, ACM HotOS, DOI: 10.1145/3458336.3465286)](https://doi.org/10.1145/3458336.3465286), the authors formalized why large-scale distributed architectures suffer catastrophic outages that **persist long after the initial root cause has disappeared**:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                METASTABLE FAILURE FORMALIZATION                                  │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. TWO EQUILIBRIUM STATES:                                                                       │
-    │    - Stable State (Healthy): Low latency, high cache hit rate, low concurrency, zero retries.    │
-    │    - Metastable State (Degraded Attractor): Saturated queues, 0% cache hit, maximum retries,     │
-    │      GC thrashing, 100% timeout rate.                                                            │
-    │                                                                                                  │
-    │ 2. THE TRIGGER:                                                                                  │
-    │    - A transient event (for example, 30-second network partition, GC pause, database failover, or burst) │
-    │      that pushes the system over the energy barrier into the degraded state.                     │
-    │                                                                                                  │
-    │ 3. THE SUSTAINING MECHANISM:                                                                     │
-    │    - A positive feedback loop (for example, unjittered retries, cache eviction cascades, work            │
-    │      amplification) that supplies enough continuous internal load to KEEP the system trapped in  │
-    │      the degraded state EVEN AFTER THE TRIGGER HAS COMPLETELY RESOLVED.                          │
-    │                                                                                                  │
-    │ 4. THE QUENCH PROTOCOL:                                                                          │
-    │    - A metastable failure CANNOT be resolved by fixing the trigger. It requires an active        │
-    │      QUENCH: dropping load to near-zero, clearing queues, pre-warming caches, and slowly         │
-    │      restoring traffic through admission control.                                                │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **METASTABLE FAILURE FORMALIZATION**
+> 1. TWO EQUILIBRIUM STATES:
+> - Stable State (Healthy): Low latency, high cache hit rate, low concurrency, zero retries.
+> - Metastable State (Degraded Attractor): Saturated queues, 0% cache hit, maximum retries,
+> GC thrashing, 100% timeout rate.
+> 2. THE TRIGGER:
+> - A transient event (for example, 30-second network partition, GC pause, database failover, or burst)
+> that pushes the system over the energy barrier into the degraded state.
+> 3. THE SUSTAINING MECHANISM:
+> - A positive feedback loop (for example, unjittered retries, cache eviction cascades, work
+> amplification) that supplies enough continuous internal load to KEEP the system trapped in
+> the degraded state EVEN AFTER THE TRIGGER HAS COMPLETELY RESOLVED.
+> 4. THE QUENCH PROTOCOL:
+> - A metastable failure CANNOT be resolved by fixing the trigger. It requires an active
+> QUENCH: dropping load to near-zero, clearing queues, pre-warming caches, and slowly
+> restoring traffic through admission control.
 
 ``` mermaid
 stateDiagram-v2
@@ -8366,17 +8252,15 @@ If each downstream service has a $p99$ latency threshold (i.e. $1\%$ of requests
 
 $$P(\text{Slow}) = 1 - (1 - 0.01)^N$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                               TAIL LATENCY FAN-OUT AMPLIFICATION                                 │
-    ├─────────────────────────┬──────────────────────────────────────────┬─────────────────────────────┤
-    │ Fan-Out Sub-Calls (N)   │ Probability Single Call > p99 (1%)       │ Probability System Call > p99│
-    ├─────────────────────────┼──────────────────────────────────────────┼─────────────────────────────┤
-    │ N = 1                   │ 1.0%                                     │ 1.0%                        │
-    │ N = 10                  │ 1.0%                                     │ 9.56%                       │
-    │ N = 50                  │ 1.0%                                     │ 39.50%                      │
-    │ N = 100                 │ 1.0%                                     │ 63.40%                      │
-    │ N = 200                 │ 1.0%                                     │ 86.60%                      │
-    └─────────────────────────┴──────────────────────────────────────────┴─────────────────────────────┘
+**TAIL LATENCY FAN-OUT AMPLIFICATION**
+
+| Fan-Out Sub-Calls (N) | Probability Single Call > p99 (1%) | Probability System Call > p99 |
+| --- | --- | --- |
+| N = 1 | 1.0% | 1.0% |
+| N = 10 | 1.0% | 9.56% |
+| N = 50 | 1.0% | 39.50% |
+| N = 100 | 1.0% | 63.40% |
+| N = 200 | 1.0% | 86.60% |
 
 > **Implication:** At $N=100$, nearly two-thirds of all user requests experience tail latency degradation, even though $99\%$ of all individual service calls are fast!
 
@@ -8562,17 +8446,15 @@ flowchart LR
 
 <!-- -->
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 THE METASTABLE FAILURE PROGRESSION                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ TIME  │ EVENT                                │ CACHE HIT │ DB READ LOAD │ SYSTEM STATUS          │
-    ├───────┼──────────────────────────────────────┼───────────┼──────────────┼────────────────────────┤
-    │ T0    │ Steady State                         │ 98.5%     │ 12,000 req/s │ HEALTHY (p99 = 8ms)    │
-    │ T1    │ Network Flap (20 sec)                │ 74.0%     │ 208,000 req/s│ DEGRADED (DB Queues)   │
-    │ T2    │ Network Heals (Trigger Gone!)        │ 15.0%     │ 680,000 req/s│ METASTABLE COLLAPSE    │
-    │ T3    │ Client Retries Maximize              │ 5.0%      │ 2.4M req/s   │ 100% Outage (504s)     │
-    │ T4    │ Engineers Restart App Servers        │ 0.0%      │ 2.4M req/s   │ Immediate Re-collapse  │
-    └───────┴──────────────────────────────────────┴───────────┴──────────────┴────────────────────────┘
+**THE METASTABLE FAILURE PROGRESSION**
+
+| TIME | EVENT | CACHE HIT | DB READ LOAD | SYSTEM STATUS |
+| --- | --- | --- | --- | --- |
+| T0 | Steady State | 98.5% | 12,000 req/s | HEALTHY (p99 = 8ms) |
+| T1 | Network Flap (20 sec) | 74.0% | 208,000 req/s | DEGRADED (DB Queues) |
+| T2 | Network Heals (Trigger Gone!) | 15.0% | 680,000 req/s | METASTABLE COLLAPSE |
+| T3 | Client Retries Maximize | 5.0% | 2.4M req/s | 100% Outage (504s) |
+| T4 | Engineers Restart App Servers | 0.0% | 2.4M req/s | Immediate Re-collapse |
 
 #### Applying Operation 7
 
@@ -8768,21 +8650,17 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 ### 4.1. The System Dynamics Map (`DYN-*`)
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                       ARIADNE SYSTEM DYNAMICS MAP (DYN-01)                                       │
-    ├────────┬───────────────────┬──────────────┬──────────────┬──────────────┬─────────────┬───────────┬──────────────┤
-    │ ID     │ Target Subsystem  │ Inflow (λ)   │ Outflow (μ)  │ Utilization  │ Stock Limit │ Delay (W) │ Metastable   │
-    │        │ & Critical Stock  │ Nominal/Peak │ Nominal/Peak │ (ρ = λ/μ)    │ (S_max)     │ Nominal/p99│ Risk Status │
-    ├────────┼───────────────────┼──────────────┼──────────────┼──────────────┼─────────────┼───────────┼──────────────┤
-    │ DYN-01 │ API Gateway       │ 10k req/s    │ 25k req/s    │ ρ = 0.60     │ 2,048 conns │ 12 ms /   │ LOW          │
-    │        │ Ingest Queue      │ (Peak: 15k)  │ (Bounded)    │ (Stable)     │ (TCP drop)  │ 45 ms     │ (Drop-Tail)  │
-    ├────────┼───────────────────┼──────────────┼──────────────┼──────────────┼─────────────┼───────────┼──────────────┤
-    │ DYN-02 │ Order Fulfillment │ 2,500 msg/s  │ 3,000 msg/s  │ ρ = 0.93     │ 100k msgs   │ 80 ms /   │ CRITICAL     │
-    │        │ Kafka Consumer    │ (Peak: 2.8k) │ (Degrades)   │ (CLIFF RISK) │ (RAM Buffer)│ 4,200 ms  │ (Retry Storm)│
-    ├────────┼───────────────────┼──────────────┼──────────────┼──────────────┼─────────────┼───────────┼──────────────┤
-    │ DYN-03 │ Postgres Primary  │ 4,200 IOPS   │ 8,000 IOPS   │ ρ = 0.52     │ 100 pool    │ 4 ms /    │ MEDIUM       │
-    │        │ Connection Pool   │ (Peak: 6.5k) │ (NVMe SSD)   │ (Stable)     │ conns       │ 18 ms     │ (Txn Hold)   │
-    └────────┴───────────────────┴──────────────┴──────────────┴──────────────┴─────────────┴───────────┴──────────────┘
+**ARIADNE SYSTEM DYNAMICS MAP (DYN-01)**
+
+| ID | Target Subsystem | Inflow (λ) | Outflow (μ) | Utilization | Stock Limit | Delay (W) | Metastable |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|  | & Critical Stock | Nominal/Peak | Nominal/Peak | (ρ = λ/μ) | (S_max) | Nominal/p99 | Risk Status |
+| DYN-01 | API Gateway | 10k req/s | 25k req/s | ρ = 0.60 | 2,048 conns | 12 ms / | LOW |
+|  | Ingest Queue | (Peak: 15k) | (Bounded) | (Stable) | (TCP drop) | 45 ms | (Drop-Tail) |
+| DYN-02 | Order Fulfillment | 2,500 msg/s | 3,000 msg/s | ρ = 0.93 | 100k msgs | 80 ms / | CRITICAL |
+|  | Kafka Consumer | (Peak: 2.8k) | (Degrades) | (CLIFF RISK) | (RAM Buffer) | 4,200 ms | (Retry Storm) |
+| DYN-03 | Postgres Primary | 4,200 IOPS | 8,000 IOPS | ρ = 0.52 | 100 pool | 4 ms / | MEDIUM |
+|  | Connection Pool | (Peak: 6.5k) | (NVMe SSD) | (Stable) | conns | 18 ms | (Txn Hold) |
 
 ------------------------------------------------------------------------
 
@@ -8851,29 +8729,22 @@ Every execution of Operation 7 produces four structured, verifiable dynamic deli
 
 An engineer or automated software agent must terminate Operation 7 when and only when all five of the following formal criteria are met:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                  OPERATION 7 STOP CONDITIONS                                     │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. BOUNDED STEADY-STATE QUEUEING                                                                 │
-    │    - All system queues and thread pools operate at utilization ρ <= 0.70 under peak nominal load.│
-    │    - Non-linear queue wait time W_q is proven bounded by Kingman's formula.                      │
-    │                                                                                                  │
-    │ 2. METASTABILITY IMMUNITY & QUENCH PLAN VERIFIED                                                 │
-    │    - Every identified Reinforcing Loop (R) is counteracted by a validated Balancing Loop (B).    │
-    │    - An explicit Quench & Recovery Protocol exists for all catastrophic triggers.                │
-    │                                                                                                  │
-    │ 3. TAIL LATENCY BUDGET VERIFIED UNDER FAN-OUT                                                    │
-    │    - For all parallel fan-out calls (N), the compound tail latency P(System > T) satisfies the   │
-    │      business SLO at p99 and p99.9.                                                              │
-    │                                                                                                  │
-    │ 4. ZERO-DOWNTIME MULTI-VERSION COMPATIBILITY PROVEN                                              │
-    │    - Tolerant reader protocols and expand/contract database lifecycles are proven backward-      │
-    │      and forward-compatible across concurrent v1 and v2 executions.                              │
-    │                                                                                                  │
-    │ 5. EXPLICIT BACKPRESSURE & LOAD SHEDDING CONFIGURED                                              │
-    │    - Every unbounded buffer is eliminated; explicit drop policies (Drop-Tail, CoDel, 429 Shed)   │
-    │      protect upstream memory and socket tables.                                                  │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 7 STOP CONDITIONS**
+> 1. BOUNDED STEADY-STATE QUEUEING
+> - All system queues and thread pools operate at utilization ρ <= 0.70 under peak nominal load.
+> - Non-linear queue wait time W_q is proven bounded by Kingman's formula.
+> 2. METASTABILITY IMMUNITY & QUENCH PLAN VERIFIED
+> - Every identified Reinforcing Loop (R) is counteracted by a validated Balancing Loop (B).
+> - An explicit Quench & Recovery Protocol exists for all catastrophic triggers.
+> 3. TAIL LATENCY BUDGET VERIFIED UNDER FAN-OUT
+> - For all parallel fan-out calls (N), the compound tail latency P(System > T) satisfies the
+> business SLO at p99 and p99.9.
+> 4. ZERO-DOWNTIME MULTI-VERSION COMPATIBILITY PROVEN
+> - Tolerant reader protocols and expand/contract database lifecycles are proven backward-
+> and forward-compatible across concurrent v1 and v2 executions.
+> 5. EXPLICIT BACKPRESSURE & LOAD SHEDDING CONFIGURED
+> - Every unbounded buffer is eliminated; explicit drop policies (Drop-Tail, CoDel, 429 Shed)
+> protect upstream memory and socket tables.
 
 ------------------------------------------------------------------------
 
@@ -9024,26 +8895,21 @@ To evaluate software mechanisms scientifically, we adapt the classical TRIZ Law 
 
 $$\text{Engineering Value} \equiv \text{Ideality} = \frac{\text{Useful Domain Functions } (\sum F_u)}{\text{Collateral Harm & Vulnerability } (\sum F_h) + \text{Lifecycle Mechanism Cost } (\sum C)}$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 THE SOFTWARE IDEALITY BALANCE                                    │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  USEFUL DOMAIN EFFECT (Σ F_u)                                                                    │
-    │  - Delivered business capabilities, throughput guarantees, availability SLOs, data freshness.   │
-    │  - Architectural evolvability, elasticity, multi-tenant isolation, security guarantees.          │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  COLLATERAL HARM & VULNERABILITY (Σ F_h)                                                         │
-    │  - Runtime fragility, distributed failure modes, cascading retry storms, data corruption risk.   │
-    │  - Cognitive load on engineering teams, onboarding friction, mental model misalignment.          │
-    │  - Blast radius: percentage of system degraded by localized component failure.                   │
-    │  - Lock-in: cost and difficulty of replacing or migrating away from the chosen mechanism.       │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  LIFECYCLE MECHANISM COST (Σ C)                                                                  │
-    │  - Code complexity: lines of custom code, cyclomatic complexity, test suite maintenance.        │
-    │  - Mutable state: distributed consensus, cache invalidation, data synchronization overhead.      │
-    │  - Infrastructure spend: cloud compute instances, memory footprint, IOPS, network egress fees.  │
-    │  - Operational friction: runbook complexity, alert noise, MTTR, manual operator intervention.    │
-    │  - Transition cost: dual-write pipelines, historical data migration, cutover downtime.           │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE SOFTWARE IDEALITY BALANCE**
+> USEFUL DOMAIN EFFECT (Σ F_u)
+> - Delivered business capabilities, throughput guarantees, availability SLOs, data freshness.
+> - Architectural evolvability, elasticity, multi-tenant isolation, security guarantees.
+> COLLATERAL HARM & VULNERABILITY (Σ F_h)
+> - Runtime fragility, distributed failure modes, cascading retry storms, data corruption risk.
+> - Cognitive load on engineering teams, onboarding friction, mental model misalignment.
+> - Blast radius: percentage of system degraded by localized component failure.
+> - Lock-in: cost and difficulty of replacing or migrating away from the chosen mechanism.
+> LIFECYCLE MECHANISM COST (Σ C)
+> - Code complexity: lines of custom code, cyclomatic complexity, test suite maintenance.
+> - Mutable state: distributed consensus, cache invalidation, data synchronization overhead.
+> - Infrastructure spend: cloud compute instances, memory footprint, IOPS, network egress fees.
+> - Operational friction: runbook complexity, alert noise, MTTR, manual operator intervention.
+> - Transition cost: dual-write pipelines, historical data migration, cutover downtime.
 
 An engineering choice is **optimal** not when it uses the most advanced technology, but when it maximizes this ratio—delivering the required behavior with the minimum necessary code, state, infrastructure, and operational risk.
 
@@ -9222,16 +9088,14 @@ In [*Software Engineering Economics* (Prentice-Hall, 1981)](https://dl.acm.org/d
 
 Boehm demonstrated that **60% to 80% of the Total Cost of Ownership (TCO) of software is incurred after the initial release**, during the maintenance, evolution, and operational phases.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 LIFECYCLE COST DISTRIBUTION                                      │
-    ├──────────────────────────────────────┬───────────────────────────────────────────────────────────┤
-    │ Initial Development (20–30% TCO)     │ Maintenance, Operations, & Evolution (70–80% TCO)         │
-    ├──────────────────────────────────────┼───────────────────────────────────────────────────────────┤
-    │ • Requirements & Architecture (5%)   │ • Corrective Maintenance (Bug fixes, Incident MTTR) (20%) │
-    │ • Coding & Unit Testing (15%)        │ • Adaptive Maintenance (OS, Cloud, DB upgrades) (20%)     │
-    │ • Integration & Transition (10%)     │ • Perfective Maintenance (Refactoring, New features) (30%)│
-    │                                      │ • Infrastructure Run Costs & On-Call Burden (10%)         │
-    └──────────────────────────────────────┴───────────────────────────────────────────────────────────┘
+**LIFECYCLE COST DISTRIBUTION**
+
+| Initial Development (20–30% TCO) | Maintenance, Operations, & Evolution (70–80% TCO) |
+| --- | --- |
+| • Requirements & Architecture (5%) | • Corrective Maintenance (Bug fixes, Incident MTTR) (20%) |
+| • Coding & Unit Testing (15%) | • Adaptive Maintenance (OS, Cloud, DB upgrades) (20%) |
+| • Integration & Transition (10%) | • Perfective Maintenance (Refactoring, New features) (30%) |
+|  | • Infrastructure Run Costs & On-Call Burden (10%) |
 
 **Architectural Consequence**: A candidate mechanism that saves 2 weeks of initial implementation time by introducing a complex distributed database will incur a 500% cost penalty over its 5-year lifecycle in runbook maintenance, schema migrations, and on-call paging. **Initial development speed is a minor variable in the true software value equation.**
 
@@ -9298,35 +9162,28 @@ In software systems, the cost of an architectural mechanism is not simply the pr
 
 $$\vec{C} = \left\langle C_{\text{code}},\; C_{\text{state}},\; C_{\text{infra}},\; C_{\text{ops}},\; C_{\text{cog}},\; C_{\text{trans}} \right\rangle$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                THE 6 DIMENSIONS OF MECHANISM COST                                │
-    ├───────────────┬──────────────────────────────────────────────────────────────────────────────────┤
-    │ DIMENSION     │ METRIC & MANIFESTATION IN SOFTWARE SYSTEMS                                       │
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. C_code     │ Lines of custom code, external library dependencies, test suites, API contracts.  │
-    │               │ - High: Writing a custom distributed raft consensus library (15,000 LoC).        │
-    │               │ - Low: Using language standard library primitives (0 LoC).                       │
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 2. C_state    │ Number of mutable data stores, cache layers, consensus protocols, locks.         │
-    │               │ - High: Multi-master distributed DB with eventual consistency & CDC reconciliation│
-    │               │ - Low: Single ACID database table or immutable append-only log.                  │
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 3. C_infra    │ Monthly cloud infrastructure bill (vCPU, RAM, NVMe IOPS, Cross-AZ egress).       │
-    │               │ - High: 20-node Kubernetes cluster with dedicated Kafka and Elasticsearch nodes. │
-    │               │ - Low: Serverless scale-to-zero function or single optimized bare-metal instance.│
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 4. C_ops      │ Runbook complexity, alert frequency, MTTR, deployment orchestration steps.       │
-    │               │ - High: Complex manual failover procedures, 24/7 pager fatigue, custom sharding. │
-    │               │ - Low: Fully automated rolling deployments, self-healing immutable instances.   │
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 5. C_cog      │ Mental model complexity, developer onboarding time, non-local side effects.      │
-    │               │ - High: Complex reactive actor framework with asynchronous hidden message passing│
-    │               │ - Low: Plain synchronous procedural code with explicit function parameters.      │
-    ├───────────────┼──────────────────────────────────────────────────────────────────────────────────┤
-    │ 6. C_trans    │ Effort and risk required to migrate from the current state to the target state.  │
-    │               │ - High: 6-month dual-write migration with cross-database historical backfill.    │
-    │               │ - Low: Drop-in library swap behind an existing interface seam.                   │
-    └───────────────┴──────────────────────────────────────────────────────────────────────────────────┘
+**THE 6 DIMENSIONS OF MECHANISM COST**
+
+| DIMENSION | METRIC & MANIFESTATION IN SOFTWARE SYSTEMS |
+| --- | --- |
+| 1. C_code | Lines of custom code, external library dependencies, test suites, API contracts. |
+|  | - High: Writing a custom distributed raft consensus library (15,000 LoC). |
+|  | - Low: Using language standard library primitives (0 LoC). |
+| 2. C_state | Number of mutable data stores, cache layers, consensus protocols, locks. |
+|  | - High: Multi-master distributed DB with eventual consistency & CDC reconciliation |
+|  | - Low: Single ACID database table or immutable append-only log. |
+| 3. C_infra | Monthly cloud infrastructure bill (vCPU, RAM, NVMe IOPS, Cross-AZ egress). |
+|  | - High: 20-node Kubernetes cluster with dedicated Kafka and Elasticsearch nodes. |
+|  | - Low: Serverless scale-to-zero function or single optimized bare-metal instance. |
+| 4. C_ops | Runbook complexity, alert frequency, MTTR, deployment orchestration steps. |
+|  | - High: Complex manual failover procedures, 24/7 pager fatigue, custom sharding. |
+|  | - Low: Fully automated rolling deployments, self-healing immutable instances. |
+| 5. C_cog | Mental model complexity, developer onboarding time, non-local side effects. |
+|  | - High: Complex reactive actor framework with asynchronous hidden message passing |
+|  | - Low: Plain synchronous procedural code with explicit function parameters. |
+| 6. C_trans | Effort and risk required to migrate from the current state to the target state. |
+|  | - High: 6-month dual-write migration with cross-database historical backfill. |
+|  | - Low: Drop-in library swap behind an existing interface seam. |
 
 ------------------------------------------------------------------------
 
@@ -9388,17 +9245,15 @@ Where $\mathbb{I}(\cdot)$ is the indicator function:
 
 #### Invariant vs. Preference Taxonomy in Software
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                INVARIANTS VS. PREFERENCES                                        │
-    ├────────────────────────────────┬─────────────────────────────────────────────────────────────────┤
-    │ HARD INVARIANTS (Pass / Fail)  │ PREFERENCE ATTRIBUTES (Optimize Trade-off)                      │
-    ├────────────────────────────────┼─────────────────────────────────────────────────────────────────┤
-    │ • Zero financial data loss     │ • p99 Read Latency (for example, 25ms vs. 45ms)                        │
-    │ • Strict tenant data isolation │ • Cloud Infrastructure Cost ($/month)                           │
-    │ • PCI-DSS / HIPAA compliance   │ • Developer Implementation Time (weeks)                         │
-    │ • Sub-100ms hard safety cutoff │ • Test Suite Execution Time (minutes)                           │
-    │ • Zero downtime schema updates │ • Language Familiarity / Team Ergonomics                        │
-    └────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
+**INVARIANTS VS. PREFERENCES**
+
+| HARD INVARIANTS (Pass / Fail) | PREFERENCE ATTRIBUTES (Optimize Trade-off) |
+| --- | --- |
+| • Zero financial data loss | • p99 Read Latency (for example, 25ms vs. 45ms) |
+| • Strict tenant data isolation | • Cloud Infrastructure Cost ($/month) |
+| • PCI-DSS / HIPAA compliance | • Developer Implementation Time (weeks) |
+| • Sub-100ms hard safety cutoff | • Test Suite Execution Time (minutes) |
+| • Zero downtime schema updates | • Language Familiarity / Team Ergonomics |
 
 ------------------------------------------------------------------------
 
@@ -9421,20 +9276,17 @@ Where:
 
 #### The Mechanism Cost Matrix (`COST-MATRIX-*`)
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                    LIFECYCLE COST COMPARISON                                     │
-    ├──────────────────────────┬───────────────────────────────┬───────────────────────────────────────┤
-    │ COST CATEGORY            │ CANDIDATE A: MANAGED CLOUD DB │ CANDIDATE B: CUSTOM DISTRIBUTED CLUST │
-    ├──────────────────────────┼───────────────────────────────┼───────────────────────────────────────┤
-    │ Initial Dev (C_dev)      │ 80 engineering hours ($8,000) │ 480 engineering hours ($48,000)       │
-    │ Transition (C_trans)     │ 40 hours ($4,000)             │ 240 hours ($24,000)                   │
-    │ 3-Yr Infra (C_infra)     │ $36,000 ($1,000/mo)           │ $18,000 ($500/mo)                     │
-    │ 3-Yr Ops (C_ops)         │ 100 on-call hrs ($10,000)     │ 600 on-call hrs ($60,000)             │
-    │ 3-Yr Maint (C_maint)     │ 60 upgrade hrs ($6,000)       │ 400 upgrade hrs ($40,000)             │
-    ├──────────────────────────┼───────────────────────────────┼───────────────────────────────────────┤
-    │ TOTAL 3-YEAR TCO:        │ $64,000                       │ $190,000                              │
-    │ VERDICT:                 │ Candidate A saves $126,000 despite higher monthly cloud bill!         │
-    └──────────────────────────┴───────────────────────────────┴───────────────────────────────────────┘
+**LIFECYCLE COST COMPARISON**
+
+| COST CATEGORY | CANDIDATE A: MANAGED CLOUD DB | CANDIDATE B: CUSTOM DISTRIBUTED CLUST |
+| --- | --- | --- |
+| Initial Dev (C_dev) | 80 engineering hours ($8,000) | 480 engineering hours ($48,000) |
+| Transition (C_trans) | 40 hours ($4,000) | 240 hours ($24,000) |
+| 3-Yr Infra (C_infra) | $36,000 ($1,000/mo) | $18,000 ($500/mo) |
+| 3-Yr Ops (C_ops) | 100 on-call hrs ($10,000) | 600 on-call hrs ($60,000) |
+| 3-Yr Maint (C_maint) | 60 upgrade hrs ($6,000) | 400 upgrade hrs ($40,000) |
+| TOTAL 3-YEAR TCO: | $64,000 | $190,000 |
+| VERDICT: | Candidate A saves $126,000 despite higher monthly cloud bill! |  |
 
 > **The Infrastructure Cost Fallacy**: A cheaper cloud bill (\$500/mo vs. \$1,000/mo) is frequently used to justify building custom infrastructure. In reality, the custom solution consumes \$126,000 in additional engineering labor, resulting in an astronomical net loss.
 
@@ -9491,19 +9343,15 @@ In software selection:
 
 The most dangerous anti-pattern in software architecture is **pseudo-precision**: assigning arbitrary numbers to unmeasured properties (for example, scoring "Scalability: 8.5/10" and "Maintainability: 7.2/10") to create an illusion of mathematical objectivity.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 PSEUDO-PRECISION VS. EPISTEMIC RIGOR                             │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  PSEUDO-PRECISION (Anti-Pattern)                                                                 │
-    │  - "Candidate 1 scores 84.3 points, Candidate 2 scores 81.7 points. Candidate 1 wins!"           │
-    │  - Masks high uncertainty behind arbitrary arithmetic sums.                                      │
-    │  - Weights are subtly manipulated until the architect's pet technology emerges victorious.       │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  EPISTEMIC RIGOR (Ariadne Standard)                                                              │
-    │  - Metrics are expressed as confidence intervals or bounds: p99 Latency = [140ms, 220ms] (EVD-04).│
-    │  - Unknown properties are explicitly flagged as `UNK-*` with their Decision Significance.         │
-    │  - If two candidates overlap within their uncertainty bounds, trigger EVOI Experiment Gate.      │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **PSEUDO-PRECISION VS. EPISTEMIC RIGOR**
+> PSEUDO-PRECISION (Anti-Pattern)
+> - "Candidate 1 scores 84.3 points, Candidate 2 scores 81.7 points. Candidate 1 wins!"
+> - Masks high uncertainty behind arbitrary arithmetic sums.
+> - Weights are subtly manipulated until the architect's pet technology emerges victorious.
+> EPISTEMIC RIGOR (Ariadne Standard)
+> - Metrics are expressed as confidence intervals or bounds: p99 Latency = [140ms, 220ms] (EVD-04).
+> - Unknown properties are explicitly flagged as `UNK-*` with their Decision Significance.
+> - If two candidates overlap within their uncertainty bounds, trigger EVOI Experiment Gate.
 
 #### The Expected Value of Information (EVOI) Gate
 
@@ -9556,22 +9404,18 @@ A global payment platform processes $50,000\text{ write transactions/sec}$ at pe
 
 #### 4. Selection Analysis & Trade-off Calculus
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   FINTECH LEDGER SELECTION MATRIX                                │
-    ├─────────────────────┬──────────────────┬──────────────────┬──────────────────┬───────────────────┤
-    │ CRITERION           │ TYPE             │ CAN-01: DIST SQL │ CAN-02: SHARDED  │ CAN-03: LOG-CENT  │
-    ├─────────────────────┬──────────────────┬──────────────────┬──────────────────┬───────────────────┤
-    │ Strict Serializab.  │ Hard Invariant   │ PASS (Raft/2PC)  │ PASS (Local ACID)│ PASS (Log Order)  │
-    │ Zero Data Loss      │ Hard Invariant   │ PASS (Raft sync) │ PASS (Sync Rep)  │ PASS (ISR=3)      │
-    │ p99 Latency <= 30ms │ Hard Invariant   │ FAIL (45–65ms)*  │ PASS (8–14ms)    │ PASS (4–7ms)      │
-    ├─────────────────────┼──────────────────┼──────────────────┼──────────────────┼───────────────────┤
-    │ 3-Year Infra Cost   │ Cost (C_infra)   │ $280,000         │ $140,000         │ $95,000           │
-    │ Operational Drag    │ Cost (C_ops)     │ HIGH (Complex)   │ MEDIUM (Vitess)  │ MEDIUM (Kafka)    │
-    │ Cognitive Load      │ Harm (C_cog)     │ LOW (StandardSQL)│ MEDIUM (Sharding)│ HIGH (Event Sourced)
-    │ Blast Radius (B_R)  │ Harm (F_h)       │ 1.0 (Clusterwide)│ 0.015 (1 Shard)  │ 0.015 (1 Partition)
-    ├─────────────────────┼──────────────────┼──────────────────┼──────────────────┼───────────────────┤
-    │ VIABILITY & RANK:   │                  │ DISQUALIFIED*    │ PARETO RANK 2    │ PARETO RANK 1     │
-    └─────────────────────┴──────────────────┴──────────────────┴──────────────────┴───────────────────┘
+**FINTECH LEDGER SELECTION MATRIX**
+
+| CRITERION | TYPE | CAN-01: DIST SQL | CAN-02: SHARDED | CAN-03: LOG-CENT |
+| --- | --- | --- | --- | --- |
+| Strict Serializab. | Hard Invariant | PASS (Raft/2PC) | PASS (Local ACID) | PASS (Log Order) |
+| Zero Data Loss | Hard Invariant | PASS (Raft sync) | PASS (Sync Rep) | PASS (ISR=3) |
+| p99 Latency <= 30ms | Hard Invariant | FAIL (45–65ms)* | PASS (8–14ms) | PASS (4–7ms) |
+| 3-Year Infra Cost | Cost (C_infra) | $280,000 | $140,000 | $95,000 |
+| Operational Drag | Cost (C_ops) | HIGH (Complex) | MEDIUM (Vitess) | MEDIUM (Kafka) |
+| Cognitive Load | Harm (C_cog) | LOW (StandardSQL) | MEDIUM (Sharding) | HIGH (Event Sourced) |
+| Blast Radius (B_R) | Harm (F_h) | 1.0 (Clusterwide) | 0.015 (1 Shard) | 0.015 (1 Partition) |
+| VIABILITY & RANK: |  | DISQUALIFIED* | PARETO RANK 2 | PARETO RANK 1 |
 
 *\*Note: CAN-01 fails INV-03 under multi-region WAN latency constraints ($p99 = 58\text{ms} > 30\text{ms}$ measured in EVD-FIN-01).*
 
@@ -9609,21 +9453,18 @@ An e-commerce order fulfillment service must coordinate inventory reservation, p
 
 #### 3. Selection Evaluation across TCO and Harm Vectors
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                               WORKFLOW COORDINATION SELECTION                                    │
-    ├──────────────────────┬────────────────────┬────────────────────┬─────────────────────────────────┤
-    │ CRITERION            │ CAN-01: SYNC REST  │ CAN-02: CHOREOGRAPHY│ CAN-03: ORCHESTRATION (TEMPORAL)│
-    ├──────────────────────┼────────────────────┼────────────────────┼─────────────────────────────────┤
-    │ Temporal Coupling    │ CRITICAL (High)    │ NONE (Decoupled)   │ NONE (Decoupled)                │
-    │ Partial Failure Mode │ Distributed Incons.│ Stuck Event DLQ    │ Deterministic Compensation Saga │
-    │ Observability / Trace│ Fragmented Logs    │ Complex Event Trace│ Full Visual Execution History   │
-    │ Code Maintenance LoC │ 1,200 LoC glue/retry│ 3,500 LoC handlers │ 450 LoC Workflow code           │
-    │ Infrastructure Drag  │ Zero additional    │ Kafka + CDC Engine │ Temporal Cluster + DB           │
-    │ Cognitive Load       │ Low initially      │ High (Spaghetti)   │ Low (Explicit Code Flow)        │
-    ├──────────────────────┼────────────────────┼────────────────────┼─────────────────────────────────┤
-    │ 3-Year TCO Estimate  │ $145,000 (Incident)│ $160,000 (Debug)   │ $85,000                         │
-    │ SELECTION VERDICT:   │ REJECTED (Harm)    │ REJECTED (Trace)   │ SELECTED (DEC-WF-02)            │
-    └──────────────────────┴────────────────────┴────────────────────┴─────────────────────────────────┘
+**WORKFLOW COORDINATION SELECTION**
+
+| CRITERION | CAN-01: SYNC REST | CAN-02: CHOREOGRAPHY | CAN-03: ORCHESTRATION (TEMPORAL) |
+| --- | --- | --- | --- |
+| Temporal Coupling | CRITICAL (High) | NONE (Decoupled) | NONE (Decoupled) |
+| Partial Failure Mode | Distributed Incons. | Stuck Event DLQ | Deterministic Compensation Saga |
+| Observability / Trace | Fragmented Logs | Complex Event Trace | Full Visual Execution History |
+| Code Maintenance LoC | 1,200 LoC glue/retry | 3,500 LoC handlers | 450 LoC Workflow code |
+| Infrastructure Drag | Zero additional | Kafka + CDC Engine | Temporal Cluster + DB |
+| Cognitive Load | Low initially | High (Spaghetti) | Low (Explicit Code Flow) |
+| 3-Year TCO Estimate | $145,000 (Incident) | $160,000 (Debug) | $85,000 |
+| SELECTION VERDICT: | REJECTED (Harm) | REJECTED (Trace) | SELECTED (DEC-WF-02) |
 
 ``` typescript
 type OrderRequest = { id: string; items: string[]; paymentDetails: unknown; shippingAddress: unknown };
@@ -9672,21 +9513,18 @@ A software engineering organization with 120 developers needs a standard solutio
 
 #### 3. Total Cost of Ownership (TCO) & Dependency Impact
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   PLATFORM PRIMITIVES VS. CUSTOM SDK                             │
-    ├──────────────────────────┬───────────────────────────────┬───────────────────────────────────────┤
-    │ METRIC / DIMENSION       │ CAN-01: IN-HOUSE COMMON SDK   │ CAN-02: MANAGED CLOUD API GATEWAY     │
-    ├──────────────────────────┼───────────────────────────────┼───────────────────────────────────────┤
-    │ Initial Implementation   │ 160 hours ($16,000)           │ 40 hours ($4,000)                     │
-    │ Version Bump Drag        │ 40 services × 4 hrs/upgrade   │ 0 service redeployments               │
-    │                          │ = 160 hrs/release ($16,000)   │ (Configured centrally)                │
-    │ Polyglot Extensibility   │ ZERO (Must rewrite for Node/Py│ 100% Language Agnostic (Network Edge) │
-    │ Distance to Main Sequence│ D = 0.82 (Zone of Pain)       │ D = 0.05 (Optimal Main Sequence)      │
-    │ Security Patch Lead Time │ 3 to 6 weeks (Coordination)   │ < 10 minutes (Central Gateway rule)   │
-    ├──────────────────────────┼───────────────────────────────┼───────────────────────────────────────┤
-    │ 3-YEAR TOTAL COST:       │ $210,000                      │ $32,000                               │
-    │ SELECTION VERDICT:       │ REJECTED (High Friction)      │ SELECTED (DEC-GATEWAY-01)             │
-    └──────────────────────────┴───────────────────────────────┴───────────────────────────────────────┘
+**PLATFORM PRIMITIVES VS. CUSTOM SDK**
+
+| METRIC / DIMENSION | CAN-01: IN-HOUSE COMMON SDK | CAN-02: MANAGED CLOUD API GATEWAY |
+| --- | --- | --- |
+| Initial Implementation | 160 hours ($16,000) | 40 hours ($4,000) |
+| Version Bump Drag | 40 services × 4 hrs/upgrade | 0 service redeployments |
+|  | = 160 hrs/release ($16,000) | (Configured centrally) |
+| Polyglot Extensibility | ZERO (Must rewrite for Node/Py | 100% Language Agnostic (Network Edge) |
+| Distance to Main Sequence | D = 0.82 (Zone of Pain) | D = 0.05 (Optimal Main Sequence) |
+| Security Patch Lead Time | 3 to 6 weeks (Coordination) | < 10 minutes (Central Gateway rule) |
+| 3-YEAR TOTAL COST: | $210,000 | $32,000 |
+| SELECTION VERDICT: | REJECTED (High Friction) | SELECTED (DEC-GATEWAY-01) |
 
 #### 4. Ideality Rationale
 
@@ -9772,34 +9610,26 @@ All producer clients emit events via the `EventPublisher` interface seam. Swappi
 
 An engineer or autonomous software agent must terminate Operation 8 when and only when all six of the following conditions are satisfied:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                  OPERATION 8 STOP CONDITIONS                                     │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. NON-COMPENSATORY INVARIANT SCREENING COMPLETE                                                 │
-    │    - Every candidate has been evaluated against all hard invariants (INV-*). All failing options │
-    │      are pruned and assigned a score of -∞ with documented failure rationale.                    │
-    │                                                                                                  │
-    │ 2. PARETO OPTIMAL FRONTIER IDENTIFIED                                                            │
-    │    - Strictly dominated candidates are eliminated. Surviving candidates form an explicit        │
-    │      multi-objective Pareto frontier across TCO, performance, and operational harm.             │
-    │                                                                                                  │
-    │ 3. QUANTIFIED 3-YEAR TCO VECTOR                                                                  │
-    │    - Mechanism cost is calculated across all 6 dimensions (Code, State, Infra, Ops, Cognitive,   │
-    │      Transition). The comparison does not rely solely on initial build time or cloud bills.      │
-    │                                                                                                  │
-    │ 4. ZERO PSEUDO-PRECISION / UNCERTAINTY BOUNDED                                                   │
-    │    - No arbitrary point scores or fake weighted sums are used. If candidates overlap within      │
-    │      their confidence intervals, either an EVOI probe is commissioned (Op 5) or the most         │
-    │      reversible option is selected.                                                              │
-    │                                                                                                  │
-    │ 5. FORMAL DECISION RECORD LOCKED (`DEC-*`)                                                       │
-    │    - The ADR contains explicit rejection rationale for all non-selected candidates, ideality     │
-    │      justification, and explicit Transitive Invalidation triggers.                               │
-    │                                                                                                  │
-    │ 6. REVERSIBILITY PROTOCOL SPECIFIED                                                              │
-    │    - The architectural boundary seam isolating the chosen mechanism is defined, ensuring that   │
-    │      the decision is a reversible "Two-Way Door" (Type 2) whenever technically feasible.        │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 8 STOP CONDITIONS**
+> 1. NON-COMPENSATORY INVARIANT SCREENING COMPLETE
+> - Every candidate has been evaluated against all hard invariants (INV-*). All failing options
+> are pruned and assigned a score of -∞ with documented failure rationale.
+> 2. PARETO OPTIMAL FRONTIER IDENTIFIED
+> - Strictly dominated candidates are eliminated. Surviving candidates form an explicit
+> multi-objective Pareto frontier across TCO, performance, and operational harm.
+> 3. QUANTIFIED 3-YEAR TCO VECTOR
+> - Mechanism cost is calculated across all 6 dimensions (Code, State, Infra, Ops, Cognitive,
+> Transition). The comparison does not rely solely on initial build time or cloud bills.
+> 4. ZERO PSEUDO-PRECISION / UNCERTAINTY BOUNDED
+> - No arbitrary point scores or fake weighted sums are used. If candidates overlap within
+> their confidence intervals, either an EVOI probe is commissioned (Op 5) or the most
+> reversible option is selected.
+> 5. FORMAL DECISION RECORD LOCKED (`DEC-*`)
+> - The ADR contains explicit rejection rationale for all non-selected candidates, ideality
+> justification, and explicit Transitive Invalidation triggers.
+> 6. REVERSIBILITY PROTOCOL SPECIFIED
+> - The architectural boundary seam isolating the chosen mechanism is defined, ensuring that
+> the decision is a reversible "Two-Way Door" (Type 2) whenever technically feasible.
 
 ------------------------------------------------------------------------
 
@@ -9944,21 +9774,17 @@ Teams often confuse the **target architecture** ($\mathcal{A}_{\text{target}}$) 
 
 $$\mathcal{A}_{\text{target}} \neq \mathcal{A}_{\text{trans}}$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                             TARGET VS. TRANSITION ARCHITECTURE                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  TARGET ARCHITECTURE (A_target)                                                                  │
-    │  - The desired end-state of the system (clean interfaces, normalized schemas, decoupled events). │
-    │  - Optimized for steady-state maintenance, modifiability, throughput, and domain clarity.       │
-    │  - Example: A single partitioned table `ledger_entries_v2` accessed via a gRPC LedgerService.   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  TRANSITION ARCHITECTURE (A_trans)                                                               │
-    │  - The temporary, disposable scaffolding required to move from A_initial to A_target safely.     │
-    │  - Optimized for zero-downtime, dual-compatibility, parity assertion, and instant rollback.     │
-    │  - Contains: Dual-write proxies, asynchronous backfill workers, background diff/parity engines,  │
-    │    feature flag routers, shadow consumers, and fallback circuit breakers.                      │
-    │  - Rule: Must have an explicit decommissioning lifecycle to prevent permanent architectural rot.│
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **TARGET VS. TRANSITION ARCHITECTURE**
+> TARGET ARCHITECTURE (A_target)
+> - The desired end-state of the system (clean interfaces, normalized schemas, decoupled events).
+> - Optimized for steady-state maintenance, modifiability, throughput, and domain clarity.
+> - Example: A single partitioned table `ledger_entries_v2` accessed via a gRPC LedgerService.
+> TRANSITION ARCHITECTURE (A_trans)
+> - The temporary, disposable scaffolding required to move from A_initial to A_target safely.
+> - Optimized for zero-downtime, dual-compatibility, parity assertion, and instant rollback.
+> - Contains: Dual-write proxies, asynchronous backfill workers, background diff/parity engines,
+> feature flag routers, shadow consumers, and fallback circuit breakers.
+> - Rule: Must have an explicit decommissioning lifecycle to prevent permanent architectural rot.
 
 If an engineer designs only $\mathcal{A}_{\text{target}}$, the rollout can become a **big-bang migration**. A big-bang migration can require a maintenance window or schema lock, and it can be hard to reverse. Operation 9 requires $\mathcal{A}_{\text{trans}}$ as a separate deliverable with its own verification.
 
@@ -10095,21 +9921,15 @@ In Operation 9, a mutation score must meet the required threshold ($MS \ge 0.85$
 
 In [*Introduction to Software Testing* (2nd ed., Cambridge University Press, 2016)](https://cs.gmu.edu/~offutt/softwaretest/), Paul Ammann and Jeff Offutt define the **RIPR model**. A test needs four conditions to expose a software fault:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                    THE RIPR MODEL OF FAULT EXECUTION                             │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  1. REACHABILITY (R)                                                                             │
-    │     The test input must execute and reach the exact physical location of the defect in code.    │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  2. INFECTION (I)                                                                                │
-    │     Upon executing the fault, the internal runtime state of the program must become incorrect.  │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  3. PROPAGATION (P)                                                                              │
-    │     The infected internal state must propagate through variables and control flow to the output. │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  4. REVEALABILITY (R)                                                                            │
-    │     The test oracle must observe the corrupted output and assert failure (avoiding false passes).│
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE RIPR MODEL OF FAULT EXECUTION**
+> 1. REACHABILITY (R)
+> The test input must execute and reach the exact physical location of the defect in code.
+> 2. INFECTION (I)
+> Upon executing the fault, the internal runtime state of the program must become incorrect.
+> 3. PROPAGATION (P)
+> The infected internal state must propagate through variables and control flow to the output.
+> 4. REVEALABILITY (R)
+> The test oracle must observe the corrupted output and assert failure (avoiding false passes).
 
 $$\text{Fault Exposed} \iff \text{Reachability} \land \text{Infection} \land \text{Propagation} \land \text{Revealability}$$
 
@@ -10195,22 +10015,17 @@ Before executing any code modification or running a migration, the engineer or a
 
 A common failure of naive problem solving is **Problem Displacement** (curing a symptom in component $A$ by introducing an unmanaged failure mode in component $B$):
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 PROBLEM DISPLACEMENT TAXONOMY                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  1. Latency Displacement ──► Memory Footprint                                                    │
-    │     Adding an in-memory cache drops DB latency from 50ms to 0.5ms, but introduces JVM GC pauses, │
-    │     OOM crashes under high cardinality, and cache-stampede failure modes upon restart.           │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  2. Code Simplicity ──► Operational Complexity                                                   │
-    │     Replacing an in-process ACID transaction with eventual consistency simplifies the service   │
-    │     boundary, but introduces complex out-of-order event reconciliation, dead-letter reprocessing,│
-    │     and distributed state auditing overhead.                                                     │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  3. Database Load ──► Network Saturation / Fanout Contention                                     │
-    │     Sharding a monolithic database offloads disk I/O, but introduces distributed scatter-gather  │
-    │     queries, network serialization overhead, and 2-phase commit latency.                         │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **PROBLEM DISPLACEMENT TAXONOMY**
+> 1. Latency Displacement ► Memory Footprint
+> Adding an in-memory cache drops DB latency from 50ms to 0.5ms, but introduces JVM GC pauses,
+> OOM crashes under high cardinality, and cache-stampede failure modes upon restart.
+> 2. Code Simplicity ► Operational Complexity
+> Replacing an in-process ACID transaction with eventual consistency simplifies the service
+> boundary, but introduces complex out-of-order event reconciliation, dead-letter reprocessing,
+> and distributed state auditing overhead.
+> 3. Database Load ► Network Saturation / Fanout Contention
+> Sharding a monolithic database offloads disk I/O, but introduces distributed scatter-gather
+> queries, network serialization overhead, and 2-phase commit latency.
 
 #### 2. Secondary Contradictions
 
@@ -10304,53 +10119,44 @@ stateDiagram-v2
 
 #### Detailed Specification of the 7 Transition Phases
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                        THE 7-PHASE EXPAND/CONTRACT TRANSITION PROTOCOL                           │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 1: EXPAND (Additive Infrastructure / Schema)                                               │
-    │ - Create new tables, columns, gRPC endpoints, or event topics alongside existing legacy ones.    │
-    │ - Invariant: Must be strictly additive and nullable/optional. Zero live reads or writes.        │
-    │ - Rollback Strategy: Drop the new table/column. Zero operational impact.                        │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 2: DUAL-WRITING (Live Ingestion Synchronization)                                           │
-    │ - Applications write incoming mutations to BOTH legacy storage (authority) and new storage.     │
-    │ - Execution: Primary write is synchronous; secondary write is asynchronous with error isolation  │
-    │   (secondary write failure does NOT abort the user request, but emits an alert/DLQ metric).     │
-    │ - Invariant: New storage captures 100% of mutations occurring from $T_{\text{dual}}$ forward.    │
-    │ - Rollback Strategy: Disable feature flag `ENABLE_DUAL_WRITE`.                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 3: BACKGROUND BACKFILL (Historical Data Reconciliation)                                    │
-    │ - Execute an idempotent batch worker to copy historical records created prior to $T_{\text{dual}}$│
-    │ - Mechanics: Cursor-based pagination over immutable keys, chunked transactions, rate-limited to  │
-    │   prevent database CPU/IOPS saturation.                                                          │
-    │ - Invariant: Re-writing an already dual-written record must be an idempotent NO-OP or update.   │
-    │ - Rollback Strategy: Pause/cancel backfill worker.                                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 4: DUAL-READING & PARITY ASSERTION (Differential Verification)                             │
-    │ - Applications read from legacy storage (returned to user) and shadow-read from new storage.     │
-    │ - Execution: An in-memory comparator compares results. Mismatches are logged with full payloads. │
-    │ - Parity Metric: $\text{Divergence Rate } \delta = \frac{N_{\text{mismatch}}}{N_{\text{total}}}$. │
-    │ - Invariant: $\delta \equiv 0.000\%$ over a continuous 72-hour window under production load.     │
-    │ - Rollback Strategy: Disable shadow-read flag; fix schema/logic mapping bugs.                    │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 5: TRAFFIC CUTOVER (Authority Shift)                                                       │
-    │ - Shift read authority to new storage. New storage is now the single source of truth.            │
-    │ - Reverse Dual-Write: Applications write to new storage (authority) and shadow-write to legacy  │
-    │   storage to maintain reverse-rollback compatibility!                                            │
-    │ - Rollout: Progressive canary deployment (1% ──► 5% ──► 25% ──► 100%).                           │
-    │ - Rollback Strategy: Flip canary flag back to 0%. Legacy storage is completely up-to-date!       │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 6: SCHEMA & INTERFACE CONTRACT (Deprecation)                                               │
-    │ - Disable reverse dual-writing to legacy storage. Legacy storage is marked read-only / frozen.   │
-    │ - Mark legacy APIs as `@Deprecated` and return HTTP `410 Gone` / Sunset headers.                 │
-    │ - Invariant: Point of No Return. Reverting after Phase 6 requires a new forward migration.       │
-    │ - Rollback Strategy: Forward disaster recovery plan only.                                       │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ PHASE 7: CLEANUP & DECOMMISSIONING (Pruning the Scaffolding)                                     │
-    │ - Drop legacy database tables, columns, indexes, and constraints.                                │
-    │ - Remove transition shims, dual-write proxy code, parity assertion engines, and feature flags.  │
-    │ - Invariant: Zero dead code, zero obsolete configuration flags, zero zombie shims.               │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE 7-PHASE EXPAND/CONTRACT TRANSITION PROTOCOL**
+> PHASE 1: EXPAND (Additive Infrastructure / Schema)
+> - Create new tables, columns, gRPC endpoints, or event topics alongside existing legacy ones.
+> - Invariant: Must be strictly additive and nullable/optional. Zero live reads or writes.
+> - Rollback Strategy: Drop the new table/column. Zero operational impact.
+> PHASE 2: DUAL-WRITING (Live Ingestion Synchronization)
+> - Applications write incoming mutations to BOTH legacy storage (authority) and new storage.
+> - Execution: Primary write is synchronous; secondary write is asynchronous with error isolation
+> (secondary write failure does NOT abort the user request, but emits an alert/DLQ metric).
+> - Invariant: New storage captures 100% of mutations occurring from $T_{\text{dual}}$ forward.
+> - Rollback Strategy: Disable feature flag `ENABLE_DUAL_WRITE`.
+> PHASE 3: BACKGROUND BACKFILL (Historical Data Reconciliation)
+> - Execute an idempotent batch worker to copy historical records created prior to $T_{\text{dual}}$
+> - Mechanics: Cursor-based pagination over immutable keys, chunked transactions, rate-limited to
+> prevent database CPU/IOPS saturation.
+> - Invariant: Re-writing an already dual-written record must be an idempotent NO-OP or update.
+> - Rollback Strategy: Pause/cancel backfill worker.
+> PHASE 4: DUAL-READING & PARITY ASSERTION (Differential Verification)
+> - Applications read from legacy storage (returned to user) and shadow-read from new storage.
+> - Execution: An in-memory comparator compares results. Mismatches are logged with full payloads.
+> - Parity Metric: $\text{Divergence Rate } \delta = \frac{N_{\text{mismatch}}}{N_{\text{total}}}$.
+> - Invariant: $\delta \equiv 0.000\%$ over a continuous 72-hour window under production load.
+> - Rollback Strategy: Disable shadow-read flag; fix schema/logic mapping bugs.
+> PHASE 5: TRAFFIC CUTOVER (Authority Shift)
+> - Shift read authority to new storage. New storage is now the single source of truth.
+> - Reverse Dual-Write: Applications write to new storage (authority) and shadow-write to legacy
+> storage to maintain reverse-rollback compatibility!
+> - Rollout: Progressive canary deployment (1% ► 5% ► 25% ► 100%).
+> - Rollback Strategy: Flip canary flag back to 0%. Legacy storage is completely up-to-date!
+> PHASE 6: SCHEMA & INTERFACE CONTRACT (Deprecation)
+> - Disable reverse dual-writing to legacy storage. Legacy storage is marked read-only / frozen.
+> - Mark legacy APIs as `@Deprecated` and return HTTP `410 Gone` / Sunset headers.
+> - Invariant: Point of No Return. Reverting after Phase 6 requires a new forward migration.
+> - Rollback Strategy: Forward disaster recovery plan only.
+> PHASE 7: CLEANUP & DECOMMISSIONING (Pruning the Scaffolding)
+> - Drop legacy database tables, columns, indexes, and constraints.
+> - Remove transition shims, dual-write proxy code, parity assertion engines, and feature flags.
+> - Invariant: Zero dead code, zero obsolete configuration flags, zero zombie shims.
 
 #### The Five Rollback Readiness Invariants ($\mathcal{I}_1$ to $\mathcal{I}_5$)
 
@@ -10831,16 +10637,13 @@ Every non-trivial architectural migration must be governed by a structured, 7-ph
 
 Operation 9 establishes the complete traceability chain connecting requirements to empirical evidence:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 EVIDENTIARY TRACEABILITY CHAIN                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  REQ-012 (Requirement: Sub-50ms Payment Authorization with 99.999% Durability)                   │
-    │    └──► HYP-008 (Causal Hypothesis: Local Outbox + Asynchronous Settlement guarantees latency)  │
-    │          └──► CAN-003 (Candidate Mechanism: PostgreSQL Outbox with Debezium CDC Engine)         │
-    │                └──► VAL-089 (Verification Card: 100k RPS Load Test + Mutation Score = 0.92)      │
-    │                      └──► EVD-104 (Empirical Evidence: Staging Chaos Test Run #4189 Passed)      │
-    │                            └──► TRANS-023 (Transition Plan: 7-Phase Rollout Executed Safely)     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **EVIDENTIARY TRACEABILITY CHAIN**
+> REQ-012 (Requirement: Sub-50ms Payment Authorization with 99.999% Durability)
+> ► HYP-008 (Causal Hypothesis: Local Outbox + Asynchronous Settlement guarantees latency)
+> ► CAN-003 (Candidate Mechanism: PostgreSQL Outbox with Debezium CDC Engine)
+> ► VAL-089 (Verification Card: 100k RPS Load Test + Mutation Score = 0.92)
+> ► EVD-104 (Empirical Evidence: Staging Chaos Test Run #4189 Passed)
+> ► TRANS-023 (Transition Plan: 7-Phase Rollout Executed Safely)
 
 ------------------------------------------------------------------------
 
@@ -10860,16 +10663,13 @@ An engineering team or AI agent may conclude Operation 9 if and only if all five
 
 ### Transitive Invalidation Protocol
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                TRANSITIVE INVALIDATION PROTOCOL                                  │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │  IF Verification Card VAL-k produces verdict FALSIFIED:                                          │
-    │  1. The underlying Candidate Mechanism CAN-i is marked INVALIDATED.                              │
-    │  2. All downstream Decision Records DEC-j relying on CAN-i are revoked.                          │
-    │  3. The system halts the transition pipeline immediately.                                        │
-    │  4. Control returns to Operation 2 (if root cause is unknown) or Operation 3/4 (to select a new  │
-    │     candidate mechanism), carrying the new empirical counterexample as an active constraint.     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **TRANSITIVE INVALIDATION PROTOCOL**
+> IF Verification Card VAL-k produces verdict FALSIFIED:
+> 1. The underlying Candidate Mechanism CAN-i is marked INVALIDATED.
+> 2. All downstream Decision Records DEC-j relying on CAN-i are revoked.
+> 3. The system halts the transition pipeline immediately.
+> 4. Control returns to Operation 2 (if root cause is unknown) or Operation 3/4 (to select a new
+> candidate mechanism), carrying the new empirical counterexample as an active constraint.
 
 ------------------------------------------------------------------------
 
@@ -11020,22 +10820,20 @@ From the seminal contributions of computer science literature:
 
 In the Ariadne reasoning layer, software engineering is modeled as a directed acyclic graph (DAG) of epistemic claims, hypotheses, evidence, and decisions. Each node in the graph represents a typed epistemic unit:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                   ARIADNE EPISTEMIC NODE TYPES                                   │
-    ├───────────┬──────────────────────────────────────────────────────────────────────────────────────┤
-    │ Prefix    │ Epistemic Definition & Operational Semantics                                         │
-    ├───────────┼──────────────────────────────────────────────────────────────────────────────────────┤
-    │ CLM-*     │ Claim: An assertion regarding system behavior, requirements, or architecture.        │
-    │ ASM-*     │ Assumption: An unverified working premise accepted provisionally to proceed.         │
-    │ HYP-*     │ Causal Hypothesis: A falsifiable explanation of an observed defect or bottleneck.    │
-    │ CTR-*     │ Contradiction: A formal clash between two required quality attributes or parameters. │
-    │ UNK-*     │ Decision-Significant Unknown: Missing information that blocks architectural choice.  │
-    │ CAN-*     │ Candidate Mechanism: A structurally distinct architecture or implementation option.  │
-    │ EVDREQ-*  │ Evidence Request: A specification of a test, benchmark, or code inspection.          │
-    │ EVD-*     │ Evidence Result: The empirical output obtained from executing an Evidence Request.   │
-    │ TRANS-*   │ Transition Plan: A temporary dual-architecture for safely reaching the target state. │
-    │ DEC-*     │ Locked Decision: An Architectural Decision Record (ADR) backed by empirical proof.   │
-    └───────────┴──────────────────────────────────────────────────────────────────────────────────────┘
+**ARIADNE EPISTEMIC NODE TYPES**
+
+| Prefix | Epistemic Definition & Operational Semantics |
+| --- | --- |
+| CLM-* | Claim: An assertion regarding system behavior, requirements, or architecture. |
+| ASM-* | Assumption: An unverified working premise accepted provisionally to proceed. |
+| HYP-* | Causal Hypothesis: A falsifiable explanation of an observed defect or bottleneck. |
+| CTR-* | Contradiction: A formal clash between two required quality attributes or parameters. |
+| UNK-* | Decision-Significant Unknown: Missing information that blocks architectural choice. |
+| CAN-* | Candidate Mechanism: A structurally distinct architecture or implementation option. |
+| EVDREQ-* | Evidence Request: A specification of a test, benchmark, or code inspection. |
+| EVD-* | Evidence Result: The empirical output obtained from executing an Evidence Request. |
+| TRANS-* | Transition Plan: A temporary dual-architecture for safely reaching the target state. |
+| DEC-* | Locked Decision: An Architectural Decision Record (ADR) backed by empirical proof. |
 
 #### Transitive Invalidation
 
@@ -11075,35 +10873,28 @@ The Nine Operations operate under ten invariant axioms that govern software desi
 
 Classical TRIZ was developed in the domain of mechanical, chemical, and electrical systems governed by thermodynamics, materials science, and classical mechanics. When transferring inventive operations to software engineering, we must account for the fundamental ontological divergence between physical hardware and computational systems.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                               PHYSICAL DEVICE VS. SOFTWARE SYSTEM                                │
-    ├───────────────────────────────┬──────────────────────────────────┬───────────────────────────────┤
-    │ Dimension                     │ Physical Machine / Device        │ Software System               │
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ Materiality & Reproduction    │ Governed by mass and friction;   │ Pure information structures;  │
-    │                               │ non-zero marginal manufacturing  │ marginal reproduction cost    │
-    │                               │ cost per unit ($C_{\text{unit}} > 0$).│ is zero ($C_{\text{reproduction}} \approx 0$).│
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ Wear, Tear & Degradation      │ Physical wear-out; entropy       │ Code does not wear out;       │
-    │                               │ manifests as material fatigue    │ entropy manifests as schema   │
-    │                               │ and friction.                    │ drift, stale assumptions, and │
-    │                               │                                  │ state space explosion.        │
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ Failure Modes                 │ Continuous, progressive failure  │ Discrete, non-linear phase    │
-    │                               │ curves (for example, thermal expansion, │ transitions (for example, single bit │
-    │                               │ mechanical vibration).           │ overflow, deadlock, OOM kill).│
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ State & Mutability            │ State is bound to physical       │ Mutable state is decoupled    │
-    │                               │ configuration and geometry.      │ from logic; state persistence │
-    │                               │                                  │ requires explicit consensus.  │
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ Topology & Polymorphism       │ Rigid physical topology;         │ Dynamic topology; routing,    │
-    │                               │ components cannot instantly      │ dependency injection, and     │
-    │                               │ rewire communication paths.      │ dynamic dispatch rewire links.│
-    ├───────────────────────────────┼──────────────────────────────────┼───────────────────────────────┤
-    │ Transformation Target         │ Solid matter, fluids, fields,    │ AST, memory layout, runtime   │
-    │                               │ energy, spatial geometry.        │ state, event streams, RPCs.   │
-    └───────────────────────────────┴──────────────────────────────────┴───────────────────────────────┘
+**PHYSICAL DEVICE VS. SOFTWARE SYSTEM**
+
+| Dimension | Physical Machine / Device | Software System |
+| --- | --- | --- |
+| Materiality & Reproduction | Governed by mass and friction; | Pure information structures; |
+|  | non-zero marginal manufacturing | marginal reproduction cost |
+|  | cost per unit ($C_{\text{unit}} > 0$). | is zero ($C_{\text{reproduction}} \approx 0$). |
+| Wear, Tear & Degradation | Physical wear-out; entropy | Code does not wear out; |
+|  | manifests as material fatigue | entropy manifests as schema |
+|  | and friction. | drift, stale assumptions, and |
+|  |  | state space explosion. |
+| Failure Modes | Continuous, progressive failure | Discrete, non-linear phase |
+|  | curves (for example, thermal expansion, | transitions (for example, single bit |
+|  | mechanical vibration). | overflow, deadlock, OOM kill). |
+| State & Mutability | State is bound to physical | Mutable state is decoupled |
+|  | configuration and geometry. | from logic; state persistence |
+|  |  | requires explicit consensus. |
+| Topology & Polymorphism | Rigid physical topology; | Dynamic topology; routing, |
+|  | components cannot instantly | dependency injection, and |
+|  | rewire communication paths. | dynamic dispatch rewire links. |
+| Transformation Target | Solid matter, fluids, fields, | AST, memory layout, runtime |
+|  | energy, spatial geometry. | state, event streams, RPCs. |
 
 In software engineering, the **target of transformation** is not a physical object, but an interconnected web of:
 
@@ -11168,43 +10959,34 @@ mindmap
 
 #### The Software Resources Catalog
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                                SOFTWARE RESOURCES CATALOG                                              │
-    ├──────────────────────┬───────────────────────────────┬─────────────────────────────────┬───────────────────────────────┤
-    │ Resource Category    │ Latent Mechanism              │ Functional Utility              │ Avoided Cost / Infrastructure │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 1. Type Systems      │ Algebraic Data Types (ADTs) & │ Eliminates invalid runtime      │ Eliminates custom defensive   │
-    │    & Compilers       │ Affine / Linear Types         │ states and memory leaks at      │ validation logic and runtime  │
-    │                      │                               │ compile time.                   │ sanitization assertions.      │
-    │                      │ <i>for example, Rust <code>enum</code> / <code>Drop</code></i>│                                 │                               │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 2. Database          │ Database <code>UNIQUE</code>, │ Guarantees data integrity and   │ Eliminates distributed lock   │
-    │    Engine            │ <code>CHECK</code>, and       │ idempotency at the storage      │ managers (ZooKeeper, Redlock) │
-    │    Primitives        │ Foreign Key Constraints       │ engine layer.                   │ and race condition handling.  │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 3. Database          │ Write-Ahead Log (WAL) &       │ Enables asynchronous change     │ Eliminates dual-writing and   │
-    │    Replication Logs  │ Change Data Capture (CDC)     │ propagation and event stream    │ complex application-level     │
-    │                      │                               │ generation directly from writes.│ event publishing pipelines.   │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 4. Kernel / OS       │ Extended Berkeley Packet      │ Executes programmable packet    │ Eliminates user-space proxy   │
-    │    Subsystems        │ Filter (eBPF) Bytecode        │ filtering, tracing, and routing │ context switches and network  │
-    │                      │                               │ in kernel space.                │ latency overhead.             │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 5. I/O Subsystems    │ Linux <code>io_uring</code>   │ Delivers true zero-copy,        │ Eliminates thread-per-request │
-    │                      │ Ring Buffers                  │ non-blocking asynchronous I/O   │ memory overhead and OS        │
-    │                      │                               │ without syscall overhead.       │ context switching bottlenecks.│
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 6. Protocol          │ Standard HTTP Caching Headers │ Offloads read traffic to edge   │ Eliminates internal Redis     │
-    │    Metadata          │ (<code>ETag</code>, <code>If-None-Match</code>)│ caches and browser memory.      │ cache clusters for static and │
-    │                      │                               │                                 │ semi-static resources.        │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 7. Payload           │ Client-Generated Idempotency  │ Prevents duplicate execution    │ Eliminates complex two-phase  │
-    │    Envelopes         │ Keys & Request UUIDs          │ of payment and mutation events. │ commit orchestration.         │
-    ├──────────────────────┼───────────────────────────────┼─────────────────────────────────┼───────────────────────────────┤
-    │ 8. Compute / Idle    │ Cooperative Work-Stealing     │ Reclaims spare CPU cycles       │ Eliminates dedicated batch    │
-    │    Intervals         │ Thread Pools (for example, Tokio)    │ during I/O wait states for      │ worker clusters for small     │
-    │                      │                               │ background maintenance.         │ maintenance tasks.            │
-    └──────────────────────┴───────────────────────────────┴─────────────────────────────────┴───────────────────────────────┘
+**SOFTWARE RESOURCES CATALOG**
+
+| Resource Category | Latent Mechanism | Functional Utility | Avoided Cost / Infrastructure |
+| --- | --- | --- | --- |
+| 1. Type Systems | Algebraic Data Types (ADTs) & | Eliminates invalid runtime | Eliminates custom defensive |
+| & Compilers | Affine / Linear Types | states and memory leaks at | validation logic and runtime |
+|  |  | compile time. | sanitization assertions. |
+|  | <i>for example, Rust <code>enum</code> / <code>Drop</code></i> |  |  |
+| 2. Database | Database <code>UNIQUE</code>, | Guarantees data integrity and | Eliminates distributed lock |
+| Engine | <code>CHECK</code>, and | idempotency at the storage | managers (ZooKeeper, Redlock) |
+| Primitives | Foreign Key Constraints | engine layer. | and race condition handling. |
+| 3. Database | Write-Ahead Log (WAL) & | Enables asynchronous change | Eliminates dual-writing and |
+| Replication Logs | Change Data Capture (CDC) | propagation and event stream | complex application-level |
+|  |  | generation directly from writes. | event publishing pipelines. |
+| 4. Kernel / OS | Extended Berkeley Packet | Executes programmable packet | Eliminates user-space proxy |
+| Subsystems | Filter (eBPF) Bytecode | filtering, tracing, and routing | context switches and network |
+|  |  | in kernel space. | latency overhead. |
+| 5. I/O Subsystems | Linux <code>io_uring</code> | Delivers true zero-copy, | Eliminates thread-per-request |
+|  | Ring Buffers | non-blocking asynchronous I/O | memory overhead and OS |
+|  |  | without syscall overhead. | context switching bottlenecks. |
+| 6. Protocol | Standard HTTP Caching Headers | Offloads read traffic to edge | Eliminates internal Redis |
+| Metadata | (<code>ETag</code>, <code>If-None-Match</code>) | caches and browser memory. | cache clusters for static and |
+|  |  |  | semi-static resources. |
+| 7. Payload | Client-Generated Idempotency | Prevents duplicate execution | Eliminates complex two-phase |
+| Envelopes | Keys & Request UUIDs | of payment and mutation events. | commit orchestration. |
+| 8. Compute / Idle | Cooperative Work-Stealing | Reclaims spare CPU cycles | Eliminates dedicated batch |
+| Intervals | Thread Pools (for example, Tokio) | during I/O wait states for | worker clusters for small |
+|  |  | background maintenance. | maintenance tasks. |
 
 > **The Golden Rule of Software Ideality**: *Never introduce a new persistent service, background daemon, or distributed coordination cluster until you have empirically proven that the latent resources of your existing compiler, operating system, database engine, and protocol layers cannot fulfill the required function.*
 
@@ -11228,27 +11010,22 @@ flowchart TD
 
 The Nine Operations resolve software contradictions through the **Four Software Separation Principles**:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                               FOUR SOFTWARE SEPARATION PRINCIPLES                                │
-    ├─────────────────────────┬──────────────────────────────────────────┬─────────────────────────────┤
-    │ Separation Principle    │ Theoretical Mechanism                    │ Canonical Software Example  │
-    ├─────────────────────────┼──────────────────────────────────────────┼─────────────────────────────┤
-    │ 1. Separation in Time   │ The system satisfies Requirement $A$ at  │ Write path vs Read path;    │
-    │    ($S_{\text{time}}$)  │ time $t_1$ and Requirement $B$ at time   │ Micro-batching with dynamic │
-    │                         │ $t_2$.                                   │ timeout $\tau$; Async CDC.  │
-    ├─────────────────────────┼──────────────────────────────────────────┼─────────────────────────────┤
-    │ 2. Separation in State  │ Subsystem $X$ owns state under condition │ CQRS; Single-writer per-key │
-    │    & Data Ownership     │ $A$, while Subsystem $Y$ owns state      │ partitioning; Immutable log │
-    │    ($S_{\text{space}}$) │ under condition $B$.                     │ vs Mutable projection.      │
-    ├─────────────────────────┼──────────────────────────────────────────┼─────────────────────────────┤
-    │ 3. Separation in Mode   │ System operates under Policy $A$ during  │ Circuit breaker states;     │
-    │    & Condition          │ normal conditions and Policy $B$ during  │ Adaptive load shedding;     │
-    │    ($S_{\text{mode}}$)  │ degraded / high-load conditions.         │ Dynamic sampling filters.   │
-    ├─────────────────────────┼──────────────────────────────────────────┼─────────────────────────────┤
-    │ 4. Separation across    │ Mechanism operates at Layer $L_{\text{low}}$│ eBPF packet filtering in  │
-    │    System Boundaries    │ for property $A$ and Layer $L_{\text{high}}$│ kernel vs User-space logic; │
-    │    ($S_{\text{boundary}}$)│ for property $B$.                      │ WASM plugin sandboxing.     │
-    └─────────────────────────┴──────────────────────────────────────────┴─────────────────────────────┘
+**FOUR SOFTWARE SEPARATION PRINCIPLES**
+
+| Separation Principle | Theoretical Mechanism | Canonical Software Example |
+| --- | --- | --- |
+| 1. Separation in Time | The system satisfies Requirement $A$ at | Write path vs Read path; |
+| ($S_{\text{time}}$) | time $t_1$ and Requirement $B$ at time | Micro-batching with dynamic |
+|  | $t_2$. | timeout $\tau$; Async CDC. |
+| 2. Separation in State | Subsystem $X$ owns state under condition | CQRS; Single-writer per-key |
+| & Data Ownership | $A$, while Subsystem $Y$ owns state | partitioning; Immutable log |
+| ($S_{\text{space}}$) | under condition $B$. | vs Mutable projection. |
+| 3. Separation in Mode | System operates under Policy $A$ during | Circuit breaker states; |
+| & Condition | normal conditions and Policy $B$ during | Adaptive load shedding; |
+| ($S_{\text{mode}}$) | degraded / high-load conditions. | Dynamic sampling filters. |
+| 4. Separation across | Mechanism operates at Layer $L_{\text{low}}$ | eBPF packet filtering in |
+| System Boundaries | for property $A$ and Layer $L_{\text{high}}$ | kernel vs User-space logic; |
+| ($S_{\text{boundary}}$) | for property $B$. | WASM plugin sandboxing. |
 
 ------------------------------------------------------------------------
 
@@ -11324,24 +11101,20 @@ Performance contradictions in software engineering are governed by queueing theo
 
 #### 8.1.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                              PERFORMANCE CONTRADICTION TAXONOMY                                        │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Physical / Algorithmic Manifestation│ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Throughput vs        │ Batch Size $b$ must be large  │ Larger batches amortize fixed   │ System either suffers high │
-    │    Latency              │ to maximize IOPS efficiency,  │ I/O overhead ($S_0$), but force │ per-request latency or     │
-    │                         │ but small to minimize wait.   │ early arrivals to wait in buffer.│ collapses under I/O syscall│
-    │                         │                               │ $L(b) = \frac{b-1}{2\lambda} + \frac{S_0 + b s}{c}$│ saturation.                │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Utilization vs       │ CPU / Pool utilization $\rho$ │ High utilization maximizes      │ Tail latency ($p99$) spikes│
-    │    Tail Latency         │ must be high for cost economy,│ hardware ROI, but causes queue  │ exponentially; queue backup│
-    │                         │ but low to prevent queueing.  │ saturation under bursty traffic.│ triggers downstream timeouts│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Cache Freshness vs   │ Cache TTL $\tau$ must be long │ Long TTL maximizes database offload│ Stale reads cause financial│
-    │    Database Offload     │ to protect DB, but short to   │ ratio, but serves outdated data │ or domain inconsistency;   │
-    │                         │ maintain data accuracy.       │ during concurrent mutations.    │ short TTL causes stampedes.│
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**PERFORMANCE CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Physical / Algorithmic Manifestation | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Throughput vs | Batch Size $b$ must be large | Larger batches amortize fixed | System either suffers high |
+| Latency | to maximize IOPS efficiency, | I/O overhead ($S_0$), but force | per-request latency or |
+|  | but small to minimize wait. | early arrivals to wait in buffer. | collapses under I/O syscall |
+|  |  | $L(b) = \frac{b-1}{2\lambda} + \frac{S_0 + b s}{c}$ | saturation. |
+| 2. Utilization vs | CPU / Pool utilization $\rho$ | High utilization maximizes | Tail latency ($p99$) spikes |
+| Tail Latency | must be high for cost economy, | hardware ROI, but causes queue | exponentially; queue backup |
+|  | but low to prevent queueing. | saturation under bursty traffic. | triggers downstream timeouts |
+| 3. Cache Freshness vs | Cache TTL $\tau$ must be long | Long TTL maximizes database offload | Stale reads cause financial |
+| Database Offload | to protect DB, but short to | ratio, but serves outdated data | or domain inconsistency; |
+|  | maintain data accuracy. | during concurrent mutations. | short TTL causes stampedes. |
 
 #### 8.1.3. Clean Resolution via Separation Principles
 
@@ -11391,25 +11164,21 @@ Modifiability reflects the cost and ripple effect of changing software component
 
 #### 8.2.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                              MODIFIABILITY CONTRADICTION TAXONOMY                                      │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Structural / Semantic Clash     │ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Abstraction &        │ Code must be generic and      │ Deep class hierarchies and      │ Cognitive overload;        │
-    │    Generality vs        │ abstract to support future    │ parameter-heavy abstractions    │ "Design Patternitis";      │
-    │    Understandability    │ requirements, but concrete to │ obscure concrete business logic │ simple bug fixes require   │
-    │                         │ be easily comprehended.       │ and complicate debugging.       │ traversing 12 indirection layers.│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Independent          │ Services must be decoupled to │ Independent deployments cause   │ Distributed runtime schema │
-    │    Deployability vs     │ allow separate release cycles,│ subtle contract drift and       │ breaks; cross-service bugs │
-    │    Semantic Consistency │ but tightly aligned to prevent│ breaking API incompatibilities. │ detected only in production.│
-    │                         │ end-to-end integration bugs.  │                                 │                            │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Extensibility vs     │ Internal state must be open to│ Exposing internal structures for│ Leaky abstractions; clients│
-    │    Strict Encapsulation │ extension, but sealed to      │ plugins allows external code to │ depend on private details; │
-    │                         │ preserve internal invariants. │ violate domain consistency rules.│ refactoring breaks plugins. │
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**MODIFIABILITY CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Structural / Semantic Clash | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Abstraction & | Code must be generic and | Deep class hierarchies and | Cognitive overload; |
+| Generality vs | abstract to support future | parameter-heavy abstractions | "Design Patternitis"; |
+| Understandability | requirements, but concrete to | obscure concrete business logic | simple bug fixes require |
+|  | be easily comprehended. | and complicate debugging. | traversing 12 indirection layers. |
+| 2. Independent | Services must be decoupled to | Independent deployments cause | Distributed runtime schema |
+| Deployability vs | allow separate release cycles, | subtle contract drift and | breaks; cross-service bugs |
+| Semantic Consistency | but tightly aligned to prevent | breaking API incompatibilities. | detected only in production. |
+|  | end-to-end integration bugs. |  |  |
+| 3. Extensibility vs | Internal state must be open to | Exposing internal structures for | Leaky abstractions; clients |
+| Strict Encapsulation | extension, but sealed to | plugins allows external code to | depend on private details; |
+|  | preserve internal invariants. | violate domain consistency rules. | refactoring breaks plugins. |
 
 #### 8.2.3. Clean Resolution via Separation Principles
 
@@ -11459,26 +11228,22 @@ Reliability in distributed software systems is governed by probability theory an
 
 #### 8.3.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                               RELIABILITY CONTRADICTION TAXONOMY                                       │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Distributed Mechanism Clash     │ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Strong Consistency   │ Node state must be            │ Under network partition $P$,    │ System either rejects all  │
-    │    vs High Availability │ synchronously locked across   │ waiting for remote consensus    │ writes (outage) or allows  │
-    │    (CAP Dilemma)        │ all replicas, but replicas    │ blocks writes; accepting local  │ split-brain state and data │
-    │                         │ must accept local writes.     │ writes causes data divergence.  │ corruption.                │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Aggressive Retries   │ Clients must retry failed     │ Retrying transient network drops│ Downstream dependency      │
-    │    vs Avalanche /       │ requests to maximize single-  │ multiplies inbound request      │ suffers total collapse;    │
-    │    Thundering Herd      │ call success, but must not    │ volume during outages, creating │ cascading failure takes down│
-    │                         │ overload failing downstreams. │ an inescapable retry storm.     │ entire platform.           │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Durability (Sync     │ Storage engine must execute   │ Disk <code>fsync()</code> and   │ Data loss on node crash    │
-    │    Disk Flush) vs       │ synchronous disk flush to     │ multi-AZ consensus introduce    │ or severe transaction      │
-    │    Write Latency        │ guarantee persistence, but    │ millisecond write latency;      │ throughput bottleneck.     │
-    │                         │ respond in sub-millisecond.   │ memory buffering risks loss.    │                            │
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**RELIABILITY CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Distributed Mechanism Clash | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Strong Consistency | Node state must be | Under network partition $P$, | System either rejects all |
+| vs High Availability | synchronously locked across | waiting for remote consensus | writes (outage) or allows |
+| (CAP Dilemma) | all replicas, but replicas | blocks writes; accepting local | split-brain state and data |
+|  | must accept local writes. | writes causes data divergence. | corruption. |
+| 2. Aggressive Retries | Clients must retry failed | Retrying transient network drops | Downstream dependency |
+| vs Avalanche / | requests to maximize single- | multiplies inbound request | suffers total collapse; |
+| Thundering Herd | call success, but must not | volume during outages, creating | cascading failure takes down |
+|  | overload failing downstreams. | an inescapable retry storm. | entire platform. |
+| 3. Durability (Sync | Storage engine must execute | Disk <code>fsync()</code> and | Data loss on node crash |
+| Disk Flush) vs | synchronous disk flush to | multi-AZ consensus introduce | or severe transaction |
+| Write Latency | guarantee persistence, but | millisecond write latency; | throughput bottleneck. |
+|  | respond in sub-millisecond. | memory buffering risks loss. |  |
 
 #### 8.3.3. Clean Resolution via Separation Principles
 
@@ -11525,26 +11290,22 @@ Testability and diagnosability quantify the friction of verifying invariants and
 
 #### 8.4.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                         TESTABILITY CONTRADICTION TAXONOMY                                             │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Diagnostic / Verification Clash │ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Telemetry Depth vs   │ System must emit rich high-   │ Full distributed traces and     │ APM storage costs explode; │
-    │    Runtime Overhead &   │ cardinality logs for root-    │ verbose debug logging consume   │ CPU cycles spent on tracing│
-    │    PII Leakage          │ cause analysis, but minimize  │ excessive CPU, memory, and      │ degrade user throughput;   │
-    │                         │ CPU/storage and protect PII.  │ storage, and risk leaking PII.  │ PII compliance violations. │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Environmental        │ Tests must run against real   │ Real databases and services     │ Test suite is slow and     │
-    │    Fidelity vs Test     │ infrastructure to catch bugs, │ introduce non-determinism, slow │ flaky; developers bypass   │
-    │    Isolation & Speed    │ but run in milliseconds       │ startup times, and shared-state │ tests or ignore broken CI  │
-    │                         │ without flaky dependencies.   │ race conditions.                │ builds.                    │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Deterministic        │ Complex concurrent edge cases │ Real OS thread scheduling and   │ Race conditions reproduce  │
-    │    Reproducibility vs   │ must be reliably reproduced,  │ distributed clock drift are     │ only once in 10,000 runs in│
-    │    Real-World           │ but real concurrency is       │ inherently non-deterministic and│ production; impossible to  │
-    │    Concurrency Testing  │ non-deterministic.            │ unseeded.                       │ debug locally.             │
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**TESTABILITY CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Diagnostic / Verification Clash | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Telemetry Depth vs | System must emit rich high- | Full distributed traces and | APM storage costs explode; |
+| Runtime Overhead & | cardinality logs for root- | verbose debug logging consume | CPU cycles spent on tracing |
+| PII Leakage | cause analysis, but minimize | excessive CPU, memory, and | degrade user throughput; |
+|  | CPU/storage and protect PII. | storage, and risk leaking PII. | PII compliance violations. |
+| 2. Environmental | Tests must run against real | Real databases and services | Test suite is slow and |
+| Fidelity vs Test | infrastructure to catch bugs, | introduce non-determinism, slow | flaky; developers bypass |
+| Isolation & Speed | but run in milliseconds | startup times, and shared-state | tests or ignore broken CI |
+|  | without flaky dependencies. | race conditions. | builds. |
+| 3. Deterministic | Complex concurrent edge cases | Real OS thread scheduling and | Race conditions reproduce |
+| Reproducibility vs | must be reliably reproduced, | distributed clock drift are | only once in 10,000 runs in |
+| Real-World | but real concurrency is | inherently non-deterministic and | production; impossible to |
+| Concurrency Testing | non-deterministic. | unseeded. | debug locally. |
 
 #### 8.4.3. Clean Resolution via Separation Principles
 
@@ -11590,26 +11351,22 @@ Security contradictions are governed by access control models, cryptography, and
 
 #### 8.5.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                                 SECURITY CONTRADICTION TAXONOMY                                        │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Security vs Engineering Clash   │ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Zero Trust & Granular│ Access must be verified on    │ Remote authorization calls (ABAC│ Developers bypass security │
-    │    Auth vs Latency &    │ every RPC with dynamic context│ / Zanzibar) add millisecond     │ checks; latency budget     │
-    │    Developer Velocity   │ but service calls must remain │ latency to every internal hop   │ exceeded; massive monolithic│
-    │                         │ fast and simple to compose.   │ and complicate local dev.       │ permissions creep.         │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Immutable Audit Logs │ Audit trails must be append-  │ GDPR/CCPA mandates permanent    │ Regulatory non-compliance  │
-    │    vs Privacy Erasure   │ only and cryptographically    │ deletion of user records;       │ fines or compromised audit │
-    │    (GDPR Deletion)      │ immutable, but privacy laws   │ mutating an immutable log       │ integrity and forensic     │
-    │                         │ mandate permanent erasure.    │ destroys cryptographic proofs.  │ invalidation.              │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Deep Packet / Payload│ Inbound payloads must be      │ Deep JSON/gRPC deserialization  │ Application vulnerability  │
-    │    Inspection vs High   │ thoroughly inspected for WAF/ │ and regex validation consume CPU│ to zero-day injection or   │
-    │    Throughput & Stream  │ CVE attacks, but streamed at  │ and break zero-copy network     │ severe ingress bandwidth   │
-    │    Processing           │ multi-gigabit line rate.      │ streaming pipelines.            │ bottlenecks.               │
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**SECURITY CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Security vs Engineering Clash | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Zero Trust & Granular | Access must be verified on | Remote authorization calls (ABAC | Developers bypass security |
+| Auth vs Latency & | every RPC with dynamic context | / Zanzibar) add millisecond | checks; latency budget |
+| Developer Velocity | but service calls must remain | latency to every internal hop | exceeded; massive monolithic |
+|  | fast and simple to compose. | and complicate local dev. | permissions creep. |
+| 2. Immutable Audit Logs | Audit trails must be append- | GDPR/CCPA mandates permanent | Regulatory non-compliance |
+| vs Privacy Erasure | only and cryptographically | deletion of user records; | fines or compromised audit |
+| (GDPR Deletion) | immutable, but privacy laws | mutating an immutable log | integrity and forensic |
+|  | mandate permanent erasure. | destroys cryptographic proofs. | invalidation. |
+| 3. Deep Packet / Payload | Inbound payloads must be | Deep JSON/gRPC deserialization | Application vulnerability |
+| Inspection vs High | thoroughly inspected for WAF/ | and regex validation consume CPU | to zero-day injection or |
+| Throughput & Stream | CVE attacks, but streamed at | and break zero-copy network | severe ingress bandwidth |
+| Processing | multi-gigabit line rate. | streaming pipelines. | bottlenecks. |
 
 #### 8.5.3. Clean Resolution via Separation Principles
 
@@ -11653,26 +11410,22 @@ Software economics governs the optimization of total engineering effort, infrast
 
 #### 8.6.2. Systematic Contradiction Breakdown
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                                ECONOMICS CONTRADICTION TAXONOMY                                        │
-    ├─────────────────────────┬───────────────────────────────┬─────────────────────────────────┬────────────────────────────┤
-    │ Contradiction Clash     │ Conflicting Parameters        │ Economic / Organizational Clash │ Systemic Failure if Unresolved│
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 1. Rapid Time-to-Market │ System must be implemented    │ Monolithic quick hacks ship     │ Team velocity grinds to a  │
-    │    vs Lifecycle TCO &   │ immediately to capture market,│ fast but accumulate crippling   │ halt after 12 months; total│
-    │    Technical Debt       │ but built cleanly to prevent  │ technical debt; clean micro-    │ rewrite required at massive│
-    │                         │ compounding maintenance cost. │ services delay launch by a year.│ financial expense.         │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 2. Multi-Tenant Cloud   │ Compute resources must be     │ Shared multi-tenant pools       │ Noisy neighbor performance │
-    │    Elasticity vs Cost   │ pooled to minimize base spend,│ suffer from unpredictable burst │ degradation for tier-1     │
-    │    Predictability       │ but isolated to prevent noisy │ billing and noisy neighbors;    │ customers; runaway cloud   │
-    │                         │ neighbors and billing spikes. │ dedicated instances waste money.│ egress/compute invoices.   │
-    ├─────────────────────────┼───────────────────────────────┼─────────────────────────────────┼────────────────────────────┤
-    │ 3. Managed Cloud SaaS vs│ Proprietary managed services  │ Proprietary services (DynamoDB, │ Massive margin compression │
-    │    Vendor Lock-In &     │ eliminate operational SRE     │ BigQuery) yield zero ops cost   │ at scale; exorbitant cost  │
-    │    Margin Compression   │ overhead, but lock architecture│ but create vendor lock-in and   │ to migrate when provider   │
-    │                         │ to high vendor unit margins.  │ severe cost inflation at scale. │ raises prices.             │
-    └─────────────────────────┴───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘
+**ECONOMICS CONTRADICTION TAXONOMY**
+
+| Contradiction Clash | Conflicting Parameters | Economic / Organizational Clash | Systemic Failure if Unresolved |
+| --- | --- | --- | --- |
+| 1. Rapid Time-to-Market | System must be implemented | Monolithic quick hacks ship | Team velocity grinds to a |
+| vs Lifecycle TCO & | immediately to capture market, | fast but accumulate crippling | halt after 12 months; total |
+| Technical Debt | but built cleanly to prevent | technical debt; clean micro- | rewrite required at massive |
+|  | compounding maintenance cost. | services delay launch by a year. | financial expense. |
+| 2. Multi-Tenant Cloud | Compute resources must be | Shared multi-tenant pools | Noisy neighbor performance |
+| Elasticity vs Cost | pooled to minimize base spend, | suffer from unpredictable burst | degradation for tier-1 |
+| Predictability | but isolated to prevent noisy | billing and noisy neighbors; | customers; runaway cloud |
+|  | neighbors and billing spikes. | dedicated instances waste money. | egress/compute invoices. |
+| 3. Managed Cloud SaaS vs | Proprietary managed services | Proprietary services (DynamoDB, | Massive margin compression |
+| Vendor Lock-In & | eliminate operational SRE | BigQuery) yield zero ops cost | at scale; exorbitant cost |
+| Margin Compression | overhead, but lock architecture | but create vendor lock-in and | to migrate when provider |
+|  | to high vendor unit margins. | severe cost inflation at scale. | raises prices. |
 
 #### 8.6.3. Clean Resolution via Separation Principles
 
@@ -11708,53 +11461,38 @@ flowchart TD
 
 ### 8.7. Master Summary Matrix of Software Contradictions and Separation Mechanisms
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                    MASTER SOFTWARE CONTRADICTION & SEPARATION MATRIX                                   │
-    ├────────────────────┬─────────────────────────────┬───────────────────────────┬─────────────────────────────────────────┤
-    │ Contradiction      │ Primary Trade-off / Clash   │ Primary Separation Type   │ Canonical Software Mechanism            │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Performance        │ Throughput vs Latency       │ Separation in Time        │ Dynamic Adaptive Micro-Batching with    │
-    │                    │                             │ ($S_{\text{time}}$)       │ Max Flush Timeout ($\tau_{\text{max}}$) │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Performance        │ Utilization vs Tail Latency │ Separation in Mode        │ Adaptive Concurrency Limiting (CoDel) & │
-    │                    │                             │ ($S_{\text{mode}}$)       │ Dynamic Load Shedding                   │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Performance        │ Freshness vs DB Offload     │ Separation in State       │ CDC Event-Driven Cache Invalidation &   │
-    │                    │                             │ ($S_{\text{space}}$)      │ Cryptographic Cache Leases              │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Modifiability      │ Abstraction vs Simplicity   │ Separation in Boundary    │ Parnas Information Hiding & Compile-    │
-    │                    │                             │ ($S_{\text{boundary}}$)   │ Time Generic Traits (Zero Runtime Cost) │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Modifiability      │ Independent Deploy vs Drift │ Separation in Time        │ Expand/Contract (Parallel Run) Schema   │
-    │                    │                             │ ($S_{\text{time}}$)       │ Rollout & Consumer-Driven Contracts     │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Reliability        │ Consistency vs Availability │ Separation in State       │ CRDTs for Commutative State; Single-    │
-    │                    │ (CAP Theorem)               │ ($S_{\text{space}}$)      │ Leader Partitioning for Invariants      │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Reliability        │ Retries vs Thundering Herd  │ Separation in Mode        │ Exponential Backoff with Full Jitter,   │
-    │                    │                             │ ($S_{\text{mode}}$)       │ Client Retry Budgets & Circuit Breakers │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Reliability        │ Durability vs Write Latency │ Separation in Boundary    │ WAL Group Commit & Quorum In-Memory     │
-    │                    │                             │ ($S_{\text{boundary}}$)   │ Replication (Raft over NVMe/RAM)        │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Testability        │ Telemetry Depth vs Overhead │ Separation in Mode        │ Tail-Based Adaptive Tracing & Kernel    │
-    │                    │                             │ ($S_{\text{mode}}$)       │ eBPF Continuous Profiling               │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Testability        │ Fidelity vs Speed/Isolation │ Separation in State       │ Ephemeral Testcontainers & In-Memory    │
-    │                    │                             │ ($S_{\text{space}}$)      │ Database Instances per Test Thread      │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Security           │ Zero Trust Auth vs Latency  │ Separation in Time        │ Short-Lived Cryptographic Tokens (JWT/  │
-    │                    │                             │ ($S_{\text{time}}$)       │ PASETO) & Local WASM Policy Engines     │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Security           │ Immutable Log vs GDPR       │ Separation in State       │ Crypto-Shredding (Per-User Ephemeral    │
-    │                    │ Erasure                     │ ($S_{\text{space}}$)      │ Keys Destroyed from KMS on Deletion)    │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Economics          │ Time-to-Market vs TCO       │ Separation in Time        │ Modular Monolith First with Explicit    │
-    │                    │                             │ ($S_{\text{time}}$)       │ Transition Milestones & Isolated Schema │
-    ├────────────────────┼─────────────────────────────┼───────────────────────────┼─────────────────────────────────────────┤
-    │ Economics          │ SaaS Velocity vs Lock-in    │ Separation in Boundary    │ Hexagonal Ports and Adapters Isolating  │
-    │                    │                             │ ($S_{\text{boundary}}$)   │ Cloud Provider SDKs                     │
-    └────────────────────┴─────────────────────────────┴───────────────────────────┴─────────────────────────────────────────┘
+**MASTER SOFTWARE CONTRADICTION & SEPARATION MATRIX**
+
+| Contradiction | Primary Trade-off / Clash | Primary Separation Type | Canonical Software Mechanism |
+| --- | --- | --- | --- |
+| Performance | Throughput vs Latency | Separation in Time | Dynamic Adaptive Micro-Batching with |
+|  |  | ($S_{\text{time}}$) | Max Flush Timeout ($\tau_{\text{max}}$) |
+| Performance | Utilization vs Tail Latency | Separation in Mode | Adaptive Concurrency Limiting (CoDel) & |
+|  |  | ($S_{\text{mode}}$) | Dynamic Load Shedding |
+| Performance | Freshness vs DB Offload | Separation in State | CDC Event-Driven Cache Invalidation & |
+|  |  | ($S_{\text{space}}$) | Cryptographic Cache Leases |
+| Modifiability | Abstraction vs Simplicity | Separation in Boundary | Parnas Information Hiding & Compile- |
+|  |  | ($S_{\text{boundary}}$) | Time Generic Traits (Zero Runtime Cost) |
+| Modifiability | Independent Deploy vs Drift | Separation in Time | Expand/Contract (Parallel Run) Schema |
+|  |  | ($S_{\text{time}}$) | Rollout & Consumer-Driven Contracts |
+| Reliability | Consistency vs Availability | Separation in State | CRDTs for Commutative State; Single- |
+|  | (CAP Theorem) | ($S_{\text{space}}$) | Leader Partitioning for Invariants |
+| Reliability | Retries vs Thundering Herd | Separation in Mode | Exponential Backoff with Full Jitter, |
+|  |  | ($S_{\text{mode}}$) | Client Retry Budgets & Circuit Breakers |
+| Reliability | Durability vs Write Latency | Separation in Boundary | WAL Group Commit & Quorum In-Memory |
+|  |  | ($S_{\text{boundary}}$) | Replication (Raft over NVMe/RAM) |
+| Testability | Telemetry Depth vs Overhead | Separation in Mode | Tail-Based Adaptive Tracing & Kernel |
+|  |  | ($S_{\text{mode}}$) | eBPF Continuous Profiling |
+| Testability | Fidelity vs Speed/Isolation | Separation in State | Ephemeral Testcontainers & In-Memory |
+|  |  | ($S_{\text{space}}$) | Database Instances per Test Thread |
+| Security | Zero Trust Auth vs Latency | Separation in Time | Short-Lived Cryptographic Tokens (JWT/ |
+|  |  | ($S_{\text{time}}$) | PASETO) & Local WASM Policy Engines |
+| Security | Immutable Log vs GDPR | Separation in State | Crypto-Shredding (Per-User Ephemeral |
+|  | Erasure | ($S_{\text{space}}$) | Keys Destroyed from KMS on Deletion) |
+| Economics | Time-to-Market vs TCO | Separation in Time | Modular Monolith First with Explicit |
+|  |  | ($S_{\text{time}}$) | Transition Milestones & Isolated Schema |
+| Economics | SaaS Velocity vs Lock-in | Separation in Boundary | Hexagonal Ports and Adapters Isolating |
+|  |  | ($S_{\text{boundary}}$) | Cloud Provider SDKs |
 
 ------------------------------------------------------------------------
 
@@ -11816,11 +11554,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.1. Function: Deduplication & Idempotency
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: DEDUPLICATION & IDEMPOTENCY                                                            │
-    │ Objective: Ensure that repeated execution of an operation produces the identical system state  │
-    │ and output as a single execution, despite network retries and duplicate message deliveries.      │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: DEDUPLICATION & IDEMPOTENCY**
+> Objective: Ensure that repeated execution of an operation produces the identical system state
+> and output as a single execution, despite network retries and duplicate message deliveries.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -11834,11 +11570,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.2. Function: Distributed Coordination & Consensus
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: DISTRIBUTED COORDINATION & CONSENSUS                                                   │
-    │ Objective: Achieve agreement on a single data value or execution state across multiple nodes in   │
-    │ an asynchronous network subject to packet loss, delay, and node crash failures.                 │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: DISTRIBUTED COORDINATION & CONSENSUS**
+> Objective: Achieve agreement on a single data value or execution state across multiple nodes in
+> an asynchronous network subject to packet loss, delay, and node crash failures.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -11851,11 +11585,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.3. Function: Caching & Latency Decoupling
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: CACHING & LATENCY DECOUPLING                                                           │
-    │ Objective: Minimize response latency and downstream load by serving repeated read requests from   │
-    │ low-latency memory, while managing consistency and cache invalidation.                          │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: CACHING & LATENCY DECOUPLING**
+> Objective: Minimize response latency and downstream load by serving repeated read requests from
+> low-latency memory, while managing consistency and cache invalidation.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -11868,11 +11600,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.4. Function: Routing & Load Distribution
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: ROUTING & LOAD DISTRIBUTION                                                           │
-    │ Objective: Distribute incoming computational requests across heterogeneous worker nodes to        │
-    │ minimize tail latency, prevent node hot-spots, and handle node churn gracefully.                │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: ROUTING & LOAD DISTRIBUTION**
+> Objective: Distribute incoming computational requests across heterogeneous worker nodes to
+> minimize tail latency, prevent node hot-spots, and handle node churn gracefully.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -11885,11 +11615,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.5. Function: Consistency & State Synchronization
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: CONSISTENCY & STATE SYNCHRONIZATION                                                   │
-    │ Objective: Maintain coherent shared state across multiple execution environments and replicas   │
-    │ while balancing the CAP/PACELC trade-offs between consistency, availability, and latency.       │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: CONSISTENCY & STATE SYNCHRONIZATION**
+> Objective: Maintain coherent shared state across multiple execution environments and replicas
+> while balancing the CAP/PACELC trade-offs between consistency, availability, and latency.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -11902,11 +11630,9 @@ The following tables define the formal catalog across six fundamental computatio
 
 ### 9.3.6. Function: Fault Isolation & Concurrency Control
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FUNCTION: FAULT ISOLATION & CONCURRENCY CONTROL                                                  │
-    │ Objective: Prevent local runtime faults, slow downstream dependencies, and resource exhaustion   │
-    │ from escalating into systemic, cascading outages across the entire distributed system.           │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **FUNCTION: FAULT ISOLATION & CONCURRENCY CONTROL**
+> Objective: Prevent local runtime faults, slow downstream dependencies, and resource exhaustion
+> from escalating into systemic, cascading outages across the entire distributed system.
 
 | ID | Operational Conditions ($\mathcal{C}_{\text{ops}}$) | Invariant Mechanism ($\mathcal{M}_{\text{inv}}$) | Resource Cost ($\mathcal{R}_{\text{cost}}$) | Harm & Failure Modes ($\mathcal{H}_{\text{harm}}$) | Empirical Verification Method ($\mathcal{V}_{\text{verify}}$) | Concrete Technology Carriers ($\mathcal{T}_{\text{carriers}}$) |
 |----|----|----|----|----|----|----|
@@ -12155,15 +11881,12 @@ For AI coding agents, this principle is an absolute epistemic imperative. An LLM
 
 To guarantee that reasoning is anchored in empirical reality, an AI agent operating within the Ariadne framework MUST execute the **Five-Layer Grounding Protocol** before formulating causal hypotheses (`HYP-*`), transforming systems (`CAN-*`), or finalizing decisions (`DEC-*`).
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE FIVE-LAYER GROUNDING PROTOCOL                                                                │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ LAYER 1: SYNTACTIC & TYPE GROUNDING (AST, Types, Signatures, Nullability Contracts)             │
-    │ LAYER 2: TOPOLOGICAL GROUNDING (Static Call Graph, Import Trees, Afferent/Efferent Coupling)     │
-    │ LAYER 3: PERSISTENCE & STATE GROUNDING (SQL Schemas, Migration Logs, Serializers, Indexes)       │
-    │ LAYER 4: HISTORICAL & CHURN GROUNDING (Git Log, Blame, Co-Change Coupling, Hotspot Analysis)    │
-    │ LAYER 5: DYNAMIC & TELEMETRY GROUNDING (OpenTelemetry Spans, p99 Latencies, Query EXPLAIN Plans) │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE FIVE-LAYER GROUNDING PROTOCOL**
+> LAYER 1: SYNTACTIC & TYPE GROUNDING (AST, Types, Signatures, Nullability Contracts)
+> LAYER 2: TOPOLOGICAL GROUNDING (Static Call Graph, Import Trees, Afferent/Efferent Coupling)
+> LAYER 3: PERSISTENCE & STATE GROUNDING (SQL Schemas, Migration Logs, Serializers, Indexes)
+> LAYER 4: HISTORICAL & CHURN GROUNDING (Git Log, Blame, Co-Change Coupling, Hotspot Analysis)
+> LAYER 5: DYNAMIC & TELEMETRY GROUNDING (OpenTelemetry Spans, p99 Latencies, Query EXPLAIN Plans)
 
 ### Layer 1: Syntactic & Type Grounding (AST & Type System)
 
@@ -12265,17 +11988,14 @@ To guarantee architectural integrity, the Ariadne framework enforces an **Indepe
 
 ## 12.2. The Seven Adversarial Critique Vectors
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE SEVEN ADVERSARIAL CRITIQUE VECTORS                                                           │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1. COMPLEXITY DISPLACEMENT: Did code simplicity merely shift into operational fragility?         │
-    │ 2. HIDDEN STATE: Did a "stateless" design introduce uncoordinated distributed state?            │
-    │ 3. INVARIANT WEAKENING: Was the conflict resolved by silently abandoning a core guarantee?       │
-    │ 4. FRAGILITY SHIFT: Did a visible fail-fast error become a silent data corruption or tail spike? │
-    │ 5. UNBUDGETED MIGRATION: Does the target architecture lack a zero-downtime transition path?      │
-    │ 6. UNVERIFIED RESOURCE: Does the mechanism rely on a phantom API, speed, or platform primitive?  │
-    │ 7. TELEMETRY CONFABULATION: Is the design justified by synthetic mean metrics masking bursts?    │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **THE SEVEN ADVERSARIAL CRITIQUE VECTORS**
+> 1. COMPLEXITY DISPLACEMENT: Did code simplicity merely shift into operational fragility?
+> 2. HIDDEN STATE: Did a "stateless" design introduce uncoordinated distributed state?
+> 3. INVARIANT WEAKENING: Was the conflict resolved by silently abandoning a core guarantee?
+> 4. FRAGILITY SHIFT: Did a visible fail-fast error become a silent data corruption or tail spike?
+> 5. UNBUDGETED MIGRATION: Does the target architecture lack a zero-downtime transition path?
+> 6. UNVERIFIED RESOURCE: Does the mechanism rely on a phantom API, speed, or platform primitive?
+> 7. TELEMETRY CONFABULATION: Is the design justified by synthetic mean metrics masking bursts?
 
 ### Vector 1: Complexity Displacement (Code $\to$ Ops / Infrastructure)
 
@@ -12536,21 +12256,19 @@ $$\mathcal{S}_{t+1} = \mathcal{O}_k\left(\mathcal{S}_t, \Delta_{\text{input}}\ri
 
 The execution of $\mathcal{O}_k$ consumes an input delta $\Delta_{\text{input}}$ (for example, telemetry logs, prototype test results, code graph analysis), performs a structured transformation on the problem representation, updates the knowledge base $\mathcal{K}_{t+1}$, appends new typed nodes and edges to $\mathcal{G}_{t+1}$, and reduces one or more components of the uncertainty vector $\mathbf{U}_{t+1}$.
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                EPISTEMIC STATE TRANSITION MATRIX                                 │
-    ├───────────┬──────────────────────────────────┬───────────────────────────────────────────────────┤
-    │ Operation │ Primary Uncertainty Reduced      │ Typical Deliverable Node Added to Graph G_t       │
-    ├───────────┼──────────────────────────────────┼───────────────────────────────────────────────────┤
-    │ Op 1      │ U_frame (Framing Uncertainty)    │ FRAME-*: Implementation-Agnostic Passport         │
-    │ Op 2      │ U_diag  (Causal Uncertainty)     │ HYP-*, CTR-*: Causal Model & Contradiction Map    │
-    │ Op 3      │ U_trans (Constructive Invariant) │ TRF-*: Transformation Operators Log               │
-    │ Op 4      │ U_space (Morphological Entropy)  │ SPACE-*, CAN-*: Structurally Distinct Candidates  │
-    │ Op 5      │ U_know  (Epistemic Deficit)      │ UNK-*, EVDREQ-*, EVD-*: Empirical Evidence Log    │
-    │ Op 6      │ U_dep   (Coupling & Radius Risk) │ DEP-*: Dependency Matrix & Change Propagation Map │
-    │ Op 7      │ U_dyn   (Non-Linear Dynamic Risk)│ DYN-*: Stocks, Flows, Delays & Feedback Loops     │
-    │ Op 8      │ U_val   (Value & Preference Gap) │ VAL-*, DEC-*: Multidimensional Value Trade-off    │
-    │ Op 9      │ U_ver   (Verification & Rollout) │ TRANS-*, EVD-*: Transition Plan & Verified Tests  │
-    └───────────┴──────────────────────────────────┴───────────────────────────────────────────────────┘
+**EPISTEMIC STATE TRANSITION MATRIX**
+
+| Operation | Primary Uncertainty Reduced | Typical Deliverable Node Added to Graph G_t |
+| --- | --- | --- |
+| Op 1 | U_frame (Framing Uncertainty) | FRAME-*: Implementation-Agnostic Passport |
+| Op 2 | U_diag (Causal Uncertainty) | HYP-*, CTR-*: Causal Model & Contradiction Map |
+| Op 3 | U_trans (Constructive Invariant) | TRF-*: Transformation Operators Log |
+| Op 4 | U_space (Morphological Entropy) | SPACE-*, CAN-*: Structurally Distinct Candidates |
+| Op 5 | U_know (Epistemic Deficit) | UNK-*, EVDREQ-*, EVD-*: Empirical Evidence Log |
+| Op 6 | U_dep (Coupling & Radius Risk) | DEP-*: Dependency Matrix & Change Propagation Map |
+| Op 7 | U_dyn (Non-Linear Dynamic Risk) | DYN-*: Stocks, Flows, Delays & Feedback Loops |
+| Op 8 | U_val (Value & Preference Gap) | VAL-*, DEC-*: Multidimensional Value Trade-off |
+| Op 9 | U_ver (Verification & Rollout) | TRANS-*, EVD-*: Transition Plan & Verified Tests |
 
 ------------------------------------------------------------------------
 
@@ -12609,25 +12327,17 @@ When `DEC-04` and `CAN-01` are invalidated, the uncertainty router does not halt
 
 ## 13.5. Comparative Analysis: Delivery Lifecycles vs. Epistemic Routing
 
-    ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                 DELIVERY LIFECYCLES VS. ARIADNE EPISTEMIC ROUTING                                      │
-    ├──────────────────────┬───────────────────────────────────────────┬─────────────────────────────────────────────────────┤
-    │ Dimension            │ Conventional Delivery (Scrum / Kanban)    │ Ariadne Epistemic Uncertainty Router                │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Primary Currency     │ Story Points, Velocity, WIP limits, Hours │ Bits of Uncertainty Reduced, Empirical Evidence     │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ State Representation │ Ticket Status (To Do, In Progress, Done)  │ Epistemic Graph G_t (Claims, Invariants, Proofs)    │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Handling Uncertainty │ Pushed into sprint backlog or spike story │ Explicitly modeled via EVOI; drives next operation  │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Backtracking Semantics│ Regarded as scope creep or failed sprint  │ First-class state transition (Transitive Invalidate)│
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Candidate Generation │ First viable idea chosen; refined locally │ Morphological divergence into distinct classes      │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Verification Basis   │ "Acceptance Criteria" passed on happy path│ Falsification-oriented test suite & fault injection │
-    ├──────────────────────┼───────────────────────────────────────────┼─────────────────────────────────────────────────────┤
-    │ Stop Condition       │ Ticket moves to "Done" column             │ All high-cost uncertainties verified by execution   │
-    └──────────────────────┴───────────────────────────────────────────┴─────────────────────────────────────────────────────┘
+**DELIVERY LIFECYCLES VS. ARIADNE EPISTEMIC ROUTING**
+
+| Dimension | Conventional Delivery (Scrum / Kanban) | Ariadne Epistemic Uncertainty Router |
+| --- | --- | --- |
+| Primary Currency | Story Points, Velocity, WIP limits, Hours | Bits of Uncertainty Reduced, Empirical Evidence |
+| State Representation | Ticket Status (To Do, In Progress, Done) | Epistemic Graph G_t (Claims, Invariants, Proofs) |
+| Handling Uncertainty | Pushed into sprint backlog or spike story | Explicitly modeled via EVOI; drives next operation |
+| Backtracking Semantics | Regarded as scope creep or failed sprint | First-class state transition (Transitive Invalidate) |
+| Candidate Generation | First viable idea chosen; refined locally | Morphological divergence into distinct classes |
+| Verification Basis | "Acceptance Criteria" passed on happy path | Falsification-oriented test suite & fault injection |
+| Stop Condition | Ticket moves to "Done" column | All high-cost uncertainties verified by execution |
 
 ------------------------------------------------------------------------
 
@@ -13213,41 +12923,30 @@ $$\mathcal{R}_{\text{unc}}(\mathcal{U}_i) = \frac{P(\text{Error} \mid \mathcal{U
 
 ## 15.3. The Uncertainty-to-Operation Routing Matrix
 
-    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │                                           ARIADNE UNCERTAINTY-TO-OPERATION ROUTING MATRIX                                       │
-    ├──────────────────────────────────────┬──────────────────────────┬─────────────────────────────┬─────────────────────────────────┤
-    │ Observed Epistemic Condition         │ Primary Uncertainty Type │ Recommended Operation       │ Mandatory Exit / Gate Deliverable│
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Problem statement contains a vendor  │ U_frame                  │ Operation 1:                │ FRAME-*: Implementation-agnostic│
-    │ product, framework name, or tool     │ (Framing Uncertainty)    │ Frame Problem               │ behavioral delta & invariants   │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ System exhibits defect, regression,  │ U_diag                   │ Operation 2:                │ HYP-*, CTR-*: Falsifiable causal│
-    │ or latency spike with unproven cause │ (Causal Uncertainty)     │ Diagnose Mechanism          │ chain & contradiction model     │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Problem cause is known, but only one │ U_trans                  │ Operation 3:                │ TRF-*: Transformation log using │
-    │ obvious, expensive fix is proposed   │ (Constructive Deficit)   │ Transform System            │ elimination & separation        │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Proposed ideas all cluster within a  │ U_space                  │ Operation 4:                │ SPACE-*, CAN-*: Morphological   │
-    │ single technology or design paradigm │ (Search Space Deficit)   │ Explore Solution Space      │ map of distinct candidate classes│
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Architectural choice hinges on an    │ U_know                   │ Operation 5:                │ UNK-*, EVD-*: Empirical evidence│
-    │ unknown latency, throughput, or cost │ (Epistemic Deficit)      │ Expand Knowledge            │ resolving the specific unknown  │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Modifying a business rule requires   │ U_dep                    │ Operation 6:                │ DEP-*: Coupling matrix with     │
-    │ synchronized edits across >3 modules │ (Boundary / Coupling)    │ Arrange Dependencies        │ change radius R_M <= 1.2        │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ System functions locally, but behaves│ U_dyn                    │ Operation 7:                │ DYN-*: Non-linear dynamics model│
-    │ erratically under load or partitions │ (Dynamic / Concurrency)  │ Model System Dynamics       │ (queues, retries, tail latency) │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Multiple viable candidates exist with│ U_val                    │ Operation 8:                │ VAL-*, DEC-*: Multidimensional  │
-    │ competing quality attribute trade-offs│ (Value / Preference)    │ Evaluate & Select           │ Pareto analysis & ADR           │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Architecture is chosen on paper, but │ U_ver                    │ Operation 9:                │ EVD-*: Property tests, Jepsen   │
-    │ lacks executable proof of invariants │ (Evidentiary Deficit)    │ Verify by Execution         │ chaos runs, microbenchmarks     │
-    ├──────────────────────────────────────┼──────────────────────────┼─────────────────────────────┼─────────────────────────────────┤
-    │ Target architecture is verified, but │ U_trans_sys              │ Operation 9:                │ TRANS-*: Seven-phase migration  │
-    │ path from current state is high-risk │ (Transition Risk)        │ Plan Transition System      │ plan with tested rollback shims │
-    └──────────────────────────────────────┴──────────────────────────┴─────────────────────────────┴─────────────────────────────────┘
+**ARIADNE UNCERTAINTY-TO-OPERATION ROUTING MATRIX**
+
+| Observed Epistemic Condition | Primary Uncertainty Type | Recommended Operation | Mandatory Exit / Gate Deliverable |
+| --- | --- | --- | --- |
+| Problem statement contains a vendor | U_frame | Operation 1: | FRAME-*: Implementation-agnostic |
+| product, framework name, or tool | (Framing Uncertainty) | Frame Problem | behavioral delta & invariants |
+| System exhibits defect, regression, | U_diag | Operation 2: | HYP-*, CTR-*: Falsifiable causal |
+| or latency spike with unproven cause | (Causal Uncertainty) | Diagnose Mechanism | chain & contradiction model |
+| Problem cause is known, but only one | U_trans | Operation 3: | TRF-*: Transformation log using |
+| obvious, expensive fix is proposed | (Constructive Deficit) | Transform System | elimination & separation |
+| Proposed ideas all cluster within a | U_space | Operation 4: | SPACE-*, CAN-*: Morphological |
+| single technology or design paradigm | (Search Space Deficit) | Explore Solution Space | map of distinct candidate classes |
+| Architectural choice hinges on an | U_know | Operation 5: | UNK-*, EVD-*: Empirical evidence |
+| unknown latency, throughput, or cost | (Epistemic Deficit) | Expand Knowledge | resolving the specific unknown |
+| Modifying a business rule requires | U_dep | Operation 6: | DEP-*: Coupling matrix with |
+| synchronized edits across >3 modules | (Boundary / Coupling) | Arrange Dependencies | change radius R_M <= 1.2 |
+| System functions locally, but behaves | U_dyn | Operation 7: | DYN-*: Non-linear dynamics model |
+| erratically under load or partitions | (Dynamic / Concurrency) | Model System Dynamics | (queues, retries, tail latency) |
+| Multiple viable candidates exist with | U_val | Operation 8: | VAL-*, DEC-*: Multidimensional |
+| competing quality attribute trade-offs | (Value / Preference) | Evaluate & Select | Pareto analysis & ADR |
+| Architecture is chosen on paper, but | U_ver | Operation 9: | EVD-*: Property tests, Jepsen |
+| lacks executable proof of invariants | (Evidentiary Deficit) | Verify by Execution | chaos runs, microbenchmarks |
+| Target architecture is verified, but | U_trans_sys | Operation 9: | TRANS-*: Seven-phase migration |
+| path from current state is high-risk | (Transition Risk) | Plan Transition System | plan with tested rollback shims |
 
 ------------------------------------------------------------------------
 
@@ -13268,50 +12967,48 @@ $$\mathcal{R}_{\text{unc}}(\mathcal{U}_i) = \frac{P(\text{Error} \mid \mathcal{U
 
 <!-- -->
 
-    ====================================================================================================
-                                  END OF EXPANDED SECTIONS 13, 14, 15
-    ====================================================================================================
+**End of expanded Sections 13, 14, and 15**
 
-    ***
+***
 
-    ---
+---
 
 ## 16. Three Depth Modes
 
 ### 16.1. The Economic Governance of Epistemic Rigor
 
-    A central failure mode in both human engineering organizations and autonomous multi-agent systems is **epistemic mismatch**: applying either excessive cognitive overhead to trivial, reversible tasks (analysis paralysis) or insufficient analytical and empirical rigor to irreversible, high-blast-radius architectural transformations (reckless deployment).
+A central failure mode in both human engineering organizations and autonomous multi-agent systems is **epistemic mismatch**: applying either excessive cognitive overhead to trivial, reversible tasks (analysis paralysis) or insufficient analytical and empirical rigor to irreversible, high-blast-radius architectural transformations (reckless deployment).
 
-    In [*The Logic of Scientific Discovery* (Popper, 1959/1934, Routledge, DOI: 10.4324/9780203746639)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper established that empirical investigation is guided by the asymmetric cost of falsification versus the risk of uncorroborated theory. In software engineering, this economic balance is formalized through the **Principle of Epistemic Risk Governance**:
+In [*The Logic of Scientific Discovery* (Popper, 1959/1934, Routledge, DOI: 10.4324/9780203746639)](https://en.wikipedia.org/wiki/The_Logic_of_Scientific_Discovery), Karl Popper established that empirical investigation is guided by the asymmetric cost of falsification versus the risk of uncorroborated theory. In software engineering, this economic balance is formalized through the **Principle of Epistemic Risk Governance**:
 
-    $$\mathbb{E}[\text{Risk Cost}] = \mathcal{P}(\text{Defect}) \times \mathcal{C}(\text{Failure Blast Radius}) \times \mathcal{R}(\text{Irreversibility})$$
+$$\mathbb{E}[\text{Risk Cost}] = \mathcal{P}(\text{Defect}) \times \mathcal{C}(\text{Failure Blast Radius}) \times \mathcal{R}(\text{Irreversibility})$$
 
-    Where:
-    - $\mathcal{P}(\text{Defect})$ is the probability of introducing an epistemic or functional defect under incomplete knowledge;
-    - $\mathcal{C}(\text{Failure Blast Radius})$ is the total operational, financial, data-loss, or safety impact if the defect reaches production;
-    - $\mathcal{R}(\text{Irreversibility}) \ge 1$ is the coefficient of rollback difficulty (for example, in-memory bug fix $\approx 1.0$; multi-terabyte distributed database schema migration $\approx 10^3$; cryptographic key rotation or external API contract breach $\approx 10^5$).
+Where:
+- $\mathcal{P}(\text{Defect})$ is the probability of introducing an epistemic or functional defect under incomplete knowledge;
+- $\mathcal{C}(\text{Failure Blast Radius})$ is the total operational, financial, data-loss, or safety impact if the defect reaches production;
+- $\mathcal{R}(\text{Irreversibility}) \ge 1$ is the coefficient of rollback difficulty (for example, in-memory bug fix $\approx 1.0$; multi-terabyte distributed database schema migration $\approx 10^3$; cryptographic key rotation or external API contract breach $\approx 10^5$).
 
-    To optimize engineering throughput without sacrificing reliability, the Ariadne reasoning layer stratifies all cognitive work into **Three Depth Modes**: **Fast Mode**, **Standard Mode**, and **Deep Mode**.
+To optimize engineering throughput without sacrificing reliability, the Ariadne reasoning layer stratifies all cognitive work into **Three Depth Modes**: **Fast Mode**, **Standard Mode**, and **Deep Mode**.
 
-    ```mermaid
-    flowchart TD
-        TaskArrival["Engineering Task Arrival<br/>(Bug, Feature, Refactor, Migration)"] --> EvaluateRisk{"Evaluate Epistemic Risk Profile<br/>• Blast Radius Scope?<br/>• Reversibility / Rollback Cost?<br/>• Cross-Service State Mutation?"}
+```mermaid
+flowchart TD
+    TaskArrival["Engineering Task Arrival<br/>(Bug, Feature, Refactor, Migration)"] --> EvaluateRisk{"Evaluate Epistemic Risk Profile<br/>• Blast Radius Scope?<br/>• Reversibility / Rollback Cost?<br/>• Cross-Service State Mutation?"}
 
-        EvaluateRisk -- "Local Scope<br/>Reversible (Two-Way Door)<br/>No State Mutation" --> FastMode["<b>16.1 Fast Mode</b><br/>• Micro-Passport<br/>• 3 Candidate Mechanisms<br/>• Invariant / Unit Check<br/>• Single-Agent Execution<br/>• Budget: ≤ 4k Tokens"]
+    EvaluateRisk -- "Local Scope<br/>Reversible (Two-Way Door)<br/>No State Mutation" --> FastMode["<b>16.1 Fast Mode</b><br/>• Micro-Passport<br/>• 3 Candidate Mechanisms<br/>• Invariant / Unit Check<br/>• Single-Agent Execution<br/>• Budget: ≤ 4k Tokens"]
 
-        EvaluateRisk -- "Multi-Module Feature<br/>Internal API / Schema Addition<br/>Moderate Blast Radius" --> StandardMode["<b>16.2 Standard Mode</b><br/>• Full Task Passport & Framing<br/>• Causal Map & Morphological Space<br/>• Dependency & Dynamics Matrices<br/>• Verifiable Spikes & ADR<br/>• Budget: 15k–40k Tokens"]
+    EvaluateRisk -- "Multi-Module Feature<br/>Internal API / Schema Addition<br/>Moderate Blast Radius" --> StandardMode["<b>16.2 Standard Mode</b><br/>• Full Task Passport & Framing<br/>• Causal Map & Morphological Space<br/>• Dependency & Dynamics Matrices<br/>• Verifiable Spikes & ADR<br/>• Budget: 15k–40k Tokens"]
 
-        EvaluateRisk -- "Distributed State / Consensus<br/>Financial / Safety-Critical<br/>Irreversible (One-Way Door)" --> DeepMode["<b>16.3 Deep Mode</b><br/>• Multi-Agent Competing Worktrees<br/>• Property-Based & Mutation Tests<br/>• Jepsen Chaos & Dark Launching<br/>• Adversarial Invariant Review<br/>• Budget: ≥ 100k Tokens"]
+    EvaluateRisk -- "Distributed State / Consensus<br/>Financial / Safety-Critical<br/>Irreversible (One-Way Door)" --> DeepMode["<b>16.3 Deep Mode</b><br/>• Multi-Agent Competing Worktrees<br/>• Property-Based & Mutation Tests<br/>• Jepsen Chaos & Dark Launching<br/>• Adversarial Invariant Review<br/>• Budget: ≥ 100k Tokens"]
 
-        FastMode --> EscalateCheck{"Unforeseen Coupling or<br/>Hidden State Discovered?"}
-        EscalateCheck -- "Yes" --> StandardMode
-        EscalateCheck -- "No" --> FastComplete["Verify Rollback & Complete"]
+    FastMode --> EscalateCheck{"Unforeseen Coupling or<br/>Hidden State Discovered?"}
+    EscalateCheck -- "Yes" --> StandardMode
+    EscalateCheck -- "No" --> FastComplete["Verify Rollback & Complete"]
 
-        StandardMode --> DeepEscalateCheck{"Distributed Anomaly or<br/>Irreversible Migration?"}
-        DeepEscalateCheck -- "Yes" --> DeepMode
-        DeepEscalateCheck -- "No" --> StandardComplete["ADR Locked & Complete"]
+    StandardMode --> DeepEscalateCheck{"Distributed Anomaly or<br/>Irreversible Migration?"}
+    DeepEscalateCheck -- "Yes" --> DeepMode
+    DeepEscalateCheck -- "No" --> StandardComplete["ADR Locked & Complete"]
 
-        DeepMode --> DeepComplete["11 Invariants Satisfied & Deployed"]
+    DeepMode --> DeepComplete["11 Invariants Satisfied & Deployed"]
 
 ------------------------------------------------------------------------
 
@@ -13332,18 +13029,16 @@ Fast Mode is designated for **Type 2 ("Two-Way Door") decisions**—modification
 
 Even in Fast Mode, unstructured "trial-and-error code thrashing" is prohibited. Fast Mode executes a compressed 6-step cycle:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ FAST MODE 6-STEP REASONING CYCLE                                                                │
-    ├──────┬───────────────────────────┬───────────────────────────────────────────────────────────────┤
-    │ Step │ Epistemic Operation       │ Operational Action & Deliverable                              │
-    ├──────┼───────────────────────────┼───────────────────────────────────────────────────────────────┤
-    │ 1    │ **Required Behavior**     │ Explicitly state required input-output invariant and delta.   │
-    │ 2    │ **Primary Cause / Bottleneck**│ Identify the exact localized mechanism causing the symptom.   │
-    │ 3    │ **3 Distinct Mechanisms** │ Formulate at least three structurally distinct local fixes.   │
-    │ 4    │ **Resource Reuse**        │ Identify what in-system language/library primitives exist.   │
-    │ 5    │ **Minimal Invariant Test**│ Write a deterministic unit test or property check that fails. │
-    │ 6    │ **Execute & Rollback Check**│ Apply the selected fix, verify test passes, assert zero leak. │
-    └──────┴───────────────────────────┴───────────────────────────────────────────────────────────────┘
+**FAST MODE 6-STEP REASONING CYCLE**
+
+| Step | Epistemic Operation | Operational Action & Deliverable |
+| --- | --- | --- |
+| 1 | **Required Behavior** | Explicitly state required input-output invariant and delta. |
+| 2 | **Primary Cause / Bottleneck** | Identify the exact localized mechanism causing the symptom. |
+| 3 | **3 Distinct Mechanisms** | Formulate at least three structurally distinct local fixes. |
+| 4 | **Resource Reuse** | Identify what in-system language/library primitives exist. |
+| 5 | **Minimal Invariant Test** | Write a deterministic unit test or property check that fails. |
+| 6 | **Execute & Rollback Check** | Apply the selected fix, verify test passes, assert zero leak. |
 
 ### 16.2.3. Concrete Fast Mode Walkthrough: In-Memory Token Bucket Leak
 
@@ -13377,20 +13072,18 @@ Standard Mode is designated for substantial feature implementations, internal ar
 
 Standard Mode mandates the creation and validation of the core Ariadne artifact suite:
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ STANDARD MODE ARTIFACT & GOVERNANCE SUITE                                                       │
-    ├───────────────────────┬──────────────────────────────────────────────────────────────────────────┤
-    │ Artifact              │ Mandatory Epistemic Contents                                             │
-    ├───────────────────────┼──────────────────────────────────────────────────────────────────────────┤
-    │ **Task Passport**     │ Problem statement, non-negotiable invariants, boundaries, metrics.       │
-    │ **Causal Map**        │ Differentiating hypotheses (`HYP-`), symptoms (`OBS-`), evidence (`EVD-`).│
-    │ **Solution Space**    │ Morphological matrix, $\ge 3$ distinct candidates (`CAN-`), pruned sets. │
-    │ **Dependency Matrix** │ Reason-for-change coupling, change radius, circularity analysis.          │
-    │ **Dynamics Map**      │ Queue accumulations, latency distributions, feedback loops, failure modes.│
-    │ **Selection Matrix**  │ Multi-attribute utility evaluation, ideality ratio, trade-off rationale. │
-    │ **Transition Plan**   │ Expand-Contract phases, feature flags, backward compatibility shims.    │
-    │ **ADR Record**        │ Context, decision, consequences, explicit falsification conditions.      │
-    └───────────────────────┴──────────────────────────────────────────────────────────────────────────┘
+**STANDARD MODE ARTIFACT & GOVERNANCE SUITE**
+
+| Artifact | Mandatory Epistemic Contents |
+| --- | --- |
+| **Task Passport** | Problem statement, non-negotiable invariants, boundaries, metrics. |
+| **Causal Map** | Differentiating hypotheses (`HYP-`), symptoms (`OBS-`), evidence (`EVD-`). |
+| **Solution Space** | Morphological matrix, $\ge 3$ distinct candidates (`CAN-`), pruned sets. |
+| **Dependency Matrix** | Reason-for-change coupling, change radius, circularity analysis. |
+| **Dynamics Map** | Queue accumulations, latency distributions, feedback loops, failure modes. |
+| **Selection Matrix** | Multi-attribute utility evaluation, ideality ratio, trade-off rationale. |
+| **Transition Plan** | Expand-Contract phases, feature flags, backward compatibility shims. |
+| **ADR Record** | Context, decision, consequences, explicit falsification conditions. |
 
 ### 16.3.3. Concrete Standard Mode Walkthrough: Synchronous Ingestion to Outbox Migration
 
@@ -13722,19 +13415,17 @@ flowchart LR
 
 ## 18.2. The 7 Canonical Provenance Types
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ ARIADNE CANONICAL PROVENANCE TYPES                                                               │
-    ├───────────┬──────────────┬───────────────────────────────────────────────────────────────────────┤
-    │ Type      │ Symbol       │ Operational Semantics & Verification Source                           │
-    ├───────────┼──────────────┼───────────────────────────────────────────────────────────────────────┤
-    │ `FACT`    │ $\mathbf{F}$ │ Directly observed, immutable ground truth in codebase, AST, or git.   │
-    │ `MEASURED`│ $\mathbf{M}$ │ Empirically measured quantitative metric with recorded environment.   │
-    │ `DERIVED` │ $\mathbf{D}$ │ Formally deduced from proven antecedents via sound logic/math.        │
-    │ `ASSUMED` │ $\mathbf{A}$ │ Unverified working premise accepted provisionally to proceed.         │
-    │ `PROPOSED`│ $\mathbf{P}$ │ Architectural design option or candidate mechanism under evaluation.  │
-    │ `UNKNOWN` │ $\mathbf{U}$ │ Decision-significant missing knowledge requiring empirical discovery. │
-    │ `DECIDED` │ $\mathbf{L}$ │ Locked architectural decision recorded in an immutable ADR.          │
-    └───────────┴──────────────┴───────────────────────────────────────────────────────────────────────┘
+**ARIADNE CANONICAL PROVENANCE TYPES**
+
+| Type | Symbol | Operational Semantics & Verification Source |
+| --- | --- | --- |
+| `FACT` | $\mathbf{F}$ | Directly observed, immutable ground truth in codebase, AST, or git. |
+| `MEASURED` | $\mathbf{M}$ | Empirically measured quantitative metric with recorded environment. |
+| `DERIVED` | $\mathbf{D}$ | Formally deduced from proven antecedents via sound logic/math. |
+| `ASSUMED` | $\mathbf{A}$ | Unverified working premise accepted provisionally to proceed. |
+| `PROPOSED` | $\mathbf{P}$ | Architectural design option or candidate mechanism under evaluation. |
+| `UNKNOWN` | $\mathbf{U}$ | Decision-significant missing knowledge requiring empirical discovery. |
+| `DECIDED` | $\mathbf{L}$ | Locked architectural decision recorded in an immutable ADR. |
 
 ### 1. `FACT` ($\mathbf{F}$)
 
@@ -13870,22 +13561,20 @@ flowchart BT
 
 ## 19.2. Exhaustive Specification of the 10 Rungs
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE 10-RUNG EVIDENTIARY LADDER                                                                   │
-    ├──────┬───────────────────────────────┬───────────────────────────────────────────────────────────┤
-    │ Rung │ Verification Methodology      │ Epistemic Confidence Provided & Failure Modes Caught      │
-    ├──────┼───────────────────────────────┼───────────────────────────────────────────────────────────┤
-    │ **1**│ **Static Plausibility**       │ Eliminates impossible architectures and obvious syntax errors.│
-    │ **2**│ **Compilation & Types**       │ Proves structural type safety and memory safety invariants.│
-    │ **3**│ **Example-Based Unit Tests**  │ Proves deterministic execution on known, human-chosen points. │
-    │ **4**│ **Property-Based Tests (PBT)**│ Proves universal algebraic invariants over vast input spaces.│
-    │ **5**│ **Mutation Testing**          │ Proves test suite effectiveness; kills tautological tests. │
-    │ **6**│ **Integration & Contracts**   │ Proves wire-level protocol and database transaction bounds. │
-    │ **7**│ **Load & Stress Benchmarks**  │ Proves latency bounds (p95/p99) and memory leak resistance. │
-    │ **8**│ **Chaos & Fault Injection**   │ Proves linearizability and resilience under node/net failures.│
-    │ **9**│ **Canary & Dark Launching**   │ Proves real-world behavior on live shadow traffic safely.  │
-    │ **10**│ **Production Observability** │ Proves sustained SLO compliance and zero regression over time.│
-    └──────┴───────────────────────────────┴───────────────────────────────────────────────────────────┘
+**THE 10-RUNG EVIDENTIARY LADDER**
+
+| Rung | Verification Methodology | Epistemic Confidence Provided & Failure Modes Caught |
+| --- | --- | --- |
+| **1** | **Static Plausibility** | Eliminates impossible architectures and obvious syntax errors. |
+| **2** | **Compilation & Types** | Proves structural type safety and memory safety invariants. |
+| **3** | **Example-Based Unit Tests** | Proves deterministic execution on known, human-chosen points. |
+| **4** | **Property-Based Tests (PBT)** | Proves universal algebraic invariants over vast input spaces. |
+| **5** | **Mutation Testing** | Proves test suite effectiveness; kills tautological tests. |
+| **6** | **Integration & Contracts** | Proves wire-level protocol and database transaction bounds. |
+| **7** | **Load & Stress Benchmarks** | Proves latency bounds (p95/p99) and memory leak resistance. |
+| **8** | **Chaos & Fault Injection** | Proves linearizability and resilience under node/net failures. |
+| **9** | **Canary & Dark Launching** | Proves real-world behavior on live shadow traffic safely. |
+| **10** | **Production Observability** | Proves sustained SLO compliance and zero regression over time. |
 
 ### Rung 1: Static Plausibility & Architectural Coherence
 
@@ -13971,23 +13660,21 @@ Every task must pass the **Epistemic Gatekeeper Function**:
 
 $$\Phi(\text{Task}) = \bigwedge_{i=1}^{11} \mathcal{I}_i(\text{Task}) \equiv \mathbf{TRUE}$$
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ THE 11 FORMAL TASK COMPLETION INVARIANTS                                                         │
-    ├──────┬──────────────────────────────────────────┬────────────────────────────────────────────────┤
-    │ Invar│ Invariant Name                           │ Formal Acceptance Criterion                    │
-    ├──────┼──────────────────────────────────────────┼────────────────────────────────────────────────┤
-    │ $\mathcal{I}_1$ │ **Behavioral Decoupling**               │ Required outcome is decoupled from technology. │
-    │ $\mathcal{I}_2$ │ **Empirical Grounding**                 │ Root cause / constraint backed by $\mathbf{M}$ or $\mathbf{F}$. │
-    │ $\mathcal{I}_3$ │ **Morphological Exploration**           │ $\ge 3$ distinct candidate classes evaluated.  │
-    │ $\mathcal{I}_4$ │ **Unknown Resolution**                  │ Zero unresolved high-cost $\mathbf{U}$ nodes remain.   │
-    │ $\mathcal{I}_5$ │ **Structural Boundary Integrity**       │ Change radius bounded; no circular couplings.  │
-    │ $\mathcal{I}_6$ │ **Dynamic Stability Under Load**        │ Queues, retries, and p99 latencies bounded.   │
-    │ $\mathcal{I}_7$ │ **Multi-Attribute Selection Justification**│ Selection backed by explicit utility matrix.   │
-    │ $\mathcal{I}_8$ │ **Rung-Appropriate Executable Proof**   │ Mandatory rungs executed with test receipts.   │
-    │ $\mathcal{I}_9$ │ **Expand-Contract Transition Safety**   │ Dual-write / feature-flagged rollout verified. │
-    │ $\mathcal{I}_{10}$│ **ADR Immutability**                   │ Decision recorded in immutable ADR format.     │
-    │ $\mathcal{I}_{11}$│ **Decommissioning & Shim Expiry**      │ Temporary shims have explicit deletion dates.  │
-    └──────┴──────────────────────────────────────────┴────────────────────────────────────────────────┘
+**THE 11 FORMAL TASK COMPLETION INVARIANTS**
+
+| Invar | Invariant Name | Formal Acceptance Criterion |
+| --- | --- | --- |
+| $\mathcal{I}_1$ | **Behavioral Decoupling** | Required outcome is decoupled from technology. |
+| $\mathcal{I}_2$ | **Empirical Grounding** | Root cause / constraint backed by $\mathbf{M}$ or $\mathbf{F}$. |
+| $\mathcal{I}_3$ | **Morphological Exploration** | $\ge 3$ distinct candidate classes evaluated. |
+| $\mathcal{I}_4$ | **Unknown Resolution** | Zero unresolved high-cost $\mathbf{U}$ nodes remain. |
+| $\mathcal{I}_5$ | **Structural Boundary Integrity** | Change radius bounded; no circular couplings. |
+| $\mathcal{I}_6$ | **Dynamic Stability Under Load** | Queues, retries, and p99 latencies bounded. |
+| $\mathcal{I}_7$ | **Multi-Attribute Selection Justification** | Selection backed by explicit utility matrix. |
+| $\mathcal{I}_8$ | **Rung-Appropriate Executable Proof** | Mandatory rungs executed with test receipts. |
+| $\mathcal{I}_9$ | **Expand-Contract Transition Safety** | Dual-write / feature-flagged rollout verified. |
+| $\mathcal{I}_{10}$ | **ADR Immutability** | Decision recorded in immutable ADR format. |
+| $\mathcal{I}_{11}$ | **Decommissioning & Shim Expiry** | Temporary shims have explicit deletion dates. |
 
 ------------------------------------------------------------------------
 
@@ -14093,9 +13780,7 @@ $ ariadne check-invariants --task=TASK-402 --mode=Standard
 [+] Invariant 10 [PASS]: ADR committed at doc/adr/0024-outbox-cdc-migration.md.
 [+] Invariant 11 [PASS]: Decommissioning task SCHEDULED (Milestone: 2026-09-15).
 
-================================================================================
 ALL 11 INVARIANTS SATISFIED. TASK PROVENANCE: DECIDED. READY FOR MERGE.
-================================================================================
 `;
 ```
 
@@ -15258,15 +14943,12 @@ Not every engineering problem justifies the full 15-artifact apparatus. When fix
 
 For such tasks, the **Minimal Artifact Set** collapses the 9 operations into a single, unified **Lean Task Card (`LEAN-TASK-ID`)** that preserves full epistemic rigor while minimizing file management overhead.
 
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                    LEAN TASK CARD (LEAN-TASK-YYYY-MM-ID)                    │
-    │                                                                             │
-    │  1. TASK & INVARIANTS: Problem, behavioral delta (C,E,O,M,I), hard bounds   │
-    │  2. DIAGNOSIS & HYPOTHESIS: Root cause, symptom, falsifiable mechanism      │
-    │  3. CANDIDATES & TRANSFORMATION: 2 distinct mechanisms + applied transform  │
-    │  4. VERIFICATION CARD: Test method, command, pass/falsification criteria    │
-    │  5. DECISION & TRANSITION: Chosen option, code diff link, rollback trigger  │
-    └─────────────────────────────────────────────────────────────────────────────┘
+> **LEAN TASK CARD (LEAN-TASK-YYYY-MM-ID)**
+> 1. TASK & INVARIANTS: Problem, behavioral delta (C,E,O,M,I), hard bounds
+> 2. DIAGNOSIS & HYPOTHESIS: Root cause, symptom, falsifiable mechanism
+> 3. CANDIDATES & TRANSFORMATION: 2 distinct mechanisms + applied transform
+> 4. VERIFICATION CARD: Test method, command, pass/falsification criteria
+> 5. DECISION & TRANSITION: Chosen option, code diff link, rollback trigger
 
 ### Transition Rule from Lean to Full Artifact Set
 
@@ -15441,14 +15123,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 1. Frame and Model the Software Problem
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 1: PROBLEM FRAMING & BEHAVIORAL MODELING                                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 1.1 Separate Function from Implementation                                                        │
-    │ 1.2 Describe Required and Actual Behavior (Conditions & Invariants)                              │
-    │ 1.3 Shift System Boundary (Function → Module → Service → System → Pipeline)                      │
-    │ 1.4 Shift Perspective (User, Data Owner, Operator, Adversary, Downstream, Maintainer)           │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 1: PROBLEM FRAMING & BEHAVIORAL MODELING**
+> 1.1 Separate Function from Implementation
+> 1.2 Describe Required and Actual Behavior (Conditions & Invariants)
+> 1.3 Shift System Boundary (Function → Module → Service → System → Pipeline)
+> 1.4 Shift Perspective (User, Data Owner, Operator, Adversary, Downstream, Maintainer)
 
 ### Technique 1.1: Separate Required Function from Current Code, Service, Library, or Infrastructure
 
@@ -15522,14 +15201,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 2. Find the Constraint, Cause, or Contradiction
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 2: ROOT DIAGNOSIS, BOTTLENECK LOCALIZATION & CONTRADICTION FORMULATION                │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 2.1 Identify Clashes Between Quality Attributes, Requirements, or Operating Modes (Contradictions)│
-    │ 2.2 Locate the Limiting Bottleneck in Execution Flow, Delivery, or Decision-Making (TOC)         │
-    │ 2.3 Construct a Causal Chain from Symptom to Testable Mechanism (5-Whys / Ishikawa)              │
-    │ 2.4 Uncover Hidden Assumptions That Make Current Architecture Seem "Inevitable"                 │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 2: ROOT DIAGNOSIS, BOTTLENECK LOCALIZATION & CONTRADICTION FORMULATION**
+> 2.1 Identify Clashes Between Quality Attributes, Requirements, or Operating Modes (Contradictions)
+> 2.2 Locate the Limiting Bottleneck in Execution Flow, Delivery, or Decision-Making (TOC)
+> 2.3 Construct a Causal Chain from Symptom to Testable Mechanism (5-Whys / Ishikawa)
+> 2.4 Uncover Hidden Assumptions That Make Current Architecture Seem "Inevitable"
 
 ### Technique 2.1: Identify Clashes Between Quality Attributes, Requirements, or Operating Modes
 
@@ -15600,15 +15276,12 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 3. Transform the Existing Software System
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 3: INVENTIVE STRUCTURAL & COMPUTATIONAL TRANSFORMATIONS                                │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 3.1 Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination (Trimming)     │
-    │ 3.2 Split by Data, Ownership, Time, Mode, Criticality, or Execution Environment (Partitioning)   │
-    │ 3.3 Combine Functions or Delegate a Function to an Existing System Mechanism (Self-Service)       │
-    │ 3.4 Replace the Computational Mechanism (Storage, Communication, Coordination, Compute)          │
-    │ 3.5 Change Quantity, Ordering, Frequency, Execution Timing, or Compute Placement                 │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 3: INVENTIVE STRUCTURAL & COMPUTATIONAL TRANSFORMATIONS**
+> 3.1 Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination (Trimming)
+> 3.2 Split by Data, Ownership, Time, Mode, Criticality, or Execution Environment (Partitioning)
+> 3.3 Combine Functions or Delegate a Function to an Existing System Mechanism (Self-Service)
+> 3.4 Replace the Computational Mechanism (Storage, Communication, Coordination, Compute)
+> 3.5 Change Quantity, Ordering, Frequency, Execution Timing, or Compute Placement
 
 ### Technique 3.1: Remove or Reduce Code, State, Layers, Intermediaries, Checks, or Coordination
 
@@ -15697,14 +15370,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 4. Explore the Space of Architectures and Implementations
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 4: SYSTEMATIC SOLUTION SPACE EXPLORATION                                               │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 4.1 Generate Multiple Candidate Solutions Differing by Operating Principle (Diversity)           │
-    │ 4.2 Isolate Orthogonal Dimensions of the Architectural Decision (Morphological Analysis)         │
-    │ 4.3 Combine Dimension Values to Discover Unexplored Regions of the Solution Space                 │
-    │ 4.4 Prune Combinations That Violate Non-Negotiable Invariants and Hard Constraints (Pruning)     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 4: SYSTEMATIC SOLUTION SPACE EXPLORATION**
+> 4.1 Generate Multiple Candidate Solutions Differing by Operating Principle (Diversity)
+> 4.2 Isolate Orthogonal Dimensions of the Architectural Decision (Morphological Analysis)
+> 4.3 Combine Dimension Values to Discover Unexplored Regions of the Solution Space
+> 4.4 Prune Combinations That Violate Non-Negotiable Invariants and Hard Constraints (Pruning)
 
 ### Technique 4.1: Generate Multiple Candidate Solutions Differing by Underlying Operating Principle
 
@@ -15778,14 +15448,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 5. Expand Knowledge and Obtain Missing Evidence
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 5: EMPIRICAL KNOWLEDGE ACQUISITION & EVIDENCE GATHERING                                │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 5.1 Formulate Concrete Decision-Significant Unknowns (UNK-*)                                     │
-    │ 5.2 Transfer Implementation Mechanisms from Other Software or Engineering Domains (Isomorphism)   │
-    │ 5.3 Maintain an Explicit Registry of Unknowns, Assumptions, and Open Questions                   │
-    │ 5.4 Generate Empirical Knowledge via Benchmarks, Spikes, Prototypes, Profiling, and Telemetry     │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 5: EMPIRICAL KNOWLEDGE ACQUISITION & EVIDENCE GATHERING**
+> 5.1 Formulate Concrete Decision-Significant Unknowns (UNK-*)
+> 5.2 Transfer Implementation Mechanisms from Other Software or Engineering Domains (Isomorphism)
+> 5.3 Maintain an Explicit Registry of Unknowns, Assumptions, and Open Questions
+> 5.4 Generate Empirical Knowledge via Benchmarks, Spikes, Prototypes, Profiling, and Telemetry
 
 ### Technique 5.1: Formulate Concrete Decision-Significant Unknowns
 
@@ -15857,13 +15524,10 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 6. Arrange Dependencies and Change Boundaries
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 6: DEPENDENCY STRUCTURING & BOUNDARY RECONFIGURATION                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 6.1 Map Static, Dynamic, Data, and Operational Dependencies                                      │
-    │ 6.2 Link Every Critical Requirement to the Specific Mechanism That Enforces It (Traceability)   │
-    │ 6.3 Eliminate Accidental Co-Change Coupling and Retain Only Necessary Relationships             │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 6: DEPENDENCY STRUCTURING & BOUNDARY RECONFIGURATION**
+> 6.1 Map Static, Dynamic, Data, and Operational Dependencies
+> 6.2 Link Every Critical Requirement to the Specific Mechanism That Enforces It (Traceability)
+> 6.3 Eliminate Accidental Co-Change Coupling and Retain Only Necessary Relationships
 
 ### Technique 6.1: Map Static, Dynamic, Data, and Operational Dependencies
 
@@ -15921,14 +15585,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 7. Understand System Behavior Over Time and Under Load
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 7: TEMPORAL, QUEUING, AND LOAD DYNAMICS MODELING                                      │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 7.1 Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity (Little's Law)              │
-    │ 7.2 Model Feedback Loops: Retries, Throttling, Cascading Failures, Self-Reinforcement, Recovery  │
-    │ 7.3 Account for Propagation Latencies, Event Ordering, Protocol Versions, and Transition Phases   │
-    │ 7.4 Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, Bottleneck Migration  │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 7: TEMPORAL, QUEUING, AND LOAD DYNAMICS MODELING**
+> 7.1 Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity (Little's Law)
+> 7.2 Model Feedback Loops: Retries, Throttling, Cascading Failures, Self-Reinforcement, Recovery
+> 7.3 Account for Propagation Latencies, Event Ordering, Protocol Versions, and Transition Phases
+> 7.4 Account for Scale Growth, Workload Shifts, Client Behavior Adaptations, Bottleneck Migration
 
 ### Technique 7.1: Model Queues, Accumulations, Inflow/Outflow Rates, and Capacity
 
@@ -15998,14 +15659,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 8. Determine Engineering Value and Select
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 8: MULTI-CRITERIA VALUE EVALUATION & SELECTION                                         │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 8.1 Define Hard Constraints, Business Value, and Preference Criteria                             │
-    │ 8.2 Compare Useful Effects Against Cost of New Mechanisms, Code, and Mutable State (Ideality)    │
-    │ 8.3 Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius            │
-    │ 8.4 Rank Viable Candidates While Preserving and Documenting Uncertainty Explicitly               │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 8: MULTI-CRITERIA VALUE EVALUATION & SELECTION**
+> 8.1 Define Hard Constraints, Business Value, and Preference Criteria
+> 8.2 Compare Useful Effects Against Cost of New Mechanisms, Code, and Mutable State (Ideality)
+> 8.3 Minimize Operational Harm, Cognitive Load, Infrastructure Spend, and Blast Radius
+> 8.4 Rank Viable Candidates While Preserving and Documenting Uncertainty Explicitly
 
 ### Technique 8.1: Define Hard Constraints, Business Value, and Preference Criteria
 
@@ -16077,14 +15735,11 @@ The 36 techniques provide concrete, operational transformations across the nine 
 
 ## Operation 9. Verify Solution by Execution and Safely Execute Transition
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ OPERATION 9: EXECUTABLE VERIFICATION & TRANSITION ARCHITECTURE                                   │
-    ├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-    │ 9.1 Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity                   │
-    │ 9.2 Validate Claims via Executable Code (Unit, Property, Mutation, Benchmark, Chaos, Canary)     │
-    │ 9.3 Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims    │
-    │ 9.4 Anchor Results with Continuous Telemetry and Decommission Temporary Transition Shims         │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **OPERATION 9: EXECUTABLE VERIFICATION & TRANSITION ARCHITECTURE**
+> 9.1 Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity
+> 9.2 Validate Claims via Executable Code (Unit, Property, Mutation, Benchmark, Chaos, Canary)
+> 9.3 Design Transition Architecture, Version Compatibility, Traffic Cutover, and Rollback Shims
+> 9.4 Anchor Results with Continuous Telemetry and Decommission Temporary Transition Shims
 
 ### Technique 9.1: Predict Beneficial Consequences, New Failure Modes, and Shifted Complexity
 
@@ -16169,26 +15824,24 @@ This matrix maps 15 established software engineering disciplines across the Nine
 
 <!-- -->
 
-    ┌─────────────────────────────────────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐
-    │ Engineering Discipline              │ Op1│ Op2│ Op3│ Op4│ Op5│ Op6│ Op7│ Op8│ Op9│
-    │                                     │Fram│Diag│Tran│Spac│Know│Dep │Dyn │Val │Ver │
-    ├─────────────────────────────────────┼────┼────┼────┼────┼────┼────┼────┼────┼────┤
-    │ 1. Architectural Design             │ ●  │ ○  │ ○  │ ●  │ ○  │ ●  │ ●  │ ●  │ ○  │
-    │ 2. Domain-Driven Design (DDD)       │ ●  │ ○  │ ○  │ ○  │ ●  │ ●  │ ○  │ ●  │ ○  │
-    │ 3. Refactoring                      │ ○  │ ○  │ ●  │ ○  │    │ ●  │    │ ○  │ ●  │
-    │ 4. Test-Driven Development (TDD)    │ ●  │ ○  │ ●  │    │ ●  │ ○  │    │ ○  │ ●  │
-    │ 5. Property-Based Testing           │ ○  │ ○  │    │ ●  │ ●  │    │ ○  │    │ ●  │
-    │ 6. Mutation Testing                 │    │ ●  │    │    │ ●  │    │    │    │ ●  │
-    │ 7. Performance Engineering          │ ○  │ ●  │ ●  │ ●  │ ●  │ ○  │ ●  │ ●  │ ●  │
-    │ 8. Site Reliability Engineering(SRE)│ ●  │ ●  │ ○  │ ○  │ ●  │ ○  │ ●  │ ●  │ ●  │
-    │ 9. Observability                    │    │ ●  │    │    │ ●  │ ○  │ ●  │    │ ●  │
-    │ 10. DevOps & CI/CD                  │ ○  │ ●  │ ●  │ ○  │ ●  │ ●  │ ●  │ ●  │ ●  │
-    │ 11. Threat Modeling                 │ ●  │ ●  │ ○  │ ●  │ ●  │ ●  │ ●  │ ●  │ ●  │
-    │ 12. Database Design                 │ ○  │ ●  │ ●  │ ●  │ ●  │ ●  │ ●  │ ○  │ ●  │
-    │ 13. Distributed Systems Engineering │ ○  │ ●  │ ●  │ ●  │ ●  │ ●  │ ●  │ ○  │ ●  │
-    │ 14. TRIZ                            │ ●  │ ●  │ ●  │ ○  │ ●  │ ○  │ ○  │ ●  │ ○  │
-    │ 15. Systems Thinking                │ ●  │ ●  │ ○  │ ○  │ ○  │ ○  │ ●  │ ○  │ ○  │
-    └─────────────────────────────────────┴────┴────┴────┴────┴────┴────┴────┴────┴────┘
+| Engineering Discipline | Op1 | Op2 | Op3 | Op4 | Op5 | Op6 | Op7 | Op8 | Op9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  | Fram | Diag | Tran | Spac | Know | Dep | Dyn | Val | Ver |
+| 1. Architectural Design | ● | ○ | ○ | ● | ○ | ● | ● | ● | ○ |
+| 2. Domain-Driven Design (DDD) | ● | ○ | ○ | ○ | ● | ● | ○ | ● | ○ |
+| 3. Refactoring | ○ | ○ | ● | ○ |  | ● |  | ○ | ● |
+| 4. Test-Driven Development (TDD) | ● | ○ | ● |  | ● | ○ |  | ○ | ● |
+| 5. Property-Based Testing | ○ | ○ |  | ● | ● |  | ○ |  | ● |
+| 6. Mutation Testing |  | ● |  |  | ● |  |  |  | ● |
+| 7. Performance Engineering | ○ | ● | ● | ● | ● | ○ | ● | ● | ● |
+| 8. Site Reliability Engineering(SRE) | ● | ● | ○ | ○ | ● | ○ | ● | ● | ● |
+| 9. Observability |  | ● |  |  | ● | ○ | ● |  | ● |
+| 10. DevOps & CI/CD | ○ | ● | ● | ○ | ● | ● | ● | ● | ● |
+| 11. Threat Modeling | ● | ● | ○ | ● | ● | ● | ● | ● | ● |
+| 12. Database Design | ○ | ● | ● | ● | ● | ● | ● | ○ | ● |
+| 13. Distributed Systems Engineering | ○ | ● | ● | ● | ● | ● | ● | ○ | ● |
+| 14. TRIZ | ● | ● | ● | ○ | ● | ○ | ○ | ● | ○ |
+| 15. Systems Thinking | ● | ● | ○ | ○ | ○ | ○ | ● | ○ | ○ |
 
 ------------------------------------------------------------------------
 
@@ -16324,9 +15977,7 @@ For autonomous developer agents, the matrix functions as an automated dynamic pr
 
 # Appendix 3. Glossary of Epistemic and Architectural Concepts
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ ARIADNE EPISTEMIC & ARCHITECTURAL ONTOLOGY (34 FORMAL DEFINITIONS)                               │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **ARIADNE EPISTEMIC & ARCHITECTURAL ONTOLOGY (34 FORMAL DEFINITIONS)**
 
 ### 1. Epistemic State
 
@@ -16552,7 +16203,7 @@ Architectural isolation mechanisms (bulkheading, rate limiting, circuit breakers
 
 The following template can be instantiated in any repository as `engineering-task.md` or `.planning/engineering-task.md` to guide complex software engineering tasks through the nine operations.
 
-``` markdown
+```` markdown
 # Engineering Task Specification: [TASK-ID] - [Task Title]
 
 - **Author / Agent**: [Name / ID]
@@ -16590,9 +16241,11 @@ The following template can be instantiated in any repository as `engineering-tas
 - **Observed Symptoms**: [List empirical anomalies, error logs, or trace spans]
 - **Primary Bottleneck**: [Identified limiting resource: CPU, Lock, Disk I/O, Network, Queue]
 - **Causal DAG**:
-```
 
-\[Symptom\] \<-- \[Intermediate Mechanism\] \<-- \[Root Flaw\]
+  ```mermaid
+  flowchart LR
+    Symptom["Symptom"] --> Mechanism["Intermediate mechanism"] --> Root["Root flaw"]
+  ```
 
     - **Falsifiable Hypotheses**:
     - `HYP-01`: [Mechanism proposition] | *Differentiating Test*: [How to prove/falsify]
@@ -16713,9 +16366,7 @@ The following template can be instantiated in any repository as `engineering-tas
 
 # Appendix 5. Rules for the Developer Agent (Operational Standard)
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ ARIADNE DEVELOPER AGENT OPERATIONAL STANDARD (12 INVARIANT RULES)                                │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **ARIADNE DEVELOPER AGENT OPERATIONAL STANDARD (12 INVARIANT RULES)**
 
 ### Agent Rule 1. Do Not Start with Code Modifications If the Task Contains a Premature Solution
 
@@ -16917,6 +16568,8 @@ The following template can be instantiated in any repository as `engineering-tas
   - Agent executes `npm test` and `npm run bench`, includes the exact terminal output showing $100\%$ passing tests and $4.2\times$ throughput speedup, and links the updated ADR.
 - **Enforcement / Validation**: Task completion gate rejects handoffs lacking terminal execution receipts.
 
+````
+
 ------------------------------------------------------------------------
 
 # Conclusion: The Synthesis of Inventive Thought and Executable Software
@@ -16945,9 +16598,7 @@ When engineering reasoning is structured as an auditable search over an executab
 
 # Master Bibliography
 
-    ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-    │ MASTER ACADEMIC & ENGINEERING BIBLIOGRAPHY (CATEGORIZED BY DOMAIN)                              │
-    └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+> **MASTER ACADEMIC & ENGINEERING BIBLIOGRAPHY (CATEGORIZED BY DOMAIN)**
 
 ## 1. Architecture, Modularity, and Software Design
 
