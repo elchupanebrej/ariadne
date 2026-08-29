@@ -2852,21 +2852,21 @@ Operation 2 is **abductive diagnosis and constraint localization**. Do not gener
 
 Operation 2 combines five bodies of scientific and engineering thought into one diagnostic harness for software systems.
 
-``` mermaid
+```mermaid
 flowchart TD
     subgraph FoundationalSchools["Foundational Theoretical Grounding"]
-        A["Genrich Altshuller (1984)<br/><b>TRIZ Contradiction Theory</b><br/>Technical & Physical Contradictions"]
-        G["Eliyahu M. Goldratt (1984, 1994)<br/><b>Theory of Constraints & Thinking Processes</b><br/>Current Reality Trees & Evaporating Cloud"]
-        P["Judea Pearl (2009)<br/><b>Causal Inference & SCMs</b><br/>Causal Hierarchy, DAGs & Falsification"]
-        U["Gene Amdahl (1967) & Neil Gunther (2007)<br/><b>Mathematical Scalability Laws</b><br/>Amdahl's Law & Universal Scalability Law (USL)"]
-        D["John Allspaw (2010) & Sidney Dekker (2014)<br/><b>Resilience Engineering & Safety-II</b><br/>Root Cause Fallacy & Complex Adaptive Systems"]
+        A["Genrich Altshuller (1984): TRIZ Contradiction Theory; technical and physical contradictions"]
+        G["Eliyahu M. Goldratt (1984, 1994): Theory of Constraints and Thinking Processes; Current Reality Trees and Evaporating Cloud"]
+        P["Judea Pearl (2009): Causal Inference and Structural Causal Models; causal hierarchy, DAGs, and falsification"]
+        U["Gene Amdahl (1967) and Neil Gunther (2007): Mathematical Scalability Laws; Amdahl's Law and Universal Scalability Law"]
+        D["John Allspaw (2010) and Sidney Dekker (2014): Resilience Engineering and Safety-II; root-cause fallacy and complex adaptive systems"]
     end
 
-    FoundationalSchools --> OP2["<b>Operation 2</b><br/>Find the Constraint, Cause, or Contradiction"]
-    OP2 --> T1["Technique 2.1<br/>Identify Contradictions"]
-    OP2 --> T2["Technique 2.2<br/>Identify Bottlenecks"]
-    OP2 --> T3["Technique 2.3<br/>Construct Causal DAGs"]
-    OP2 --> T4["Technique 2.4<br/>Uncover Assumptions"]
+    FoundationalSchools --> OP2["Operation 2: Find the Constraint, Cause, or Contradiction"]
+    OP2 --> T1["Technique 2.1: Identify Contradictions"]
+    OP2 --> T2["Technique 2.2: Identify Bottlenecks"]
+    OP2 --> T3["Technique 2.3: Construct Causal DAGs"]
+    OP2 --> T4["Technique 2.4: Uncover Assumptions"]
 ```
 
 #### 2.2.3.1. Genrich Altshuller: Contradiction Analysis
