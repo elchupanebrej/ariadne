@@ -1,109 +1,14 @@
 import {
-  runEpistemicGate,
-  type EpistemicDiagnostic,
-} from "../../gates/epistemic-gate.js";
-import {
-  runSemanticGate,
-  runSemanticPreflight,
-  type SemanticDiagnostic,
-} from "../../gates/semantic-gate.js";
-import {
-  runStructuralGate,
-  type StructuralGateResult,
-} from "../../gates/structural-gate.js";
-import type { MaterializedGraph } from "../../graph/storage.js";
-import type { GraphDiagnostic } from "../../graph/integrity.js";
+  EpistemicGateEngine,
+  type GateCommand,
+  type GateName,
+  type GateReceipt,
+  type GateResult,
+} from "../../gates/gate-engine.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
-export type GateName = "structural" | "semantic" | "epistemic";
-export type GateCommand = GateName | "all";
-
-type GateDiagnostic = {
-  code: string;
-  message: string;
-  gate: GateName;
-  remediation: string;
-  [key: string]: unknown;
-};
-
-export type GateResult = {
-  gate: GateName;
-  passed: boolean;
-  diagnostics: GateDiagnostic[];
-};
-
-export type GateReceipt = {
-  gate: GateCommand;
-  strict: boolean;
-  passed: boolean;
-  diagnostics: GateDiagnostic[];
-  results: GateResult[];
-};
-
-const ORDER: readonly GateName[] = ["structural", "semantic", "epistemic"];
-
-const remediation: Record<string, string> = {
-  INVALID_GRAPH: "Provide nodes and edges that satisfy the canonical graph shape.",
-  INVALID_NODE: "Fix the node fields and canonical identifier before retrying.",
-  DUPLICATE_NODE: "Keep one node event for each canonical node identifier.",
-  INVALID_EDGE: "Fix the edge relation and endpoint fields before retrying.",
-  MISSING_NODE: "Add the referenced node or remove the dangling edge.",
-  CYCLE: "Replace the deductive cycle with an acyclic derivation.",
-  CTR_SEPARATION_DIVERSITY:
-    "Add three candidate mechanisms across distinct separation principles.",
-  CTR_SEPARATION_PREFLIGHT:
-    "Add candidates across the uncovered separation principles; the strict semantic gate remains authoritative.",
-  CTR_CANDIDATE_CARDINALITY:
-    "Add the missing structurally distinct candidate mechanisms before retrying.",
-  HYP_FALSIFICATION_CONDITION: "Add an explicit falsification condition to the hypothesis.",
-  HARD_REQUIREMENT_FAILED: "Remove the failed candidate before preference scoring.",
-  UNKNOWN_CLAIM_CLASS: "Declare a supported claim class or minimum evidentiary rung.",
-  MISSING_EVIDENCE_RUNG: "Record the Evidentiary Ladder rung for the evidence.",
-  INSUFFICIENT_EVIDENCE: "Collect evidence at or above the required evidentiary rung.",
-  UNRESOLVED_DECISION_DEPENDENCY: "Resolve dependency provenance before locking the decision.",
-  MISSING_ADVERSARIAL_CRITIQUE: "Record an adversarial critique before locking the candidate.",
-};
-
-const hintFor = (code: string): string =>
-  remediation[code] ?? "Inspect the diagnostic and satisfy its stated invariant.";
-
-const withHints = (
-  gate: GateName,
-  diagnostics: Array<GraphDiagnostic | SemanticDiagnostic | EpistemicDiagnostic>,
-): GateDiagnostic[] =>
-  diagnostics.map((diagnostic) => ({
-    ...diagnostic,
-    gate,
-    remediation: hintFor(diagnostic.code),
-  }));
-
-const runOne = (
-  gate: GateName,
-  graph: MaterializedGraph,
-  preflightDiagnostics: SemanticDiagnostic[] = [],
-): GateResult => {
-  let result: StructuralGateResult | { passed: boolean; diagnostics: SemanticDiagnostic[] } | { passed: boolean; diagnostics: EpistemicDiagnostic[] };
-  switch (gate) {
-    case "structural":
-      result = runStructuralGate(graph);
-      break;
-    case "semantic":
-      result = runSemanticGate(graph);
-      break;
-    case "epistemic":
-      result = runEpistemicGate(graph);
-      break;
-  }
-  return {
-    gate,
-    passed: result.passed,
-    diagnostics: [
-      ...withHints(gate, preflightDiagnostics),
-      ...withHints(gate, result.diagnostics),
-    ],
-  };
-};
+export type { GateCommand, GateName, GateReceipt, GateResult };
 
 const GATE_USAGE = "Usage: ariadne gate <structural|semantic|epistemic|all> [--strict]\n";
 
@@ -124,21 +29,10 @@ export async function runGate(args: readonly string[], io: CliIO): Promise<numbe
     return 0;
   }
   const { gate, strict } = parse(args);
-  const { storage } = await resolveCliWorkspace(io);
-  const graph = await storage.materialize();
-  const names = gate === "all" ? ORDER : [gate];
-  const semanticPreflight = names.includes("semantic") ? runSemanticPreflight(graph) : [];
-  const results = names.map((name) =>
-    runOne(name, graph, name === "semantic" ? semanticPreflight : []),
-  );
-  const diagnostics = results.flatMap((result) => result.diagnostics);
-  const receipt: GateReceipt = {
-    gate,
-    strict,
-    passed: results.every((result) => result.passed),
-    diagnostics,
-    results,
-  };
+  const { graph } = await resolveCliWorkspace(io);
+
+  const receipt = await graph.gate({ gate, strict });
+
   io.stdout.write(`${JSON.stringify(receipt, null, 2)}\n`);
   return receipt.passed ? 0 : 1;
 }

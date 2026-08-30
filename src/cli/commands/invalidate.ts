@@ -1,6 +1,3 @@
-import { propagateInvalidation } from "../../graph/invalidation.js";
-import type { Node } from "../../core/schemas/nodes.js";
-import { emitOperationalNotice } from "../../adapters/gsd/operational-notice.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
@@ -13,9 +10,6 @@ const parseArgs = (args: readonly string[]): { nodeId: string; evidenceId: strin
   return { nodeId: args[0], evidenceId: args[2] };
 };
 
-const changed = (before: Node, after: Node): boolean =>
-  JSON.stringify(before) !== JSON.stringify(after);
-
 export async function runInvalidation(
   args: readonly string[],
   io: CliIO,
@@ -25,65 +19,13 @@ export async function runInvalidation(
     return 0;
   }
   const { nodeId, evidenceId } = parseArgs(args);
-  const { environment, storage } = await resolveCliWorkspace(io);
-  const cascade = await storage.transaction((graph) => {
-    const target = graph.nodes.find(({ id }) => id === nodeId);
-    if (!target) throw new Error(`Node not found: ${nodeId}`);
-    if (target.type !== "ASM" && target.type !== "HYP") {
-      throw new Error(`Invalidation target ${nodeId} must be ASM or HYP`);
-    }
-    const evidence = graph.nodes.find(({ id }) => id === evidenceId);
-    if (!evidence || evidence.type !== "EVD") {
-      throw new Error(`Evidence ${evidenceId} must be an EVD node`);
-    }
+  const { environment, graph } = await resolveCliWorkspace(io);
 
-    const result = propagateInvalidation(graph, nodeId, evidenceId);
-    const beforeById = new Map(graph.nodes.map((node) => [node.id, node]));
-    const events = result.graph.nodes
-      .filter((node) => {
-        const before = beforeById.get(node.id);
-        return before !== undefined && changed(before, node);
-      })
-      .map((node) => ({ kind: "node" as const, node }));
-    const affectedNodeIds = result.trace
-      .filter(({ status }) => status !== undefined)
-      .map(({ node_id }) => node_id)
-      .sort((left, right) => left.localeCompare(right));
+  const result = await graph.invalidate(nodeId, evidenceId, {
+    rootPath: environment.rootPath,
+    notify: (banner) => io.stdout.write(`${banner}\n`),
+  });
 
-    return {
-      result: {
-        affectedNodeIds,
-        trace: result.trace,
-      },
-      events,
-    };
-  });
-  const { affectedNodeIds, trace } = cascade;
-  const priorState = (await storage.readState<Record<string, unknown>>()) ?? {};
-  await storage.writeState({
-    ...priorState,
-    last_invalidation: {
-      node_id: nodeId,
-      evidence_id: evidenceId,
-      affected_node_ids: affectedNodeIds,
-    },
-  });
-  await emitOperationalNotice(
-    environment.rootPath,
-    {
-      falsifiedId: nodeId,
-      evidenceId,
-      affectedIds: affectedNodeIds,
-    },
-    (banner) => io.stdout.write(`${banner}\n`),
-  );
-  io.stdout.write(
-    `${JSON.stringify({
-      falsified_node_id: nodeId,
-      evidence_id: evidenceId,
-      affected_node_ids: affectedNodeIds,
-      trace,
-    })}\n`,
-  );
+  io.stdout.write(`${JSON.stringify(result)}\n`);
   return 0;
 }

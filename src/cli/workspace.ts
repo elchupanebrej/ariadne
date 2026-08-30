@@ -3,6 +3,7 @@ import { statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { detectGsd, type GsdEnvironment } from "../adapters/gsd/detector.js";
 import { GraphStorage } from "../graph/storage.js";
+import { EpistemicGraph } from "../graph/epistemic-graph.js";
 
 export type CliIO = {
   cwd: string;
@@ -13,6 +14,7 @@ export type CliIO = {
 export type CliWorkspace = {
   environment: GsdEnvironment;
   storage: GraphStorage;
+  graph: EpistemicGraph;
 };
 
 export const hasHelp = (
@@ -52,5 +54,9 @@ export function findCliWorkspaceRoot(cwd = process.cwd()): string {
 export async function resolveCliWorkspace(io: CliIO): Promise<CliWorkspace> {
   const root = findCliWorkspaceRoot(io.cwd);
   const environment = detectGsd(root);
-  return { environment, storage: new GraphStorage(environment.storageRoot) };
+  return {
+    environment,
+    storage: new GraphStorage(environment.storageRoot),
+    graph: EpistemicGraph.open(environment.storageRoot),
+  };
 }

@@ -26,6 +26,11 @@ _Avoid_: Cascade failure, ripple delete, cache purge
 A typed metadata graph attached to tasks and plans that tracks claims, hypotheses, evidence, and invalidation rules without taking over task management.
 _Avoid_: State machine, ticket wrapper, meta-plan
 
+**Epistemic Graph Engine**:
+The deep domain module that encapsulates graph mutation invariants, deductive DAG integrity, atomic multi-artifact synchronization, and transitive invalidation cascade behind a unified interface.
+_Avoid_: Graph database, storage helper, JSONL writer, repo wrapper
+
+
 **Methodological Guide**:
 A normative guide that connects rationale, executable rules, a learning path, verification, and lifecycle governance for one method.
 _Avoid_: Skill, harness, documentation bundle
@@ -222,6 +227,7 @@ _Avoid_: Graph dump, invented per-card path, bare card ID
 
 **Decision Tree Report**:
 The research outcome artifact rendering the traversal from the framed problem through every graph node to locked decisions, showing edge relations, derived intermediate answers, and links to card files.
+A request for a visual rendering produces the HTML projection via `ariadne viz`: a single self-contained zero-JavaScript page with the same trees, provenance coloring, and change log. The embedded text tree remains the canonical in-response artifact.
 _Avoid_: ASCII spiral, session transcript, freeform summary
 
 **Decision Change Log**:

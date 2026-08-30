@@ -26,4 +26,6 @@ evidence; otherwise use knowledge first.
 
 Artifact operations must embed the decision tree and change log produced by
 `ariadne report`, plus the actual-file Markdown links required by
-`rules/05-uncertainty.md`; never expose a bare card ID as a document.
+`rules/05-uncertainty.md`; never expose a bare card ID as a document. A visual
+HTML projection of the same tree is produced by `ariadne viz` when a rendering
+is requested.

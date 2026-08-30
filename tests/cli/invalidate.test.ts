@@ -5,6 +5,8 @@ import { Writable } from "node:stream";
 import { describe, expect, it, vi } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
+
 
 const capture = () => {
   let output = "";
@@ -122,7 +124,7 @@ describe("ariadne invalidate", () => {
 
   it("writes the cascade in one transaction and repeats idempotently", async () => {
     const { cwd, storage } = await workspace();
-    const transaction = vi.spyOn(GraphStorage.prototype, "transaction");
+    const invalidateSpy = vi.spyOn(EpistemicGraph.prototype, "invalidate");
     try {
       const first = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
       expect(first.code).toBe(0);
@@ -141,11 +143,12 @@ describe("ariadne invalidate", () => {
         },
         active_notices: [expect.stringMatching(/^NOT-/u)],
       });
-      expect(transaction).toHaveBeenCalledTimes(2);
+      expect(invalidateSpy).toHaveBeenCalledTimes(2);
     } finally {
-      transaction.mockRestore();
+      invalidateSpy.mockRestore();
     }
   });
+
 
   it("serializes concurrent invalidations without duplicating cascade events", async () => {
     const { cwd, storage } = await workspace();

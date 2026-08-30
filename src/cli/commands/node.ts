@@ -1,6 +1,5 @@
 import {
   NODE_TYPES,
-  NodeSchemas,
   type Node,
   type NodeType,
 } from "../../core/schemas/nodes.js";
@@ -8,8 +7,7 @@ import {
   PROVENANCE_TYPES,
   type ProvenanceType,
 } from "../../core/types/nodes.js";
-import { hasHelp, resolveCliWorkspace } from "../workspace.js";
-import type { CliIO } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
 
 type Flags = Map<string, string | true>;
 
@@ -68,7 +66,7 @@ const parsePayload = (flags: Flags): Record<string, unknown> => {
   }
 };
 
-const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
+const graphFor = async (io: CliIO) => (await resolveCliWorkspace(io)).graph;
 
 async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
@@ -82,22 +80,13 @@ async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const title = flagValue(flags, "title");
   const payload = parsePayload(flags);
 
-  const storage = await storageFor(io);
-  const graph = await storage.materialize();
-  const existing = graph.nodes.find((node) => node.id === id);
+  const graph = await graphFor(io);
+  const existing = await graph.getNode(id);
   if (existing && existing.status !== "REMOVED") {
     throw new Error(`Node already exists: ${id}`);
   }
 
-  const node = NodeSchemas[type].parse({
-    ...payload,
-    type,
-    id,
-    title,
-    statement: payload.statement ?? title,
-  }) as Node;
-  await storage.appendNode(node);
-  return node;
+  return await graph.addNode(type, id, title, payload);
 }
 
 async function getNode(args: readonly string[], io: CliIO): Promise<Node> {
@@ -105,11 +94,10 @@ async function getNode(args: readonly string[], io: CliIO): Promise<Node> {
   if (positionals.length !== 1 || flags.size > 0) {
     throw new Error("Usage: ariadne node get <id>");
   }
-  const graph = await (await storageFor(io)).materialize();
-  const found = graph.nodes.find(
-    (candidate) => candidate.id === positionals[0],
-  );
-  if (!found) throw new Error(`Node not found: ${positionals[0]}`);
+  const [id] = positionals;
+  const graph = await graphFor(io);
+  const found = await graph.getNode(id);
+  if (!found) throw new Error(`Node not found: ${id}`);
   return found;
 }
 
@@ -125,13 +113,11 @@ async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
     throw new Error(`Unknown provenance: ${provenance}`);
   }
 
-  const graph = await (await storageFor(io)).materialize();
-  return graph.nodes.filter(
-    (node) =>
-      node.status !== "REMOVED" &&
-      (typeof type !== "string" || node.type === type) &&
-      (typeof provenance !== "string" || node.provenance_type === provenance),
-  );
+  const graph = await graphFor(io);
+  return await graph.listNodes({
+    type: type as NodeType | undefined,
+    provenance: provenance as ProvenanceType | undefined,
+  });
 }
 
 async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
@@ -139,14 +125,14 @@ async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
   if (positionals.length !== 1 || flags.size > 0) {
     throw new Error("Usage: ariadne node remove <id>");
   }
-  const storage = await storageFor(io);
-  const node = (await storage.materialize()).nodes.find(
-    (candidate) => candidate.id === positionals[0],
-  );
-  if (!node) throw new Error(`Node not found: ${positionals[0]}`);
+  const [id] = positionals;
+  const graph = await graphFor(io);
+  const node = await graph.getNode(id);
+  if (!node) throw new Error(`Node not found: ${id}`);
   if (node.status === "REMOVED") throw new Error(`Node already removed: ${node.id}`);
+
   const tombstone = { ...node, status: "REMOVED", tombstone: true };
-  await storage.appendNode(tombstone);
+  await graph.updateNode(id, { status: "REMOVED", payload: { tombstone: true } });
   return tombstone;
 }
 
@@ -165,41 +151,22 @@ async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
     throw new Error("Missing required option: --title");
   }
 
-  const storage = await storageFor(io);
-  return await storage.transaction((graph) => {
-    const existing = graph.nodes.find((node) => node.id === id);
-    if (!existing || existing.status === "REMOVED") {
-      throw new Error(`Node not found: ${id}`);
-    }
+  const graph = await graphFor(io);
+  const existing = await graph.getNode(id);
+  if (!existing || existing.status === "REMOVED") {
+    throw new Error(`Node not found: ${id}`);
+  }
 
-    if (payload.id !== undefined && payload.id !== id) {
-      throw new Error(`Cannot change node id: ${String(payload.id)}`);
-    }
-    if (payload.type !== undefined && payload.type !== existing.type) {
-      throw new Error(`Cannot change node type: ${String(payload.type)}`);
-    }
+  if (payload.id !== undefined && payload.id !== id) {
+    throw new Error(`Cannot change node id: ${String(payload.id)}`);
+  }
+  if (payload.type !== undefined && payload.type !== existing.type) {
+    throw new Error(`Cannot change node type: ${String(payload.type)}`);
+  }
 
-    const type = existing.type;
-    const titleToUse = typeof title === "string" ? title : (payload.title as string | undefined) ?? existing.title;
-
-    const merged = {
-      ...existing,
-      ...payload,
-      id,
-      type,
-      ...(titleToUse !== undefined ? { title: titleToUse } : {}),
-    };
-
-    const schema = NodeSchemas[type];
-    if (!schema) {
-      throw new Error(`Unknown node type schema: ${type}`);
-    }
-
-    const updatedNode = schema.parse(merged) as Node;
-    return {
-      result: updatedNode,
-      events: [{ kind: "node", node: updatedNode }],
-    };
+  return await graph.updateNode(id, {
+    title: typeof title === "string" ? title : undefined,
+    payload,
   });
 }
 

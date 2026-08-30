@@ -41,7 +41,9 @@ Link each card label to its persisted file at `.ariadne/cards/<ID>.md`
 (gsd deployment: `.planning/ariadne/cards/<ID>.md`), and link `GRAPH.jsonl`,
 `INDEX.md`, and `STATE.yaml` separately when they back the substrate. Then
 run `ariadne report <FRAME-id>` and embed its output — the decision tree and
-change log — in the response.
+change log — in the response. When a visual rendering is requested, run
+`ariadne viz <FRAME-id>` and link the generated HTML file; the embedded text
+tree remains the canonical in-response artifact.
 
 ## Handoff boundary
 

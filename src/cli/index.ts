@@ -14,6 +14,7 @@ import { runOperation } from "./commands/op.js";
 import { runReport } from "./commands/report.js";
 import { runStatus } from "./commands/status.js";
 import { runTemplate } from "./commands/template.js";
+import { runViz } from "./commands/viz.js";
 import { hasHelp, type CliIO } from "./workspace.js";
 
 const VERSION = "0.1.0";
@@ -32,6 +33,7 @@ Usage:
   ariadne ingest gsd <path>
   ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>
   ariadne report [FRAME-id] [--json]
+  ariadne viz [FRAME-id] [--json]
   ariadne init [--mode auto|standalone|gsd] [--force]
   ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
 
@@ -84,6 +86,7 @@ export async function runCli(
     if (command === "envelope") return await runEnvelope(args.slice(1), io);
     if (command === "ingest") return await runIngest(args.slice(1), io);
     if (command === "report") return await runReport(args.slice(1), io);
+    if (command === "viz") return await runViz(args.slice(1), io);
     if (command === "op") return runOperation(args.slice(1), io);
     if (command === "init") return await runInit(args.slice(1), io);
     if (command === "template") return runTemplate(args.slice(1), io);

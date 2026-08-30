@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
-import { runStructuralGate } from "../../src/gates/structural-gate.js";
+import { runStructuralGate } from "../../src/gates/gate-engine.js";
 import { runSemanticGate } from "../../src/gates/semantic-gate.js";
+
 import type { MaterializedGraph } from "../../src/graph/storage.js";
 
 const node = (

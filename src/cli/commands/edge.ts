@@ -1,13 +1,8 @@
 import {
   canonicalEdgeRelation,
-  EDGE_TYPES,
-  EdgeSchema,
-  type EdgeType,
   type EpistemicEdge,
 } from "../../core/schemas/edges.js";
-import { validateGraph } from "../../graph/integrity.js";
-import { hasHelp, resolveCliWorkspace } from "../workspace.js";
-import type { CliIO } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
 
 type Flags = Map<string, string>;
 
@@ -32,46 +27,23 @@ const parseFlags = (
   return { positionals, flags };
 };
 
-const storageFor = async (io: CliIO) => (await resolveCliWorkspace(io)).storage;
+const graphFor = async (io: CliIO) => (await resolveCliWorkspace(io)).graph;
 
-const parseEdge = (args: readonly string[], usage: string): EpistemicEdge => {
+const parseEdgeArgs = (args: readonly string[], usage: string): [string, string, string] => {
   if (args.length !== 3) {
     throw new Error(`${usage} (got ${args.length}, expected 3)`);
   }
-  const [source, relation, target] = args;
-  // Canonical relation semantics: formatting aliases are accepted and
-  // persisted as their equivalent canonical relation; anything else fails.
-  const canonical = canonicalEdgeRelation(relation);
-  if (!canonical) {
-    throw new Error(`Invalid edge relation: ${relation}`);
-  }
-  return EdgeSchema.parse({ source, type: canonical, target });
+  return [args[0], args[1], args[2]];
 };
-
-const edgeKey = (edge: EpistemicEdge): string =>
-  `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
 
 async function addEdge(
   args: readonly string[],
   usage: string,
   io: CliIO,
 ): Promise<EpistemicEdge> {
-  const edge = parseEdge(args, usage);
-  const storage = await storageFor(io);
-  const graph = await storage.materialize();
-  const nodeIds = new Set(graph.nodes.map((node) => node.id));
-  if (!nodeIds.has(edge.source)) throw new Error(`Edge source ${edge.source} does not exist`);
-  if (!nodeIds.has(edge.target)) throw new Error(`Edge target ${edge.target} does not exist`);
-  if (graph.edges.some((candidate) => edgeKey(candidate) === edgeKey(edge))) {
-    throw new Error(`Edge already exists: ${edgeKey(edge)}`);
-  }
-
-  const validation = validateGraph({ nodes: graph.nodes, edges: [...graph.edges, edge] });
-  if (!validation.valid) {
-    throw new Error(validation.diagnostics.map(({ code, message }) => `${code}: ${message}`).join("; "));
-  }
-  await storage.appendEdge(edge);
-  return edge;
+  const [source, relation, target] = parseEdgeArgs(args, usage);
+  const graph = await graphFor(io);
+  return await graph.addEdge(source, relation, target);
 }
 
 async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicEdge[]> {
@@ -84,13 +56,13 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
   if (relation && !canonicalRelation) {
     throw new Error(`Invalid edge relation: ${relation}`);
   }
-  const graph = await (await storageFor(io)).materialize();
-  return graph.edges.filter(
-    (edge) =>
-      (!from || edge.source === from) &&
-      (!to || edge.target === to) &&
-      (!canonicalRelation || edge.type === canonicalRelation),
-  );
+
+  const graph = await graphFor(io);
+  return await graph.listEdges({
+    from,
+    to,
+    relation: canonicalRelation,
+  });
 }
 
 async function removeEdge(
@@ -98,14 +70,9 @@ async function removeEdge(
   usage: string,
   io: CliIO,
 ): Promise<EpistemicEdge> {
-  const edge = parseEdge(args, usage);
-  const storage = await storageFor(io);
-  const graph = await storage.materialize();
-  if (!graph.edges.some((candidate) => edgeKey(candidate) === edgeKey(edge))) {
-    throw new Error(`Edge not found: ${edgeKey(edge)}`);
-  }
-  await storage.appendEdgeTombstone(edge);
-  return edge;
+  const [source, relation, target] = parseEdgeArgs(args, usage);
+  const graph = await graphFor(io);
+  return await graph.removeEdge(source, relation, target);
 }
 
 const EDGE_USAGE = "Usage: ariadne edge <add|list|remove> ...\n";

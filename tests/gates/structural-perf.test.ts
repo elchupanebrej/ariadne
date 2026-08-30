@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { runStructuralGate } from "../../src/gates/structural-gate.js";
+import { runStructuralGate } from "../../src/gates/gate-engine.js";
+
 
 const representativeGraph = () => ({
   nodes: Array.from({ length: 50 }, (_, index) => ({

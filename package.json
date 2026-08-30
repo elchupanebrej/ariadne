@@ -1,26 +1,56 @@
 {
-  "name": "ariadne",
+  "name": "ariadne-reasoning",
   "version": "0.1.0",
-  "private": true,
+  "description": "Software reasoning layer and epistemic substrate for autonomous agents and engineers",
   "type": "module",
   "bin": {
-    "ariadne": "dist/cli/index.js"
+    "ariadne": "dist/cli/index.js",
+    "ariadne-reasoning": "dist/cli/index.js"
   },
+  "files": [
+    "dist",
+    ".agents",
+    "scripts"
+  ],
   "engines": {
     "node": ">=20"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elchupanebrej/ariadne.git"
+  },
+  "homepage": "https://github.com/elchupanebrej/ariadne#readme",
+  "bugs": {
+    "url": "https://github.com/elchupanebrej/ariadne/issues"
+  },
+  "keywords": [
+    "ai",
+    "reasoning",
+    "epistemics",
+    "agents",
+    "agent-skills",
+    "software-engineering",
+    "decision-trees"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build",
     "test": "vitest run",
-    "verify": "npm run typecheck && npm test"
+    "verify": "npm run typecheck && npm test",
+    "docs:build": "node scripts/build-nine-operations-html.mjs",
+    "docs:check": "node scripts/build-nine-operations-html.mjs --check",
+    "docs:test": "npm run docs:check && node scripts/test-nine-operations-html.mjs",
+    "skills:link": "bash scripts/link-skill.sh",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "zod": "^4.1.5"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "marked": "18.0.11",
+    "playwright": "1.61.0",
     "typescript": "^5.9.2",
     "vitest": "4.1.6"
   }
