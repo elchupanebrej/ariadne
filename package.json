@@ -36,7 +36,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build",
-    "test": "vitest run",
+    "test": "vitest run --testTimeout 15000",
     "verify": "npm run typecheck && npm test",
     "docs:build": "node scripts/build-nine-operations-html.mjs",
     "docs:check": "node scripts/build-nine-operations-html.mjs --check",

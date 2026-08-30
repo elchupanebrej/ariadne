@@ -1,6 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import {
@@ -262,9 +261,7 @@ describe("thin-path effect safety (fault-injected clean-session runs)", () => {
 
   it("survives a real process reset immediately after the durable dispatch intent", async () => {
     const { root, id } = await runningAttempt("eff-proc");
-    const builtModule = resolve(
-      fileURLToPath(new URL("../../dist/harness/attempt.js", import.meta.url)),
-    );
+    const builtModule = new URL("../../dist/harness/attempt.js", import.meta.url).href;
     const probe = join(root, "..", `probe-effect-${Date.now()}.mjs`);
     await writeFile(
       probe,

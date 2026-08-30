@@ -1,6 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import {
@@ -24,9 +23,7 @@ const readLedgerRecord = async (
   return JSON.parse(lines[lines.length - 1]) as Record<string, unknown>;
 };
 
-const builtModule = resolve(
-  fileURLToPath(new URL("../../dist/harness/attempt.js", import.meta.url)),
-);
+const builtModule = new URL("../../dist/harness/attempt.js", import.meta.url).href;
 
 describe("thin Orchestration Attempt continuity", () => {
   it("retains only the declared pointer-only fields on disk", async () => {
