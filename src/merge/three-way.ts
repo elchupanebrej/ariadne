@@ -496,7 +496,12 @@ const edgeVariantFor = (
   source,
   source_label: sourceLabels[source],
   source_digest: sourceDigest,
-  variant_digest: digest(canonicalJson(state?.value ?? null)),
+  variant_digest: digest(
+    canonicalJson({
+      operation: state?.operation ?? "absent",
+      value: state?.value ?? null,
+    }),
+  ),
   operation: state?.operation ?? "absent",
   value: state?.value ?? null,
 });
