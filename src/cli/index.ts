@@ -15,6 +15,7 @@ import { runReport } from "./commands/report.js";
 import { runStatus } from "./commands/status.js";
 import { runTemplate } from "./commands/template.js";
 import { runViz } from "./commands/viz.js";
+import { runMergeDriver } from "./commands/merge.js";
 import { hasHelp, type CliIO } from "./workspace.js";
 
 const VERSION = "0.1.0";
@@ -36,6 +37,7 @@ Usage:
   ariadne viz [FRAME-id] [--json]
   ariadne init [--mode auto|standalone|gsd] [--force]
   ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
+  ariadne merge-driver [--json] <ancestor> <current> <incoming>
 
 Options:
   -h, --help       Show this help
@@ -90,6 +92,7 @@ export async function runCli(
     if (command === "op") return runOperation(args.slice(1), io);
     if (command === "init") return await runInit(args.slice(1), io);
     if (command === "template") return runTemplate(args.slice(1), io);
+    if (command === "merge-driver") return await runMergeDriver(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);

@@ -37,3 +37,4 @@ export * from "./method-contract/index.js";
 export * from "./teach-ariadne/index.js";
 export * from "./teach-methodology/index.js";
 export * from "./teach-harness/index.js";
+export * from "./merge/three-way.js";
