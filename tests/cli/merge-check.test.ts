@@ -92,6 +92,11 @@ describe("ariadne merge-check", () => {
           readFile(join(cwd, ".ariadne", "cards", "CTR-MERGE-1.md"), "utf8"),
         ]),
       ).toEqual(before);
+
+      const human = await invoke(cwd, ["merge-check"]);
+      expect(human.code).toBe(1);
+      expect(human.stdout).toContain("Ariadne publication check: blocked");
+      expect(human.stdout).toContain(".ariadne/cards/CTR-MERGE-1.md");
     } finally {
       await rm(cwd, { recursive: true, force: true });
     }
@@ -208,4 +213,20 @@ describe("ariadne merge-check", () => {
       await rm(repo, { recursive: true, force: true });
     }
   }, 15_000);
+
+  it("does not repair or truncate a malformed journal tail", async () => {
+    const cwd = await workspace();
+    try {
+      const graphPath = join(cwd, ".ariadne", "GRAPH.jsonl");
+      await mkdir(join(cwd, ".ariadne"));
+      const malformed = `${sharedNode("base")}\n{"kind":"node"`;
+      await writeFile(graphPath, malformed);
+
+      const result = await invoke(cwd, ["merge-check", "--json"]);
+      expect(result.code).toBe(1);
+      expect(await readFile(graphPath, "utf8")).toBe(malformed);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
 });
