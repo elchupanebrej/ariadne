@@ -446,6 +446,25 @@ describe("ariadne merge-driver", () => {
     }
   });
 
+  it("materializes separate contradictions for disconnected topology violations", () => {
+    const base = [
+      typedNodeEvent("TASK-A", "TASK"),
+      typedNodeEvent("TASK-B", "TASK"),
+      typedNodeEvent("TASK-C", "TASK"),
+      typedNodeEvent("TASK-D", "TASK"),
+    ].join("\n") + "\n";
+    const current = `${base}${edgeEventOf("TASK-A", "derived_from", "TASK-B")}\n${edgeEventOf("TASK-C", "derived_from", "TASK-D")}\n`;
+    const incoming = `${base}${edgeEventOf("TASK-B", "derived_from", "TASK-A")}\n${edgeEventOf("TASK-D", "derived_from", "TASK-C")}\n`;
+
+    const result = mergeBranchModels({ base, current, incoming });
+    expect(result.receipt.outcome).toBe("DIVERGED");
+    expect(result.receipt.created_conflict_ids).toHaveLength(2);
+    const events = result.output?.trim().split("\n").map((line) => JSON.parse(line)) ?? [];
+    expect(events.filter(({ kind }: { kind: string }) => kind === "node")).toHaveLength(6);
+    expect(events.filter(({ kind }: { kind: string }) => kind === "edge")).toHaveLength(0);
+    expect(events.filter(({ node }: { node?: { type?: string } }) => node?.type === "CTR")).toHaveLength(2);
+  });
+
   it("propagates causal quarantine transitively but leaves reference-only additions active", async () => {
     const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
     try {
@@ -480,6 +499,22 @@ describe("ariadne merge-driver", () => {
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
+  });
+
+  it("quarantines dependency-only descendants of a conflicting node", () => {
+    const base = `${typedNodeEvent("ASM-ROOT", "ASM", "ancestor")}\n`;
+    const current = [
+      base.trimEnd(),
+      typedNodeEvent("ASM-ROOT", "ASM", "current"),
+      typedNodeEvent("CAN-DEPENDENT", "CAN", "dependent", { dependencies: ["ASM-ROOT"] }),
+    ].join("\n") + "\n";
+    const incoming = `${base.trimEnd()}\n${typedNodeEvent("ASM-ROOT", "ASM", "incoming")}\n`;
+
+    const result = mergeBranchModels({ base, current, incoming });
+    expect(result.receipt.outcome).toBe("DIVERGED");
+    const events = result.output?.trim().split("\n").map((line) => JSON.parse(line)) ?? [];
+    expect(events.some(({ node }: { node?: { id?: string } }) => node?.id === "CAN-DEPENDENT")).toBe(false);
+    expect(result.output).toContain("CAN-DEPENDENT");
   });
 
   it("accepts the quarantine ceiling and fails atomically above it", () => {

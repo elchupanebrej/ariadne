@@ -82,7 +82,10 @@ const invalidationMetadata = (
   };
 };
 
-const reverseTopology = (edges: readonly EpistemicEdge[]) => {
+export const buildInfluenceAdjacency = (
+  graph: Pick<MaterializedGraph, "nodes" | "edges">,
+  options: { includeDependencies?: boolean } = {},
+) => {
   const adjacency = new Map<string, Array<{ id: string; relation: EdgeType }>>();
   const add = (from: string, id: string, relation: EdgeType): void => {
     const neighbors = adjacency.get(from) ?? [];
@@ -90,13 +93,19 @@ const reverseTopology = (edges: readonly EpistemicEdge[]) => {
     adjacency.set(from, neighbors);
   };
 
-  for (const edge of edges) {
+  for (const edge of graph.edges) {
     if (edge.type === "depends_on" || edge.type === "derived_from") {
       add(edge.target, edge.source, edge.type);
     } else if (edge.type === "supports") {
       add(edge.source, edge.target, edge.type);
     } else if (edge.type === "invalidates") {
       add(edge.source, edge.target, edge.type);
+    }
+  }
+
+  if (options.includeDependencies) {
+    for (const node of graph.nodes) {
+      for (const dependency of node.dependencies ?? []) add(dependency, node.id, "depends_on");
     }
   }
 
@@ -109,6 +118,9 @@ const reverseTopology = (edges: readonly EpistemicEdge[]) => {
   }
   return adjacency;
 };
+
+const reverseTopology = (edges: readonly EpistemicEdge[]) =>
+  buildInfluenceAdjacency({ nodes: [], edges: [...edges] });
 
 export function propagateInvalidation(
   graph: InvalidationGraph,

@@ -697,31 +697,6 @@ export function mergeBranchModels(
     if (target) quarantineCeilingSubjects.add(target);
   };
 
-  const choose = <T>(
-    subject: string,
-    base: T | undefined,
-    current: T | undefined,
-    incoming: T | undefined,
-    event: (value: T | undefined, baseValue: T | undefined) => GraphEvent | undefined,
-  ): void => {
-    const currentChanged = !equal(current, base);
-    const incomingChanged = !equal(incoming, base);
-    if (currentChanged && incomingChanged && !equal(current, incoming)) {
-      diagnostics.push({
-        code: "INCOMPATIBLE_BRANCH_CHANGE",
-        message: `Current and incoming branches changed ${subject} differently`,
-        subject,
-      });
-      return;
-    }
-    if (!currentChanged && !incomingChanged) return;
-    const value = currentChanged ? current : incoming;
-    const produced = event(value, base);
-    if (produced) events.push(produced);
-    appliedSubjects.push(subject);
-    if (currentChanged && incomingChanged) deduplicatedSubjects.push(subject);
-  };
-
   for (const id of nodeIds) {
     const base = baseNodes.get(id);
     const current = currentNodes.get(id);
@@ -900,7 +875,9 @@ export function mergeBranchModels(
     ...parsed.base.events,
     ...events,
   ]);
-  const causalAdjacency = buildInfluenceAdjacency(activeGraph(causalCandidate));
+  const causalAdjacency = buildInfluenceAdjacency(activeGraph(causalCandidate), {
+    includeDependencies: true,
+  });
   const causalOwners = new Map<string, string>();
   for (const root of [...nodeConflictSubjects].sort((left, right) => left.localeCompare(right))) {
     const reachable = new Set<string>([root]);
@@ -942,27 +919,50 @@ export function mergeBranchModels(
 
   const selectedEvents = (): GraphEvent[] =>
     events.filter((event) => !quarantinedEventSubjects.has(eventSubject(event)));
-  const topologyCandidate = materialize([
-    ...parsed.base.events,
-    ...selectedEvents(),
-  ]);
-  const topologyValidation = validateGraph(activeGraph(topologyCandidate));
-  if (!topologyValidation.valid) {
+  while (true) {
+    const topologyCandidate = materialize([
+      ...parsed.base.events,
+      ...selectedEvents(),
+    ]);
+    const topologyValidation = validateGraph(activeGraph(topologyCandidate));
+    if (topologyValidation.valid) break;
     const topologyNodeIds = new Set<string>();
     const topologyEdgeKeys = new Set<string>();
+    const topologyAdjacency = new Map<string, Set<string>>();
+    const connectTopology = (left: string, right: string): void => {
+      const leftNeighbors = topologyAdjacency.get(left) ?? new Set<string>();
+      leftNeighbors.add(right);
+      topologyAdjacency.set(left, leftNeighbors);
+      const rightNeighbors = topologyAdjacency.get(right) ?? new Set<string>();
+      rightNeighbors.add(left);
+      topologyAdjacency.set(right, rightNeighbors);
+    };
+    const diagnosticNodeIds = (diagnostic: GraphDiagnostic): Set<string> => {
+      const ids = new Set(diagnostic.path ?? []);
+      if (diagnostic.nodeId) ids.add(diagnostic.nodeId);
+      if (diagnostic.edge?.source) ids.add(diagnostic.edge.source);
+      if (diagnostic.edge?.target) ids.add(diagnostic.edge.target);
+      return ids;
+    };
     for (const diagnostic of topologyValidation.diagnostics) {
-      for (const id of diagnostic.path ?? []) topologyNodeIds.add(id);
+      const diagnosticIds = diagnosticNodeIds(diagnostic);
+      for (const id of diagnosticIds) topologyNodeIds.add(id);
+      const path = diagnostic.path ?? [];
+      for (let index = 1; index < path.length; index += 1) {
+        connectTopology(path[index - 1] as string, path[index] as string);
+      }
       const edge = diagnostic.edge;
       if (edge?.source && edge.target && edge.type) {
-        topologyNodeIds.add(edge.source);
-        topologyNodeIds.add(edge.target);
+        connectTopology(edge.source, edge.target);
         topologyEdgeKeys.add(`${edge.source}\u0000${edge.type}\u0000${edge.target}`);
       }
-      if (diagnostic.nodeId) topologyNodeIds.add(diagnostic.nodeId);
     }
     for (const node of topologyCandidate.nodes) {
       for (const dependency of node.dependencies ?? []) {
-        if (topologyNodeIds.has(dependency)) topologyNodeIds.add(node.id);
+        if (topologyNodeIds.has(dependency)) {
+          topologyNodeIds.add(node.id);
+          connectTopology(dependency, node.id);
+        }
       }
     }
     for (const edge of topologyCandidate.edges) {
@@ -971,7 +971,9 @@ export function mergeBranchModels(
         topologyNodeIds.has(edge.source) &&
         topologyNodeIds.has(edge.target)
       ) {
-        topologyEdgeKeys.add(edgeSubject(edge).replaceAll(":", "\u0000"));
+        const key = edgeSubject(edge).replaceAll(":", "\u0000");
+        topologyEdgeKeys.add(key);
+        connectTopology(edge.source, edge.target);
       }
     }
     if (topologyNodeIds.size === 0 && topologyEdgeKeys.size === 0) {
@@ -981,68 +983,105 @@ export function mergeBranchModels(
         topologyValidation.diagnostics.map((item) => diagnosticFromGraph("base", item)),
       );
     }
-    const topologySubject = `topology:${[...topologyNodeIds].sort((left, right) => left.localeCompare(right)).join(",")}|${[...topologyEdgeKeys].sort((left, right) => left.localeCompare(right)).join(",")}`;
-    const quarantined: Quarantine = { nodes: [], edges: [] };
-    for (const id of topologyNodeIds) {
-      for (const [sourceName, nodes] of [
-        ["current", currentNodes],
-        ["incoming", incomingNodes],
-      ] as const) {
-        const value = nodes.get(id);
-        if (!value || equal(semanticNode(value), semanticNode(baseNodes.get(id)))) continue;
-        quarantined.nodes.push({
-          source: sourceName,
-          source_label: sourceLabels[sourceName],
-          source_digest: normalizedInputDigests[sourceName],
-          operation: isDeletedNode(value) ? "delete" : "present",
-          value,
-        });
-        quarantineNode(id);
-        quarantinedEventSubjects.add(`node:${id}`);
+    const quarantinedEventCount = quarantinedEventSubjects.size;
+    const components: Array<Set<string>> = [];
+    const visited = new Set<string>();
+    for (const start of [...topologyNodeIds].sort((left, right) => left.localeCompare(right))) {
+      if (visited.has(start)) continue;
+      const component = new Set<string>();
+      const queue = [start];
+      visited.add(start);
+      for (let index = 0; index < queue.length; index += 1) {
+        const id = queue[index];
+        component.add(id);
+        for (const neighbor of topologyAdjacency.get(id) ?? []) {
+          if (visited.has(neighbor)) continue;
+          visited.add(neighbor);
+          queue.push(neighbor);
+        }
       }
+      components.push(component);
     }
-    for (const key of topologyEdgeKeys) {
-      const edgeSubjectKey = key.replaceAll("\u0000", ":");
-      for (const [sourceName, states] of [
-        ["current", currentEdgeStates],
-        ["incoming", incomingEdgeStates],
-      ] as const) {
-        const state = edgeStateFor(states, edgeSubjectKey);
-        const baseState = edgeStateFor(baseEdgeStates, edgeSubjectKey);
-        if (equal(state, baseState)) continue;
-        const value = state.operation === "absent"
-          ? baseState.operation === "present" ? baseState.value : undefined
-          : state.value;
-        if (!value) continue;
-        quarantined.edges.push({
-          source: sourceName,
-          source_label: sourceLabels[sourceName],
-          source_digest: normalizedInputDigests[sourceName],
-          operation: state.operation === "present" ? "present" : "delete",
-          value,
-        });
-        quarantineEdge(key);
-        quarantinedEventSubjects.add(`edge:${edgeSubject(value)}`);
+    for (const component of components) {
+      const componentEdgeKeys = [...topologyEdgeKeys].filter((key) => {
+        const [source, , target] = key.split("\u0000");
+        return component.has(source) && component.has(target);
+      });
+      const topologySubject = `topology:${[...component].sort((left, right) => left.localeCompare(right)).join(",")}|${componentEdgeKeys.sort((left, right) => left.localeCompare(right)).join(",")}`;
+      const quarantined: Quarantine = { nodes: [], edges: [] };
+      for (const id of component) {
+        for (const [sourceName, nodes] of [
+          ["current", currentNodes],
+          ["incoming", incomingNodes],
+        ] as const) {
+          const value = nodes.get(id);
+          if (!value || equal(semanticNode(value), semanticNode(baseNodes.get(id)))) continue;
+          quarantined.nodes.push({
+            source: sourceName,
+            source_label: sourceLabels[sourceName],
+            source_digest: normalizedInputDigests[sourceName],
+            operation: isDeletedNode(value) ? "delete" : "present",
+            value,
+          });
+          quarantineNode(id);
+          quarantinedEventSubjects.add(`node:${id}`);
+        }
       }
+      for (const key of componentEdgeKeys) {
+        const edgeSubjectKey = key.replaceAll("\u0000", ":");
+        for (const [sourceName, states] of [
+          ["current", currentEdgeStates],
+          ["incoming", incomingEdgeStates],
+        ] as const) {
+          const state = edgeStateFor(states, edgeSubjectKey);
+          const baseState = edgeStateFor(baseEdgeStates, edgeSubjectKey);
+          if (equal(state, baseState)) continue;
+          const value = state.operation === "absent"
+            ? baseState.operation === "present" ? baseState.value : undefined
+            : state.value;
+          if (!value) continue;
+          quarantined.edges.push({
+            source: sourceName,
+            source_label: sourceLabels[sourceName],
+            source_digest: normalizedInputDigests[sourceName],
+            operation: state.operation === "present" ? "present" : "delete",
+            value,
+          });
+          quarantineEdge(key);
+          quarantinedEventSubjects.add(`edge:${edgeSubject(value)}`);
+        }
+      }
+      const componentCodes = topologyValidation.diagnostics
+        .filter((diagnostic) =>
+          [...diagnosticNodeIds(diagnostic)].some((id) => component.has(id)),
+        )
+        .map(({ code }) => code);
+      const code = componentCodes.includes("CYCLE")
+        ? "TOPOLOGY_CYCLE"
+        : componentCodes.includes("INVALID_EDGE")
+          ? "TOPOLOGY_INVALID_ENDPOINT"
+          : "TOPOLOGY_DANGLING_REFERENCE";
+      const contradiction = topologyConflictNode({
+        subject: topologySubject,
+        diagnosticCodes: [code],
+        quarantined,
+        inputDigests: normalizedInputDigests,
+      });
+      conflicts.set(topologySubject, contradiction);
+      createdConflictIds.push(contradiction.id);
+      diagnostics.push({
+        code,
+        message: `Merged branch changes create an invalid topology for ${topologySubject}`,
+        subject: topologySubject,
+      });
     }
-    const code = topologyValidation.diagnostics.some(({ code: diagnosticCode }) => diagnosticCode === "CYCLE")
-      ? "TOPOLOGY_CYCLE"
-      : topologyValidation.diagnostics.some(({ code: diagnosticCode }) => diagnosticCode === "INVALID_EDGE")
-        ? "TOPOLOGY_INVALID_ENDPOINT"
-        : "TOPOLOGY_DANGLING_REFERENCE";
-    const contradiction = topologyConflictNode({
-      subject: topologySubject,
-      diagnosticCodes: [code],
-      quarantined,
-      inputDigests: normalizedInputDigests,
-    });
-    conflicts.set(topologySubject, contradiction);
-    createdConflictIds.push(contradiction.id);
-    diagnostics.push({
-      code,
-      message: `Merged branch changes create an invalid topology for ${topologySubject}`,
-      subject: topologySubject,
-    });
+    if (quarantinedEventSubjects.size === quarantinedEventCount) {
+      return failure(
+        normalizedInputDigests,
+        inputs.current,
+        topologyValidation.diagnostics.map((item) => diagnosticFromGraph("base", item)),
+      );
+    }
   }
 
   const finalEvents = selectedEvents();
