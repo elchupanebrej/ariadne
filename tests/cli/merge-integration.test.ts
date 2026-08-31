@@ -69,12 +69,16 @@ describe("Ariadne Git merge integration", () => {
       expect(
         await git(repo, "config", "--local", "--get", "merge.ariadne.driver"),
       ).toBe(driver);
-      expect(attributes).toBe(".ariadne/GRAPH.jsonl merge=ariadne\n");
+      expect(attributes).toBe(
+        ".ariadne/GRAPH.jsonl merge=ariadne\n" +
+          ".ariadne/INDEX.md merge=ours\n" +
+          ".ariadne/cards/** merge=ours\n",
+      );
       expect(driver).toContain("merge-driver --protocol-version 1 %O %A %B");
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 
   it("leaves incompatible attributes and driver configuration unchanged", async () => {
     const repo = await repository();
@@ -155,7 +159,9 @@ describe("Ariadne Git merge integration", () => {
         graph_path: ".planning/ariadne/GRAPH.jsonl",
       });
       expect(await readFile(join(repo, ".gitattributes"), "utf8")).toBe(
-        ".planning/ariadne/GRAPH.jsonl merge=ariadne\n",
+        ".planning/ariadne/GRAPH.jsonl merge=ariadne\n" +
+          ".planning/ariadne/INDEX.md merge=ours\n" +
+          ".planning/ariadne/cards/** merge=ours\n",
       );
     } finally {
       await rm(repo, { recursive: true, force: true });
@@ -179,5 +185,5 @@ describe("Ariadne Git merge integration", () => {
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 });

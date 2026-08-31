@@ -16,9 +16,8 @@ const HOOK_NAMES = ["pre-merge-commit", "pre-commit"] as const;
 const HOOK_MARKER = "# ariadne-merge-hook-v1";
 const HOOK_CONTENT = `#!/bin/sh
 ${HOOK_MARKER}
-# Merge hooks are intentionally non-blocking; ticket 07 extends this path with projection sync.
 if command -v ariadne >/dev/null 2>&1; then
-  ariadne merge-doctor --json >&2 || true
+  ariadne merge-sync --stage-derived >&2 || true
 fi
 exit 0
 `;
@@ -181,7 +180,14 @@ const effectiveAttribute = (
     const line = rawLine.replace(/\s+#.*$/u, "").trim();
     if (!line || line.startsWith("#")) continue;
     const [pattern, ...attributes] = line.split(/\s+/u);
-    if (pattern !== graphPath && pattern !== "*.jsonl" && pattern !== "*")
+    const wildcard =
+      pattern.endsWith("/**") && graphPath.startsWith(pattern.slice(0, -2));
+    if (
+      pattern !== graphPath &&
+      pattern !== "*.jsonl" &&
+      pattern !== "*" &&
+      !wildcard
+    )
       continue;
     for (const attribute of attributes) {
       if (attribute.startsWith("merge="))
@@ -211,14 +217,37 @@ const committedAttribute = async (
     return { passed: false, message: "Committed .gitattributes is missing" };
   }
   const value = effectiveAttribute(content, graphPath);
-  return value === "ariadne"
+  if (value !== "ariadne") {
+    return {
+      passed: false,
+      message: `Committed attributes select ${value ?? "no merge driver"} for ${graphPath}; commit ${graphPath} merge=ariadne before relying on Git integration`,
+    };
+  }
+  const storagePath = relative(root, detectGsd(root).storageRoot).replaceAll(
+    "\\",
+    "/",
+  );
+  const generated = [
+    { path: `${storagePath}/INDEX.md`, pattern: `${storagePath}/INDEX.md` },
+    {
+      path: `${storagePath}/cards/placeholder.md`,
+      pattern: `${storagePath}/cards/**`,
+    },
+  ];
+  const missing = generated.filter(
+    ({ path: target, pattern }) =>
+      effectiveAttribute(content, target) !== "ours",
+  );
+  return missing.length === 0
     ? {
         passed: true,
-        message: `Committed attributes select ariadne for ${graphPath}`,
+        message: `Committed attributes select Ariadne for ${graphPath} and generated projections`,
       }
     : {
         passed: false,
-        message: `Committed attributes select ${value ?? "no merge driver"} for ${graphPath}; commit ${graphPath} merge=ariadne before relying on Git integration`,
+        message: `Committed attributes must select merge=ours for generated projections (${missing
+          .map(({ pattern }) => pattern)
+          .join(", ")})`,
       };
 };
 
@@ -359,15 +388,45 @@ const setupAttributes = async (
 ): Promise<{ changed: boolean; conflict?: string }> => {
   const path = join(root, ".gitattributes");
   const content = (await exists(path)) ? await readFile(path, "utf8") : "";
-  const effective = await workingAttribute(root, graphPath);
-  if (effective && effective !== "ariadne") {
+  const storagePath = relative(root, detectGsd(root).storageRoot).replaceAll(
+    "\\",
+    "/",
+  );
+  const entries = [
+    { path: graphPath, pattern: graphPath, merge: "ariadne" },
+    {
+      path: `${storagePath}/INDEX.md`,
+      pattern: `${storagePath}/INDEX.md`,
+      merge: "ours",
+    },
+    {
+      path: `${storagePath}/cards/placeholder.md`,
+      pattern: `${storagePath}/cards/**`,
+      merge: "ours",
+    },
+  ];
+  const conflicts = entries
+    .map(({ path: target, merge }) => ({
+      target,
+      merge,
+      value: effectiveAttribute(content, target),
+    }))
+    .filter(({ merge, value }) => value !== undefined && value !== merge);
+  if (conflicts.length > 0) {
     return {
       changed: false,
-      conflict: `Existing attributes select merge=${effective} for ${graphPath}. Manual integration: change that policy to '${graphPath} merge=ariadne' only after reviewing repository policy.`,
+      conflict: `Existing attributes conflict with Ariadne generated-file policy: ${conflicts
+        .map(({ target, value }) => `${target}=merge=${value}`)
+        .join(
+          ", ",
+        )}. Manual integration: preserve repository policy or explicitly select Ariadne for the canonical graph and merge=ours for generated projections.`,
     };
   }
-  if (effective === "ariadne") return { changed: false };
-  const addition = `${graphPath} merge=ariadne\n`;
+  const missing = entries.filter(
+    ({ path: target, merge }) => effectiveAttribute(content, target) !== merge,
+  );
+  if (missing.length === 0) return { changed: false };
+  const addition = `${missing.map(({ pattern, merge }) => `${pattern} merge=${merge}`).join("\n")}\n`;
   await writeFile(
     path,
     content.length === 0
@@ -428,12 +487,14 @@ export async function runMergeSetup(
   }
   const hookPlan = await prepareHooks(root, currentHooksPath);
   if (hookPlan.conflict) conflicts.push(hookPlan.conflict);
+  let attributes: { changed: boolean; conflict?: string } = { changed: false };
+  if (conflicts.length === 0) {
+    attributes = await setupAttributes(root, graphPath);
+    if (attributes.conflict) conflicts.push(attributes.conflict);
+  }
   const changes: string[] = [];
   if (conflicts.length === 0) {
-    if (!attributeValue) {
-      await setupAttributes(root, graphPath);
-      changes.push(".gitattributes");
-    }
+    if (attributes.changed) changes.push(".gitattributes");
     if (!currentDriver) {
       await git(root, [
         "config",

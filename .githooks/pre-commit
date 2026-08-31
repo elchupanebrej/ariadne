@@ -1,7 +1,6 @@
 #!/bin/sh
 # ariadne-merge-hook-v1
-# Merge hooks are intentionally non-blocking; ticket 07 extends this path with projection sync.
 if command -v ariadne >/dev/null 2>&1; then
-  ariadne merge-doctor --json >&2 || true
+  ariadne merge-sync --stage-derived >&2 || true
 fi
 exit 0
