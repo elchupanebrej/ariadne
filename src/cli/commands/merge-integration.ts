@@ -1,0 +1,349 @@
+import { access, readFile, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { MERGE_PROTOCOL_VERSION } from "../../merge/three-way.js";
+import { hasHelp, type CliIO } from "../workspace.js";
+
+const runFile = promisify(execFile);
+const DRIVER_KEY = "merge.ariadne.driver";
+const DEFAULT_GRAPH_PATH = ".ariadne/GRAPH.jsonl";
+const ROOT_GRAPH_PATH = "GRAPH.jsonl";
+
+type Check = { passed: boolean; message: string };
+
+type IntegrationReceipt = {
+  passed: boolean;
+  graph_path: string;
+  protocol_version: number;
+  checks: {
+    committed_attributes: Check;
+    local_driver: Check;
+    executable: Check;
+    protocol: Check;
+  };
+  changes?: string[];
+  diagnostics?: string[];
+};
+
+const SETUP_USAGE = "Usage: ariadne merge-setup [--json]\n";
+const DOCTOR_USAGE = "Usage: ariadne merge-doctor [--json]\n";
+
+const git = async (cwd: string, args: string[]): Promise<string> =>
+  (await runFile("git", ["-C", cwd, ...args], { encoding: "utf8" })).stdout;
+
+const tryGit = async (
+  cwd: string,
+  args: string[],
+): Promise<string | undefined> => {
+  try {
+    return await git(cwd, args);
+  } catch (error) {
+    const code: string | number | undefined = (
+      error as { code?: string | number }
+    ).code;
+    if (code === 1 || code === "1") return undefined;
+    throw error;
+  }
+};
+
+const exists = async (path: string): Promise<boolean> => {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const repositoryRoot = async (cwd: string): Promise<string> =>
+  (await git(cwd, ["rev-parse", "--show-toplevel"])).trim();
+
+const graphPathFor = async (root: string): Promise<string> =>
+  (await exists(join(root, ".ariadne"))) ? DEFAULT_GRAPH_PATH : ROOT_GRAPH_PATH;
+
+const shellQuote = (value: string): string =>
+  `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+
+const cliEntry = async (): Promise<string> => {
+  const moduleEntry = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "index.js",
+  );
+  const sourceEntry = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../../dist/cli/index.js",
+  );
+  if (await exists(moduleEntry)) return moduleEntry;
+  if (await exists(sourceEntry)) return sourceEntry;
+  return moduleEntry;
+};
+
+const expectedDriver = async (): Promise<string> =>
+  `${shellQuote(process.execPath)} ${shellQuote(await cliEntry())} merge-driver --protocol-version ${MERGE_PROTOCOL_VERSION} %O %A %B`;
+
+const tokenize = (value: string): string[] => {
+  const tokens = value.match(/"(?:\\.|[^"])*"|\S+/gu) ?? [];
+  return tokens.map((token) => {
+    if (!token.startsWith('"') || !token.endsWith('"')) return token;
+    return token.slice(1, -1).replaceAll("\\\\", "\\").replaceAll('\\"', '"');
+  });
+};
+
+const driverShape = (value: string | undefined): Check => {
+  if (!value)
+    return { passed: false, message: "Local merge driver is missing" };
+  const tokens = tokenize(value);
+  const required = ["%O", "%A", "%B"];
+  if (
+    !tokens.includes("merge-driver") ||
+    !tokens.includes("--protocol-version") ||
+    tokens[tokens.indexOf("--protocol-version") + 1] !==
+      String(MERGE_PROTOCOL_VERSION) ||
+    required.some((placeholder) => !tokens.includes(placeholder))
+  ) {
+    return {
+      passed: false,
+      message: `Local merge driver must invoke merge-driver with protocol ${MERGE_PROTOCOL_VERSION} and %O %A %B placeholders`,
+    };
+  }
+  return { passed: true, message: "Local merge driver command is compatible" };
+};
+
+const executableCheck = async (value: string | undefined): Promise<Check> => {
+  const shape = driverShape(value);
+  if (!shape.passed || !value) return shape;
+  const [command, script] = tokenize(value);
+  try {
+    if (command.includes("/") || command.includes("\\")) {
+      await access(command, constants.X_OK);
+    } else {
+      await runFile(command, ["--version"], { encoding: "utf8" });
+    }
+    if (script && (script.includes("/") || script.includes("\\"))) {
+      await access(script, constants.F_OK);
+    }
+    return {
+      passed: true,
+      message: "Merge driver executable and entry point are available",
+    };
+  } catch {
+    return {
+      passed: false,
+      message: `Merge driver executable is unavailable: ${command}`,
+    };
+  }
+};
+
+const effectiveAttribute = (
+  content: string,
+  graphPath: string,
+): string | undefined => {
+  let result: string | undefined;
+  for (const rawLine of content.split(/\r?\n/u)) {
+    const line = rawLine.replace(/\s+#.*$/u, "").trim();
+    if (!line || line.startsWith("#")) continue;
+    const [pattern, ...attributes] = line.split(/\s+/u);
+    if (pattern !== graphPath && pattern !== "*.jsonl" && pattern !== "*")
+      continue;
+    for (const attribute of attributes) {
+      if (attribute.startsWith("merge="))
+        result = attribute.slice("merge=".length);
+      else if (attribute === "merge") result = "set";
+      else if (attribute === "-merge") result = "unset";
+    }
+  }
+  return result;
+};
+
+const workingAttribute = async (
+  root: string,
+  graphPath: string,
+): Promise<string | undefined> => {
+  const output = await git(root, ["check-attr", "merge", "--", graphPath]);
+  const value = output.trim().split(":").at(-1)?.trim();
+  return value === "unspecified" ? undefined : value;
+};
+
+const committedAttribute = async (
+  root: string,
+  graphPath: string,
+): Promise<Check> => {
+  const content = await tryGit(root, ["show", "HEAD:.gitattributes"]);
+  if (!content) {
+    return { passed: false, message: "Committed .gitattributes is missing" };
+  }
+  const value = effectiveAttribute(content, graphPath);
+  return value === "ariadne"
+    ? {
+        passed: true,
+        message: `Committed attributes select ariadne for ${graphPath}`,
+      }
+    : {
+        passed: false,
+        message: `Committed attributes select ${value ?? "no merge driver"} for ${graphPath}; commit ${graphPath} merge=ariadne before relying on Git integration`,
+      };
+};
+
+const setupAttributes = async (
+  root: string,
+  graphPath: string,
+): Promise<{ changed: boolean; conflict?: string }> => {
+  const path = join(root, ".gitattributes");
+  const content = (await exists(path)) ? await readFile(path, "utf8") : "";
+  const effective = await workingAttribute(root, graphPath);
+  if (effective && effective !== "ariadne") {
+    return {
+      changed: false,
+      conflict: `Existing attributes select merge=${effective} for ${graphPath}. Manual integration: change that policy to '${graphPath} merge=ariadne' only after reviewing repository policy.`,
+    };
+  }
+  if (effective === "ariadne") return { changed: false };
+  const addition = `${graphPath} merge=ariadne\n`;
+  await writeFile(
+    path,
+    content.length === 0
+      ? addition
+      : content.endsWith("\n")
+        ? `${content}${addition}`
+        : `${content}\n${addition}`,
+    "utf8",
+  );
+  return { changed: true };
+};
+
+const summary = (name: string, receipt: IntegrationReceipt): string => {
+  const failed = Object.values(receipt.checks)
+    .filter(({ passed }) => !passed)
+    .map(({ message }) => message);
+  const diagnostics = receipt.diagnostics ?? [];
+  return `Ariadne ${name} ${receipt.passed ? "passed" : "failed"} for ${receipt.graph_path}; ${[...failed, ...diagnostics].join("; ") || "all checks passed"}\n`;
+};
+
+const parseJsonFlag = (args: readonly string[], usage: string): boolean => {
+  if (args.some((arg) => arg !== "--json")) throw new Error(usage.trim());
+  return args.includes("--json");
+};
+
+export async function runMergeSetup(
+  args: readonly string[],
+  io: CliIO,
+): Promise<number> {
+  if (hasHelp(args)) {
+    io.stdout.write(SETUP_USAGE);
+    return 0;
+  }
+  const json = parseJsonFlag(args, SETUP_USAGE);
+  const root = await repositoryRoot(io.cwd);
+  const graphPath = await graphPathFor(root);
+  const currentDriver = await tryGit(root, [
+    "config",
+    "--local",
+    "--get",
+    DRIVER_KEY,
+  ]);
+  const attributeValue = await workingAttribute(root, graphPath);
+  const driver = driverShape(currentDriver);
+  const conflicts: string[] = [];
+  if (attributeValue && attributeValue !== "ariadne") {
+    conflicts.push(
+      `Existing attributes select merge=${attributeValue} for ${graphPath}. Manual integration: change that policy to '${graphPath} merge=ariadne' only after reviewing repository policy.`,
+    );
+  }
+  if (currentDriver && !driver.passed) {
+    conflicts.push(
+      `${driver.message}. Manual integration: update ${DRIVER_KEY} after reviewing the existing command.`,
+    );
+  }
+  const changes: string[] = [];
+  if (conflicts.length === 0) {
+    if (!attributeValue) {
+      await setupAttributes(root, graphPath);
+      changes.push(".gitattributes");
+    }
+    if (!currentDriver) {
+      await git(root, [
+        "config",
+        "--local",
+        DRIVER_KEY,
+        await expectedDriver(),
+      ]);
+      changes.push(DRIVER_KEY);
+    }
+  }
+  const receipt: IntegrationReceipt = {
+    passed: conflicts.length === 0,
+    graph_path: graphPath,
+    protocol_version: MERGE_PROTOCOL_VERSION,
+    checks: {
+      committed_attributes: {
+        passed: !attributeValue || attributeValue === "ariadne",
+        message: attributeValue ?? "missing",
+      },
+      local_driver: currentDriver
+        ? driver
+        : { passed: true, message: "Local merge driver will be installed" },
+      executable: {
+        passed: true,
+        message: "Executable check is provided by merge-doctor",
+      },
+      protocol: {
+        passed: true,
+        message: `Setup pins protocol ${MERGE_PROTOCOL_VERSION}`,
+      },
+    },
+    changes,
+    ...(conflicts.length > 0 ? { diagnostics: conflicts } : {}),
+  };
+  if (json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
+  io.stderr.write(summary("merge setup", receipt));
+  return receipt.passed ? 0 : 1;
+}
+
+export async function runMergeDoctor(
+  args: readonly string[],
+  io: CliIO,
+): Promise<number> {
+  if (hasHelp(args)) {
+    io.stdout.write(DOCTOR_USAGE);
+    return 0;
+  }
+  const json = parseJsonFlag(args, DOCTOR_USAGE);
+  const root = await repositoryRoot(io.cwd);
+  const graphPath = await graphPathFor(root);
+  const driver = await tryGit(root, ["config", "--local", "--get", DRIVER_KEY]);
+  const committed = await committedAttribute(root, graphPath);
+  const local = driverShape(driver);
+  const executable = await executableCheck(driver);
+  const protocol: Check = driver?.includes(
+    `--protocol-version ${MERGE_PROTOCOL_VERSION}`,
+  )
+    ? {
+        passed: true,
+        message: `Merge protocol ${MERGE_PROTOCOL_VERSION} is pinned independently of package version`,
+      }
+    : {
+        passed: false,
+        message: `Merge driver does not pin protocol ${MERGE_PROTOCOL_VERSION}`,
+      };
+  const receipt: IntegrationReceipt = {
+    passed:
+      committed.passed && local.passed && executable.passed && protocol.passed,
+    graph_path: graphPath,
+    protocol_version: MERGE_PROTOCOL_VERSION,
+    checks: {
+      committed_attributes: committed,
+      local_driver: local,
+      executable,
+      protocol,
+    },
+  };
+  if (json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
+  io.stderr.write(summary("merge doctor", receipt));
+  return receipt.passed ? 0 : 1;
+}
+
+export { DOCTOR_USAGE, SETUP_USAGE };
