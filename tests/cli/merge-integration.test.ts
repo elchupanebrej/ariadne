@@ -104,13 +104,51 @@ describe("Ariadne Git merge integration", () => {
     }
   });
 
+  it("rejects a driver with reordered Git placeholders", async () => {
+    const repo = await repository();
+    try {
+      await git(
+        repo,
+        "config",
+        "--local",
+        "merge.ariadne.driver",
+        "node driver merge-driver --protocol-version 1 %A %O %B",
+      );
+      const result = await run(repo, ["merge-setup", "--json"]);
+      expect(result.code).toBe(1);
+      expect(
+        await git(repo, "config", "--local", "--get", "merge.ariadne.driver"),
+      ).toBe("node driver merge-driver --protocol-version 1 %A %O %B\n");
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("uses the GSD overlay as the canonical graph path", async () => {
+    const repo = await repository();
+    try {
+      await rm(join(repo, ".ariadne"), { recursive: true, force: true });
+      await mkdir(join(repo, ".planning", "ariadne"), { recursive: true });
+      const result = await run(repo, ["merge-setup", "--json"]);
+      expect(result.code).toBe(0);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        graph_path: ".planning/ariadne/GRAPH.jsonl",
+      });
+      expect(await readFile(join(repo, ".gitattributes"), "utf8")).toBe(
+        ".planning/ariadne/GRAPH.jsonl merge=ariadne\n",
+      );
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
   it("doctor passes only after the repository attributes are committed", async () => {
     const repo = await repository();
     try {
       expect((await run(repo, ["merge-doctor"])).code).toBe(1);
       expect((await run(repo, ["merge-setup"])).code).toBe(0);
       expect((await run(repo, ["merge-doctor"])).code).toBe(1);
-      await git(repo, "add", ".gitattributes");
+      await git(repo, "add", ".gitattributes", ".githooks");
       await git(repo, "commit", "-qm", "install merge integration");
       const doctor = await run(repo, ["merge-doctor", "--json"]);
       expect(doctor.code).toBe(0);

@@ -1,16 +1,27 @@
-import { access, readFile, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { detectGsd } from "../../adapters/gsd/detector.js";
 import { MERGE_PROTOCOL_VERSION } from "../../merge/three-way.js";
 import { hasHelp, type CliIO } from "../workspace.js";
 
 const runFile = promisify(execFile);
 const DRIVER_KEY = "merge.ariadne.driver";
-const DEFAULT_GRAPH_PATH = ".ariadne/GRAPH.jsonl";
-const ROOT_GRAPH_PATH = "GRAPH.jsonl";
+const HOOKS_KEY = "core.hooksPath";
+const HOOKS_PATH = ".githooks";
+const HOOK_NAMES = ["pre-merge-commit", "pre-commit"] as const;
+const HOOK_MARKER = "# ariadne-merge-hook-v1";
+const HOOK_CONTENT = `#!/bin/sh
+${HOOK_MARKER}
+# Merge hooks are intentionally non-blocking; ticket 07 extends this path with projection sync.
+if command -v ariadne >/dev/null 2>&1; then
+  ariadne merge-doctor --json >&2 || true
+fi
+exit 0
+`;
 
 type Check = { passed: boolean; message: string };
 
@@ -23,6 +34,7 @@ type IntegrationReceipt = {
     local_driver: Check;
     executable: Check;
     protocol: Check;
+    hooks: Check;
   };
   changes?: string[];
   diagnostics?: string[];
@@ -61,8 +73,11 @@ const exists = async (path: string): Promise<boolean> => {
 const repositoryRoot = async (cwd: string): Promise<string> =>
   (await git(cwd, ["rev-parse", "--show-toplevel"])).trim();
 
-const graphPathFor = async (root: string): Promise<string> =>
-  (await exists(join(root, ".ariadne"))) ? DEFAULT_GRAPH_PATH : ROOT_GRAPH_PATH;
+const graphPathFor = (root: string): string => {
+  const storageRoot = detectGsd(root).storageRoot;
+  const path = relative(root, join(storageRoot, "GRAPH.jsonl"));
+  return path.replaceAll("\\", "/");
+};
 
 const shellQuote = (value: string): string =>
   `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
@@ -97,13 +112,17 @@ const driverShape = (value: string | undefined): Check => {
   if (!value)
     return { passed: false, message: "Local merge driver is missing" };
   const tokens = tokenize(value);
-  const required = ["%O", "%A", "%B"];
+  const expectedTail = [
+    "merge-driver",
+    "--protocol-version",
+    String(MERGE_PROTOCOL_VERSION),
+    "%O",
+    "%A",
+    "%B",
+  ];
   if (
-    !tokens.includes("merge-driver") ||
-    !tokens.includes("--protocol-version") ||
-    tokens[tokens.indexOf("--protocol-version") + 1] !==
-      String(MERGE_PROTOCOL_VERSION) ||
-    required.some((placeholder) => !tokens.includes(placeholder))
+    tokens.length !== expectedTail.length + 2 ||
+    expectedTail.some((token, index) => tokens[index + 2] !== token)
   ) {
     return {
       passed: false,
@@ -188,6 +207,137 @@ const committedAttribute = async (
       };
 };
 
+const gitDirectory = async (root: string): Promise<string> => {
+  const value = (await git(root, ["rev-parse", "--git-dir"])).trim();
+  return resolve(root, value);
+};
+
+const hookRoot = (root: string, hooksPath: string): string =>
+  resolve(root, hooksPath);
+
+const hookIsCompatible = (content: string | undefined): boolean =>
+  content?.includes(HOOK_MARKER) ?? false;
+
+const inspectHooks = async (
+  root: string,
+  hooksPath: string | undefined,
+): Promise<Check> => {
+  if (hooksPath !== HOOKS_PATH) {
+    return {
+      passed: false,
+      message: `Local ${HOOKS_KEY} must be ${HOOKS_PATH}; existing hook policy was not overwritten`,
+    };
+  }
+  const directory = hookRoot(root, hooksPath);
+  for (const name of HOOK_NAMES) {
+    const path = join(directory, name);
+    try {
+      await access(path, constants.X_OK);
+      if (!hookIsCompatible(await readFile(path, "utf8"))) {
+        return {
+          passed: false,
+          message: `Existing hook ${hooksPath}/${name} is incompatible`,
+        };
+      }
+    } catch {
+      return {
+        passed: false,
+        message: `Required hook ${hooksPath}/${name} is missing or not executable`,
+      };
+    }
+  }
+  return { passed: true, message: `Local ${HOOKS_PATH} hooks are installed` };
+};
+
+const committedHooks = async (root: string): Promise<Check> => {
+  for (const name of HOOK_NAMES) {
+    const content = await tryGit(root, ["show", `HEAD:${HOOKS_PATH}/${name}`]);
+    if (!hookIsCompatible(content)) {
+      return {
+        passed: false,
+        message: `Committed ${HOOKS_PATH}/${name} is missing or incompatible`,
+      };
+    }
+  }
+  return {
+    passed: true,
+    message: `Committed ${HOOKS_PATH} hooks are available`,
+  };
+};
+
+type HookPlan = {
+  missing: readonly string[];
+  needsPath: boolean;
+  changes: string[];
+  conflict?: string;
+};
+
+const prepareHooks = async (
+  root: string,
+  existingHooksPath: string | undefined,
+): Promise<HookPlan> => {
+  if (existingHooksPath && existingHooksPath !== HOOKS_PATH) {
+    return {
+      missing: [],
+      needsPath: false,
+      changes: [],
+      conflict: `Existing ${HOOKS_KEY} is ${existingHooksPath}. Manual integration: review it and configure ${HOOKS_PATH} only if that preserves the repository's hook policy.`,
+    };
+  }
+  if (!existingHooksPath) {
+    const defaultDirectory = await gitDirectory(root);
+    for (const name of HOOK_NAMES) {
+      if (await exists(join(defaultDirectory, name))) {
+        return {
+          missing: [],
+          needsPath: false,
+          changes: [],
+          conflict: `Existing .git/hooks/${name} would be bypassed. Manual integration: merge the Ariadne hook into that file or choose an explicit compatible ${HOOKS_KEY}.`,
+        };
+      }
+    }
+  }
+  const directory = hookRoot(root, HOOKS_PATH);
+  const missing: string[] = [];
+  for (const name of HOOK_NAMES) {
+    const path = join(directory, name);
+    if (await exists(path)) {
+      if (!hookIsCompatible(await readFile(path, "utf8"))) {
+        return {
+          missing: [],
+          needsPath: false,
+          changes: [],
+          conflict: `Existing ${HOOKS_PATH}/${name} is incompatible. Manual integration: merge the Ariadne hook into that file without replacing existing policy.`,
+        };
+      }
+      continue;
+    }
+    missing.push(name);
+  }
+  return {
+    missing,
+    needsPath: !existingHooksPath,
+    changes: [
+      ...missing.map((name) => `${HOOKS_PATH}/${name}`),
+      ...(!existingHooksPath ? [HOOKS_KEY] : []),
+    ],
+  };
+};
+
+const applyHooks = async (root: string, plan: HookPlan): Promise<void> => {
+  if (plan.missing.length > 0) {
+    const directory = hookRoot(root, HOOKS_PATH);
+    await mkdir(directory, { recursive: true });
+    for (const name of plan.missing) {
+      const path = join(directory, name);
+      await writeFile(path, HOOK_CONTENT, "utf8");
+      await chmod(path, 0o755);
+    }
+  }
+  if (plan.needsPath)
+    await git(root, ["config", "--local", HOOKS_KEY, HOOKS_PATH]);
+};
+
 const setupAttributes = async (
   root: string,
   graphPath: string,
@@ -238,13 +388,16 @@ export async function runMergeSetup(
   }
   const json = parseJsonFlag(args, SETUP_USAGE);
   const root = await repositoryRoot(io.cwd);
-  const graphPath = await graphPathFor(root);
+  const graphPath = graphPathFor(root);
   const currentDriver = await tryGit(root, [
     "config",
     "--local",
     "--get",
     DRIVER_KEY,
   ]);
+  const currentHooksPath = (
+    await tryGit(root, ["config", "--local", "--get", HOOKS_KEY])
+  )?.trim();
   const attributeValue = await workingAttribute(root, graphPath);
   const driver = driverShape(currentDriver);
   const conflicts: string[] = [];
@@ -258,6 +411,8 @@ export async function runMergeSetup(
       `${driver.message}. Manual integration: update ${DRIVER_KEY} after reviewing the existing command.`,
     );
   }
+  const hookPlan = await prepareHooks(root, currentHooksPath);
+  if (hookPlan.conflict) conflicts.push(hookPlan.conflict);
   const changes: string[] = [];
   if (conflicts.length === 0) {
     if (!attributeValue) {
@@ -273,6 +428,8 @@ export async function runMergeSetup(
       ]);
       changes.push(DRIVER_KEY);
     }
+    await applyHooks(root, hookPlan);
+    changes.push(...hookPlan.changes);
   }
   const receipt: IntegrationReceipt = {
     passed: conflicts.length === 0,
@@ -294,6 +451,11 @@ export async function runMergeSetup(
         passed: true,
         message: `Setup pins protocol ${MERGE_PROTOCOL_VERSION}`,
       },
+      hooks: {
+        passed: conflicts.length === 0,
+        message:
+          hookPlan.conflict ?? "Repository-local hooks will be installed",
+      },
     },
     changes,
     ...(conflicts.length > 0 ? { diagnostics: conflicts } : {}),
@@ -313,11 +475,16 @@ export async function runMergeDoctor(
   }
   const json = parseJsonFlag(args, DOCTOR_USAGE);
   const root = await repositoryRoot(io.cwd);
-  const graphPath = await graphPathFor(root);
+  const graphPath = graphPathFor(root);
   const driver = await tryGit(root, ["config", "--local", "--get", DRIVER_KEY]);
+  const hooksPath = (
+    await tryGit(root, ["config", "--local", "--get", HOOKS_KEY])
+  )?.trim();
   const committed = await committedAttribute(root, graphPath);
   const local = driverShape(driver);
   const executable = await executableCheck(driver);
+  const hooks = await inspectHooks(root, hooksPath);
+  const committedHookCheck = await committedHooks(root);
   const protocol: Check = driver?.includes(
     `--protocol-version ${MERGE_PROTOCOL_VERSION}`,
   )
@@ -331,7 +498,12 @@ export async function runMergeDoctor(
       };
   const receipt: IntegrationReceipt = {
     passed:
-      committed.passed && local.passed && executable.passed && protocol.passed,
+      committed.passed &&
+      local.passed &&
+      executable.passed &&
+      protocol.passed &&
+      hooks.passed &&
+      committedHookCheck.passed,
     graph_path: graphPath,
     protocol_version: MERGE_PROTOCOL_VERSION,
     checks: {
@@ -339,6 +511,10 @@ export async function runMergeDoctor(
       local_driver: local,
       executable,
       protocol,
+      hooks: {
+        passed: hooks.passed && committedHookCheck.passed,
+        message: `${hooks.message}; ${committedHookCheck.message}`,
+      },
     },
   };
   if (json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
