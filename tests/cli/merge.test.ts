@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
+import { mergeBranchModels } from "../../src/merge/three-way.js";
 
 const run = promisify(execFile);
 const git = async (cwd: string, ...args: string[]) => run("git", args, { cwd });
@@ -21,6 +22,29 @@ const nodeEvent = (id: string): string =>
 
 const edgeEvent = (source: string, target: string): string =>
   JSON.stringify({ kind: "edge", edge: { source, type: "depends_on", target } });
+
+const edgeEventOf = (
+  source: string,
+  type: string,
+  target: string,
+  tombstone = false,
+): string =>
+  JSON.stringify({
+    kind: "edge",
+    edge: { source, type, target },
+    ...(tombstone ? { tombstone: true } : {}),
+  });
+
+const typedNodeEvent = (
+  id: string,
+  type: string,
+  statement = id,
+  extra: Record<string, unknown> = {},
+): string =>
+  JSON.stringify({
+    kind: "node",
+    node: { id, type, provenance_type: "PROPOSED", statement, ...extra },
+  });
 
 const capture = () => {
   let output = "";
@@ -236,7 +260,7 @@ describe("ariadne merge-driver", () => {
     }
   });
 
-  it("fails atomically for malformed input and an unsafe merged DAG", async () => {
+  it("fails atomically for malformed input and materializes an unsafe merged DAG", async () => {
     const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
     try {
       const basePath = join(repo, "base.jsonl");
@@ -283,20 +307,196 @@ describe("ariadne merge-driver", () => {
         currentPath,
         incomingPath,
       ]);
-      expect(cycle.code).toBe(1);
+      expect(cycle.code).toBe(0);
       const cycleReceipt = JSON.parse(cycle.stdout.text()) as {
         outcome: string;
         diagnostics: Array<{ code: string; message: string }>;
       };
-      if (!cycleReceipt.diagnostics.some(({ code }) => code === "CYCLE")) {
+      if (!cycleReceipt.diagnostics.some(({ code }) => code === "TOPOLOGY_CYCLE")) {
         throw new Error(JSON.stringify(cycleReceipt.diagnostics));
       }
-      expect(cycleReceipt.outcome).toBe("FAILED");
+      expect(cycleReceipt.outcome).toBe("DIVERGED");
       expect(cycleReceipt.diagnostics.map(({ code }) => code).join(",")).toContain("CYCLE");
-      expect(await readFile(currentPath, "utf8")).toBe(before);
+      expect(await readFile(currentPath, "utf8")).not.toBe(before);
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
+  });
+
+  it("preserves an opposed edge add and tombstone as an inactive divergence", async () => {
+    const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      const base = `${typedNodeEvent("TASK-A", "TASK")}\n${typedNodeEvent("TASK-B", "TASK")}\n`;
+      await writeFile(basePath, base);
+      await writeFile(currentPath, `${base}${edgeEventOf("TASK-A", "depends_on", "TASK-B")}\n`);
+      await writeFile(
+        incomingPath,
+        `${base}${edgeEventOf("TASK-A", "depends_on", "TASK-B", true)}\n`,
+      );
+
+      const result = await invoke(repo, ["merge-driver", "--json", basePath, currentPath, incomingPath]);
+      const receipt = JSON.parse(result.stdout.text()) as {
+        outcome: string;
+        diagnostics: Array<{ code: string }>;
+      };
+
+      expect(result.code).toBe(0);
+      expect(receipt.outcome).toBe("DIVERGED");
+      expect(receipt.diagnostics).toEqual(
+        expect.arrayContaining([expect.objectContaining({ code: "EDGE_STATE_CONFLICT" })]),
+      );
+      const events = (await readFile(currentPath, "utf8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { kind: string; node?: Record<string, unknown>; edge?: unknown });
+      expect(events.filter(({ kind }) => kind === "edge")).toHaveLength(0);
+      expect(events.at(-1)?.node).toMatchObject({
+        subject_key: "TASK-A:depends_on:TASK-B",
+        base_value: null,
+      });
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("quarantines a dangling endpoint and preserves both branch-local states", async () => {
+    const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      const base = `${typedNodeEvent("TASK-A", "TASK")}\n${typedNodeEvent("TASK-B", "TASK")}\n`;
+      const removed = typedNodeEvent("TASK-B", "TASK", "TASK-B", { status: "REMOVED", tombstone: true });
+      await writeFile(basePath, base);
+      await writeFile(currentPath, `${base}${removed}\n`);
+      await writeFile(incomingPath, `${base}${edgeEventOf("TASK-A", "depends_on", "TASK-B")}\n`);
+
+      const result = await invoke(repo, ["merge-driver", "--json", basePath, currentPath, incomingPath]);
+      const receipt = JSON.parse(result.stdout.text()) as {
+        outcome: string;
+        created_conflict_ids: string[];
+        quarantined_subjects: string[];
+      };
+
+      expect(result.code).toBe(0);
+      expect(receipt.outcome).toBe("DIVERGED");
+      expect(receipt.created_conflict_ids).toHaveLength(1);
+      expect(receipt.quarantined_subjects).toEqual(
+        expect.arrayContaining(["TASK-B", "TASK-A:depends_on:TASK-B"]),
+      );
+      const events = (await readFile(currentPath, "utf8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { kind: string; node?: Record<string, unknown>; edge?: unknown });
+      expect(events.filter(({ kind }) => kind === "edge")).toHaveLength(0);
+      expect(events.find(({ node }) => node?.id === "TASK-B")?.node).not.toHaveProperty("tombstone", true);
+      expect(events.at(-1)?.node).toMatchObject({
+        type: "CTR",
+        quarantined: {
+          nodes: [expect.objectContaining({ value: expect.objectContaining({ id: "TASK-B" }) })],
+          edges: [expect.objectContaining({ value: { source: "TASK-A", type: "depends_on", target: "TASK-B" } })],
+        },
+      });
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("quarantines a combined deductive cycle without failing Git merge", async () => {
+    const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      const base = `${typedNodeEvent("TASK-A", "TASK")}\n${typedNodeEvent("TASK-B", "TASK")}\n`;
+      await writeFile(basePath, base);
+      await writeFile(currentPath, `${base}${edgeEventOf("TASK-A", "derived_from", "TASK-B")}\n`);
+      await writeFile(incomingPath, `${base}${edgeEventOf("TASK-B", "derived_from", "TASK-A")}\n`);
+
+      const result = await invoke(repo, ["merge-driver", "--json", basePath, currentPath, incomingPath]);
+      const receipt = JSON.parse(result.stdout.text()) as {
+        outcome: string;
+        diagnostics: Array<{ code: string }>;
+      };
+
+      expect(result.code).toBe(0);
+      expect(receipt.outcome).toBe("DIVERGED");
+      expect(receipt.diagnostics).toEqual(
+        expect.arrayContaining([expect.objectContaining({ code: "TOPOLOGY_CYCLE" })]),
+      );
+      const events = (await readFile(currentPath, "utf8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { kind: string; node?: Record<string, unknown> });
+      expect(events.filter(({ kind }) => kind === "node")).toHaveLength(3);
+      expect(events.filter(({ kind }) => kind === "edge")).toHaveLength(0);
+      expect(events.at(-1)?.node).toMatchObject({
+        quarantined: {
+          edges: expect.arrayContaining([
+            expect.objectContaining({ value: { source: "TASK-A", type: "derived_from", target: "TASK-B" } }),
+            expect.objectContaining({ value: { source: "TASK-B", type: "derived_from", target: "TASK-A" } }),
+          ]),
+        },
+      });
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("propagates causal quarantine transitively but leaves reference-only additions active", async () => {
+    const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      const base = `${typedNodeEvent("ASM-ROOT", "ASM", "ancestor")}\n`;
+      const current = [
+        base.trimEnd(),
+        typedNodeEvent("ASM-ROOT", "ASM", "current"),
+        typedNodeEvent("CAN-DEPENDENT", "CAN"),
+        edgeEventOf("CAN-DEPENDENT", "derived_from", "ASM-ROOT"),
+        typedNodeEvent("TASK-REFERENCE", "TASK"),
+        edgeEventOf("TASK-REFERENCE", "references", "ASM-ROOT"),
+      ].join("\n") + "\n";
+      const incoming = `${base.trimEnd()}\n${typedNodeEvent("ASM-ROOT", "ASM", "incoming")}\n`;
+      await writeFile(basePath, base);
+      await writeFile(currentPath, current);
+      await writeFile(incomingPath, incoming);
+
+      const result = await invoke(repo, ["merge-driver", "--json", basePath, currentPath, incomingPath]);
+      expect(result.code).toBe(0);
+      expect(JSON.parse(result.stdout.text())).toMatchObject({ outcome: "DIVERGED" });
+      const events = (await readFile(currentPath, "utf8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { kind: string; node?: Record<string, unknown>; edge?: Record<string, unknown> });
+      expect(events.some(({ node }) => node?.id === "CAN-DEPENDENT")).toBe(false);
+      expect(events.some(({ edge }) => edge?.type === "derived_from")).toBe(false);
+      expect(events.some(({ node }) => node?.id === "TASK-REFERENCE")).toBe(true);
+      expect(events.some(({ edge }) => edge?.type === "references")).toBe(true);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts the quarantine ceiling and fails atomically above it", () => {
+    const node = (id: string): string => typedNodeEvent(id, "TASK");
+    const base = `${node("TASK-A")}\n${node("TASK-B")}\n`;
+    const current = `${base}${edgeEventOf("TASK-A", "derived_from", "TASK-B")}\n`;
+    const incoming = `${base}${edgeEventOf("TASK-B", "derived_from", "TASK-A")}\n`;
+    const atCeiling = mergeBranchModels({ base, current, incoming }, { limits: { maxQuarantinedSubjects: 2 } });
+    expect(atCeiling.receipt.outcome).toBe("DIVERGED");
+    expect(atCeiling.output).not.toBeNull();
+
+    const overCeiling = mergeBranchModels({ base, current, incoming }, { limits: { maxQuarantinedSubjects: 1 } });
+    expect(overCeiling.receipt.outcome).toBe("FAILED");
+    expect(overCeiling.output).toBeNull();
+    expect(overCeiling.receipt.diagnostics).toEqual(
+      expect.arrayContaining([expect.objectContaining({ code: "QUARANTINE_CEILING_EXCEEDED" })]),
+    );
   });
 
   it("emits a complete deterministic receipt and fails closed for rebase", async () => {
