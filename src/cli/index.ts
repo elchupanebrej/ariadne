@@ -18,6 +18,7 @@ import { runViz } from "./commands/viz.js";
 import { runMergeDriver } from "./commands/merge.js";
 import { runMergeResolve } from "./commands/merge-resolve.js";
 import { runMergeDoctor, runMergeSetup } from "./commands/merge-integration.js";
+import { runMergeCheck } from "./commands/merge-check.js";
 import { hasHelp, type CliIO } from "./workspace.js";
 
 const VERSION = "0.1.0";
@@ -43,6 +44,7 @@ Usage:
   ariadne merge-resolve <conflict-id> --expected-digest <digest> (--select-digest <digest> | --delta <file>) [--json]
   ariadne merge-setup [--json]
   ariadne merge-doctor [--json]
+  ariadne merge-check [--json]
 
 Options:
   -h, --help       Show this help
@@ -106,6 +108,8 @@ export async function runCli(
       return await runMergeSetup(args.slice(1), io);
     if (command === "merge-doctor")
       return await runMergeDoctor(args.slice(1), io);
+    if (command === "merge-check")
+      return await runMergeCheck(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);
