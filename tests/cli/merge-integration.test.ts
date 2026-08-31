@@ -124,6 +124,26 @@ describe("Ariadne Git merge integration", () => {
     }
   });
 
+  it("rejects a compatible-looking driver with the wrong Ariadne entry point", async () => {
+    const repo = await repository();
+    try {
+      await git(
+        repo,
+        "config",
+        "--local",
+        "merge.ariadne.driver",
+        `${process.execPath} /tmp/other-cli.js merge-driver --protocol-version 1 %O %A %B`,
+      );
+      const result = await run(repo, ["merge-setup", "--json"]);
+      expect(result.code).toBe(1);
+      expect(result.stderr).toMatch(
+        /this Ariadne executable and CLI entry point/i,
+      );
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
   it("uses the GSD overlay as the canonical graph path", async () => {
     const repo = await repository();
     try {

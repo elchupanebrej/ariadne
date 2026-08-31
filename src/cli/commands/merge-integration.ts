@@ -132,8 +132,23 @@ const driverShape = (value: string | undefined): Check => {
   return { passed: true, message: "Local merge driver command is compatible" };
 };
 
-const executableCheck = async (value: string | undefined): Promise<Check> => {
+const driverIdentity = async (value: string | undefined): Promise<Check> => {
   const shape = driverShape(value);
+  if (!shape.passed || !value) return shape;
+  const tokens = tokenize(value);
+  const expectedEntry = await cliEntry();
+  if (tokens[0] !== process.execPath || tokens[1] !== expectedEntry) {
+    return {
+      passed: false,
+      message:
+        "Local merge driver must invoke this Ariadne executable and CLI entry point",
+    };
+  }
+  return shape;
+};
+
+const executableCheck = async (value: string | undefined): Promise<Check> => {
+  const shape = await driverIdentity(value);
   if (!shape.passed || !value) return shape;
   const [command, script] = tokenize(value);
   try {
@@ -399,7 +414,7 @@ export async function runMergeSetup(
     await tryGit(root, ["config", "--local", "--get", HOOKS_KEY])
   )?.trim();
   const attributeValue = await workingAttribute(root, graphPath);
-  const driver = driverShape(currentDriver);
+  const driver = await driverIdentity(currentDriver);
   const conflicts: string[] = [];
   if (attributeValue && attributeValue !== "ariadne") {
     conflicts.push(
