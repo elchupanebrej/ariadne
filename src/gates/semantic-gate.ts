@@ -28,6 +28,18 @@ export type SemanticGateResult = {
   diagnostics: SemanticDiagnostic[];
 };
 
+export type DecisionScopeDiagnostic = {
+  code: "DECISION_SCOPE_DIVERGENCE" | "INVALID_GRAPH";
+  message: string;
+  nodeId?: string;
+  decision_scope?: string;
+};
+
+export type DecisionScopeGateResult = {
+  passed: boolean;
+  diagnostics: DecisionScopeDiagnostic[];
+};
+
 type SemanticNode = Node & Record<string, unknown>;
 type SemanticEdge = {
   source: string;
@@ -213,6 +225,56 @@ const semanticContextFor = (input: unknown, nodes: SemanticNode[]) => ({
       !(node.conflict_kind === "branch_merge" && node.status === "MERGE_CONFLICT"),
   ),
 });
+
+const mergeConflictDecisionScope = (node: SemanticNode): string | undefined => {
+  if (typeof node.decision_scope === "string" && node.decision_scope.length > 0) {
+    return node.decision_scope;
+  }
+  if (!Array.isArray(node.variants)) return undefined;
+
+  const scopes = node.variants.flatMap((variant) => {
+    if (!isRecord(variant) || !isRecord(variant.value) || variant.value.type !== "DEC") {
+      return [];
+    }
+    return typeof variant.value.decision_scope === "string"
+      ? [variant.value.decision_scope]
+      : [];
+  });
+  return [...new Set(scopes)].sort((left, right) => left.localeCompare(right))[0];
+};
+
+export function runDecisionScopeGate(input: unknown): DecisionScopeGateResult {
+  const nodes = asNodes(input);
+  if (!nodes) {
+    return {
+      passed: false,
+      diagnostics: [{
+        code: "INVALID_GRAPH",
+        message: "Decision-scope gate requires nodes and edges arrays with node identifiers",
+      }],
+    };
+  }
+
+  const diagnostics = nodes.flatMap((node) => {
+    if (
+      node.type !== "CTR" ||
+      node.conflict_kind !== "branch_merge" ||
+      node.status !== "MERGE_CONFLICT"
+    ) {
+      return [];
+    }
+    const decisionScope = mergeConflictDecisionScope(node);
+    if (!decisionScope) return [];
+    return [{
+      code: "DECISION_SCOPE_DIVERGENCE" as const,
+      message: `Decision scope ${decisionScope} has unresolved branch merge divergence`,
+      nodeId: node.id,
+      decision_scope: decisionScope,
+    }];
+  });
+
+  return { passed: diagnostics.length === 0, diagnostics };
+}
 
 const contradictionBreadthFor = (
   candidates: SemanticNode[],

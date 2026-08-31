@@ -129,7 +129,9 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
       });
     }
   });
-export const DecisionNodeSchema = createNodeSchema("DEC");
+export const DecisionNodeSchema = createNodeSchema("DEC").extend({
+  decision_scope: z.string().min(1).optional(),
+});
 export const StateNodeSchema = createNodeSchema("STATE");
 export const HandoffNodeSchema = createNodeSchema("HANDOFF");
 export const LeanTaskNodeSchema = createNodeSchema("LEAN-TASK");

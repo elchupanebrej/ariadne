@@ -49,6 +49,34 @@ describe("ariadne gate", () => {
     });
   });
 
+  it("reports unresolved decision-scope merge contradictions separately", async () => {
+    const cwd = await workspace();
+    const storage = new GraphStorage(join(cwd, ".ariadne"));
+    await storage.appendNode({
+      id: "CTR-MERGE-SCOPE",
+      type: "CTR",
+      provenance_type: "FACT",
+      statement: "Two branches disagree about one decision scope",
+      status: "MERGE_CONFLICT",
+      conflict_kind: "branch_merge",
+      decision_scope: "release-policy",
+    });
+
+    const result = await invoke(cwd, ["gate", "decision-scope"]);
+    expect(result.code).toBe(1);
+    expect(JSON.parse(result.stdout.text())).toMatchObject({
+      gate: "decision-scope",
+      passed: false,
+      diagnostics: [
+        expect.objectContaining({
+          code: "DECISION_SCOPE_DIVERGENCE",
+          nodeId: "CTR-MERGE-SCOPE",
+        }),
+      ],
+      results: [{ gate: "decision-scope", passed: false }],
+    });
+  });
+
   it("accepts --strict and reports remediation for violations", async () => {
     const cwd = await workspace();
     const storage = new GraphStorage(join(cwd, ".ariadne"));

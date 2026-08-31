@@ -46,6 +46,12 @@ const typedNodeEvent = (
     node: { id, type, provenance_type: "PROPOSED", statement, ...extra },
   });
 
+const decisionEvent = (
+  id: string,
+  scope: string,
+  statement: string,
+): string => typedNodeEvent(id, "DEC", statement, { decision_scope: scope });
+
 const capture = () => {
   let output = "";
   const stream = new Writable({
@@ -258,6 +264,69 @@ describe("ariadne merge-driver", () => {
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
+  });
+
+  it("preserves incompatible different-ID decisions as one scope contradiction", () => {
+    const base = `${typedNodeEvent("TASK-BASE", "TASK")}\n${typedNodeEvent(
+      "DEC-ANCESTOR",
+      "DEC",
+      "ancestor policy",
+      {
+        decision_scope: "release-policy",
+        provenance_type: "DECIDED",
+        status: "DECIDED",
+      },
+    )}\n`;
+    const current = `${base}${decisionEvent("DEC-CURRENT", "release-policy", "current policy")}\n`;
+    const incoming = `${base}${decisionEvent("DEC-INCOMING", "release-policy", "incoming policy")}\n`;
+
+    const result = mergeBranchModels({ base, current, incoming });
+    const swapped = mergeBranchModels({ base, current: incoming, incoming: current });
+    expect(result.receipt.outcome).toBe("DIVERGED");
+    expect(result.receipt.created_conflict_ids).toHaveLength(1);
+    expect(result.receipt.created_conflict_ids).toEqual(swapped.receipt.created_conflict_ids);
+    expect(result.output).not.toBeNull();
+
+    const events = result.output!.split("\n").filter(Boolean).map((line) => JSON.parse(line) as {
+      kind: string;
+      node?: Record<string, unknown>;
+    });
+    expect(events.map(({ node }) => node?.id)).toEqual([
+      "TASK-BASE",
+      "DEC-ANCESTOR",
+      result.receipt.created_conflict_ids[0],
+    ]);
+    expect(events.at(-1)?.node).toMatchObject({
+      type: "CTR",
+      status: "MERGE_CONFLICT",
+      conflict_kind: "branch_merge",
+      decision_scope: "release-policy",
+      subject_key: "decision_scope:release-policy",
+      base_value: expect.objectContaining({ id: "DEC-ANCESTOR", status: "DECIDED" }),
+      variants: expect.arrayContaining([
+        expect.objectContaining({ value: expect.objectContaining({ id: "DEC-CURRENT" }) }),
+        expect.objectContaining({ value: expect.objectContaining({ id: "DEC-INCOMING" }) }),
+      ]),
+    });
+    const activeNodeIds = result.output!
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => (JSON.parse(line) as { node?: { id?: string } }).node?.id)
+      .filter((id): id is string => id !== undefined);
+    expect(activeNodeIds).not.toContain("DEC-CURRENT");
+    expect(activeNodeIds).not.toContain("DEC-INCOMING");
+  });
+
+  it("keeps different-ID non-decision claims independent", () => {
+    const base = `${typedNodeEvent("TASK-BASE", "TASK")}\n`;
+    const current = `${base}${typedNodeEvent("CLM-CURRENT", "CLM", "same prose")}\n`;
+    const incoming = `${base}${typedNodeEvent("CLM-INCOMING", "CLM", "same prose")}\n`;
+
+    const result = mergeBranchModels({ base, current, incoming });
+    expect(result.receipt.outcome).toBe("CLEAN");
+    expect(result.receipt.created_conflict_ids).toEqual([]);
+    expect(result.output).toContain('"id":"CLM-CURRENT"');
+    expect(result.output).toContain('"id":"CLM-INCOMING"');
   });
 
   it("fails atomically for malformed input and materializes an unsafe merged DAG", async () => {

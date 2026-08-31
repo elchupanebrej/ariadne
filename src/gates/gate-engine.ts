@@ -3,6 +3,8 @@ import {
   runSemanticGate,
   runSemanticPreflight,
   type SemanticDiagnostic,
+  runDecisionScopeGate,
+  type DecisionScopeDiagnostic,
 } from "./semantic-gate.js";
 import {
   runEpistemicGate,
@@ -10,7 +12,7 @@ import {
 } from "./epistemic-gate.js";
 import type { MaterializedGraph } from "../graph/storage.js";
 
-export type GateName = "structural" | "semantic" | "epistemic";
+export type GateName = "structural" | "semantic" | "epistemic" | "decision-scope";
 export type GateCommand = GateName | "all";
 
 export type GateDiagnostic = {
@@ -62,14 +64,16 @@ const REMEDIATION_MAP: Record<string, string> = {
   INSUFFICIENT_EVIDENCE: "Collect evidence at or above the required evidentiary rung.",
   UNRESOLVED_DECISION_DEPENDENCY: "Resolve dependency provenance before locking the decision.",
   MISSING_ADVERSARIAL_CRITIQUE: "Record an adversarial critique before locking the candidate.",
+  DECISION_SCOPE_DIVERGENCE:
+    "Reconcile the unresolved branch decision-scope contradiction before publishing authority.",
 };
 
 export const getRemediationHint = (code: string): string =>
   REMEDIATION_MAP[code] ?? "Inspect the diagnostic and satisfy its stated invariant.";
 
-const withHints = (
+const withHints = <T extends { code: string; message: string }>(
   gate: GateName,
-  diagnostics: Array<GraphDiagnostic | SemanticDiagnostic | EpistemicDiagnostic>,
+  diagnostics: readonly T[],
 ): GateDiagnostic[] =>
   diagnostics.map((diagnostic) => ({
     ...diagnostic,
@@ -118,6 +122,16 @@ export class EpistemicGateEngine {
     };
   }
 
+  /** Run the read-only gate for unresolved branch decision scopes. */
+  static verifyDecisionScope(graph: MaterializedGraph): GateResult {
+    const result = runDecisionScopeGate(graph);
+    return {
+      gate: "decision-scope",
+      passed: result.passed,
+      diagnostics: withHints("decision-scope", result.diagnostics as DecisionScopeDiagnostic[]),
+    };
+  }
+
   /**
    * Run one or all verification gates and return a comprehensive GateReceipt.
    */
@@ -140,6 +154,9 @@ export class EpistemicGateEngine {
           break;
         case "epistemic":
           results.push(this.verifyEpistemic(graph));
+          break;
+        case "decision-scope":
+          results.push(this.verifyDecisionScope(graph));
           break;
       }
     }

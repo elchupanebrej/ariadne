@@ -147,6 +147,15 @@ const isDeletedNode = (node: Node | undefined): boolean =>
 const semanticNode = (node: Node | undefined): Node | undefined =>
   isDeletedNode(node) ? undefined : node;
 
+const decisionScope = (node: Node | undefined): string | undefined => {
+  if (node?.type !== "DEC") return undefined;
+  const scope = nodeFields(node).decision_scope;
+  return typeof scope === "string" && scope.length > 0 ? scope : undefined;
+};
+
+const comparableDecision = (node: Node): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(nodeFields(node)).filter(([key]) => key !== "id"));
+
 const activeGraph = (graph: MaterializedGraph): MaterializedGraph => ({
   nodes: graph.nodes.filter((node) => !isDeletedNode(node)),
   edges: graph.edges,
@@ -410,6 +419,71 @@ const conflictNode = ({
       "Select the base or a stored variant by digest, or submit a validated ariadne-delta with the expected conflict digest.",
     quarantined: { nodes: [], edges: [] },
     ...(base && !isDeletedNode(base) ? { shadowed_subject: subject, shadowed_by: id } : {}),
+  };
+  return nodePayload as Node;
+};
+
+const decisionScopeConflictNode = ({
+  scope,
+  base,
+  variants: sourceVariants,
+  inputDigests,
+}: {
+  scope: string;
+  base: Node | undefined;
+  variants: Array<{ source: MergeBranch; value: Node }>;
+  inputDigests: Record<MergeSource, string>;
+}): Node => {
+  const variants = sourceVariants
+    .map(({ source, value }) => variantFor(source, value, inputDigests[source]))
+    .sort((left, right) =>
+      `${left.variant_digest}:${left.source}`.localeCompare(`${right.variant_digest}:${right.source}`),
+    );
+  const subject = `decision_scope:${scope}`;
+  const baseValue = base ?? null;
+  const baseDigest = digest(canonicalJson(baseValue));
+  const variantDigests = variants.map(({ variant_digest }) => variant_digest).sort();
+  const identity = {
+    merge_protocol_version: MERGE_PROTOCOL_VERSION,
+    conflict_kind: "branch_merge",
+    subject_key: subject,
+    decision_scope: scope,
+    base_digest: baseDigest,
+    variant_digests: variantDigests,
+  };
+  const payloadDigest = digest(
+    canonicalJson({
+      ...identity,
+      base_value: baseValue,
+      variants: variants.map(({ variant_digest, value }) => ({ variant_digest, value })),
+    }),
+  );
+  const id = `CTR-merge-${digest(canonicalJson(identity)).slice(0, 16)}`;
+  const nodePayload: Record<string, unknown> = {
+    id,
+    type: "CTR",
+    provenance_type: "FACT",
+    title: `Merge contradiction: ${subject}`,
+    statement: `Current and incoming branches diverge for ${subject}; reconcile a canonical decision.`,
+    status: "MERGE_CONFLICT",
+    conflict_kind: "branch_merge",
+    merge_protocol_version: MERGE_PROTOCOL_VERSION,
+    subject_key: subject,
+    decision_scope: scope,
+    base_value: baseValue,
+    base_digest: baseDigest,
+    variants,
+    variant_digests: variantDigests,
+    source_digests: inputDigests,
+    source_labels: sourceLabels,
+    diagnostic_codes: ["DECISION_SCOPE_CONFLICT"],
+    conflict_digest: payloadDigest,
+    reconciliation_guidance:
+      "Reconcile this decision-scope contradiction with decision-owner authorization.",
+    quarantined: { nodes: [], edges: [] },
+    ...(base && !isDeletedNode(base)
+      ? { shadowed_subject: base.id, shadowed_by: id }
+      : {}),
   };
   return nodePayload as Node;
 };
@@ -683,6 +757,7 @@ export function mergeBranchModels(
   const quarantineCeilingSubjects = new Set<string>();
   const diagnostics: MergeDiagnostic[] = [];
   const conflicts = new Map<string, Node>();
+  const conflictOwners = new Map<string, Node>();
   const nodeConflictSubjects = new Set<string>();
   const supersededBy = new Map<string, Node>();
   const quarantinedEventSubjects = new Set<string>();
@@ -731,6 +806,7 @@ export function mergeBranchModels(
         diagnosticCode: conflictCode,
       });
       conflicts.set(id, contradiction);
+      conflictOwners.set(id, contradiction);
       nodeConflictSubjects.add(id);
       createdConflictIds.push(contradiction.id);
       if (previous) supersededBy.set(contradiction.id, previous);
@@ -762,6 +838,71 @@ export function mergeBranchModels(
     appliedSubjects.push(id);
     if (currentChanged && incomingChanged) deduplicatedSubjects.push(id);
   }
+
+  const decisionDeltas = new Map<string, { current: Node[]; incoming: Node[] }>();
+  for (const [source, nodes] of [
+    ["current", currentNodes],
+    ["incoming", incomingNodes],
+  ] as const) {
+    for (const node of nodes.values()) {
+      const scope = decisionScope(node);
+      if (!scope || equal(semanticNode(node), semanticNode(baseNodes.get(node.id)))) continue;
+      const deltas = decisionDeltas.get(scope) ?? { current: [], incoming: [] };
+      deltas[source].push(node);
+      decisionDeltas.set(scope, deltas);
+    }
+  }
+
+  for (const scope of [...decisionDeltas.keys()].sort((left, right) => left.localeCompare(right))) {
+    const deltas = decisionDeltas.get(scope) as { current: Node[]; incoming: Node[] };
+    const incompatible = deltas.current.some((current) =>
+      deltas.incoming.some(
+        (incoming) =>
+          current.id !== incoming.id &&
+          !equal(comparableDecision(current), comparableDecision(incoming)),
+      ),
+    );
+    if (!incompatible) continue;
+
+    const subject = `decision_scope:${scope}`;
+    const base = parsed.base.graph.nodes
+      .filter((node) => decisionScope(node) === scope)
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .at(0);
+    const variants = [
+      ...deltas.current.map((value) => ({ source: "current" as const, value })),
+      ...deltas.incoming.map((value) => ({ source: "incoming" as const, value })),
+    ];
+    const previous = parsed.base.graph.nodes
+      .filter(
+        (node) =>
+          isUnresolvedMergeContradiction(node) &&
+          mergeContradictionSubject(node) === subject,
+      )
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .at(-1);
+    const contradiction = decisionScopeConflictNode({
+      scope,
+      base,
+      variants,
+      inputDigests: normalizedInputDigests,
+    });
+    conflicts.set(subject, contradiction);
+    createdConflictIds.push(contradiction.id);
+    if (previous) supersededBy.set(contradiction.id, previous);
+    for (const { value } of variants) {
+      conflictOwners.set(value.id, contradiction);
+      nodeConflictSubjects.add(value.id);
+      quarantinedEventSubjects.add(`node:${value.id}`);
+      quarantineNode(value.id);
+    }
+    diagnostics.push({
+      code: "DECISION_SCOPE_CONFLICT",
+      message: `Current and incoming branches changed ${subject} differently; ancestor decision remains active`,
+      subject,
+    });
+  }
+
   for (const key of edgeKeys) {
     const [source, , target] = key.split("\u0000");
     const baseState = edgeStateFor(baseEdgeStates, key);
@@ -770,10 +911,10 @@ export function mergeBranchModels(
     const currentChanged = !equal(currentState, baseState);
     const incomingChanged = !equal(incomingState, baseState);
     const conflictedNewNode = [source, target].find(
-      (id) => conflicts.has(id) && !baseNodes.has(id),
+      (id) => conflictOwners.has(id) && !baseNodes.has(id),
     );
     if (conflictedNewNode) {
-      const contradiction = conflicts.get(conflictedNewNode) as Node;
+      const contradiction = conflictOwners.get(conflictedNewNode) as Node;
       const quarantined = nodeFields(contradiction).quarantined as Quarantine;
       for (const [sourceName, state] of [
         ["current", currentState],
@@ -910,7 +1051,7 @@ export function mergeBranchModels(
     }
   }
   for (const [subject, root] of causalOwners) {
-    const owner = conflicts.get(root);
+    const owner = conflictOwners.get(root);
     if (!owner) continue;
     quarantinedEventSubjects.add(subject);
     if (subject.startsWith("node:")) addNodeStates(owner, subject.slice("node:".length));

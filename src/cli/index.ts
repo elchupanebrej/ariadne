@@ -27,7 +27,7 @@ Usage:
   ariadne node <add|get|list|remove|update> ...
   ariadne edge <add|list|remove> ...
   ariadne invalidate <node_id> --by <evidence_id>
-  ariadne gate <structural|semantic|epistemic|all> [--strict]
+  ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]
   ariadne verify [--strict]
   ariadne envelope <send|receive|verify> <file>
   ariadne ingest matt <skill> <file>

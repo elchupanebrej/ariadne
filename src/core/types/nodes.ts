@@ -136,7 +136,9 @@ export type DependencyNode = NodeOfType<"DEP">;
 export type DynamicsNode = NodeOfType<"DYN">;
 export type ValueSelectionNode = NodeOfType<"VAL-SELECT">;
 export type ValidationNode = NodeOfType<"VAL">;
-export type DecisionNode = NodeOfType<"DEC">;
+export type DecisionNode = NodeOfType<"DEC"> & {
+  decision_scope?: string;
+};
 export type StateNode = NodeOfType<"STATE">;
 export type HandoffNode = NodeOfType<"HANDOFF">;
 export type LeanTaskNode = NodeOfType<"LEAN-TASK">;

@@ -10,11 +10,17 @@ import type { CliIO } from "../workspace.js";
 
 export type { GateCommand, GateName, GateReceipt, GateResult };
 
-const GATE_USAGE = "Usage: ariadne gate <structural|semantic|epistemic|all> [--strict]\n";
+const GATE_USAGE = "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]\n";
 
 const parse = (args: readonly string[]): { gate: GateCommand; strict: boolean } => {
   const [gate, ...options] = args;
-  if (gate !== "structural" && gate !== "semantic" && gate !== "epistemic" && gate !== "all") {
+  if (
+    gate !== "structural" &&
+    gate !== "semantic" &&
+    gate !== "epistemic" &&
+    gate !== "decision-scope" &&
+    gate !== "all"
+  ) {
     throw new Error(`Unknown gate: ${gate ?? ""}`.trim());
   }
   if (options.some((option) => option !== "--strict") || options.length > 1) {
