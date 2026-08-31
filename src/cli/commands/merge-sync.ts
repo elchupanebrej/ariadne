@@ -74,6 +74,17 @@ const stageDerived = async (
   const relativePaths = paths.map((path) => relativePath(root, path));
   if (relativePaths.length > 0)
     await runFile("git", ["-C", root, "add", "--", ...relativePaths]);
+  const statePath = relativePath(root, storage.statePath);
+  const stagedState = (
+    await runFile(
+      "git",
+      ["-C", root, "diff", "--cached", "--name-only", "--", statePath],
+      {
+        encoding: "utf8",
+      },
+    )
+  ).stdout.trim();
+  if (stagedState) await runFile("git", ["-C", root, "reset", "--", statePath]);
   return relativePaths;
 };
 

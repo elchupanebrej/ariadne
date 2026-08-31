@@ -61,6 +61,7 @@ describe("ariadne merge-sync", () => {
         host_owned: { keep: true },
         frontier: ["TASK-STALE"],
       });
+      await git(root, "add", ".ariadne/STATE.yaml");
 
       const first = await invoke(root, [
         "merge-sync",
