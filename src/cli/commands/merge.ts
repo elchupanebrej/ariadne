@@ -117,13 +117,13 @@ export async function runMergeDriver(args: readonly string[], io: CliIO): Promis
     { base, current, incoming },
     { protocolVersion, ...(operation ? { operation } : {}) },
   );
-  if (result.receipt.outcome === "CLEAN" && result.output !== null) {
+  if (result.receipt.outcome !== "FAILED" && result.output !== null) {
     await replaceAtomically(currentPath, result.output);
   }
 
   if (json) io.stdout.write(`${JSON.stringify(result.receipt)}\n`);
   io.stderr.write(summary(result.receipt));
-  return result.receipt.outcome === "CLEAN" ? 0 : 1;
+  return result.receipt.outcome === "FAILED" ? 1 : 0;
 }
 
 export { MERGE_USAGE };

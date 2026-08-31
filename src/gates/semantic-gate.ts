@@ -206,7 +206,12 @@ const depthModeOf = (input: unknown): "Fast" | "Standard" | "Deep" => {
 const semanticContextFor = (input: unknown, nodes: SemanticNode[]) => ({
   requiredCandidates: depthModeOf(input) === "Fast" ? 1 : 3,
   candidates: nodes.filter((node) => node.type === "CAN" && isActive(node)),
-  contradictions: nodes.filter((node) => node.type === "CTR" && isActive(node)),
+  contradictions: nodes.filter(
+    (node) =>
+      node.type === "CTR" &&
+      isActive(node) &&
+      !(node.conflict_kind === "branch_merge" && node.status === "MERGE_CONFLICT"),
+  ),
 });
 
 const contradictionBreadthFor = (

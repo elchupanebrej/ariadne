@@ -1,4 +1,12 @@
-import { isFrontierNode, type MaterializedGraph } from "../../graph/storage.js";
+import {
+  isFrontierNode,
+  type MaterializedGraph,
+} from "../../graph/storage.js";
+import {
+  isUnresolvedMergeContradiction,
+  mergeContradictionGuidance,
+  mergeContradictionSubject,
+} from "../../merge/three-way.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
@@ -16,6 +24,14 @@ export type StatusReport = {
     edges: number;
     invalid_references: number;
   };
+  merge_conflicts: Array<{
+    id: string;
+    subject: string;
+    status: string;
+    card: string;
+    guidance: string;
+    shadowed_node_id?: string;
+  }>;
 };
 
 const asIds = (value: unknown): string[] => {
@@ -74,6 +90,21 @@ export function buildStatusReport(
   const invalidReferences = graph.edges.filter(
     (edge) => !ids.has(edge.source) || !ids.has(edge.target),
   ).length;
+  const merge_conflicts = graph.nodes
+    .filter(isUnresolvedMergeContradiction)
+    .map((node) => {
+      const subject = mergeContradictionSubject(node) ?? node.id;
+      return {
+        id: node.id,
+        subject,
+        status: node.status ?? "MERGE_CONFLICT",
+        card: `.ariadne/cards/${node.id}.md`,
+        guidance: mergeContradictionGuidance(node),
+        ...(graph.nodes.some((candidate) => candidate.id === subject)
+          ? { shadowed_node_id: subject }
+          : {}),
+      };
+    });
 
   return {
     depth_mode:
@@ -90,6 +121,7 @@ export function buildStatusReport(
       edges: graph.edges.length,
       invalid_references: invalidReferences,
     },
+    merge_conflicts,
   };
 }
 
@@ -127,6 +159,11 @@ export async function runStatus(args: readonly string[], io: CliIO): Promise<num
       }`,
       `Graph health: ${report.graph_health.healthy ? "healthy" : "unhealthy"} ` +
         `(${report.graph_health.nodes} nodes, ${report.graph_health.edges} edges)`,
+      `Merge conflicts: ${
+        report.merge_conflicts.length > 0
+          ? report.merge_conflicts.map(({ id, subject }) => `${id} (${subject})`).join(", ")
+          : "none"
+      }`,
       "",
     ].join("\n"),
   );

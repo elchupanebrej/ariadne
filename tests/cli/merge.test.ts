@@ -160,6 +160,82 @@ describe("ariadne merge-driver", () => {
     }
   });
 
+  it("preserves divergent revisions as one graph-native merge contradiction", async () => {
+    const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      const baseNode = JSON.parse(nodeEvent("TASK-SHARED"));
+      const currentNode = {
+        kind: "node",
+        node: {
+          ...baseNode.node,
+          statement: "Current branch interpretation",
+          provenance_type: "ASSUMED",
+        },
+      };
+      const incomingNode = {
+        kind: "node",
+        node: {
+          ...baseNode.node,
+          statement: "Incoming branch interpretation",
+          provenance_type: "MEASURED",
+        },
+      };
+      const base = `${nodeEvent("TASK-SHARED")}\n`;
+      await writeFile(basePath, base);
+      await writeFile(currentPath, `${base}${JSON.stringify(currentNode)}\n`);
+      await writeFile(incomingPath, `${base}${JSON.stringify(incomingNode)}\n`);
+
+      const result = await invoke(repo, [
+        "merge-driver",
+        "--json",
+        basePath,
+        currentPath,
+        incomingPath,
+      ]);
+
+      expect(result.code).toBe(0);
+      const receipt = JSON.parse(result.stdout.text()) as {
+        outcome: string;
+        created_conflict_ids: string[];
+      };
+      expect(receipt.outcome).toBe("DIVERGED");
+      expect(receipt.created_conflict_ids).toHaveLength(1);
+
+      const mergedEvents = (await readFile(currentPath, "utf8"))
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { kind: string; node?: Record<string, unknown> });
+      expect(mergedEvents).toHaveLength(2);
+      expect(mergedEvents[0]).toEqual(baseNode);
+      const contradiction = mergedEvents[1].node as Record<string, unknown>;
+      expect(contradiction).toMatchObject({
+        type: "CTR",
+        provenance_type: "FACT",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+        subject_key: "TASK-SHARED",
+        base_value: baseNode.node,
+      });
+      expect(contradiction.id).toMatch(/^CTR-merge-/u);
+      expect(contradiction.variants).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ value: currentNode.node, source_digest: expect.any(String) }),
+          expect.objectContaining({ value: incomingNode.node, source_digest: expect.any(String) }),
+        ]),
+      );
+      expect(contradiction.source_digests).toMatchObject({
+        base: expect.any(String),
+        current: expect.any(String),
+        incoming: expect.any(String),
+      });
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
   it("fails atomically for malformed input and an unsafe merged DAG", async () => {
     const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-"));
     try {
