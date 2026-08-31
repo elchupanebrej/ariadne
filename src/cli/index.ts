@@ -78,7 +78,8 @@ export async function runCli(
     if (command === "status") return await runStatus(args.slice(1), io);
     if (command === "node") return await runNode(args.slice(1), io);
     if (command === "edge") return await runEdge(args.slice(1), io);
-    if (command === "invalidate") return await runInvalidation(args.slice(1), io);
+    if (command === "invalidate")
+      return await runInvalidation(args.slice(1), io);
     if (command === "gate") return await runGate(args.slice(1), io);
     if (command === "verify") {
       if (hasHelp(args.slice(1))) {
@@ -94,8 +95,10 @@ export async function runCli(
     if (command === "op") return runOperation(args.slice(1), io);
     if (command === "init") return await runInit(args.slice(1), io);
     if (command === "template") return runTemplate(args.slice(1), io);
-    if (command === "merge-driver") return await runMergeDriver(args.slice(1), io);
-    if (command === "merge-resolve") return await runMergeResolve(args.slice(1), io);
+    if (command === "merge-driver")
+      return await runMergeDriver(args.slice(1), io);
+    if (command === "merge-resolve")
+      return await runMergeResolve(args.slice(1), io);
     throw new Error(`Unknown command: ${command}`);
   } catch (error) {
     io.stderr.write(`Error: ${errorMessage(error)}\n`);

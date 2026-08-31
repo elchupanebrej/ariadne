@@ -13,16 +13,10 @@ import {
   type MaterializedGraph,
 } from "../graph/storage.js";
 import { validateGraph } from "../graph/integrity.js";
-import {
-  canonicalJson,
-  isUnresolvedMergeContradiction,
-} from "./three-way.js";
+import { canonicalJson, isUnresolvedMergeContradiction } from "./three-way.js";
 
 export type MergeReconciliationOutcome =
-  | "RESOLVED"
-  | "REJECTED"
-  | "STALE"
-  | "ALREADY_RESOLVED";
+  "RESOLVED" | "REJECTED" | "STALE" | "ALREADY_RESOLVED";
 
 export type MergeReconciliationDiagnostic = {
   code: string;
@@ -46,7 +40,7 @@ export type MergeReconciliationRequest = {
   expectedConflictDigest: string;
   selectDigest?: string;
   delta?: EpistemicDelta | string | unknown;
-  decisionOwnerAuthorization?: string | true;
+  decisionOwnerAuthorization?: string;
 };
 
 type StoredVariant = {
@@ -62,17 +56,24 @@ type QuarantineEntry = {
   value?: unknown;
 };
 
+type QuarantineEntries = {
+  nodes: QuarantineEntry[];
+  edges: QuarantineEntry[];
+};
+
 const digest = (value: string): string =>
   createHash("sha256").update(value, "utf8").digest("hex");
 
 const nodeFields = (node: Node): Record<string, unknown> =>
   node as unknown as Record<string, unknown>;
 
-const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
-  `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
+const edgeKey = (
+  edge: Pick<EpistemicEdge, "source" | "type" | "target">,
+): string => `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
 
-const edgeSubject = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
-  `${edge.source}:${edge.type}:${edge.target}`;
+const edgeSubject = (
+  edge: Pick<EpistemicEdge, "source" | "type" | "target">,
+): string => `${edge.source}:${edge.type}:${edge.target}`;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -101,8 +102,12 @@ const applyEvents = (
     else edges.set(edgeKey(event.edge), event.edge);
   }
   return {
-    nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
-    edges: [...edges.values()].sort((left, right) => edgeKey(left).localeCompare(edgeKey(right))),
+    nodes: [...nodes.values()].sort((left, right) =>
+      left.id.localeCompare(right.id),
+    ),
+    edges: [...edges.values()].sort((left, right) =>
+      edgeKey(left).localeCompare(edgeKey(right)),
+    ),
   };
 };
 
@@ -111,7 +116,7 @@ const storedVariants = (conflict: Node): StoredVariant[] => {
   return Array.isArray(variants) ? variants.filter(isRecord) : [];
 };
 
-const quarantine = (conflict: Node): { nodes: QuarantineEntry[]; edges: QuarantineEntry[] } => {
+const quarantine = (conflict: Node): QuarantineEntries => {
   const value = nodeFields(conflict).quarantined;
   if (!isRecord(value)) return { nodes: [], edges: [] };
   return {
@@ -129,12 +134,15 @@ const decisionOwner = (node: Node | undefined): string | undefined => {
   if (!node) return undefined;
   const fields = nodeFields(node);
   for (const key of ["decision_owner", "decisionOwner", "owner"]) {
-    if (typeof fields[key] === "string" && fields[key].trim()) return fields[key];
+    if (typeof fields[key] === "string" && fields[key].trim())
+      return fields[key];
   }
   return undefined;
 };
 
-const subjectKind = (subject: string): "node" | "edge" | "scope" | "topology" | "other" => {
+const subjectKind = (
+  subject: string,
+): "node" | "edge" | "scope" | "topology" | "other" => {
   if (subject.startsWith("decision_scope:")) return "scope";
   if (subject.startsWith("topology:")) return "topology";
   if (subject.split(":").length === 3) return "edge";
@@ -161,7 +169,9 @@ const reject = (
   diagnostics,
 });
 
-const parseDelta = (value: unknown): { delta?: EpistemicDelta; error?: string } => {
+const parseDelta = (
+  value: unknown,
+): { delta?: EpistemicDelta; error?: string } => {
   let candidate = value;
   if (typeof candidate === "string") {
     const raw = candidate;
@@ -170,7 +180,8 @@ const parseDelta = (value: unknown): { delta?: EpistemicDelta; error?: string } 
     } catch {
       try {
         const blocks = extractDeltaBlocks(raw);
-        if (blocks.length !== 1) return { error: "Exactly one ariadne-delta block is required" };
+        if (blocks.length !== 1)
+          return { error: "Exactly one ariadne-delta block is required" };
         return { delta: blocks[0] };
       } catch {
         return { error: "Delta must be valid JSON or one ariadne-delta block" };
@@ -207,23 +218,31 @@ const errorDiagnostics = (
   code: string,
   message: string,
   subject?: string,
-): MergeReconciliationDiagnostic[] => [{ code, message, ...(subject ? { subject } : {}) }];
+): MergeReconciliationDiagnostic[] => [
+  { code, message, ...(subject ? { subject } : {}) },
+];
 
 const addEvent = (events: GraphEvent[], event: GraphEvent): void => {
-  if (event.kind === "node" && events.some(
-    (existing) =>
-      existing.kind === "node" &&
-      existing.node.id === event.node.id &&
-      equal(existing.node, event.node),
-  )) {
+  if (
+    event.kind === "node" &&
+    events.some(
+      (existing) =>
+        existing.kind === "node" &&
+        existing.node.id === event.node.id &&
+        equal(existing.node, event.node),
+    )
+  ) {
     return;
   }
-  if (event.kind === "edge" && events.some(
-    (existing) =>
-      existing.kind === "edge" &&
-      edgeKey(existing.edge) === edgeKey(event.edge) &&
-      existing.tombstone === event.tombstone,
-  )) {
+  if (
+    event.kind === "edge" &&
+    events.some(
+      (existing) =>
+        existing.kind === "edge" &&
+        edgeKey(existing.edge) === edgeKey(event.edge) &&
+        existing.tombstone === event.tombstone,
+    )
+  ) {
     return;
   }
   events.push(event);
@@ -232,14 +251,17 @@ const addEvent = (events: GraphEvent[], event: GraphEvent): void => {
 const deltaTouchesConflict = (
   conflict: Node,
   delta: EpistemicDelta,
-  quarantined: { nodes: QuarantineEntry[]; edges: QuarantineEntry[] },
+  quarantined: QuarantineEntries,
 ): boolean => {
   const subject = nodeFields(conflict).subject_key;
   if (typeof subject !== "string") return false;
   const kind = subjectKind(subject);
   const mutations = allMutations(delta).map(mutationId);
   if (kind === "node") {
-    return delta.nodes.some((node) => node.id === subject) || mutations.includes(subject);
+    return (
+      delta.nodes.some((node) => node.id === subject) ||
+      mutations.includes(subject)
+    );
   }
   if (kind === "edge") {
     return delta.edges.some((edge) => edgeSubject(edge) === subject);
@@ -264,9 +286,12 @@ const deltaTouchesConflict = (
     ) {
       decisionIds.add(base.data.id);
     }
-    return delta.nodes.some(
-      (node) => node.type === "DEC" && nodeFields(node).decision_scope === scope,
-    ) || mutations.some((id) => id !== undefined && decisionIds.has(id));
+    return (
+      delta.nodes.some(
+        (node) =>
+          node.type === "DEC" && nodeFields(node).decision_scope === scope,
+      ) || mutations.some((id) => id !== undefined && decisionIds.has(id))
+    );
   }
 
   const quarantinedIds = new Set(
@@ -281,9 +306,13 @@ const deltaTouchesConflict = (
       return value.success ? [edgeSubject(value.data)] : [];
     }),
   );
-  const subjectIds = new Set(subject.slice("topology:".length).split(/[|,]/u).filter(Boolean));
+  const subjectIds = new Set(
+    subject.slice("topology:".length).split(/[|,]/u).filter(Boolean),
+  );
   return (
-    delta.nodes.some((node) => quarantinedIds.has(node.id) || subjectIds.has(node.id)) ||
+    delta.nodes.some(
+      (node) => quarantinedIds.has(node.id) || subjectIds.has(node.id),
+    ) ||
     delta.edges.some(
       (edge) =>
         quarantinedEdges.has(edgeSubject(edge)) ||
@@ -302,8 +331,8 @@ const applyDelta = (
   const allowedExisting = new Set<string>(
     typeof subject === "string" ? [subject] : [],
   );
-  const q = quarantine(conflict);
-  for (const entry of q.nodes) {
+  const quarantined = quarantine(conflict);
+  for (const entry of quarantined.nodes) {
     const parsed = NodeSchema.safeParse(entry.value);
     if (parsed.success) allowedExisting.add(parsed.data.id);
   }
@@ -317,7 +346,9 @@ const applyDelta = (
   }
 
   const currentNodes = new Map(current.nodes.map((node) => [node.id, node]));
-  const currentEdges = new Map(current.edges.map((edge) => [edgeKey(edge), edge]));
+  const currentEdges = new Map(
+    current.edges.map((edge) => [edgeKey(edge), edge]),
+  );
   const events: GraphEvent[] = [];
   for (const node of delta.nodes) {
     const previous = currentNodes.get(node.id);
@@ -338,12 +369,26 @@ const applyDelta = (
 
   for (const mutation of allMutations(delta)) {
     const id = mutationId(mutation);
-    if (!id) return { diagnostics: errorDiagnostics("INVALID_DELTA", "Delta mutation has no node id") };
+    if (!id)
+      return {
+        diagnostics: errorDiagnostics(
+          "INVALID_DELTA",
+          "Delta mutation has no node id",
+        ),
+      };
     const previous = currentNodes.get(id);
     if (!previous) {
-      return { diagnostics: errorDiagnostics("DELTA_MISSING_NODE", `Cannot mutate missing node ${id}`, id) };
+      return {
+        diagnostics: errorDiagnostics(
+          "DELTA_MISSING_NODE",
+          `Cannot mutate missing node ${id}`,
+          id,
+        ),
+      };
     }
-    if ((previous.status ?? null) !== (mutation.expected_status as string | null)) {
+    if (
+      (previous.status ?? null) !== (mutation.expected_status as string | null)
+    ) {
       return {
         diagnostics: errorDiagnostics(
           "DELTA_STATUS_CONFLICT",
@@ -354,13 +399,20 @@ const applyDelta = (
     }
     const next: Record<string, unknown> = { ...previous };
     if (typeof mutation.status === "string") next.status = mutation.status;
-    if (isRecord(mutation.invalidation)) next.invalidation = mutation.invalidation;
+    if (isRecord(mutation.invalidation))
+      next.invalidation = mutation.invalidation;
     if (isRecord(mutation.invalidation_metadata)) {
       next.invalidation = mutation.invalidation_metadata;
     }
     const parsed = NodeSchema.safeParse(next);
     if (!parsed.success) {
-      return { diagnostics: errorDiagnostics("INVALID_DELTA_NODE", `Delta mutation invalidates ${id}`, id) };
+      return {
+        diagnostics: errorDiagnostics(
+          "INVALID_DELTA_NODE",
+          `Delta mutation invalidates ${id}`,
+          id,
+        ),
+      };
     }
     if (!equal(previous, parsed.data)) {
       currentNodes.set(id, parsed.data);
@@ -381,11 +433,9 @@ const applyDelta = (
 const releaseQuarantine = (
   current: MaterializedGraph,
   events: GraphEvent[],
-  entries: { nodes: QuarantineEntry[]; edges: QuarantineEntry[] },
+  entries: QuarantineEntries,
 ): { released: string[]; diagnostics?: MergeReconciliationDiagnostic[] } => {
-  const working = applyEvents(current, events);
-  const nodes = new Map(working.nodes.map((node) => [node.id, node]));
-  const edges = new Map(working.edges.map((edge) => [edgeKey(edge), edge]));
+  let working = applyEvents(current, events);
   const released: string[] = [];
 
   const nodeEntries = [...entries.nodes].sort((left, right) =>
@@ -393,52 +443,101 @@ const releaseQuarantine = (
       String((right.value as { id?: unknown })?.id),
     ),
   );
-  for (const entry of nodeEntries) {
-    const parsed = NodeSchema.safeParse(entry.value);
-    if (!parsed.success || (entry.operation !== "present" && entry.operation !== "delete")) {
-      return { released: [], diagnostics: errorDiagnostics("INVALID_QUARANTINE", "Quarantined node is invalid") };
-    }
-    const previous = nodes.get(parsed.data.id);
-    if (previous && !equal(previous, parsed.data) && !isRemoved(parsed.data)) {
-      return {
-        released: [],
-        diagnostics: errorDiagnostics(
-          "QUARANTINE_NODE_CONFLICT",
-          `Quarantined node ${parsed.data.id} conflicts with the prospective graph`,
-          parsed.data.id,
-        ),
-      };
-    }
-    if (!previous || !equal(previous, parsed.data)) {
-      nodes.set(parsed.data.id, parsed.data);
-      addEvent(events, { kind: "node", node: parsed.data });
-      released.push(parsed.data.id);
-    }
-  }
-
   const edgeEntries = [...entries.edges].sort((left, right) => {
     const leftEdge = EdgeSchema.safeParse(left.value);
     const rightEdge = EdgeSchema.safeParse(right.value);
-    return String(leftEdge.success ? edgeSubject(leftEdge.data) : left.value).localeCompare(
+    return String(
+      leftEdge.success ? edgeSubject(leftEdge.data) : left.value,
+    ).localeCompare(
       String(rightEdge.success ? edgeSubject(rightEdge.data) : right.value),
     );
   });
+
+  for (const entry of nodeEntries) {
+    const parsed = NodeSchema.safeParse(entry.value);
+    if (
+      !parsed.success ||
+      (entry.operation !== "present" && entry.operation !== "delete")
+    ) {
+      return {
+        released: [],
+        diagnostics: errorDiagnostics(
+          "INVALID_QUARANTINE",
+          "Quarantined node is invalid",
+        ),
+      };
+    }
+  }
   for (const entry of edgeEntries) {
     const parsed = EdgeSchema.safeParse(entry.value);
-    if (!parsed.success || (entry.operation !== "present" && entry.operation !== "delete")) {
-      return { released: [], diagnostics: errorDiagnostics("INVALID_QUARANTINE", "Quarantined edge is invalid") };
+    if (
+      !parsed.success ||
+      (entry.operation !== "present" && entry.operation !== "delete")
+    ) {
+      return {
+        released: [],
+        diagnostics: errorDiagnostics(
+          "INVALID_QUARANTINE",
+          "Quarantined edge is invalid",
+        ),
+      };
     }
-    const key = edgeKey(parsed.data);
-    if (entry.operation === "present") {
-      if (!edges.has(key)) {
-        edges.set(key, parsed.data);
-        addEvent(events, { kind: "edge", edge: parsed.data });
-        released.push(edgeSubject(parsed.data));
+  }
+
+  const isValidProspective = (graph: MaterializedGraph): boolean =>
+    validateGraph(graph).valid && validateGraph(activeGraph(graph)).valid;
+
+  let progressed = true;
+  while (progressed) {
+    progressed = false;
+    for (let index = 0; index < nodeEntries.length; index += 1) {
+      const entry = nodeEntries[index];
+      const node = NodeSchema.parse(entry.value);
+      const previous = working.nodes.find(({ id }) => id === node.id);
+      if (previous) {
+        nodeEntries.splice(index, 1);
+        index -= 1;
+        progressed = true;
+        continue;
       }
-    } else if (edges.has(key)) {
-      edges.delete(key);
-      addEvent(events, { kind: "edge", edge: parsed.data, tombstone: true });
-      released.push(edgeSubject(parsed.data));
+      const event: GraphEvent = { kind: "node", node };
+      const candidate = applyEvents(working, [event]);
+      if (!isValidProspective(candidate)) continue;
+      working = candidate;
+      addEvent(events, event);
+      released.push(node.id);
+      nodeEntries.splice(index, 1);
+      index -= 1;
+      progressed = true;
+    }
+    for (let index = 0; index < edgeEntries.length; index += 1) {
+      const entry = edgeEntries[index];
+      const edge = EdgeSchema.parse(entry.value);
+      const key = edgeKey(edge);
+      const present = working.edges.some(
+        (candidate) => edgeKey(candidate) === key,
+      );
+      if (
+        (entry.operation === "present" && present) ||
+        (entry.operation === "delete" && !present)
+      ) {
+        edgeEntries.splice(index, 1);
+        index -= 1;
+        progressed = true;
+        continue;
+      }
+      const event: GraphEvent =
+        entry.operation === "delete"
+          ? { kind: "edge", edge, tombstone: true }
+          : { kind: "edge", edge };
+      const candidate = applyEvents(working, [event]);
+      if (!isValidProspective(candidate)) continue;
+      working = candidate;
+      addEvent(events, event);
+      released.push(edgeSubject(edge));
+      edgeEntries.splice(index, 1);
+      index -= 1;
+      progressed = true;
     }
   }
   return { released };
@@ -446,19 +545,18 @@ const releaseQuarantine = (
 
 const authorityDiagnostics = (
   changedDecisions: Node[],
-  authorization: string | true | undefined,
+  authorization: string | undefined,
 ): MergeReconciliationDiagnostic[] => {
   if (changedDecisions.length === 0) return [];
-  if (authorization !== true && !(typeof authorization === "string" && authorization.trim())) {
+  if (!(typeof authorization === "string" && authorization.trim())) {
     return errorDiagnostics(
       "MISSING_DECISION_OWNER_AUTHORIZATION",
       "Changing a locked decision requires explicit decision-owner authorization",
     );
   }
-  if (typeof authorization !== "string") return [];
-  const declaredOwners = changedDecisions.map(decisionOwner).filter(
-    (owner): owner is string => owner !== undefined,
-  );
+  const declaredOwners = changedDecisions
+    .map(decisionOwner)
+    .filter((owner): owner is string => owner !== undefined);
   if (declaredOwners.length > 0 && !declaredOwners.includes(authorization)) {
     return errorDiagnostics(
       "DECISION_OWNER_MISMATCH",
@@ -469,19 +567,22 @@ const authorityDiagnostics = (
 };
 
 const evidenceDiagnostics = (
-  graph: MaterializedGraph,
-  changedSubjects: Set<string>,
-): MergeReconciliationDiagnostic[] =>
-  EpistemicGateEngine.verifyEpistemic(graph).diagnostics
-    .filter(
-      (diagnostic) =>
-        typeof diagnostic.nodeId !== "string" || changedSubjects.has(diagnostic.nodeId),
+  before: MaterializedGraph,
+  after: MaterializedGraph,
+): MergeReconciliationDiagnostic[] => {
+  const existing = new Set(
+    EpistemicGateEngine.verifyEpistemic(before).diagnostics.map(canonicalJson),
+  );
+  return EpistemicGateEngine.verifyEpistemic(after)
+    .diagnostics.filter(
+      (diagnostic) => !existing.has(canonicalJson(diagnostic)),
     )
     .map(({ code, message, nodeId }) => ({
       code,
       message,
       ...(typeof nodeId === "string" ? { subject: nodeId } : {}),
     }));
+};
 
 const resolvedConflict = (
   conflict: Node,
@@ -502,10 +603,18 @@ export async function reconcileMergeContradiction(
   request: MergeReconciliationRequest,
 ): Promise<MergeReconciliationReceipt> {
   return storage.transaction((current) => {
-    const conflict = current.nodes.find((node) => node.id === request.conflictId);
+    const conflict = current.nodes.find(
+      (node) => node.id === request.conflictId,
+    );
     if (!conflict) {
       return {
-        result: reject(request, errorDiagnostics("CONFLICT_NOT_FOUND", `Merge contradiction not found: ${request.conflictId}`)),
+        result: reject(
+          request,
+          errorDiagnostics(
+            "CONFLICT_NOT_FOUND",
+            `Merge contradiction not found: ${request.conflictId}`,
+          ),
+        ),
         events: [],
       };
     }
@@ -513,7 +622,10 @@ export async function reconcileMergeContradiction(
       return {
         result: reject(
           request,
-          errorDiagnostics("CONFLICT_ALREADY_RESOLVED", `Merge contradiction ${request.conflictId} is already resolved`),
+          errorDiagnostics(
+            "CONFLICT_ALREADY_RESOLVED",
+            `Merge contradiction ${request.conflictId} is already resolved`,
+          ),
           conflict,
           "ALREADY_RESOLVED",
         ),
@@ -565,13 +677,17 @@ export async function reconcileMergeContradiction(
       if (request.selectDigest === baseDigest) {
         mode = "base";
       } else {
-        const matches = stored.filter((variant) => variant.variant_digest === request.selectDigest);
+        const matches = stored.filter(
+          (variant) => variant.variant_digest === request.selectDigest,
+        );
         if (matches.length !== 1) {
           return {
             result: reject(
               request,
               errorDiagnostics(
-                matches.length > 1 ? "AMBIGUOUS_VARIANT_DIGEST" : "UNKNOWN_VARIANT_DIGEST",
+                matches.length > 1
+                  ? "AMBIGUOUS_VARIANT_DIGEST"
+                  : "UNKNOWN_VARIANT_DIGEST",
                 "Selection must match the stored base or exactly one stored variant content digest",
               ),
               conflict,
@@ -586,7 +702,14 @@ export async function reconcileMergeContradiction(
       const parsed = parseDelta(request.delta);
       if (!parsed.delta) {
         return {
-          result: reject(request, errorDiagnostics("INVALID_DELTA", parsed.error ?? "Invalid ariadne-delta"), conflict),
+          result: reject(
+            request,
+            errorDiagnostics(
+              "INVALID_DELTA",
+              parsed.error ?? "Invalid ariadne-delta",
+            ),
+            conflict,
+          ),
           events: [],
         };
       }
@@ -607,14 +730,17 @@ export async function reconcileMergeContradiction(
       const parsedEdge = EdgeSchema.safeParse(value);
       const kind = typeof subject === "string" ? subjectKind(subject) : "other";
       if (parsedNode.success && (kind === "node" || kind === "scope")) {
-        const currentNode = current.nodes.find((node) => node.id === parsedNode.data.id);
+        const currentNode = current.nodes.find(
+          (node) => node.id === parsedNode.data.id,
+        );
         if (currentNode && !equal(currentNode, parsedNode.data)) {
           if (lockedDecision(currentNode)) changedDecisions.push(currentNode);
           addEvent(events, { kind: "node", node: parsedNode.data });
         } else if (!currentNode) {
           addEvent(events, { kind: "node", node: parsedNode.data });
         }
-        if (lockedDecision(parsedNode.data) && mode === "variant") changedDecisions.push(parsedNode.data);
+        if (lockedDecision(parsedNode.data) && mode === "variant")
+          changedDecisions.push(parsedNode.data);
         appliedSubjects.push(parsedNode.data.id);
 
         if (kind === "scope") {
@@ -637,7 +763,11 @@ export async function reconcileMergeContradiction(
         const key = edgeKey(parsedEdge.data);
         if (operation === "delete" || operation === "absent") {
           if (current.edges.some((edge) => edgeKey(edge) === key)) {
-            addEvent(events, { kind: "edge", edge: parsedEdge.data, tombstone: true });
+            addEvent(events, {
+              kind: "edge",
+              edge: parsedEdge.data,
+              tombstone: true,
+            });
             appliedSubjects.push(edgeSubject(parsedEdge.data));
           }
         } else if (!current.edges.some((edge) => edgeKey(edge) === key)) {
@@ -646,21 +776,42 @@ export async function reconcileMergeContradiction(
         }
       } else if (value !== null && value !== undefined) {
         return {
-          result: reject(request, errorDiagnostics("INVALID_STORED_VALUE", "Stored resolution value is not a valid node or edge", typeof subject === "string" ? subject : undefined), conflict),
+          result: reject(
+            request,
+            errorDiagnostics(
+              "INVALID_STORED_VALUE",
+              "Stored resolution value is not a valid node or edge",
+              typeof subject === "string" ? subject : undefined,
+            ),
+            conflict,
+          ),
           events: [],
         };
       }
     } else if (delta) {
       if (!deltaTouchesConflict(conflict, delta, entries)) {
         return {
-          result: reject(request, errorDiagnostics("DELTA_DOES_NOT_RESOLVE_CONFLICT", "The ariadne-delta does not change the contradiction subject", typeof subject === "string" ? subject : undefined), conflict),
+          result: reject(
+            request,
+            errorDiagnostics(
+              "DELTA_DOES_NOT_RESOLVE_CONFLICT",
+              "The ariadne-delta does not change the contradiction subject",
+              typeof subject === "string" ? subject : undefined,
+            ),
+            conflict,
+          ),
           events: [],
         };
       }
       const applied = applyDelta(current, conflict, delta);
       if (!applied.events) {
         return {
-          result: reject(request, applied.diagnostics ?? errorDiagnostics("INVALID_DELTA", "Invalid ariadne-delta"), conflict),
+          result: reject(
+            request,
+            applied.diagnostics ??
+              errorDiagnostics("INVALID_DELTA", "Invalid ariadne-delta"),
+            conflict,
+          ),
           events: [],
         };
       }
@@ -668,7 +819,9 @@ export async function reconcileMergeContradiction(
       for (const event of applied.events) {
         if (event.kind === "node") {
           appliedSubjects.push(event.node.id);
-          const previous = current.nodes.find((node) => node.id === event.node.id);
+          const previous = current.nodes.find(
+            (node) => node.id === event.node.id,
+          );
           if (lockedDecision(previous) || lockedDecision(event.node)) {
             changedDecisions.push(previous ?? event.node);
           }
@@ -678,18 +831,32 @@ export async function reconcileMergeContradiction(
       }
     }
 
-    const selectedSource =
-      mode === "variant" && typeof selected?.source === "string"
-        ? selected.source
-        : undefined;
-    const releasedEntries = selectedSource
-      ? {
-          nodes: entries.nodes.filter((entry) => entry.source === selectedSource),
-          edges: entries.edges.filter((entry) => entry.source === selectedSource),
+    const conflictSubject = typeof subject === "string" ? subject : undefined;
+    const isRootEntry = (entry: QuarantineEntry): boolean => {
+      if (!conflictSubject || conflictSubject.startsWith("topology:"))
+        return false;
+      const node = NodeSchema.safeParse(entry.value);
+      if (node.success) {
+        if (subjectKind(conflictSubject) === "node")
+          return node.data.id === conflictSubject;
+        if (subjectKind(conflictSubject) === "scope") {
+          return (
+            nodeFields(node.data).decision_scope ===
+            conflictSubject.slice("decision_scope:".length)
+          );
         }
-      : mode === "delta"
-        ? entries
-        : { nodes: [], edges: [] };
+      }
+      const edge = EdgeSchema.safeParse(entry.value);
+      return (
+        subjectKind(conflictSubject) === "edge" &&
+        edge.success &&
+        edgeSubject(edge.data) === conflictSubject
+      );
+    };
+    const releasedEntries: QuarantineEntries = {
+      nodes: entries.nodes.filter((entry) => !isRootEntry(entry)),
+      edges: entries.edges.filter((entry) => !isRootEntry(entry)),
+    };
     const released = releaseQuarantine(current, events, releasedEntries);
     if (released.diagnostics) {
       return {
@@ -697,7 +864,10 @@ export async function reconcileMergeContradiction(
         events: [],
       };
     }
-    const authority = authorityDiagnostics(changedDecisions, request.decisionOwnerAuthorization);
+    const authority = authorityDiagnostics(
+      changedDecisions,
+      request.decisionOwnerAuthorization,
+    );
     if (authority.length > 0) {
       return { result: reject(request, authority, conflict), events: [] };
     }
@@ -708,17 +878,17 @@ export async function reconcileMergeContradiction(
     const validation = validateGraph(prospective);
     const activeValidation = validateGraph(activeGraph(prospective));
     if (!validation.valid || !activeValidation.valid) {
-      const diagnostics = [...validation.diagnostics, ...activeValidation.diagnostics].map(({ code, message }) => ({
+      const diagnostics = [
+        ...validation.diagnostics,
+        ...activeValidation.diagnostics,
+      ].map(({ code, message }) => ({
         code: "INVALID_PROSPECTIVE_GRAPH",
         message,
       }));
       return { result: reject(request, diagnostics, conflict), events: [] };
     }
 
-    const evidence = evidenceDiagnostics(
-      prospective,
-      new Set(events.flatMap((event) => (event.kind === "node" ? [event.node.id] : []))),
-    );
+    const evidence = evidenceDiagnostics(current, prospective);
     if (evidence.length > 0) {
       return { result: reject(request, evidence, conflict), events: [] };
     }
@@ -730,8 +900,12 @@ export async function reconcileMergeContradiction(
         expected_conflict_digest: request.expectedConflictDigest,
         actual_conflict_digest: String(actualDigest),
         resolution_mode: mode,
-        applied_subjects: [...new Set(appliedSubjects)].sort((left, right) => left.localeCompare(right)),
-        released_subjects: [...new Set(released.released)].sort((left, right) => left.localeCompare(right)),
+        applied_subjects: [...new Set(appliedSubjects)].sort((left, right) =>
+          left.localeCompare(right),
+        ),
+        released_subjects: [...new Set(released.released)].sort((left, right) =>
+          left.localeCompare(right),
+        ),
         diagnostics: [],
       },
       events,

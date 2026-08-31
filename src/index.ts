@@ -12,7 +12,12 @@ export * from "./graph/storage.js";
 export * from "./graph/storage-driver.js";
 export * from "./graph/epistemic-graph.js";
 export { runGate } from "./cli/commands/gate.js";
-export type { GateCommand, GateName, GateReceipt, GateResult } from "./cli/commands/gate.js";
+export type {
+  GateCommand,
+  GateName,
+  GateReceipt,
+  GateResult,
+} from "./cli/commands/gate.js";
 export { runCli } from "./cli/index.js";
 
 export type { RunCliOptions } from "./cli/index.js";
