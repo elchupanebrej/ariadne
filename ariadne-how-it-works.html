@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ariadne: how it works</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .deck {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 32px 16px;
+  }
+  .slide { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .deck-ready .slide:not(.active) { display: none; }
+  h1 { font-size: 2rem; margin-bottom: 4px; }
+  h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); margin-bottom: 16px; font-size: 1rem; }
+  .diagram {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .diagram svg { max-width: none; }
+  .zoom {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    background: rgba(22, 27, 34, 0.85);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .zoom:hover { color: var(--accent); border-color: var(--accent); }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(13, 17, 23, 0.94);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .overlay.open { display: flex; }
+  .overlay .close {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .overlay .close:hover { color: var(--accent); border-color: var(--accent); }
+  .notes {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    border-left: 3px solid var(--accent);
+    padding-left: 12px;
+  }
+  .notes code {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.85em;
+  }
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  button {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .counter { color: var(--muted); font-size: 0.9rem; }
+  .kbd {
+    font-size: 0.75rem; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px;
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1. Methodology -->
+  <section class="slide active">
+    <h2>1. Methodology: systematic inventive thinking</h2>
+    <p class="subtitle">Nine formal operations on the state of an engineering problem — the foundation Ariadne is built on</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart LR
+    O1["1. Frame<br/>model the problem"] --> O2["2. Diagnose<br/>cause / contradiction"]
+    O2 --> O3["3. Transform<br/>change the system"]
+    O3 --> O4["4. Explore<br/>solution space"]
+    O4 --> O5["5. Knowledge<br/>missing facts"]
+    O5 --> O6["6. Dependencies<br/>boundaries and links"]
+    O6 --> O7["7. Dynamics<br/>behavior over time"]
+    O7 --> O8["8. Value<br/>candidate selection"]
+    O8 --> O9["9. Validate<br/>verify + transition"]
+    O5 -.->|"evidence request / result"| O9
+      </pre>
+    </div>
+    <div class="notes">
+      Ariadne is not a set of prompts — it is a software adaptation of systematic inventive thinking
+      (SIT, the modern branch of TRIZ) for engineering tasks. The methodology claims that any engineering
+      problem can be decomposed into nine operations: formal transformations of the problem state. Each
+      operation has a strict definition — its input, the action it performs, and its expected output. The
+      operations follow the natural path of reasoning: first understand and model the problem (Frame), then
+      find the cause or contradiction (Diagnose), propose changes to the system (Transform), explore the
+      space of alternatives (Explore), fill the gaps in knowledge (Knowledge), account for dependencies and
+      boundaries (Dependencies), check behavior over time and under load (Dynamics), select a candidate by
+      value (Value), and finally confirm the solution by execution and transition safely (Validate). Every
+      branch of reasoning ends in one epistemic chain:
+      <code>observed failure → diagnosis → model → hypothesis → transformation → executable check → empirical
+      evidence → justified decision</code>.
+    </div>
+  </section>
+
+  <!-- 2. Formal model -->
+  <section class="slide">
+    <h2>2. Formal problem model</h2>
+    <p class="subtitle">Problem state S_t is a tuple of requirements, invariants, contradictions, candidate mechanisms, and the epistemic graph</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    ST["Problem state S_t"] --> B["B_t — behavioral requirements"]
+    ST --> I["I_t — invariants"]
+    ST --> C["C_t — contradictions"]
+    ST --> M["M_t — candidate mechanisms"]
+    ST --> E["E_t — epistemic graph"]
+    C --> SP["separation: in time /<br/>in data / in modes / across boundaries"]
+    E --> PR["provenance: U ⊏ A ⊏ P ⊏ D ⊏ M ⊏ F ⊏ L"]
+    E --> LAD["evidence ladder — 10 rungs"]
+      </pre>
+    </div>
+    <div class="notes">
+      The methodology introduces one formal representation of any task — the tuple S_t. Behavioral
+      requirements (B_t) describe what the system must do; invariants (I_t) are properties that must never be
+      violated under any circumstances; contradictions (C_t) are the places where requirements conflict with
+      each other; candidate mechanisms (M_t) are structurally distinct solution variants; the epistemic graph
+      (E_t) is the map of where every claim came from. Two kinds of contradictions are distinguished: technical
+      (improving one parameter inevitably degrades another) and physical (one component must simultaneously
+      possess mutually exclusive properties). Following TRIZ, contradictions are not "balanced" by compromise —
+      they are eliminated with separation principles: in time, in data ownership, in operating modes, or across
+      system boundaries. The epistemic graph is an overlay of typed metadata around the work plan: it records
+      where each claim originated and how reliable it is, but it does not replace a task tracker.
+    </div>
+  </section>
+
+  <!-- 3. Overview -->
+  <section class="slide">
+    <h2>3. Overview: from task to decision</h2>
+    <p class="subtitle">The full path: the agent receives a task, applies rules, writes to the graph, passes gates, and emits a report</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    A["Task / symptom"] --> B["Agent<br/>ariadne skill"]
+    B --> C["Routing<br/>SKILL.md → rules/*.md"]
+    C --> D["CLI: ariadne op<br/>(9 operations)"]
+    D --> E["Graph mutations<br/>ariadne node / edge / invalidate"]
+    E --> F["Gates<br/>structural → semantic → epistemic"]
+    F -->|"passed"| G["Report: decision tree<br/>+ change log"]
+    F -->|"diagnostics"| D
+    G --> H["DEC — locked decision"]
+    S["Subagents<br/>(adversarial, spike)"] -.->|"envelope ariadne-delta"| E
+      </pre>
+    </div>
+    <div class="notes">
+      Work starts when the agent (an LLM) receives a task or a description of a symptom. Its first step is to
+      consult the <code>ariadne</code> skill — a dispatcher file that decides which branch of the methodology
+      fits the situation and directs the agent to a specific rule file (rules). The rules say which operations
+      to perform and which nodes to create; the agent executes them through the <code>ariadne</code> command-line
+      utility. Each command adds or changes nodes and edges in the epistemic graph — the persistent store of the
+      entire reasoning process. Before a decision can be locked, the graph passes a series of automated checks —
+      the gates; if a check reports problems, the agent returns to the operations and refines the model. When all
+      checks pass, a report is generated — a decision tree with a change log that shows how and why the result was
+      reached. Along the way, subagents (e.g. an independent critic or a hypothesis investigator) may contribute;
+      they can only touch the graph through schema-validated envelope packages.
+    </div>
+  </section>
+
+  <!-- 4. Epistemic graph -->
+  <section class="slide">
+    <h2>4. The epistemic graph</h2>
+    <p class="subtitle">Ariadne's core store: typed claim nodes, dependency edges, and a provenance mark on every claim</p>
+    <div class="diagram">
+      <pre class="mermaid">
+graph LR
+    F["FRAME<br/>problem"] --> H["HYP<br/>hypothesis"]
+    H --> C1["CAN<br/>mechanism A"]
+    H --> C2["CAN<br/>mechanism B"]
+    C1 --> R["EVDREQ<br/>evidence request"]
+    R --> V["EVD<br/>result"]
+    V --> D["DEC<br/>decision"]
+
+    subgraph Provenance
+        direction LR
+        U["UNKNOWN"] --> A["ASSUMED"] --> P["PROPOSED"] --> DER["DERIVED"] --> M["MEASURED"] --> F2["FACT"] --> L["DECIDED"]
+    end
+      </pre>
+    </div>
+    <div class="notes">
+      All of Ariadne's work happens on the epistemic graph — a directed graph where each node is one claim with a
+      role: FRAME is the problem statement, HYP is a hypothesis about the cause, CAN is a candidate mechanism,
+      EVDREQ is a request for verification, EVD is the verification result, DEC is the accepted decision. Edges
+      express dependencies between claims (e.g. "this hypothesis explains the symptom" or "this decision relies on
+      that candidate"). The most important attribute of a node is its provenance — where the claim came from and how
+      trustworthy it is. Provenance forms a ladder of rigor, from UNKNOWN through ASSUMED (assumption), PROPOSED
+      (proposed), DERIVED (derived), MEASURED (measured), and FACT up to DECIDED (locked by decision). The
+      weakest-precondition rule applies: a derived claim can never be more reliable than its weakest premise.
+      Hypotheses must carry falsification conditions — criteria under which they count as disproven — and
+      verification results must carry a verdict (supported / falsified / inconclusive).
+    </div>
+  </section>
+
+  <!-- 5. Storage -->
+  <section class="slide">
+    <h2>5. Storage: an event log</h2>
+    <p class="subtitle">The graph is not stored as a ready file — it is rebuilt by replaying an append-only journal of events</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    A["ariadne node add / edge add"] --> B["Process queue +<br/>mkdir lock<br/>(stale 5 min)"]
+    B --> C["append: GRAPH.jsonl<br/>node | edge | tombstone"]
+    B --> D["STATE.yaml<br/>frontier, open_unknowns"]
+    C --> E["Replay all events<br/>→ materialized graph"]
+    E --> F["Integrity check<br/>+ gates"]
+    E --> G["INDEX.md<br/>node cards"]
+      </pre>
+    </div>
+    <div class="notes">
+      Physically, Ariadne stores the graph in the <code>.ariadne/</code> directory as a journal of events — the
+      GRAPH.jsonl file, to which every command appends one line: node creation, edge creation, or edge removal.
+      Edge removal is recorded as a special tombstone event, so the history of reasoning is never erased — it can
+      be replayed from the start to obtain the graph in any state. This design guarantees reproducibility: two
+      agents reading the same journal always see the same graph. Parallel processes are protected by an in-process
+      queue plus a filesystem lock (a lock-directory with protection against stale holders). Separately, STATE.yaml
+      keeps service state: the list of unfinished nodes (frontier) and open questions (open_unknowns), which tells
+      the agent what is still pending. An INDEX.md with human-readable cards for all nodes is generated alongside.
+    </div>
+  </section>
+
+  <!-- 6. Operations and rules -->
+  <section class="slide">
+    <h2>6. Operations and rule routing</h2>
+    <p class="subtitle">The agent does not improvise: every task branch routes to exactly one rule, which dictates the operation</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    A["Task branch"] --> B{"What is it?"}
+    B -->|"requirements"| R1["10-frame"]
+    B -->|"symptom → cause"| R2["20-diagnose"]
+    B -->|"transform"| R3["30-transform"]
+    B -->|"structural candidates"| R4["40-explore"]
+    B -->|"unknown facts"| R5["50-knowledge"]
+    B -->|"links / boundaries"| R6["60-dependencies"]
+    B -->|"queues / dynamics"| R7["70-dynamics"]
+    B -->|"candidate selection"| R8["80-value"]
+    B -->|"verify / transition"| R9["90-validate"]
+    R1 & R2 & R3 & R4 & R5 & R6 & R7 & R8 & R9 --> O["ariadne op &lt;operation&gt;"]
+    O --> M["graph mutation"]
+      </pre>
+    </div>
+    <div class="notes">
+      The key idea of Ariadne is that the agent must not decide "by feel" which technique to apply. The dispatcher
+      (SKILL.md) analyzes what exactly arrived: requirements without mechanisms, a symptom without a cause, a need
+      to transform something, several solution variants, a shortage of facts, questions about coupling between
+      modules, behavior problems under load, selection among candidates, or the need for verification and a safe
+      transition. Depending on the answer, the agent loads exactly one rule file — for example
+      rules/20-diagnose.md for causal analysis or rules/80-value.md for candidate selection. The rule is an
+      instruction that specifies which nodes, edges, and checks must be created, and it invokes the corresponding
+      CLI operation (<code>ariadne op diagnose</code>, etc.). The console command is a thin wrapper: it only prints
+      which rule was activated; all substantive work happens in the graph according to the rule.
+    </div>
+  </section>
+
+  <!-- 7. Gates -->
+  <section class="slide">
+    <h2>7. Gates: structural → semantic → epistemic</h2>
+    <p class="subtitle">Automated checks that prevent locking a decision without evidence of the required rigor</p>
+    <div class="diagram">
+      <pre class="mermaid">
+flowchart TD
+    G["Graph"] --> S["Structural<br/>graph integrity, valid edges"]
+    S --> SE["Semantic<br/>semantic consistency"]
+    SE --> E["Epistemic"]
+    E --> C1["claim-class →<br/>minimum ladder rung"]
+    C1 --> C2["EVDREQ confirmed by EVD<br/>with sufficient rung"]
+    C2 --> C3["TRANS: lifecycle,<br/>deadline, verification"]
+    C3 --> C4["adversarial critique present"]
+    C4 --> P{"All passed?"}
+    P -->|"yes"| OK["verify: ok"]
+    P -->|"no"| DIAG["diagnostics with codes<br/>→ back to operations"]
+      </pre>
+    </div>
+    <div class="notes">
+      Gates are deterministic (model-independent) checks of the graph, run with <code>ariadne verify</code>. The
+      first, structural gate, checks integrity: do all nodes referenced by edges exist, are the link types valid.
+      The second, semantic gate, checks that claims are meaningfully consistent. The third, epistemic gate, is the
+      strictest: it matches the class of every claim against the minimum admissible rung of the evidence ladder.
+      For example, a claim about syntactic structure only requires rung 2, while a claim about the safety of a
+      distributed system requires rung 8 — "plausible" is not counted there. Every evidence request (EVDREQ) must
+      have a corresponding result (EVD) with a sufficient rung. Transitions (TRANS) are checked for lifecycle
+      state, deadline, and verification confirmation, and key decisions for the presence of adversarial critique.
+      If a gate fails, it returns a list of diagnostics with codes, so the agent knows exactly what to fix.
+    </div>
+  </section>
+
+  <!-- 8. Invalidation -->
+  <section class="slide">
+    <h2>8. Transitive invalidation</h2>
+    <p class="subtitle">New evidence disproved a hypothesis — statuses cascade across all dependent nodes</p>
+    <div class="diagram">
+      <pre class="mermaid">
+graph TD
+    EVD["EVD<br/>verdict: FALSIFIED"] -->|"falsifies"| HYP["HYP<br/>FALSIFIED"]
+    HYP -->|"invalidate"| CAN["CAN<br/>INVALIDATED"]
+    HYP -->|"invalidate"| CLM["CLM<br/>NEEDS_REVIEW"]
+    CAN -->|"invalidate"| DEC["DEC<br/>RE-OPENED"]
+    CAN -->|"invalidate"| TRANS["TRANS<br/>BLOCKED"]
+    TRANS -->|"mandatory"| DC["Decommissioning Contract<br/>retirement predicate + cleanup test"]
+      </pre>
+    </div>
+    <div class="notes">
+      Reasoning is not static: new empirical data can arrive at any time and disprove previously accepted
+      hypotheses. The operation <code>ariadne invalidate HYP-x --by EVD-y</code> handles this case: it first
+      verifies that the evidence EVD actually falsifies the given hypothesis, then runs transitive invalidation —
+      updating statuses along the chain of dependencies. The hypothesis is marked FALSIFIED; candidate mechanisms
+      that relied on it become INVALIDATED; related claims are flagged NEEDS_REVIEW; accepted decisions are
+      RE-OPENED; and planned transitions are BLOCKED. Nothing is physically deleted: the old events stay in the
+      journal, and the whole path of reasoning can be traced. This lets the system "fail honestly": instead of
+      burying disproven assumptions, it marks them explicitly and forces a re-examination of everything built on
+      top of them.
+    </div>
+  </section>
+
+  <!-- 9. Reports, envelopes, adapters -->
+  <section class="slide">
+    <h2>9. Reports, subagents, and host integration</h2>
+    <p class="subtitle">How results leave the graph (reports) and how outside contributions enter it (envelopes, adapters)</p>
+    <div class="diagram">
+      <pre class="mermaid">
+sequenceDiagram
+    participant A as Agent
+    participant S as Subagent
+    participant C as CLI ariadne
+    participant G as Graph (.ariadne/)
+    participant H as Host (GSD / Matt)
+    A->>C: ariadne report FRAME-x
+    C->>G: traverse decision tree
+    G-->>C: nodes + change log
+    C-->>A: decision tree (text)
+    C-->>A: ariadne viz → HTML projection
+    S->>C: envelope receive<br/>(ariadne-delta)
+    C->>G: apply mutations
+    C-->>S: verify: gates
+    G-->>H: NOT-* notices<br/>on assumption falsification
+      </pre>
+    </div>
+    <div class="notes">
+      The final stage turns the graph into artifacts that humans and other systems can read. The
+      <code>ariadne report</code> command traverses the decision tree from the original problem statement down to
+      locked decisions and produces a text report with a change log — from which one can reconstruct why every
+      decision was made. The <code>ariadne viz</code> command builds a self-contained HTML projection of the same
+      tree for visual review. The second flow is input: subagents (an independent critic, a hypothesis
+      investigator) have no direct access to the graph; they submit their proposals as
+      <code>ariadne-delta</code> envelopes — structured JSON packages that the CLI validates against a schema and
+      applies to the graph. The third flow is integration with host systems: the GSD adapter receives operational
+      notices (NOT-*) when assumptions are falsified, so an external planner is aware of the risks; the Matt
+      adapter imports data from other tools; and the orchestration layer (harness) allows a session to continue in
+      a fresh environment. The depth of processing is controlled by the Fast / Standard / Deep mode — the deeper
+      the mode, the more mandatory checks.
+    </div>
+  </section>
+
+  <nav>
+    <button id="prev" disabled>← Back</button>
+    <span class="counter"><span id="current">1</span> / 9 &nbsp;<span class="kbd">←</span> <span class="kbd">→</span></span>
+    <button id="next">Next →</button>
+  </nav>
+</div>
+
+<script>
+  mermaid.initialize({
+    theme: "dark",
+    startOnLoad: false,
+    flowchart: { curve: "basis" }
+  });
+
+  const slides = document.querySelectorAll(".slide");
+  let i = 0;
+
+  function fitDiagrams() {
+    document.querySelectorAll(".diagram").forEach((box) => {
+      const svg = box.querySelector("svg");
+      if (!svg || svg.viewBox.baseVal.width === 0) return;
+      const w = box.clientWidth - 40;
+      const h = box.clientHeight - 40;
+      if (w < 50 || h < 50) return;
+      const scale = Math.min(w / svg.viewBox.baseVal.width, h / svg.viewBox.baseVal.height);
+      svg.style.maxWidth = "none";
+      svg.style.maxHeight = "none";
+      svg.style.width = `${Math.floor(svg.viewBox.baseVal.width * scale)}px`;
+      svg.style.height = `${Math.floor(svg.viewBox.baseVal.height * scale)}px`;
+    });
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close";
+  closeBtn.title = "Close (Esc)";
+  closeBtn.textContent = "✕";
+  closeBtn.addEventListener("click", closeZoom);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+
+  function fitZoomed() {
+    const svg = overlay.querySelector("svg");
+    if (!svg || svg.viewBox.baseVal.width === 0) return;
+    const w = window.innerWidth - 48;
+    const h = window.innerHeight - 96;
+    const scale = Math.min(w / svg.viewBox.baseVal.width, h / svg.viewBox.baseVal.height);
+    svg.style.maxWidth = "none";
+    svg.style.maxHeight = "none";
+    svg.style.width = `${Math.floor(svg.viewBox.baseVal.width * scale)}px`;
+    svg.style.height = `${Math.floor(svg.viewBox.baseVal.height * scale)}px`;
+  }
+
+  function openZoom(box) {
+    const svg = box.querySelector("svg");
+    if (!svg) return;
+    overlay.querySelectorAll("svg").forEach((s) => s.remove());
+    overlay.appendChild(svg.cloneNode(true));
+    overlay.classList.add("open");
+    fitZoomed();
+  }
+
+  function closeZoom() {
+    overlay.classList.remove("open");
+    overlay.querySelectorAll("svg").forEach((s) => s.remove());
+  }
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeZoom();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeZoom();
+  });
+  window.addEventListener("resize", () => {
+    if (overlay.classList.contains("open")) fitZoomed();
+  });
+
+  function show(n) {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+    document.getElementById("prev").disabled = i === 0;
+    document.getElementById("next").disabled = i === slides.length - 1;
+    document.getElementById("current").textContent = i + 1;
+    requestAnimationFrame(fitDiagrams);
+  }
+
+  document.getElementById("prev").onclick = () => show(i - 1);
+  document.getElementById("next").onclick = () => show(i + 1);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") show(i + 1);
+    if (e.key === "ArrowLeft") show(i - 1);
+  });
+  window.addEventListener("resize", fitDiagrams);
+
+  window.addEventListener("load", async () => {
+    await mermaid.run({ querySelector: ".mermaid" });
+    document.querySelectorAll(".diagram").forEach((box) => {
+      const btn = document.createElement("button");
+      btn.className = "zoom";
+      btn.title = "Zoom to full screen";
+      btn.textContent = "⤢";
+      btn.addEventListener("click", () => openZoom(box));
+      box.appendChild(btn);
+    });
+    document.querySelector(".deck").classList.add("deck-ready");
+    show(0);
+  });
+</script>
+</body>
+</html>
