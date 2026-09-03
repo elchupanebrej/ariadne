@@ -51,6 +51,7 @@
     "docs:check": "node scripts/build-nine-operations-html.mjs --check",
     "docs:test": "npm run docs:check && node scripts/test-nine-operations-html.mjs",
     "skills:link": "bash scripts/link-skill.sh",
+    "pack:smoke": "node scripts/pack-smoke.mjs",
     "prepack": "npm run build"
   },
   "dependencies": {
