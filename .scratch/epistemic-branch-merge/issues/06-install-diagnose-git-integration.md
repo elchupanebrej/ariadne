@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Merge compatible Branch Epistemic Models through Git.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Setup idempotently adds only missing repository attributes and local driver configuration for the canonical Epistemic Graph log.
 - [ ] Existing incompatible attributes or driver configuration are left unchanged and reported with exact manual integration guidance.
@@ -13,3 +13,7 @@
 - [ ] A fresh clone without the required local integration fails doctor with an actionable diagnosis before graph-changing work proceeds.
 - [ ] Setup and merge never alter global Git configuration, invoke the network, commit, push, or open a pull request.
 - [ ] Re-running setup produces no duplicate attributes or configuration and preserves unrelated Git settings.
+
+## Comments
+
+- 2026-09-03: Implemented and committed as `f3e8d5c`. Build/typecheck and focused Git-integration tests passed; the two-axis review passed. The full suite had unrelated gate/help failures.

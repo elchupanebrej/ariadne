@@ -4,7 +4,7 @@
 
 **Blocked by:** 03 — Quarantine edge and topology divergence; 04 — Detect Decision Scope divergence without changing authority.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Reconciliation requires the contradiction ID and expected conflict digest and accepts exactly one mode: select stored base or variant by content digest, or submit one schema-valid `ariadne-delta`.
 - [ ] Selecting by branch label, providing both or neither mode, or supplying an arbitrary replacement graph is rejected without mutation.
@@ -13,3 +13,7 @@
 - [ ] Valid non-decision reconciliation can be completed by an agent under normal evidence rules, while changing a locked decision requires decision-owner authorization.
 - [ ] Successful reconciliation appends canonical values, restores only now-valid quarantined knowledge, marks the contradiction resolved, and retains its historical record.
 - [ ] Repeated or concurrent attempts cannot expose a partially reconciled graph and receive a clear structured outcome.
+
+## Comments
+
+- 2026-09-03: Implemented and committed as `30ab966`. Build/typecheck and focused reconciliation tests passed; the two-axis review passed. The full suite had three unrelated gate/help failures.

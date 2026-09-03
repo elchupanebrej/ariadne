@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 — Preserve node divergence as Merge Contradictions.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] The explicit merge check returns non-zero and lists conflict-card links when unresolved `branch_merge` contradictions exist.
 - [ ] The check returns zero after every relevant contradiction is resolved and does not confuse unrelated contradiction types with merge policy.
@@ -12,3 +12,7 @@
 - [ ] An integration fixture proves that the same valid `DIVERGED` graph can be merged and committed locally while the publication check fails.
 - [ ] Structural and epistemic validation remain active independently, while Separation Diversity stays exempt for unresolved `branch_merge` contradictions.
 - [ ] Structured output is stable enough for CI consumption without parsing human-readable prose.
+
+## Comments
+
+- 2026-09-03: Verified the implementation and added acceptance coverage in `35e0edd`. Focused tests, build/typecheck, and the two-axis review passed.

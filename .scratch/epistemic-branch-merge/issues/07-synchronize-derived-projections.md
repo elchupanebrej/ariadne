@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 — Preserve node divergence as Merge Contradictions; 06 — Install and diagnose Git merge integration safely.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Generated indexes and cards use a generated-file merge strategy that avoids textual conflicts and treats the canonical graph as their only semantic source.
 - [ ] One idempotent synchronization command rebuilds indexes, cards, frontier, and open-unknown projections and is the documented repair path when hooks are absent or bypassed.
@@ -14,3 +14,7 @@
 - [ ] Unrelated host-owned state fields survive synchronization byte-for-byte where ownership rules require it.
 - [ ] A valid `DIVERGED` merge can still be committed locally, and hook output links to actual conflict cards without launching an agent, creating a queue item, or emitting handoff state.
 - [ ] Setup remains idempotent and refuses to overwrite incompatible hook paths or hook files, reporting manual integration guidance instead.
+
+## Comments
+
+- 2026-09-03: Implemented as `85e09c2`, corrected the non-executable-hook diagnostic in `5bf88bd`, and closed the Spec-review gaps in `a9c825d`. Focused tests, build/typecheck, and the final two-axis review passed. The full suite has three unrelated gate/help failures.
