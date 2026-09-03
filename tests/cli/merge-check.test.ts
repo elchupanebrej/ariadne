@@ -1,5 +1,13 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  mkdtemp,
+  mkdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { constants } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
@@ -38,6 +46,15 @@ const invoke = async (cwd: string, args: string[]) => {
 
 const workspace = async (): Promise<string> =>
   mkdtemp(join(tmpdir(), "ariadne-merge-check-"));
+
+const exists = async (path: string): Promise<boolean> => {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const sharedNode = (statement: string): string =>
   JSON.stringify({
@@ -145,6 +162,176 @@ describe("ariadne merge-check", () => {
     }
   });
 
+  it("emits deterministic structured output and filters only unresolved branch merges", async () => {
+    const cwd = await workspace();
+    try {
+      const storage = new GraphStorage(join(cwd, ".ariadne"));
+      await storage.appendNode({
+        id: "CTR-MERGE-Z",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "Later branch disagreement",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+      });
+      await storage.appendNode({
+        id: "CTR-MERGE-A",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "Earlier branch disagreement",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+      });
+      await storage.appendNode({
+        id: "CTR-MERGE-RESOLVED",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "Resolved branch disagreement",
+        status: "RESOLVED",
+        conflict_kind: "branch_merge",
+      });
+      await storage.appendNode({
+        id: "CTR-OTHER-MERGE",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "Non-merge contradiction",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "evidence",
+      });
+      await storage.appendNode({
+        id: "TASK-MERGE-FALSE",
+        type: "TASK",
+        provenance_type: "FACT",
+        statement: "A non-contradiction with merge fields",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+      });
+
+      const first = await invoke(cwd, ["merge-check", "--json"]);
+      const second = await invoke(cwd, ["merge-check", "--json"]);
+
+      expect(first.code).toBe(1);
+      expect(second.code).toBe(1);
+      expect(second.stdout).toBe(first.stdout);
+      expect(JSON.parse(first.stdout)).toMatchObject({
+        check: "publication",
+        passed: false,
+        unresolved_conflicts: [
+          { id: "CTR-MERGE-A", card: ".ariadne/cards/CTR-MERGE-A.md" },
+          { id: "CTR-MERGE-Z", card: ".ariadne/cards/CTR-MERGE-Z.md" },
+        ],
+        diagnostics: [
+          expect.objectContaining({ nodeId: "CTR-MERGE-A" }),
+          expect.objectContaining({ nodeId: "CTR-MERGE-Z" }),
+        ],
+      });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("does not change projections, state, notices, locks, or local Git policy", async () => {
+    const cwd = await workspace();
+    try {
+      await git(cwd, "init", "-q");
+      await git(cwd, "config", "merge.ariadne.sentinel", "unchanged");
+      const storage = new GraphStorage(join(cwd, ".ariadne"));
+      await storage.appendNode({
+        id: "CTR-MERGE-READONLY",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "A publication-only conflict",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+      });
+      const noticesPath = join(cwd, ".ariadne", "NOTICES.jsonl");
+      await writeFile(noticesPath, "existing notice state\n", "utf8");
+      const paths = [
+        join(cwd, ".ariadne", "GRAPH.jsonl"),
+        join(cwd, ".ariadne", "INDEX.md"),
+        join(cwd, ".ariadne", "cards", "CTR-MERGE-READONLY.md"),
+        join(cwd, ".ariadne", "STATE.yaml"),
+        noticesPath,
+      ];
+      const before = await Promise.all(paths.map((path) => readFile(path, "utf8")));
+      const gitPolicyBefore = await git(cwd, "config", "--local", "--get", "merge.ariadne.sentinel");
+      const lockPaths = [
+        join(cwd, ".ariadne", "GRAPH.jsonl.lock"),
+        join(cwd, ".ariadne", "STATE.yaml.lock"),
+      ];
+
+      const result = await invoke(cwd, ["merge-check", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(await Promise.all(paths.map((path) => readFile(path, "utf8")))).toEqual(before);
+      expect(await git(cwd, "config", "--local", "--get", "merge.ariadne.sentinel")).toBe(
+        gitPolicyBefore,
+      );
+      expect(await Promise.all(lockPaths.map((path) => exists(path)))).toEqual([false, false]);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps publication, structural, semantic, and epistemic gates independent", async () => {
+    const cwd = await workspace();
+    try {
+      const storage = new GraphStorage(join(cwd, ".ariadne"));
+      await storage.appendNode({
+        id: "CTR-MERGE-INDEPENDENT",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "A valid unresolved branch merge",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+      });
+      await storage.appendNode({
+        id: "EVDREQ-INDEPENDENT",
+        type: "EVDREQ",
+        provenance_type: "PROPOSED",
+        statement: "An evidence request without a result",
+        claim_class: "Algorithmic logic",
+      });
+
+      const publication = await invoke(cwd, ["merge-check", "--json"]);
+      const structural = await invoke(cwd, ["gate", "structural"]);
+      const semantic = await invoke(cwd, ["gate", "semantic"]);
+      const epistemic = await invoke(cwd, ["gate", "epistemic"]);
+      const all = await invoke(cwd, ["gate", "all"]);
+
+      expect(publication.code).toBe(1);
+      expect(JSON.parse(publication.stdout)).toMatchObject({
+        check: "publication",
+        passed: false,
+        diagnostics: [expect.objectContaining({ nodeId: "CTR-MERGE-INDEPENDENT" })],
+      });
+      expect(structural.code).toBe(0);
+      expect(semantic.code).toBe(0);
+      expect(epistemic.code).toBe(1);
+      expect(JSON.parse(epistemic.stdout)).toMatchObject({
+        gate: "epistemic",
+        passed: false,
+        diagnostics: [
+          expect.objectContaining({
+            code: "MISSING_EVIDENCE_RESULT",
+            nodeId: "EVDREQ-INDEPENDENT",
+          }),
+        ],
+      });
+      expect(JSON.parse(all.stdout)).toMatchObject({
+        gate: "all",
+        passed: false,
+        results: [
+          { gate: "structural", passed: true },
+          { gate: "semantic", passed: true },
+          { gate: "epistemic", passed: false },
+        ],
+      });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("allows a valid divergent merge and commit while publication remains blocked", async () => {
     const repo = await workspace();
     try {
@@ -197,6 +384,25 @@ describe("ariadne merge-check", () => {
       const status = await git(repo, "status", "--short");
       expect(status).toBe("");
 
+      const semantic = await invoke(repo, ["gate", "semantic"]);
+      const allGates = await invoke(repo, ["gate", "all"]);
+      expect(semantic.code).toBe(0);
+      expect(JSON.parse(semantic.stdout)).toMatchObject({
+        gate: "semantic",
+        passed: true,
+        diagnostics: [],
+      });
+      expect(allGates.code).toBe(0);
+      expect(JSON.parse(allGates.stdout)).toMatchObject({
+        gate: "all",
+        passed: true,
+        results: [
+          { gate: "structural", passed: true },
+          { gate: "semantic", passed: true },
+          { gate: "epistemic", passed: true },
+        ],
+      });
+
       const result = await invoke(repo, ["merge-check", "--json"]);
       expect(result.code).toBe(1);
       expect(JSON.parse(result.stdout)).toMatchObject({
@@ -212,7 +418,7 @@ describe("ariadne merge-check", () => {
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
-  }, 15_000);
+  }, 30_000);
 
   it("does not repair or truncate a malformed journal tail", async () => {
     const cwd = await workspace();
