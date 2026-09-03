@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { join } from "node:path";
 import { Writable } from "node:stream";
@@ -372,6 +372,33 @@ describe("Ariadne Git merge integration", () => {
       );
       await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
       expect(result.stderr).toMatch(/not executable.*manual integration/i);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses an executable hook that carries the marker but omits synchronization", async () => {
+    const repo = await repository();
+    try {
+      await mkdir(join(repo, ".githooks"), { recursive: true });
+      for (const name of ["pre-merge-commit", "pre-commit"]) {
+        const path = join(repo, ".githooks", name);
+        await writeFile(
+          path,
+          "#!/bin/sh\n# ariadne-merge-hook-v1\nexit 0\n",
+        );
+        await chmod(path, 0o755);
+      }
+      await git(repo, "config", "--local", "core.hooksPath", ".githooks");
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(result.stderr).toMatch(/incompatible.*manual integration/i);
+      expect(await readFile(join(repo, ".githooks", "pre-commit"), "utf8")).toBe(
+        "#!/bin/sh\n# ariadne-merge-hook-v1\nexit 0\n",
+      );
+      await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
     } finally {
       await rm(repo, { recursive: true, force: true });
     }

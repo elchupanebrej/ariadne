@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { promisify } from "node:util";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { GraphStorage } from "../../src/graph/storage.js";
 
@@ -57,6 +57,10 @@ describe("ariadne merge-sync", () => {
         join(root, ".ariadne", "cards", "TASK-STALE.md"),
         "stale card\n",
       );
+      await writeFile(
+        join(root, ".ariadne", "cards", "HOST-NOTE.txt"),
+        "host-owned note\n",
+      );
       await storage.writeState({
         host_owned: { keep: true },
         frontier: ["TASK-STALE"],
@@ -97,12 +101,21 @@ describe("ariadne merge-sync", () => {
       expect(await git(root, "diff", "--cached", "--name-only")).toBe(
         ".ariadne/INDEX.md\n.ariadne/cards/TASK-OPEN.md\n.ariadne/cards/UNK-OPEN.md\n",
       );
+      expect(await git(root, "status", "--porcelain")).toContain(
+        "?? .ariadne/cards/HOST-NOTE.txt",
+      );
 
       const before = await Promise.all([
         readFile(join(root, ".ariadne", "INDEX.md"), "utf8"),
         readFile(join(root, ".ariadne", "STATE.yaml"), "utf8"),
       ]);
-      expect((await invoke(root, ["merge-sync", "--json"])).code).toBe(0);
+      const secondJson = await invoke(root, ["merge-sync", "--json"]);
+      expect(secondJson.code).toBe(0);
+      expect(secondJson.stdout).toContain('"state_changed": false');
+      const second = await invoke(root, ["merge-sync"]);
+      expect(second.stdout).toContain(
+        "State projection unchanged in working tree only: .ariadne/STATE.yaml",
+      );
       expect(
         await Promise.all([
           readFile(join(root, ".ariadne", "INDEX.md"), "utf8"),
@@ -134,6 +147,60 @@ describe("ariadne merge-sync", () => {
         await readFile(join(root, ".planning", "ariadne", "INDEX.md"), "utf8"),
       ).toContain("TASK-GSD");
     } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("prints a usable conflict-card link and reconciliation guidance", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-conflict-"));
+    try {
+      const storage = new GraphStorage(join(root, ".ariadne"));
+      await storage.appendNode({
+        id: "CTR-MERGE-LINK",
+        type: "CTR",
+        provenance_type: "FACT",
+        statement: "Branches diverged",
+        status: "MERGE_CONFLICT",
+        conflict_kind: "branch_merge",
+        reconciliation_guidance: "Select a stored variant after review.",
+      });
+
+      const result = await invoke(root, ["merge-sync"]);
+
+      expect(result.code).toBe(0);
+      expect(result.stdout).toContain(
+        "[CTR-MERGE-LINK](.ariadne/cards/CTR-MERGE-LINK.md)",
+      );
+      expect(result.stdout).toContain("Select a stored variant after review.");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps unchanged cards byte-identical when synchronization runs on another day", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-03T09:00:00.000Z"));
+    const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-idempotent-"));
+    try {
+      const storage = new GraphStorage(join(root, ".ariadne"));
+      await storage.appendNode(node("TASK-STABLE"));
+      await invoke(root, ["merge-sync"]);
+      const before = await readFile(
+        join(root, ".ariadne", "cards", "TASK-STABLE.md"),
+        "utf8",
+      );
+
+      vi.setSystemTime(new Date("2026-09-04T09:00:00.000Z"));
+      expect((await invoke(root, ["merge-sync"])).code).toBe(0);
+
+      expect(
+        await readFile(
+          join(root, ".ariadne", "cards", "TASK-STABLE.md"),
+          "utf8",
+        ),
+      ).toBe(before);
+    } finally {
+      vi.useRealTimers();
       await rm(root, { recursive: true, force: true });
     }
   });

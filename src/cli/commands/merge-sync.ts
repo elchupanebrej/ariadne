@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, readdir, readFile, rm } from "node:fs/promises";
+import { access, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
@@ -27,8 +27,9 @@ const relativePath = (root: string, path: string): string =>
 const removeStaleCards = async (
   storage: GraphStorage,
   ids: Set<string>,
-): Promise<void> => {
-  if (!(await exists(storage.cardsDirectory))) return;
+): Promise<string[]> => {
+  if (!(await exists(storage.cardsDirectory))) return [];
+  const removed: string[] = [];
   for (const entry of await readdir(storage.cardsDirectory, {
     withFileTypes: true,
   })) {
@@ -37,15 +38,57 @@ const removeStaleCards = async (
       entry.name.endsWith(".md") &&
       !ids.has(entry.name.slice(0, -3))
     ) {
-      await rm(join(storage.cardsDirectory, entry.name));
+      const path = join(storage.cardsDirectory, entry.name);
+      await rm(path);
+      removed.push(path);
     }
   }
+  return removed;
+};
+
+const existingCards = async (
+  storage: GraphStorage,
+  ids: readonly string[],
+): Promise<Map<string, string>> => {
+  const entries = await Promise.all(
+    ids.map(async (id) => {
+      const path = join(storage.cardsDirectory, `${id}.md`);
+      try {
+        return [path, await readFile(path, "utf8")] as const;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+        throw error;
+      }
+    }),
+  );
+  return new Map(entries.filter((entry): entry is readonly [string, string] => entry !== undefined));
+};
+
+const withoutRevisionDate = (content: string): string =>
+  content.replace(/^- Revised: \d{4}-\d{2}-\d{2}$/mu, "- Revised: <derived>");
+
+const preserveStableCards = async (
+  storage: GraphStorage,
+  previous: ReadonlyMap<string, string>,
+  ids: readonly string[],
+): Promise<void> => {
+  await Promise.all(
+    ids.map(async (id) => {
+      const path = join(storage.cardsDirectory, `${id}.md`);
+      const before = previous.get(path);
+      if (before === undefined) return;
+      const after = await readFile(path, "utf8");
+      if (after !== before && withoutRevisionDate(after) === withoutRevisionDate(before)) {
+        await writeFile(path, before, "utf8");
+      }
+    }),
+  );
 };
 
 const syncState = async (
   storage: GraphStorage,
   graph: Awaited<ReturnType<GraphStorage["materialize"]>>,
-): Promise<string> => {
+): Promise<{ path: string; changed: boolean }> => {
   const state = (await storage.readState<Record<string, unknown>>()) ?? {};
   const frontier = graph.nodes.filter(isFrontierNode).map(({ id }) => id);
   const openUnknowns = graph.nodes
@@ -59,21 +102,48 @@ const syncState = async (
   if ("active_frontier" in state) next.active_frontier = frontier;
   if ("openUnknowns" in state) next.openUnknowns = openUnknowns;
   if ("unknowns" in state) next.unknowns = openUnknowns;
-  await storage.writeState(next);
-  return storage.statePath;
+  let previous: string | undefined;
+  try {
+    previous = await readFile(storage.statePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  const serialized = `${JSON.stringify(next, null, 2)}\n`;
+  const changed = previous !== serialized;
+  if (changed) await storage.writeState(next);
+  return { path: storage.statePath, changed };
 };
 
 const stageDerived = async (
   root: string,
   storage: GraphStorage,
+  cardPaths: readonly string[],
 ): Promise<string[]> => {
-  const paths = [
-    storage.indexPath,
-    ...((await exists(storage.cardsDirectory)) ? [storage.cardsDirectory] : []),
-  ];
-  const relativePaths = paths.map((path) => relativePath(root, path));
-  if (relativePaths.length > 0)
-    await runFile("git", ["-C", root, "add", "--", ...relativePaths]);
+  const relativeIndexPath = relativePath(root, storage.indexPath);
+  const relativeCardPaths = (
+    await Promise.all(
+      [...new Set(cardPaths)].map(async (path) => {
+        const relativeCardPath = relativePath(root, path);
+        if (await exists(path)) return relativeCardPath;
+        const tracked = (
+          await runFile(
+            "git",
+            ["-C", root, "ls-files", "--", relativeCardPath],
+            { encoding: "utf8" },
+          )
+        ).stdout.trim();
+        return tracked ? relativeCardPath : undefined;
+      }),
+    )
+  ).filter((path): path is string => path !== undefined);
+  await runFile("git", [
+    "-C",
+    root,
+    "add",
+    "--",
+    relativeIndexPath,
+    ...relativeCardPaths,
+  ]);
   const statePath = relativePath(root, storage.statePath);
   const stagedState = (
     await runFile(
@@ -85,7 +155,12 @@ const stageDerived = async (
     )
   ).stdout.trim();
   if (stagedState) await runFile("git", ["-C", root, "reset", "--", statePath]);
-  return relativePaths;
+  return [
+    relativeIndexPath,
+    ...((await exists(storage.cardsDirectory))
+      ? [relativePath(root, storage.cardsDirectory)]
+      : []),
+  ];
 };
 
 export async function runMergeSync(
@@ -103,6 +178,10 @@ export async function runMergeSync(
   const { environment } = await resolveCliWorkspace(io);
   const storage = new GraphStorage(environment.storageRoot);
   const graph = await storage.materialize();
+  const previousCards = await existingCards(
+    storage,
+    graph.nodes.map(({ id }) => id),
+  );
   const validation = EpistemicGateEngine.verify(graph, {
     gate: "all",
     strict: true,
@@ -112,11 +191,26 @@ export async function runMergeSync(
     environment.storageRoot,
     graph,
   );
-  await removeStaleCards(storage, new Set(graph.nodes.map(({ id }) => id)));
+  const removedCards = await removeStaleCards(
+    storage,
+    new Set(graph.nodes.map(({ id }) => id)),
+  );
   await storage.regenerateIndex();
-  const statePath = await syncState(storage, graph);
+  await preserveStableCards(
+    storage,
+    previousCards,
+    graph.nodes.map(({ id }) => id),
+  );
+  const state = await syncState(storage, graph);
   const staged = args.includes("--stage-derived")
-    ? await stageDerived(environment.rootPath, storage)
+    ? await stageDerived(
+        environment.rootPath,
+        storage,
+        [
+          ...removedCards,
+          ...graph.nodes.map(({ id }) => join(storage.cardsDirectory, `${id}.md`)),
+        ],
+      )
     : [];
   const receipt = {
     command: "merge-sync" as const,
@@ -125,8 +219,9 @@ export async function runMergeSync(
     generated: {
       index: relativePath(environment.rootPath, storage.indexPath),
       cards: relativePath(environment.rootPath, storage.cardsDirectory),
-      state: relativePath(environment.rootPath, statePath),
+      state: relativePath(environment.rootPath, state.path),
     },
+    state_changed: state.changed,
     staged,
     validation,
     publication: mergeCheck,
@@ -138,12 +233,13 @@ export async function runMergeSync(
       [
         `Ariadne merge sync: ${validation.passed ? "validated" : "validation failed"}`,
         `Generated: ${receipt.generated.index}, ${receipt.generated.cards}`,
-        `State projection updated in working tree only: ${receipt.generated.state}`,
+        `State projection ${state.changed ? "changed" : "unchanged"} in working tree only: ${receipt.generated.state}`,
         ...(staged.length > 0
           ? [`Staged derived files: ${staged.join(", ")}`]
           : []),
         ...mergeCheck.diagnostics.map(
-          ({ nodeId, card }) => `Merge conflict: ${nodeId} — ${card}`,
+          ({ nodeId, card, guidance }) =>
+            `Merge conflict: [${nodeId}](${card}) — ${guidance}`,
         ),
         "",
       ].join("\n"),

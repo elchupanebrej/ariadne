@@ -266,7 +266,10 @@ const hookRoot = (root: string, hooksPath: string): string =>
   resolve(root, hooksPath);
 
 const hookIsCompatible = (content: string | undefined): boolean =>
-  content?.includes(HOOK_MARKER) ?? false;
+  content !== undefined &&
+  content.includes(HOOK_MARKER) &&
+  content.includes("merge-sync --stage-derived") &&
+  content.includes("|| true");
 
 const inspectHooks = async (
   root: string,
