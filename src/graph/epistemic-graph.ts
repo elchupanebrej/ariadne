@@ -3,6 +3,7 @@ import {
   canonicalEdgeRelation,
   EdgeSchema,
   type EpistemicEdge,
+  unknownEdgeRelation,
 } from "../core/schemas/edges.js";
 import {
   NODE_TYPES,
@@ -290,7 +291,7 @@ export class EpistemicGraph {
   async addEdge(source: string, relation: string, target: string): Promise<EpistemicEdge> {
     const canonicalRelation = canonicalEdgeRelation(relation);
     if (!canonicalRelation) {
-      throw new Error(`Invalid edge relation: ${relation}`);
+      throw new Error(unknownEdgeRelation(relation));
     }
     const edge = EdgeSchema.parse({ source, type: canonicalRelation, target });
 
@@ -327,7 +328,7 @@ export class EpistemicGraph {
   async removeEdge(source: string, relation: string, target: string): Promise<EpistemicEdge> {
     const canonicalRelation = canonicalEdgeRelation(relation);
     if (!canonicalRelation) {
-      throw new Error(`Invalid edge relation: ${relation}`);
+      throw new Error(unknownEdgeRelation(relation));
     }
     const edge = EdgeSchema.parse({ source, type: canonicalRelation, target });
 

@@ -7,8 +7,10 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { NODE_TYPES } from "../../src/core/schemas/nodes.js";
+import { EDGE_TYPES } from "../../src/core/schemas/edges.js";
 
 const NODE_ADD_USAGE = `Usage: ariadne node add <type> <id> --title <title> --payload <json>\nValid node types (uppercase): ${NODE_TYPES.join(", ")}`;
+const EDGE_ADD_USAGE = `Usage: ariadne edge add <from_id> <relation> <to_id>\nValid edge relations: ${EDGE_TYPES.join(", ")}`;
 
 const capture = () => {
   let output = "";
@@ -62,8 +64,8 @@ describe("subcommand and option help", () => {
       ["node", "remove", "-h", "Usage: ariadne node remove <id>"],
       ["node", "update", "--help", "Usage: ariadne node update <id> [--title <title>] --payload <json>"],
       ["node", "update", "-h", "Usage: ariadne node update <id> [--title <title>] --payload <json>"],
-      ["edge", "add", "--help", "Usage: ariadne edge add <from_id> <relation> <to_id>"],
-      ["edge", "add", "-h", "Usage: ariadne edge add <from_id> <relation> <to_id>"],
+      ["edge", "add", "--help", EDGE_ADD_USAGE],
+      ["edge", "add", "-h", EDGE_ADD_USAGE],
       ["edge", "list", "--help", "Usage: ariadne edge list [--from] [--to] [--relation]"],
       ["edge", "list", "-h", "Usage: ariadne edge list [--from] [--to] [--relation]"],
       ["edge", "remove", "--help", "Usage: ariadne edge remove <from_id> <relation> <to_id>"],

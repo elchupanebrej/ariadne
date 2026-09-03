@@ -1,6 +1,8 @@
 import {
   canonicalEdgeRelation,
   type EpistemicEdge,
+  EDGE_TYPE_HINT,
+  unknownEdgeRelation,
 } from "../../core/schemas/edges.js";
 import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
 
@@ -54,7 +56,7 @@ async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicE
   const relation = flags.get("relation");
   const canonicalRelation = relation ? canonicalEdgeRelation(relation) : undefined;
   if (relation && !canonicalRelation) {
-    throw new Error(`Invalid edge relation: ${relation}`);
+    throw new Error(unknownEdgeRelation(relation));
   }
 
   const graph = await graphFor(io);
@@ -77,6 +79,7 @@ async function removeEdge(
 
 const EDGE_USAGE = "Usage: ariadne edge <add|list|remove> ...\n";
 const EDGE_ADD_USAGE = "Usage: ariadne edge add <from_id> <relation> <to_id>";
+const EDGE_ADD_HELP = `${EDGE_ADD_USAGE}\n${EDGE_TYPE_HINT}`;
 const EDGE_LIST_USAGE = "Usage: ariadne edge list [--from] [--to] [--relation]\n";
 const EDGE_REMOVE_USAGE = "Usage: ariadne edge remove <from_id> <relation> <to_id>";
 
@@ -91,7 +94,7 @@ export async function runEdge(args: readonly string[], io: CliIO): Promise<numbe
   switch (command) {
     case "add":
       if (hasHelp(rest)) {
-        io.stdout.write(`${EDGE_ADD_USAGE}\n`);
+        io.stdout.write(`${EDGE_ADD_HELP}\n`);
         return 0;
       }
       result = await addEdge(rest, EDGE_ADD_USAGE, io);

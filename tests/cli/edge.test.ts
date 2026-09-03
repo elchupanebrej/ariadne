@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
+import { EDGE_TYPES } from "../../src/core/schemas/edges.js";
 import { GraphStorage } from "../../src/graph/storage.js";
 
 const capture = () => {
@@ -71,6 +72,33 @@ describe("ariadne edge", () => {
     const invalid = await invoke(cwd, ["edge", "add", "TASK-2", "not_a_relation", "TASK-1"]);
     expect(invalid.code).toBe(1);
     expect(invalid.stderr.text()).toContain("edge");
+    expect((await storage.materialize()).edges).toEqual([]);
+  });
+
+  it("enumerates valid edge relations in errors and add help", async () => {
+    const { cwd, storage } = await workspace();
+    const relationList = EDGE_TYPES.join(", ");
+
+    const addErr = await invoke(cwd, ["edge", "add", "TASK-1", "raises", "TASK-2"]);
+    expect(addErr.code).toBe(1);
+    expect(addErr.stderr.text()).toContain("Invalid edge relation: raises");
+    expect(addErr.stderr.text()).toContain(relationList);
+
+    const removeErr = await invoke(cwd, ["edge", "remove", "TASK-1", "raises", "TASK-2"]);
+    expect(removeErr.code).toBe(1);
+    expect(removeErr.stderr.text()).toContain("Invalid edge relation: raises");
+    expect(removeErr.stderr.text()).toContain(relationList);
+
+    const listErr = await invoke(cwd, ["edge", "list", "--relation", "raises"]);
+    expect(listErr.code).toBe(1);
+    expect(listErr.stderr.text()).toContain("Invalid edge relation: raises");
+    expect(listErr.stderr.text()).toContain(relationList);
+
+    const help = await invoke(cwd, ["edge", "add", "--help"]);
+    expect(help.code).toBe(0);
+    expect(help.stdout.text()).toContain("Usage: ariadne edge add <from_id> <relation> <to_id>");
+    expect(help.stdout.text()).toContain(relationList);
+
     expect((await storage.materialize()).edges).toEqual([]);
   });
 
