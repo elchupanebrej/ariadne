@@ -71,9 +71,7 @@ const graphFor = async (io: CliIO) => (await resolveCliWorkspace(io)).graph;
 async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
   if (positionals.length !== 2) {
-    throw new Error(
-      "Usage: ariadne node add <type> <id> --title <title> --payload <json>",
-    );
+    throw new Error(`${NODE_ADD_USAGE.trim()} (got ${positionals.length}, expected 2)`);
   }
   const [type, id] = positionals;
   if (!isNodeType(type)) throw new Error(unknownNodeType(type));
