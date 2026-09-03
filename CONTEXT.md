@@ -30,6 +30,46 @@ _Avoid_: State machine, ticket wrapper, meta-plan
 The deep domain module that encapsulates graph mutation invariants, deductive DAG integrity, atomic multi-artifact synchronization, and transitive invalidation cascade behind a unified interface.
 _Avoid_: Graph database, storage helper, JSONL writer, repo wrapper
 
+**Branch Epistemic Model**:
+The materialized Epistemic Graph associated with one Git revision. It excludes derived projections, reports, and operational artifacts.
+_Avoid_: Ariadne directory, branch state, model files
+
+**Epistemic Merge Divergence**:
+A successful three-way combination in which incompatible branch knowledge remains unresolved while the active Epistemic Graph stays valid.
+_Avoid_: Git conflict, failed merge, textual conflict
+
+**Clean Epistemic Merge**:
+A valid three-way combination in which explicit identity and topology rules detect no Merge Contradiction. It does not prove arbitrary semantic agreement between different node identities.
+_Avoid_: Converged model, proven agreement, identical branches
+
+**Merge Contradiction**:
+An epistemic contradiction that preserves incompatible materialized branch variants and their common-ancestor context until reconciliation selects or synthesizes a canonical value.
+_Avoid_: Conflict marker, merge error, winning branch
+
+**Causal Quarantine**:
+The branch-local materialized changes withheld from the active graph because they transitively depend on a Merge Contradiction through causal graph relations.
+_Avoid_: Deletion, rollback, connected component
+
+**Decision Scope**:
+A stable identity for the policy or question settled by a decision across Branch Epistemic Models.
+_Avoid_: Node ID, title, universal semantic key
+
+**Merge Reconciliation**:
+The append-only resolution of a Merge Contradiction into canonical graph values under the authority required by the affected node types.
+_Avoid_: Git conflict resolution, branch selection, history rewrite
+
+**Merge Receipt**:
+The structured, non-normative result of one three-way merge attempt, including its outcome, detection coverage, input digests, diagnostics, and output digest.
+_Avoid_: Merge Contradiction, graph history, merge ledger
+
+**Merge Protocol Version**:
+The compatibility identity of three-way merge semantics, Merge Contradiction payloads, and Merge Receipts, versioned independently from the Ariadne package.
+_Avoid_: Package version, graph schema version, latest driver
+
+**Post-Merge Verification Requirement**:
+A Merge Receipt signal that repository changes may have made existing evidence stale and require explicit verification because no precise revision binding is available.
+_Avoid_: Automatic invalidation, provenance downgrade, failed merge
+
 
 **Methodological Guide**:
 A normative guide that connects rationale, executable rules, a learning path, verification, and lifecycle governance for one method.
