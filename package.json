@@ -2,15 +2,24 @@
   "name": "ariadne-reasoning",
   "version": "0.1.0",
   "description": "Software reasoning layer and epistemic substrate for autonomous agents and engineers",
+  "license": "MIT",
   "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "bin": {
     "ariadne": "dist/cli/index.js",
     "ariadne-reasoning": "dist/cli/index.js"
   },
   "files": [
     "dist",
-    ".agents",
-    "scripts"
+    ".agents/skills/methodize-harness",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=20"
