@@ -35,13 +35,21 @@ export type MergeReconciliationReceipt = {
   diagnostics: MergeReconciliationDiagnostic[];
 };
 
-export type MergeReconciliationRequest = {
+type MergeReconciliationRequestFields = {
   conflictId: string;
   expectedConflictDigest: string;
-  selectDigest?: string;
-  delta?: EpistemicDelta | string | unknown;
   decisionOwnerAuthorization?: string;
 };
+
+export type MergeReconciliationRequest =
+  | (MergeReconciliationRequestFields & {
+      selectDigest: string;
+      delta?: never;
+    })
+  | (MergeReconciliationRequestFields & {
+      selectDigest?: never;
+      delta: EpistemicDelta | string;
+    });
 
 type StoredVariant = {
   source?: unknown;
@@ -116,6 +124,24 @@ const storedVariants = (conflict: Node): StoredVariant[] => {
   return Array.isArray(variants) ? variants.filter(isRecord) : [];
 };
 
+const storedVariantDigest = (
+  variant: StoredVariant,
+  kind: ReturnType<typeof subjectKind>,
+): string =>
+  digest(
+    canonicalJson(
+      kind === "edge"
+        ? {
+            operation:
+              variant.operation === "delete" || variant.operation === "present"
+                ? variant.operation
+                : "absent",
+            value: variant.value ?? null,
+          }
+        : (variant.value ?? null),
+    ),
+  );
+
 const quarantine = (conflict: Node): QuarantineEntries => {
   const value = nodeFields(conflict).quarantined;
   if (!isRecord(value)) return { nodes: [], edges: [] };
@@ -168,6 +194,91 @@ const reject = (
   released_subjects: [],
   diagnostics,
 });
+
+const INVALID_REQUEST_KEYS = new Set([
+  "conflictId",
+  "expectedConflictDigest",
+  "selectDigest",
+  "delta",
+  "decisionOwnerAuthorization",
+]);
+
+const invalidRequestReceipt = (
+  request: unknown,
+  diagnostics: MergeReconciliationDiagnostic[],
+): MergeReconciliationReceipt => {
+  const value = isRecord(request) ? request : {};
+  return {
+    outcome: "REJECTED",
+    conflict_id: typeof value.conflictId === "string" ? value.conflictId : "",
+    expected_conflict_digest:
+      typeof value.expectedConflictDigest === "string"
+        ? value.expectedConflictDigest
+        : "",
+    actual_conflict_digest: null,
+    resolution_mode: null,
+    applied_subjects: [],
+    released_subjects: [],
+    diagnostics,
+  };
+};
+
+const validateRequest = (
+  request: unknown,
+): MergeReconciliationDiagnostic[] => {
+  if (!isRecord(request)) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_REQUEST",
+      "Reconciliation request must be an object",
+    );
+  }
+  const unknownKeys = Object.keys(request).filter(
+    (key) => !INVALID_REQUEST_KEYS.has(key),
+  );
+  if (unknownKeys.length > 0) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_REQUEST",
+      `Reconciliation request contains unsupported fields: ${unknownKeys.join(", ")}`,
+    );
+  }
+  if (
+    typeof request.conflictId !== "string" ||
+    request.conflictId.trim() === ""
+  ) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_REQUEST",
+      "A contradiction ID is required",
+    );
+  }
+  if (
+    typeof request.expectedConflictDigest !== "string" ||
+    request.expectedConflictDigest.trim() === ""
+  ) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_REQUEST",
+      "An expected conflict digest is required",
+    );
+  }
+  const hasSelection = request.selectDigest !== undefined;
+  const hasDelta = request.delta !== undefined;
+  if (hasSelection === hasDelta) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_MODE",
+      "Exactly one of stored content digest selection or ariadne-delta is required",
+    );
+  }
+  if (
+    hasSelection &&
+    (typeof request.selectDigest !== "string" ||
+      request.selectDigest.trim() === "")
+  ) {
+    return errorDiagnostics(
+      "INVALID_RECONCILIATION_MODE",
+      "Stored content selection must be a non-empty digest",
+    );
+  }
+  return [];
+};
 
 const parseDelta = (
   value: unknown,
@@ -312,6 +423,10 @@ const deltaTouchesConflict = (
   return (
     delta.nodes.some(
       (node) => quarantinedIds.has(node.id) || subjectIds.has(node.id),
+    ) ||
+    mutations.some(
+      (id) =>
+        id !== undefined && (quarantinedIds.has(id) || subjectIds.has(id)),
     ) ||
     delta.edges.some(
       (edge) =>
@@ -484,6 +599,48 @@ const releaseQuarantine = (
     }
   }
 
+  const ambiguousNodeIds = new Set<string>();
+  for (const entry of nodeEntries) {
+    const node = NodeSchema.parse(entry.value);
+    const sameSubject = nodeEntries.filter((candidate) => {
+      const value = NodeSchema.parse(candidate.value);
+      return value.id === node.id;
+    });
+    if (
+      new Set(
+        sameSubject.map((candidate) =>
+          canonicalJson(
+            candidate.operation === "delete"
+              ? nodeRemoval(NodeSchema.parse(candidate.value))
+              : NodeSchema.parse(candidate.value),
+          ),
+        ),
+      ).size > 1
+    ) {
+      ambiguousNodeIds.add(node.id);
+    }
+  }
+  const ambiguousEdgeKeys = new Set<string>();
+  for (const entry of edgeEntries) {
+    const edge = EdgeSchema.parse(entry.value);
+    const key = edgeKey(edge);
+    const sameSubject = edgeEntries.filter(
+      (candidate) => edgeKey(EdgeSchema.parse(candidate.value)) === key,
+    );
+    if (
+      new Set(
+        sameSubject.map((candidate) =>
+          canonicalJson({
+            operation: candidate.operation,
+            value: EdgeSchema.parse(candidate.value),
+          }),
+        ),
+      ).size > 1
+    ) {
+      ambiguousEdgeKeys.add(key);
+    }
+  }
+
   const isValidProspective = (graph: MaterializedGraph): boolean =>
     validateGraph(graph).valid && validateGraph(activeGraph(graph)).valid;
 
@@ -493,14 +650,17 @@ const releaseQuarantine = (
     for (let index = 0; index < nodeEntries.length; index += 1) {
       const entry = nodeEntries[index];
       const node = NodeSchema.parse(entry.value);
+      if (ambiguousNodeIds.has(node.id)) continue;
+      const candidateNode =
+        entry.operation === "delete" ? nodeRemoval(node) : node;
       const previous = working.nodes.find(({ id }) => id === node.id);
-      if (previous) {
+      if (previous && equal(previous, candidateNode)) {
         nodeEntries.splice(index, 1);
         index -= 1;
         progressed = true;
         continue;
       }
-      const event: GraphEvent = { kind: "node", node };
+      const event: GraphEvent = { kind: "node", node: candidateNode };
       const candidate = applyEvents(working, [event]);
       if (!isValidProspective(candidate)) continue;
       working = candidate;
@@ -514,6 +674,7 @@ const releaseQuarantine = (
       const entry = edgeEntries[index];
       const edge = EdgeSchema.parse(entry.value);
       const key = edgeKey(edge);
+      if (ambiguousEdgeKeys.has(key)) continue;
       const present = working.edges.some(
         (candidate) => edgeKey(candidate) === key,
       );
@@ -602,6 +763,11 @@ export async function reconcileMergeContradiction(
   storage: GraphStorage,
   request: MergeReconciliationRequest,
 ): Promise<MergeReconciliationReceipt> {
+  const requestDiagnostics = validateRequest(request);
+  if (requestDiagnostics.length > 0) {
+    return invalidRequestReceipt(request, requestDiagnostics);
+  }
+
   return storage.transaction((current) => {
     const conflict = current.nodes.find(
       (node) => node.id === request.conflictId,
@@ -614,6 +780,22 @@ export async function reconcileMergeContradiction(
             "CONFLICT_NOT_FOUND",
             `Merge contradiction not found: ${request.conflictId}`,
           ),
+        ),
+        events: [],
+      };
+    }
+    if (
+      conflict.type !== "CTR" ||
+      nodeFields(conflict).conflict_kind !== "branch_merge"
+    ) {
+      return {
+        result: reject(
+          request,
+          errorDiagnostics(
+            "INVALID_CONFLICT_ID",
+            `Node ${request.conflictId} is not a merge contradiction`,
+          ),
+          conflict,
         ),
         events: [],
       };
@@ -675,6 +857,22 @@ export async function reconcileMergeContradiction(
     if (hasSelection) {
       const baseDigest = nodeFields(conflict).base_digest;
       if (request.selectDigest === baseDigest) {
+        if (
+          typeof baseDigest !== "string" ||
+          baseDigest !== digest(canonicalJson(nodeFields(conflict).base_value ?? null))
+        ) {
+          return {
+            result: reject(
+              request,
+              errorDiagnostics(
+                "INVALID_BASE_DIGEST",
+                "Stored base digest does not match the stored base content",
+              ),
+              conflict,
+            ),
+            events: [],
+          };
+        }
         mode = "base";
       } else {
         const matches = stored.filter(
@@ -696,6 +894,23 @@ export async function reconcileMergeContradiction(
           };
         }
         selected = matches[0];
+        const kind =
+          typeof nodeFields(conflict).subject_key === "string"
+            ? subjectKind(nodeFields(conflict).subject_key as string)
+            : "other";
+        if (storedVariantDigest(selected, kind) !== request.selectDigest) {
+          return {
+            result: reject(
+              request,
+              errorDiagnostics(
+                "INVALID_VARIANT_DIGEST",
+                "Stored variant digest does not match the stored variant content",
+              ),
+              conflict,
+            ),
+            events: [],
+          };
+        }
         mode = "variant";
       }
     } else {
@@ -730,6 +945,26 @@ export async function reconcileMergeContradiction(
       const parsedEdge = EdgeSchema.safeParse(value);
       const kind = typeof subject === "string" ? subjectKind(subject) : "other";
       if (parsedNode.success && (kind === "node" || kind === "scope")) {
+        const matchesSubject =
+          (kind === "node" && parsedNode.data.id === subject) ||
+          (kind === "scope" &&
+            parsedNode.data.type === "DEC" &&
+            nodeFields(parsedNode.data).decision_scope ===
+              (subject as string).slice("decision_scope:".length));
+        if (!matchesSubject) {
+          return {
+            result: reject(
+              request,
+              errorDiagnostics(
+                "INVALID_STORED_VALUE",
+                "Stored resolution value does not match the contradiction subject",
+                typeof subject === "string" ? subject : undefined,
+              ),
+              conflict,
+            ),
+            events: [],
+          };
+        }
         const currentNode = current.nodes.find(
           (node) => node.id === parsedNode.data.id,
         );
@@ -759,6 +994,20 @@ export async function reconcileMergeContradiction(
           }
         }
       } else if (parsedEdge.success && kind === "edge") {
+        if (edgeSubject(parsedEdge.data) !== subject) {
+          return {
+            result: reject(
+              request,
+              errorDiagnostics(
+                "INVALID_STORED_VALUE",
+                "Stored resolution value does not match the contradiction subject",
+                typeof subject === "string" ? subject : undefined,
+              ),
+              conflict,
+            ),
+            events: [],
+          };
+        }
         const operation = mode === "variant" ? selected?.operation : "present";
         const key = edgeKey(parsedEdge.data);
         if (operation === "delete" || operation === "absent") {
@@ -864,8 +1113,19 @@ export async function reconcileMergeContradiction(
         events: [],
       };
     }
+
+    const changedDecisionById = new Map(
+      changedDecisions.map((node) => [node.id, node]),
+    );
+    for (const event of events) {
+      if (event.kind !== "node") continue;
+      const previous = current.nodes.find((node) => node.id === event.node.id);
+      if (lockedDecision(previous) || lockedDecision(event.node)) {
+        changedDecisionById.set(event.node.id, previous ?? event.node);
+      }
+    }
     const authority = authorityDiagnostics(
-      changedDecisions,
+      [...changedDecisionById.values()],
       request.decisionOwnerAuthorization,
     );
     if (authority.length > 0) {

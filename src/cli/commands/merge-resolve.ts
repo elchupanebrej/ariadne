@@ -32,6 +32,7 @@ const parseArgs = (args: readonly string[]): ParsedArgs => {
   let deltaPath: string | undefined;
   let decisionOwner: string | undefined;
   let json = false;
+  const seenValueOptions = new Set<string>();
   for (let index = 0; index < rest.length; index += 1) {
     const arg = rest[index];
     if (arg === "--json") {
@@ -47,6 +48,9 @@ const parseArgs = (args: readonly string[]): ParsedArgs => {
       const value = rest[++index];
       if (!value || value.startsWith("--"))
         throw new Error(MERGE_RESOLVE_USAGE.trim());
+      if (seenValueOptions.has(arg))
+        throw new Error(`Option ${arg} may be specified only once`);
+      seenValueOptions.add(arg);
       if (arg === "--expected-digest") expectedDigest = value;
       else if (arg === "--select-digest") selectDigest = value;
       else if (arg === "--delta") deltaPath = value;
@@ -90,17 +94,25 @@ export async function runMergeResolve(
       ? undefined
       : await readFile(parsed.deltaPath, "utf8");
   const { storage } = await resolveCliWorkspace(io);
-  const receipt = await reconcileMergeContradiction(storage, {
-    conflictId: parsed.conflictId,
-    expectedConflictDigest: parsed.expectedDigest,
-    ...(parsed.selectDigest !== undefined
-      ? { selectDigest: parsed.selectDigest }
-      : {}),
-    ...(delta !== undefined ? { delta } : {}),
-    ...(parsed.decisionOwner !== undefined
-      ? { decisionOwnerAuthorization: parsed.decisionOwner }
-      : {}),
-  });
+  const authorization =
+    parsed.decisionOwner === undefined
+      ? {}
+      : { decisionOwnerAuthorization: parsed.decisionOwner };
+  const request =
+    parsed.selectDigest !== undefined
+      ? {
+          conflictId: parsed.conflictId,
+          expectedConflictDigest: parsed.expectedDigest,
+          selectDigest: parsed.selectDigest,
+          ...authorization,
+        }
+      : {
+          conflictId: parsed.conflictId,
+          expectedConflictDigest: parsed.expectedDigest,
+          delta: delta as string,
+          ...authorization,
+        };
+  const receipt = await reconcileMergeContradiction(storage, request);
   if (parsed.json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
   io.stderr.write(summary(receipt));
   return receipt.outcome === "RESOLVED" ||
