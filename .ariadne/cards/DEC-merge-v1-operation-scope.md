@@ -1,0 +1,18 @@
+# DEC-merge-v1-operation-scope: Limit the v1 contract to git merge
+
+- Status: DECIDED
+- Provenance: DECIDED
+- Type: DEC
+- Revised: 2026-08-30
+
+## Statement
+
+Guarantee and test the first protocol only for ordinary git merge; rebase, cherry-pick, revert, and unsupported recursive cases fail closed until operation-specific fixtures establish support.
+
+## Payload
+
+```json
+{
+  "decision_scope": "epistemic-merge-git-operation-scope"
+}
+```

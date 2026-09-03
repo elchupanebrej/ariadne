@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-24
+- Revised: 2026-08-30
 
 ## Statement
 
@@ -39,6 +39,7 @@ Provide host-neutral fresh-session enforcement as the smallest executable kernel
     "Method Contract rules",
     "host permission enforcement",
     "generic database, queue, scheduler, or plugin marketplace"
-  ]
+  ],
+  "separation_principle": "System Boundary"
 }
 ```
