@@ -14,10 +14,22 @@ const HOOKS_KEY = "core.hooksPath";
 const HOOKS_PATH = ".githooks";
 const HOOK_NAMES = ["pre-merge-commit", "pre-commit"] as const;
 const HOOK_MARKER = "# ariadne-merge-hook-v1";
+const HOOK_COMMAND = "ariadne merge-sync --stage-derived >&2 || true";
+const HOOK_UNAVAILABLE_DIAGNOSTIC =
+  "printf '%s\\n' \"Ariadne merge synchronization unavailable: ariadne is not on PATH; run ariadne merge-sync --stage-derived manually.\" >&2";
+const HOOK_SYNC_SHAPE = [
+  "if command -v ariadne >/dev/null 2>&1; then",
+  HOOK_COMMAND,
+  "else",
+  HOOK_UNAVAILABLE_DIAGNOSTIC,
+  "fi",
+] as const;
 const HOOK_CONTENT = `#!/bin/sh
 ${HOOK_MARKER}
-if command -v ariadne >/dev/null 2>&1; then
-  ariadne merge-sync --stage-derived >&2 || true
+${HOOK_SYNC_SHAPE[0]}
+  ${HOOK_SYNC_SHAPE[1]}
+else
+  ${HOOK_UNAVAILABLE_DIAGNOSTIC}
 fi
 exit 0
 `;
@@ -265,11 +277,18 @@ const gitDirectory = async (root: string): Promise<string> => {
 const hookRoot = (root: string, hooksPath: string): string =>
   resolve(root, hooksPath);
 
-const hookIsCompatible = (content: string | undefined): boolean =>
-  content !== undefined &&
-  content.includes(HOOK_MARKER) &&
-  content.includes("merge-sync --stage-derived") &&
-  content.includes("|| true");
+const hookIsCompatible = (content: string | undefined): boolean => {
+  if (content === undefined) return false;
+  const lines = content
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const markerIndex = lines.indexOf(HOOK_MARKER);
+  const shapeIndex = lines.findIndex((_, index) =>
+    HOOK_SYNC_SHAPE.every((line, offset) => lines[index + offset] === line),
+  );
+  return markerIndex >= 0 && shapeIndex > markerIndex;
+};
 
 const inspectHooks = async (
   root: string,

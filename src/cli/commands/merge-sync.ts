@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
@@ -85,6 +85,173 @@ const preserveStableCards = async (
   );
 };
 
+type JsonProperty = {
+  key: string;
+  valueStart: number;
+  valueEnd: number;
+};
+
+type JsonObjectLayout = {
+  openingEnd: number;
+  closingStart: number;
+  properties: JsonProperty[];
+};
+
+const isJsonWhitespace = (value: string | undefined): boolean =>
+  value === " " || value === "\n" || value === "\r" || value === "\t";
+
+const skipJsonWhitespace = (content: string, start: number): number => {
+  let cursor = start;
+  while (isJsonWhitespace(content[cursor])) cursor += 1;
+  return cursor;
+};
+
+const scanJsonStringEnd = (content: string, start: number): number => {
+  for (let cursor = start + 1; cursor < content.length; cursor += 1) {
+    if (content[cursor] === "\\") {
+      cursor += 1;
+    } else if (content[cursor] === '"') {
+      return cursor + 1;
+    }
+  }
+  throw new Error("Invalid JSON string in STATE.yaml");
+};
+
+const scanJsonValueEnd = (content: string, start: number): number => {
+  const opening = content[start];
+  if (opening === '"') return scanJsonStringEnd(content, start);
+  if (opening !== "{" && opening !== "[") {
+    let end = start;
+    while (end < content.length && !",}".includes(content[end])) end += 1;
+    while (end > start && isJsonWhitespace(content[end - 1])) end -= 1;
+    return end;
+  }
+
+  const closings = new Map([
+    ["{", "}"],
+    ["[", "]"],
+  ]);
+  const stack = [closings.get(opening) as string];
+  for (let cursor = start + 1; cursor < content.length; cursor += 1) {
+    const value = content[cursor];
+    if (value === '"') {
+      cursor = scanJsonStringEnd(content, cursor) - 1;
+      continue;
+    }
+    if (closings.has(value)) {
+      stack.push(closings.get(value) as string);
+      continue;
+    }
+    if (value === stack.at(-1)) {
+      stack.pop();
+      if (stack.length === 0) return cursor + 1;
+    }
+  }
+  throw new Error("Invalid JSON value in STATE.yaml");
+};
+
+const scanJsonObject = (content: string): JsonObjectLayout => {
+  const opening = skipJsonWhitespace(content, 0);
+  if (content[opening] !== "{") throw new Error("STATE.yaml must contain a JSON object");
+
+  const properties: JsonProperty[] = [];
+  let cursor = opening + 1;
+  while (true) {
+    cursor = skipJsonWhitespace(content, cursor);
+    if (content[cursor] === "}") {
+      return { openingEnd: opening + 1, closingStart: cursor, properties };
+    }
+    const keyStart = cursor;
+    const keyEnd = scanJsonStringEnd(content, keyStart);
+    const key = JSON.parse(content.slice(keyStart, keyEnd)) as string;
+    cursor = skipJsonWhitespace(content, keyEnd);
+    if (content[cursor] !== ":") throw new Error("Invalid STATE.yaml object");
+    const valueStart = skipJsonWhitespace(content, cursor + 1);
+    const valueEnd = scanJsonValueEnd(content, valueStart);
+    properties.push({ key, valueStart, valueEnd });
+    cursor = skipJsonWhitespace(content, valueEnd);
+    if (content[cursor] === ",") {
+      cursor += 1;
+      continue;
+    }
+    if (content[cursor] !== "}") throw new Error("Invalid STATE.yaml object");
+    return { openingEnd: opening + 1, closingStart: cursor, properties };
+  }
+};
+
+const fieldIndent = (content: string, property: JsonProperty): string => {
+  const lineStart = content.lastIndexOf("\n", property.valueStart - 1) + 1;
+  const prefix = content.slice(lineStart, property.valueStart);
+  return prefix.match(/^[ \t]*/u)?.[0] || "  ";
+};
+
+const missingJsonFields = (
+  content: string,
+  layout: JsonObjectLayout,
+  fields: ReadonlyMap<string, unknown>,
+): string => {
+  const lastValueEnd = layout.properties.at(-1)?.valueEnd ?? layout.openingEnd;
+  const trailing = content.slice(lastValueEnd, layout.closingStart);
+  const multiline = trailing.includes("\n");
+  const lineBreak = content.includes("\r\n") ? "\r\n" : "\n";
+  const indent = multiline
+    ? layout.properties[0]
+      ? fieldIndent(content, layout.properties[0])
+      : "  "
+    : "";
+  const rendered = [...fields]
+    .map(([key, value]) => `${JSON.stringify(key)}: ${JSON.stringify(value)}`)
+    .join(multiline ? `,${lineBreak}${indent}` : ", ");
+  if (layout.properties.length === 0) {
+    return multiline ? `${lineBreak}${indent}${rendered}` : rendered;
+  }
+  return multiline ? `,${lineBreak}${indent}${rendered}` : `, ${rendered}`;
+};
+
+const patchStateJson = (
+  content: string,
+  state: Record<string, unknown>,
+  projections: Readonly<Record<string, readonly string[]>>,
+): string => {
+  const layout = scanJsonObject(content);
+  const properties = new Map(layout.properties.map((property) => [property.key, property]));
+  const replacements = new Map<string, string>();
+  const missing = new Map<string, unknown>();
+  for (const [key, value] of Object.entries(projections)) {
+    const serialized = JSON.stringify(value);
+    const property = properties.get(key);
+    if (!property) {
+      missing.set(key, value);
+    } else if (JSON.stringify(state[key]) !== serialized) {
+      replacements.set(key, serialized);
+    }
+  }
+
+  const insertionPoint =
+    missing.size > 0
+      ? layout.properties.at(-1)?.valueEnd ?? layout.openingEnd
+      : undefined;
+  const insertion =
+    insertionPoint === undefined
+      ? undefined
+      : missingJsonFields(content, layout, missing);
+  let result = "";
+  let cursor = 0;
+  for (const property of layout.properties) {
+    result += content.slice(cursor, property.valueStart);
+    result += replacements.get(property.key) ?? content.slice(property.valueStart, property.valueEnd);
+    cursor = property.valueEnd;
+    if (cursor === insertionPoint) result += insertion;
+  }
+  if (layout.properties.length === 0 && insertionPoint === layout.openingEnd) {
+    result += content.slice(cursor, insertionPoint);
+    result += insertion;
+    cursor = insertionPoint;
+  }
+  result += content.slice(cursor);
+  return result;
+};
+
 const syncState = async (
   storage: GraphStorage,
   graph: Awaited<ReturnType<GraphStorage["materialize"]>>,
@@ -94,23 +261,28 @@ const syncState = async (
   const openUnknowns = graph.nodes
     .filter((node) => isFrontierNode(node) && node.type === "UNK")
     .map(({ id }) => id);
-  const next: Record<string, unknown> = {
-    ...state,
+  const projections: Record<string, readonly string[]> = {
     frontier,
     open_unknowns: openUnknowns,
   };
-  if ("active_frontier" in state) next.active_frontier = frontier;
-  if ("openUnknowns" in state) next.openUnknowns = openUnknowns;
-  if ("unknowns" in state) next.unknowns = openUnknowns;
+  if ("active_frontier" in state) projections.active_frontier = frontier;
+  if ("openUnknowns" in state) projections.openUnknowns = openUnknowns;
+  if ("unknowns" in state) projections.unknowns = openUnknowns;
   let previous: string | undefined;
   try {
     previous = await readFile(storage.statePath, "utf8");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  const serialized = `${JSON.stringify(next, null, 2)}\n`;
+  const next = { ...state, ...projections };
+  const serialized = previous
+    ? patchStateJson(previous, state, projections)
+    : `${JSON.stringify(next, null, 2)}\n`;
   const changed = previous !== serialized;
-  if (changed) await storage.writeState(next);
+  if (changed) {
+    await mkdir(storage.rootDirectory, { recursive: true });
+    await writeFile(storage.statePath, serialized, "utf8");
+  }
   return { path: storage.statePath, changed };
 };
 

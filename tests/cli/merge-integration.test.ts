@@ -406,4 +406,53 @@ describe("Ariadne Git merge integration", () => {
       await rm(repo, { recursive: true, force: true });
     }
   });
+
+  it("diagnoses missing Ariadne on PATH without blocking the hook", async () => {
+    const repo = await repository();
+    const emptyPath = await mkdtemp(join("/tmp", "ariadne-empty-path-"));
+    try {
+      expect((await run(repo, ["merge-setup"])).code).toBe(0);
+      const result = await exec(
+        join(repo, ".githooks", "pre-commit"),
+        [],
+        { cwd: repo, env: { ...process.env, PATH: emptyPath } },
+      );
+
+      expect(result.stderr).toMatch(
+        /merge synchronization unavailable.*not on PATH/i,
+      );
+      expect(result.stderr).toContain("merge-sync --stage-derived");
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+      await rm(emptyPath, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects marker and synchronization text that is not an active hook shape", async () => {
+    const repo = await repository();
+    try {
+      await mkdir(join(repo, ".githooks"), { recursive: true });
+      for (const name of ["pre-merge-commit", "pre-commit"]) {
+        const path = join(repo, ".githooks", name);
+        await writeFile(
+          path,
+          "#!/bin/sh\n" +
+            "# ariadne-merge-hook-v1\n" +
+            "# ariadne merge-sync --stage-derived >&2 || true\n" +
+            "echo \"ariadne merge-sync --stage-derived\"\n" +
+            "exit 0\n",
+        );
+        await chmod(path, 0o755);
+      }
+      await git(repo, "config", "--local", "core.hooksPath", ".githooks");
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(result.stderr).toMatch(/incompatible.*manual integration/i);
+      await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
 });

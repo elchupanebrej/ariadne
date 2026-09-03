@@ -127,6 +127,56 @@ describe("ariadne merge-sync", () => {
     }
   }, 15_000);
 
+  it("preserves host-owned STATE.yaml bytes while refreshing projections", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-state-bytes-"));
+    try {
+      const storage = new GraphStorage(join(root, ".ariadne"));
+      await storage.appendEvents([
+        { kind: "node", node: node("TASK-OPEN") },
+        { kind: "node", node: node("UNK-OPEN", "UNK") },
+      ]);
+      await writeFile(
+        join(root, ".ariadne", "STATE.yaml"),
+        `{
+    "host_owned" : {
+      "z" : [1,  2],
+      "a":"keep"
+    },
+    "frontier" : [
+      "TASK-STALE"
+    ],
+    "host_after": {
+      "note": "preserve, even }"
+    },
+    "host_text" : "preserve, even }",
+    "open_unknowns" : [
+      "UNK-STALE"
+    ]
+}\n`,
+        "utf8",
+      );
+
+      expect((await invoke(root, ["merge-sync"])).code).toBe(0);
+
+      expect(await readFile(join(root, ".ariadne", "STATE.yaml"), "utf8")).toBe(
+        `{
+    "host_owned" : {
+      "z" : [1,  2],
+      "a":"keep"
+    },
+    "frontier" : ["TASK-OPEN","UNK-OPEN"],
+    "host_after": {
+      "note": "preserve, even }"
+    },
+    "host_text" : "preserve, even }",
+    "open_unknowns" : ["UNK-OPEN"]
+}\n`,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("uses the GSD overlay for every projection", async () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-gsd-"));
     try {
