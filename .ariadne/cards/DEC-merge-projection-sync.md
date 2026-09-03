@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Treat index and cards as generated merge outputs, accept a temporary current-sid
 
 ```json
 {
-  "decision_scope": "epistemic-merge-projection-sync"
+  "decision_scope": "epistemic-merge-projection-sync",
+  "adversarial_critique": "Adversarial review of DEC-merge-projection-sync: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

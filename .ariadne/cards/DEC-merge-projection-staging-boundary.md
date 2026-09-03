@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Hooks may automatically stage only fully derived index and card projections; syn
 
 ```json
 {
-  "decision_scope": "epistemic-merge-projection-staging"
+  "decision_scope": "epistemic-merge-projection-staging",
+  "adversarial_critique": "Adversarial review of DEC-merge-projection-staging-boundary: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

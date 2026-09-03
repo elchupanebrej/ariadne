@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Commit repository attributes, install the merge driver and non-blocking hooks on
 
 ```json
 {
-  "decision_scope": "epistemic-merge-installation-contract"
+  "decision_scope": "epistemic-merge-installation-contract",
+  "adversarial_critique": "Adversarial review of DEC-merge-local-install: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

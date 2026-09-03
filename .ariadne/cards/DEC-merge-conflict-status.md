@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Represent an unresolved graph-native merge contradiction as CTR with status MERG
 
 ```json
 {
-  "decision_scope": "epistemic-merge-contradiction-status"
+  "decision_scope": "epistemic-merge-contradiction-status",
+  "adversarial_critique": "Adversarial review of DEC-merge-conflict-status: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

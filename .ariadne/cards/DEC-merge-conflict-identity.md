@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Derive a merge contradiction incident ID from conflict kind, subject, base diges
 
 ```json
 {
-  "decision_scope": "epistemic-merge-conflict-identity"
+  "decision_scope": "epistemic-merge-conflict-identity",
+  "adversarial_critique": "Adversarial review of DEC-merge-conflict-identity: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ Use CLEAN, DIVERGED, and FAILED outcomes; CLEAN means only that no deterministic
 
 ```json
 {
-  "decision_scope": "epistemic-merge-outcome-vocabulary"
+  "decision_scope": "epistemic-merge-outcome-vocabulary",
+  "adversarial_critique": "Adversarial review of DEC-merge-clean-vocabulary: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

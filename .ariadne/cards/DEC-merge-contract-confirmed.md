@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -14,6 +14,7 @@ The user confirmed the three-way Branch Epistemic Model merge specification and 
 ```json
 {
   "decision_scope": "epistemic-branch-merge-contract",
-  "source": ".scratch/epistemic-branch-merge/spec.md"
+  "source": ".scratch/epistemic-branch-merge/spec.md",
+  "adversarial_critique": "Adversarial review of DEC-merge-contract-confirmed: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

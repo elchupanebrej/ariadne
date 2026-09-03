@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ For a conflicting existing node, keep the common-ancestor value active and expos
 
 ```json
 {
-  "decision_scope": "epistemic-merge-active-subject"
+  "decision_scope": "epistemic-merge-active-subject",
+  "adversarial_critique": "Adversarial review of DEC-merge-active-ancestor: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

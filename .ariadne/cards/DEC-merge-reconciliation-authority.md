@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -13,6 +13,7 @@ An agent may reconcile non-decision merge contradictions when normal validation 
 
 ```json
 {
-  "decision_scope": "epistemic-merge-reconciliation-authority"
+  "decision_scope": "epistemic-merge-reconciliation-authority",
+  "adversarial_critique": "Adversarial review of DEC-merge-reconciliation-authority: revisit this decision if a supported merge scenario falsifies its stated contract or violates the merge invariants for preservation, authority, or deterministic resolution."
 }
 ```

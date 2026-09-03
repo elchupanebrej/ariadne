@@ -97,8 +97,8 @@ describe("subcommand and option help", () => {
     it.each([
       [["status", "--help"], "Usage: ariadne status [--json]"],
       [["status", "-h"], "Usage: ariadne status [--json]"],
-      [["gate", "--help"], "Usage: ariadne gate <structural|semantic|epistemic|all> [--strict]"],
-      [["gate", "-h"], "Usage: ariadne gate <structural|semantic|epistemic|all> [--strict]"],
+      [["gate", "--help"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
+      [["gate", "-h"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
       [["verify", "--help"], "Usage: ariadne verify [--strict]"],
       [["verify", "-h"], "Usage: ariadne verify [--strict]"],
       [["invalidate", "--help"], "Usage: ariadne invalidate <node_id> --by <evidence_id>"],
