@@ -55,7 +55,13 @@ const tryGit = async (
     const code: string | number | undefined = (
       error as { code?: string | number }
     ).code;
-    if (code === 1 || code === "1") return undefined;
+    if (
+      code === 1 ||
+      code === "1" ||
+      code === 128 ||
+      code === "128"
+    )
+      return undefined;
     throw error;
   }
 };
@@ -346,12 +352,33 @@ const prepareHooks = async (
   for (const name of HOOK_NAMES) {
     const path = join(directory, name);
     if (await exists(path)) {
-      if (!hookIsCompatible(await readFile(path, "utf8"))) {
+      let content: string;
+      try {
+        content = await readFile(path, "utf8");
+      } catch {
+        return {
+          missing: [],
+          needsPath: false,
+          changes: [],
+          conflict: `Existing ${HOOKS_PATH}/${name} is not a readable hook file. Manual integration: preserve repository policy and provide a compatible executable hook.`,
+        };
+      }
+      if (!hookIsCompatible(content)) {
         return {
           missing: [],
           needsPath: false,
           changes: [],
           conflict: `Existing ${HOOKS_PATH}/${name} is incompatible. Manual integration: merge the Ariadne hook into that file without replacing existing policy.`,
+        };
+      }
+      try {
+        await access(path, constants.X_OK);
+      } catch {
+        return {
+          missing: [],
+          needsPath: false,
+          changes: [],
+          conflict: `Existing ${HOOKS_PATH}/${name} is not executable. Manual integration: preserve repository policy and make the compatible hook executable.`,
         };
       }
       continue;
@@ -405,26 +432,25 @@ const setupAttributes = async (
       merge: "ours",
     },
   ];
-  const conflicts = entries
-    .map(({ path: target, merge }) => ({
-      target,
-      merge,
-      value: effectiveAttribute(content, target),
-    }))
+  const effectiveEntries = await Promise.all(
+    entries.map(async (entry) => ({
+      ...entry,
+      value: await workingAttribute(root, entry.path),
+    })),
+  );
+  const conflicts = effectiveEntries
     .filter(({ merge, value }) => value !== undefined && value !== merge);
   if (conflicts.length > 0) {
     return {
       changed: false,
       conflict: `Existing attributes conflict with Ariadne generated-file policy: ${conflicts
-        .map(({ target, value }) => `${target}=merge=${value}`)
+        .map(({ path: target, value }) => `${target}=merge=${value}`)
         .join(
           ", ",
         )}. Manual integration: preserve repository policy or explicitly select Ariadne for the canonical graph and merge=ours for generated projections.`,
     };
   }
-  const missing = entries.filter(
-    ({ path: target, merge }) => effectiveAttribute(content, target) !== merge,
-  );
+  const missing = effectiveEntries.filter(({ merge, value }) => value !== merge);
   if (missing.length === 0) return { changed: false };
   const addition = `${missing.map(({ pattern, merge }) => `${pattern} merge=${merge}`).join("\n")}\n`;
   await writeFile(

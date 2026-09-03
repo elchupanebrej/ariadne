@@ -80,6 +80,26 @@ describe("Ariadne Git merge integration", () => {
     }
   }, 15_000);
 
+  it("adds only the missing managed attribute when integration is partially present", async () => {
+    const repo = await repository();
+    try {
+      const existing =
+        "# repository policy\n" +
+        ".ariadne/GRAPH.jsonl merge=ariadne\n" +
+        ".ariadne/INDEX.md merge=ours\n";
+      await writeFile(join(repo, ".gitattributes"), existing);
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(0);
+      expect(await readFile(join(repo, ".gitattributes"), "utf8")).toBe(
+        `${existing}.ariadne/cards/** merge=ours\n`,
+      );
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
   it("leaves incompatible attributes and driver configuration unchanged", async () => {
     const repo = await repository();
     try {
@@ -186,4 +206,174 @@ describe("Ariadne Git merge integration", () => {
       await rm(repo, { recursive: true, force: true });
     }
   }, 15_000);
+
+  it("reports an actionable JSON diagnosis before the repository has a commit", async () => {
+    const repo = await repository();
+    try {
+      const before = await git(repo, "status", "--porcelain");
+      const result = await run(repo, ["merge-doctor", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        passed: false,
+        checks: {
+          committed_attributes: { passed: false },
+          local_driver: { passed: false },
+          executable: { passed: false },
+          protocol: { passed: false },
+          hooks: { passed: false },
+        },
+      });
+      expect(result.stderr).toMatch(/committed \.gitattributes is missing/i);
+      expect(await git(repo, "status", "--porcelain")).toBe(before);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("fails closed with an actionable diagnosis in a fresh clone", async () => {
+    const source = await repository();
+    const clone = await mkdtemp(join("/tmp", "ariadne-merge-clone-"));
+    try {
+      expect((await run(source, ["merge-setup"])).code).toBe(0);
+      await git(source, "add", ".ariadne/GRAPH.jsonl", ".gitattributes", ".githooks");
+      await git(source, "commit", "-qm", "install merge integration");
+      await git(clone, "clone", "-q", source, clone);
+
+      const graphBefore = await readFile(join(clone, ".ariadne", "GRAPH.jsonl"), "utf8");
+      const statusBefore = await git(clone, "status", "--porcelain");
+      const result = await run(clone, ["merge-doctor", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        passed: false,
+        checks: {
+          committed_attributes: { passed: true },
+          local_driver: { passed: false, message: expect.stringMatching(/missing/i) },
+          hooks: { passed: false },
+        },
+      });
+      expect(result.stderr).toMatch(/local merge driver is missing|core\.hooksPath/i);
+      expect(await readFile(join(clone, ".ariadne", "GRAPH.jsonl"), "utf8")).toBe(graphBefore);
+      expect(await git(clone, "status", "--porcelain")).toBe(statusBefore);
+    } finally {
+      await rm(source, { recursive: true, force: true });
+      await rm(clone, { recursive: true, force: true });
+    }
+  }, 15_000);
+
+  it("rejects an incompatible protocol before changing the Git result file", async () => {
+    const repo = await repository();
+    try {
+      const basePath = join(repo, "base.jsonl");
+      const currentPath = join(repo, "current.jsonl");
+      const incomingPath = join(repo, "incoming.jsonl");
+      await writeFile(basePath, "");
+      await writeFile(currentPath, "current bytes\n");
+      await writeFile(incomingPath, "incoming bytes\n");
+
+      const result = await run(repo, [
+        "merge-driver",
+        "--json",
+        "--protocol-version",
+        "2",
+        basePath,
+        currentPath,
+        incomingPath,
+      ]);
+
+      expect(result.code).toBe(1);
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        outcome: "FAILED",
+        merge_protocol_version: 2,
+        diagnostics: [
+          expect.objectContaining({ code: "UNSUPPORTED_MERGE_PROTOCOL" }),
+        ],
+      });
+      expect(await readFile(currentPath, "utf8")).toBe("current bytes\n");
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps global Git configuration and repository history untouched", async () => {
+    const repo = await repository();
+    const globalConfig = join(repo, "global.gitconfig");
+    const previousGlobalConfig = process.env.GIT_CONFIG_GLOBAL;
+    process.env.GIT_CONFIG_GLOBAL = globalConfig;
+    try {
+      await git(repo, "config", "--global", "merge.ariadne.driver", "keep-global");
+      await git(repo, "remote", "add", "origin", "https://127.0.0.1:1/never-contacted.git");
+      await git(repo, "add", ".ariadne/GRAPH.jsonl");
+      await git(
+        repo,
+        "-c",
+        "core.hooksPath=/dev/null",
+        "commit",
+        "-qm",
+        "initial repository state",
+      );
+      const globalBefore = await readFile(globalConfig, "utf8");
+      const commitsBefore = await git(repo, "rev-list", "--count", "HEAD");
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(0);
+      expect(await readFile(globalConfig, "utf8")).toBe(globalBefore);
+      expect(await git(repo, "rev-list", "--count", "HEAD")).toBe(commitsBefore);
+      expect(await git(repo, "config", "--local", "--get", "merge.ariadne.driver")).not.toBe(
+        "keep-global\n",
+      );
+    } finally {
+      if (previousGlobalConfig === undefined) delete process.env.GIT_CONFIG_GLOBAL;
+      else process.env.GIT_CONFIG_GLOBAL = previousGlobalConfig;
+      await rm(repo, { recursive: true, force: true });
+    }
+  }, 15_000);
+
+  it("preserves incompatible higher-priority attributes for generated projections", async () => {
+    const repo = await repository();
+    try {
+      await writeFile(
+        join(repo, ".git", "info", "attributes"),
+        ".ariadne/INDEX.md merge=theirs\n",
+      );
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(await readFile(join(repo, ".git", "info", "attributes"), "utf8")).toBe(
+        ".ariadne/INDEX.md merge=theirs\n",
+      );
+      await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
+      expect(result.stderr).toMatch(/\.ariadne\/INDEX\.md.*manual integration/i);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("reports a non-executable existing hook without overwriting repository policy", async () => {
+    const repo = await repository();
+    try {
+      await mkdir(join(repo, ".githooks"), { recursive: true });
+      for (const name of ["pre-merge-commit", "pre-commit"]) {
+        await writeFile(
+          join(repo, ".githooks", name),
+          "#!/bin/sh\n# ariadne-merge-hook-v1\n",
+        );
+      }
+      await git(repo, "config", "--local", "core.hooksPath", ".githooks");
+
+      const result = await run(repo, ["merge-setup", "--json"]);
+
+      expect(result.code).toBe(1);
+      expect(await readFile(join(repo, ".githooks", "pre-commit"), "utf8")).toBe(
+        "#!/bin/sh\n# ariadne-merge-hook-v1\n",
+      );
+      await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
+      expect(result.stderr).toMatch(/not executable.*manual integration/i);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
 });
