@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -40,6 +40,7 @@ Provide host-neutral fresh-session enforcement as the smallest executable kernel
     "host permission enforcement",
     "generic database, queue, scheduler, or plugin marketplace"
   ],
-  "separation_principle": "System Boundary"
+  "separation_principle": "System Boundary",
+  "refinement_2026_09_03": "Ticket 14 research: stays unsupported. The thin attempt path satisfies all ten hard continuation invariants (evidence 14-kernel-branch-disposition, 17-clean-session-support-matrix); EVD-graph-native-harness-contract-r1 confirms the observed gap is a projection gap on the existing CLI, not a missing runtime behavior. Falsification condition 1 (thin baseline satisfies every invariant) is now evidence-supported."
 }
 ```

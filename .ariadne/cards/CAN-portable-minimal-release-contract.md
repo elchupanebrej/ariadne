@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -42,6 +42,7 @@ Publish only intentional typed entry points and portable skills, add package bas
     "claim_class": "Boundary contract",
     "minimum_rung": 6,
     "method": "Install the packed artifact in a clean temporary project, type-check a documented import, and run the packaged skill example."
-  }
+  },
+  "refinement_2026_09_03": "Ticket 14 research: audit complete in docs/research/graph-native-harness-contract.md. teach-* modules have no non-test consumer; package unpublished (ariadne-reasoning free per docs/research/npm-delivery.md), so teaching export trim is safe pre-first-publish and major-only after. Minimum surface: declarations + types, intentional exports map, README, LICENSE, no install scripts, pack smoke check. attempt.ts, controller.ts, release-bundle.ts, self-application.ts are retained thin-path modules."
 }
 ```

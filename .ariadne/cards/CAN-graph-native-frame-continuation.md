@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -43,6 +43,7 @@ Deepen the existing status or report path so an explicit frame yields one ordere
     "claim_class": "Algorithmic logic",
     "minimum_rung": 3,
     "method": "Table-driven examples for open evidence, unresolved contradiction, blocked dependency, and decision-ready frames."
-  }
+  },
+  "refinement_2026_09_03": "Ticket 14 research: readiness and priority rules defined over existing semantics in docs/research/graph-native-harness-contract.md — six readiness classes (open-evidence, unresolved-contradiction, blocked-dependency, decision-ready, blocked, insufficient-information) with deterministic priority fail-closed first; evidence EVD-graph-native-harness-contract-r1. No DEC lock yet: lock-eligible after the Rung 3 table-driven check passes."
 }
 ```

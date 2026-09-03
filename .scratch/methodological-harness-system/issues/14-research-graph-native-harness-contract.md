@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 **Type:** research
 
@@ -36,9 +36,48 @@ Primary-source starting points:
 4. What is the minimum documented, typed package surface and external pack contract that preserves direct Ariadne and method-skill use?
 5. What single real-host adapter contract test would be required before claiming host integration, while leaving permissions, retry, compaction, sessions, and snapshots with the host?
 
-- [ ] Produce an English research note that answers all five questions using pinned primary sources, current call-site evidence, and reproducible local commands or receipts.
-- [ ] Define the frame-continuation readiness and priority rules over existing Ariadne node and edge semantics, including blocked and insufficient-information outcomes, without adding new mutable state.
-- [ ] Record a consumer and package-surface audit that separates safe deletion, major-release-only removal, and retained supported API.
-- [ ] State explicit falsification predicates for graph-only continuation, pointer-only handoff, teaching-runtime deletion, package portability, and host-adapter claims.
-- [ ] Update the relevant Ariadne unknowns, evidence results, candidates, and provisional selection; finish with all strict Ariadne gates green and no unsupported `DEC` lock.
-- [ ] End with one ranked recommendation and a concise do-not-build list; leave implementation as follow-up work rather than expanding this research ticket.
+- [x] Produce an English research note that answers all five questions using pinned primary sources, current call-site evidence, and reproducible local commands or receipts.
+- [x] Define the frame-continuation readiness and priority rules over existing Ariadne node and edge semantics, including blocked and insufficient-information outcomes, without adding new mutable state.
+- [x] Record a consumer and package-surface audit that separates safe deletion, major-release-only removal, and retained supported API.
+- [x] State explicit falsification predicates for graph-only continuation, pointer-only handoff, teaching-runtime deletion, package portability, and host-adapter claims.
+- [x] Update the relevant Ariadne unknowns, evidence results, candidates, and provisional selection; finish with all strict Ariadne gates green and no unsupported `DEC` lock.
+- [x] End with one ranked recommendation and a concise do-not-build list; leave implementation as follow-up work rather than expanding this research ticket.
+
+## Answer
+
+Note: `docs/research/graph-native-harness-contract.md`. Graph evidence:
+`EVD-graph-native-harness-contract-r1` (SUPPORTED, Rung 3, `answers`
+`EVDREQ-peer-repository-harness-patterns`, `tests` all four candidates).
+
+1. **Yes** — six readiness classes (open-evidence, unresolved-contradiction,
+   blocked-dependency, decision-ready, blocked, insufficient-information) are derivable from
+   existing node types, `provenance_type`, `isFrontierNode` terminality, `dependencies`, and
+   edge endpoint contracts, with a deterministic fail-closed-first priority order. OpenSpec
+   proves the shape; `EVD-frame-continuation-prototype-r3` confirmed the current report JSON
+   lacks every continuation field.
+2. **Pointer-only handoff suffices.** The observed failure (unbounded status frontier) is a
+   projection gap, not a state gap; `CAN-persisted-active-frame-spine` stays deferred until
+   concurrent multi-frame sessions without a pointer supplier are observed.
+3. Audit: `src/teach-harness/` (2,626 lines), `teach-ariadne/` (1,699), `teach-methodology/`
+   (2,083) have no non-test, non-star-export consumer → safe deletion **pre-first-publish**
+   (package unpublished), major-release-only after. `attempt.ts`, `controller.ts`,
+   `release-bundle.ts`, `self-application.ts` are retained thin-path API. Pack measurement:
+   teach files = 260,109 B of 904,382 B (28.8%).
+4. Minimum surface: declarations + `types`, intentional `exports` map, README, LICENSE, zero
+   install scripts, plus the demonstrated pack-and-install smoke check.
+5. One contract test against one real host adapter: dispatch intent before effect → host
+   permission decision → crash-after-intent yields exactly one disposition via owner receipt →
+   cancellation acknowledgment. No host-integration claim before it passes.
+
+**Ranked recommendation:** implement graph-native frame continuation (deepen
+`status`/`report` with explicit frame argument) paired with the pre-first-publish package
+repair; defer spine and dedicated runtime; no DEC lock until the Rung 3 table-driven check
+passes.
+
+Receipts: `npm run verify` PASS (63 files / 657 tests); `ariadne verify --strict` PASS; all
+four pinned primary-source URLs resolved (no 404s).
+
+## Comments
+
+Follow-up spec published from this ticket's answer:
+`specs/graph-native-continuation-and-package-repair.md` (ready-for-agent).

@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-30
+- Revised: 2026-09-03
 
 ## Statement
 
@@ -38,6 +38,7 @@ Persist active frame, next action, progress, and stop point in a small repositor
   "required_evidence_requests": [
     "EVDREQ-peer-repository-harness-patterns"
   ],
-  "falsification_predicate": "Reject if explicit frame-scoped derivation gives the same continuation outcome or if snapshot freshness cannot be proven after crash and concurrent work."
+  "falsification_predicate": "Reject if explicit frame-scoped derivation gives the same continuation outcome or if snapshot freshness cannot be proven after crash and concurrent work.",
+  "refinement_2026_09_03": "Ticket 14 research: stays deferred. The observed orientation failure (unbounded status frontier) is a projection gap cured by deepening status/report with an explicit frame argument; no observed failure justifies persisted active-frame state. Justifying trigger: concurrent multi-frame sessions with no pointer supplier where frame-scoped derivation cannot select one focus."
 }
 ```
