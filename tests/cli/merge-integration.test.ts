@@ -371,6 +371,9 @@ describe("Ariadne Git merge integration", () => {
         "#!/bin/sh\n# ariadne-merge-hook-v1\n",
       );
       await expect(readFile(join(repo, ".gitattributes"))).rejects.toThrow();
+      expect(result.stderr).toContain(
+        "Existing .githooks/pre-merge-commit is not executable",
+      );
       expect(result.stderr).toMatch(/not executable.*manual integration/i);
     } finally {
       await rm(repo, { recursive: true, force: true });

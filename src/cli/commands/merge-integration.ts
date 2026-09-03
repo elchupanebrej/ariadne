@@ -355,6 +355,16 @@ const prepareHooks = async (
   for (const name of HOOK_NAMES) {
     const path = join(directory, name);
     if (await exists(path)) {
+      try {
+        await access(path, constants.X_OK);
+      } catch {
+        return {
+          missing: [],
+          needsPath: false,
+          changes: [],
+          conflict: `Existing ${HOOKS_PATH}/${name} is not executable. Manual integration: preserve repository policy and make the compatible hook executable.`,
+        };
+      }
       let content: string;
       try {
         content = await readFile(path, "utf8");
@@ -372,16 +382,6 @@ const prepareHooks = async (
           needsPath: false,
           changes: [],
           conflict: `Existing ${HOOKS_PATH}/${name} is incompatible. Manual integration: merge the Ariadne hook into that file without replacing existing policy.`,
-        };
-      }
-      try {
-        await access(path, constants.X_OK);
-      } catch {
-        return {
-          missing: [],
-          needsPath: false,
-          changes: [],
-          conflict: `Existing ${HOOKS_PATH}/${name} is not executable. Manual integration: preserve repository policy and make the compatible hook executable.`,
         };
       }
       continue;
