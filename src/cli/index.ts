@@ -27,7 +27,7 @@ const VERSION = "0.1.0";
 const HELP = `Ariadne ${VERSION}
 
 Usage:
-  ariadne status [--json]
+  ariadne status [FRAME-id] [--json]
   ariadne node <add|get|list|remove|update> ...
   ariadne edge <add|list|remove> ...
   ariadne invalidate <node_id> --by <evidence_id>

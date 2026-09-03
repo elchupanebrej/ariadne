@@ -95,8 +95,8 @@ describe("subcommand and option help", () => {
 
   describe("other command families help", () => {
     it.each([
-      [["status", "--help"], "Usage: ariadne status [--json]"],
-      [["status", "-h"], "Usage: ariadne status [--json]"],
+      [["status", "--help"], "Usage: ariadne status [FRAME-id] [--json]"],
+      [["status", "-h"], "Usage: ariadne status [FRAME-id] [--json]"],
       [["gate", "--help"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
       [["gate", "-h"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
       [["verify", "--help"], "Usage: ariadne verify [--strict]"],
@@ -150,7 +150,7 @@ describe("subcommand and option help", () => {
       [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag"],
       [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ..."],
       [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag"],
-      [["status", "--unknown-flag"], "Usage: ariadne status [--json]"],
+      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]"],
       [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
       [["unknown-command"], "Unknown command: unknown-command"],
     ])("returns 1 with error on stderr for %j", async (args, expectedError) => {

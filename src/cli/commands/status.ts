@@ -1,3 +1,5 @@
+import type { EpistemicEdge } from "../../core/schemas/edges.js";
+import type { Node } from "../../core/schemas/nodes.js";
 import {
   isFrontierNode,
   type MaterializedGraph,
@@ -125,7 +127,210 @@ export function buildStatusReport(
   };
 }
 
-const STATUS_USAGE = "Usage: ariadne status [--json]\n";
+export type Continuation = {
+  readiness_class: string;
+  next_action: string;
+  operation: string;
+  command_or_template: string;
+  dependencies: string[];
+  unlocks: string[];
+};
+
+const CONTINUATION_EDGE_TYPES = new Set([
+  "derived_from",
+  "satisfies",
+  "answers",
+  "tests",
+  "supports",
+  "falsifies",
+  "contradicts",
+  "depends_on",
+  "references",
+]);
+
+export type FrameSubgraph = {
+  nodes: Node[];
+  edges: EpistemicEdge[];
+};
+
+/**
+ * Subgraph connected to the frame through the existing edge types (direct plus
+ * transitive), intersected with non-terminal nodes per the frontier predicate.
+ * Pure projection: reads the materialized graph, writes nothing.
+ */
+export function frameSubgraph(
+  graph: MaterializedGraph,
+  frameId: string,
+): FrameSubgraph | null {
+  if (!graph.nodes.some((node) => node.id === frameId)) return null;
+
+  const neighbors = new Map<string, string[]>();
+  const connect = (from: string, to: string): void => {
+    const list = neighbors.get(from);
+    if (list) list.push(to);
+    else neighbors.set(from, [to]);
+  };
+  for (const edge of graph.edges) {
+    if (!CONTINUATION_EDGE_TYPES.has(edge.type)) continue;
+    connect(edge.source, edge.target);
+    connect(edge.target, edge.source);
+  }
+
+  const connected = new Set<string>([frameId]);
+  const queue = [frameId];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const next of neighbors.get(current) ?? []) {
+      if (connected.has(next)) continue;
+      connected.add(next);
+      queue.push(next);
+    }
+  }
+
+  const nodes = graph.nodes.filter(
+    (node) => connected.has(node.id) && isFrontierNode(node),
+  );
+  const subgraphIds = new Set(nodes.map((node) => node.id));
+  const edges = graph.edges.filter(
+    (edge) => subgraphIds.has(edge.source) && subgraphIds.has(edge.target),
+  );
+  return { nodes, edges };
+}
+
+const byId = (left: Node, right: Node): number => left.id.localeCompare(right.id);
+
+const isDecisionId = (id: string): boolean => id.startsWith("DEC-");
+
+const isValidatingSupport = (node: Node): boolean =>
+  node.type === "EVD" ? node.verdict === "SUPPORTED" : true;
+
+type ClassifyContext = FrameSubgraph;
+
+type Classifier = {
+  readiness_class: string;
+  classify: (context: ClassifyContext) => Continuation | null;
+};
+
+const classifyReady = ({ nodes, edges }: ClassifyContext): Continuation | null => {
+  const candidates = nodes.filter((node) => node.type === "CAN").sort(byId);
+  const ready = candidates.find((candidate) => {
+    const supporting = edges.filter(
+      (edge) => edge.type === "supports" && edge.target === candidate.id,
+    );
+    if (supporting.length === 0) return false;
+    const sourceById = new Map(nodes.map((node) => [node.id, node]));
+    if (!supporting.every((edge) => {
+      const source = sourceById.get(edge.source);
+      return source !== undefined && isValidatingSupport(source);
+    })) {
+      return false;
+    }
+    const attacked = edges.some(
+      (edge) =>
+        (edge.type === "contradicts" ||
+          edge.type === "invalidates" ||
+          edge.type === "falsifies") &&
+        edge.target === candidate.id,
+    );
+    if (attacked) return false;
+    const decidedAlready = edges.some(
+      (edge) =>
+        (edge.type === "satisfies" || edge.type === "answers") &&
+        (isDecisionId(edge.source) || isDecisionId(edge.target)),
+    );
+    return !decidedAlready;
+  });
+  if (!ready) return null;
+
+  return {
+    readiness_class: "ready",
+    next_action: `Record the decision for ${ready.id}`,
+    operation: "record_decision",
+    command_or_template:
+      `ariadne node add DEC <DEC-id> --title <decision> --payload '{"provenance_type":"DECIDED"}'` +
+      ` && ariadne edge add <DEC-id> satisfies ${ready.id}`,
+    dependencies: [],
+    unlocks: candidates
+      .filter((candidate) => candidate.id !== ready.id)
+      .map((candidate) => candidate.id),
+  };
+};
+
+const classifyInsufficientInformation = ({
+  nodes,
+  edges,
+}: ClassifyContext): Continuation | null => {
+  const evidenceResults = new Set(
+    nodes.filter((node) => node.type === "EVD").map((node) => node.id),
+  );
+  const evidenceRequests = new Set(
+    nodes.filter((node) => node.type === "EVDREQ").map((node) => node.id),
+  );
+  const testedOrFalsified = new Set(
+    edges
+      .filter(
+        (edge) =>
+          (edge.type === "tests" || edge.type === "falsifies") &&
+          evidenceResults.has(edge.source),
+      )
+      .map((edge) => edge.target),
+  );
+  const requested = new Set(
+    edges
+      .filter(
+        (edge) =>
+          evidenceRequests.has(edge.source) &&
+          (edge.type === "tests" || edge.type === "depends_on"),
+      )
+      .map((edge) => edge.target),
+  );
+  const insufficient = nodes
+    .filter(
+      (node) =>
+        (node.provenance_type === "UNKNOWN" || node.provenance_type === "ASSUMED") &&
+        !testedOrFalsified.has(node.id) &&
+        !requested.has(node.id),
+    )
+    .sort(byId);
+  const first = insufficient[0];
+  if (!first) return null;
+
+  return {
+    readiness_class: "insufficient-information",
+    next_action: `Raise an explicit ${first.type} for ${first.id} plus one evidence request`,
+    operation: "raise_unknown_and_evidence_request",
+    command_or_template:
+      `ariadne node add ${first.type} <new-id> --title <statement> --payload '{"provenance_type":"${first.provenance_type}"}'` +
+      ` && ariadne node add EVDREQ <EVDREQ-id> --title <question> --payload '{"claim":"${first.id}"}'` +
+      ` && ariadne edge add <EVDREQ-id> tests ${first.id}`,
+    dependencies: [],
+    unlocks: insufficient.slice(1).map((node) => node.id),
+  };
+};
+
+// Fail-closed blocked-* classes (ticket 16) slot in ahead of `ready`.
+const CLASSIFIERS: readonly Classifier[] = [
+  { readiness_class: "ready", classify: classifyReady },
+  {
+    readiness_class: "insufficient-information",
+    classify: classifyInsufficientInformation,
+  },
+];
+
+export function buildContinuation(
+  graph: MaterializedGraph,
+  frameId: string,
+): Continuation | null {
+  const subgraph = frameSubgraph(graph, frameId);
+  if (!subgraph) return null;
+  for (const { classify } of CLASSIFIERS) {
+    const continuation = classify(subgraph);
+    if (continuation) return continuation;
+  }
+  return null;
+}
+
+const STATUS_USAGE = "Usage: ariadne status [FRAME-id] [--json]\n";
 
 export async function runStatus(args: readonly string[], io: CliIO): Promise<number> {
   if (hasHelp(args)) {
@@ -133,19 +338,28 @@ export async function runStatus(args: readonly string[], io: CliIO): Promise<num
     return 0;
   }
   const json = args.includes("--json");
-  const unexpected = args.filter((arg) => arg !== "--json");
-  if (unexpected.length > 0) {
+  const positional = args.filter((arg) => arg !== "--json");
+  if (positional.length > 1 || positional.some((arg) => arg.startsWith("--"))) {
     throw new Error(STATUS_USAGE.trim());
   }
+  const [frameId] = positional;
 
   const { storage } = await resolveCliWorkspace(io);
-  const report = buildStatusReport(
-    await storage.readState<State>(),
-    await storage.materialize(),
-  );
+  const graph = await storage.materialize();
+  const report = buildStatusReport(await storage.readState<State>(), graph);
+
+  let continuation: Continuation | null = null;
+  if (frameId !== undefined) {
+    if (!graph.nodes.some((node) => node.id === frameId)) {
+      throw new Error(`Unknown FRAME: ${frameId}`);
+    }
+    continuation = buildContinuation(graph, frameId);
+  }
 
   if (json) {
-    io.stdout.write(`${JSON.stringify(report)}\n`);
+    io.stdout.write(
+      `${JSON.stringify(continuation ? { ...report, continuation } : report)}\n`,
+    );
     return 0;
   }
 
@@ -164,6 +378,13 @@ export async function runStatus(args: readonly string[], io: CliIO): Promise<num
           ? report.merge_conflicts.map(({ id, subject }) => `${id} (${subject})`).join(", ")
           : "none"
       }`,
+      ...(continuation
+        ? [
+            `Next action (${continuation.readiness_class}): ${continuation.next_action}`,
+            `Operation: ${continuation.operation}`,
+            `Command: ${continuation.command_or_template}`,
+          ]
+        : []),
       "",
     ].join("\n"),
   );

@@ -13,6 +13,7 @@ import {
   type ReportSummary,
 } from "../../graph/report-engine.js";
 import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
+import { buildContinuation } from "./status.js";
 
 export {
   buildReport,
@@ -52,10 +53,14 @@ export async function runReport(args: readonly string[], io: CliIO): Promise<num
   await writeFile(join(reportsDirectory, fileName), report.text, "utf8");
 
   if (json) {
+    const continuation = frameArg
+      ? buildContinuation(await storage.materialize(), frameArg)
+      : null;
     io.stdout.write(
       `${JSON.stringify({
         file: `${toRootRelative(environment.rootPath, reportsDirectory)}/${fileName}`,
         ...report.summary,
+        ...(continuation ? { continuation } : {}),
       })}\n`,
     );
     return 0;
