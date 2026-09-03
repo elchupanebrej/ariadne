@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
+import { NODE_TYPES } from "../../src/core/schemas/nodes.js";
 import { GraphStorage } from "../../src/graph/storage.js";
 
 const capture = () => {
@@ -119,6 +120,33 @@ describe("ariadne node", () => {
     const list = capture();
     expect(await runCli(["node", "list"], { cwd, stdout: list.stream, stderr: capture().stream })).toBe(0);
     expect(JSON.parse(list.text())).toEqual([]);
+  });
+
+  it("enumerates valid node types in errors and add help", async () => {
+    const cwd = workspace();
+    const typeList = NODE_TYPES.join(", ");
+
+    const addErr = capture();
+    expect(
+      await runCli(
+        ["node", "add", "frame", "FRAME-1", "--title", "T", "--payload", "{}"],
+        { cwd, stdout: capture().stream, stderr: addErr.stream },
+      ),
+    ).toBe(1);
+    expect(addErr.text()).toContain("Unknown node type: frame");
+    expect(addErr.text()).toContain(typeList);
+    expect(addErr.text()).toContain("uppercase");
+
+    const listErr = capture();
+    expect(
+      await runCli(["node", "list", "--type", "frame"], { cwd, stdout: capture().stream, stderr: listErr.stream }),
+    ).toBe(1);
+    expect(listErr.text()).toContain("Unknown node type: frame");
+    expect(listErr.text()).toContain(typeList);
+
+    const help = capture();
+    expect(await runCli(["node", "add", "--help"], { cwd, stdout: help.stream, stderr: capture().stream })).toBe(0);
+    expect(help.text()).toContain(typeList);
   });
 
   it("rejects invalid node payloads without writing graph state", async () => {

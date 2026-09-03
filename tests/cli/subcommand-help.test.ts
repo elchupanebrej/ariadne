@@ -6,6 +6,9 @@ import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
+import { NODE_TYPES } from "../../src/core/schemas/nodes.js";
+
+const NODE_ADD_USAGE = `Usage: ariadne node add <type> <id> --title <title> --payload <json>\nValid node types (uppercase): ${NODE_TYPES.join(", ")}`;
 
 const capture = () => {
   let output = "";
@@ -49,8 +52,8 @@ describe("subcommand and option help", () => {
 
   describe("leaf-level subcommand help", () => {
     it.each([
-      ["node", "add", "--help", "Usage: ariadne node add <type> <id> --title <title> --payload <json>"],
-      ["node", "add", "-h", "Usage: ariadne node add <type> <id> --title <title> --payload <json>"],
+      ["node", "add", "--help", NODE_ADD_USAGE],
+      ["node", "add", "-h", NODE_ADD_USAGE],
       ["node", "get", "--help", "Usage: ariadne node get <id>"],
       ["node", "get", "-h", "Usage: ariadne node get <id>"],
       ["node", "list", "--help", "Usage: ariadne node list [--type] [--provenance]"],
@@ -86,7 +89,7 @@ describe("subcommand and option help", () => {
       ]);
       expect(result.code).toBe(0);
       expect(result.stdout.trim()).toBe(
-        "Usage: ariadne node add <type> <id> --title <title> --payload <json>",
+        NODE_ADD_USAGE,
       );
       expect(result.stderr).toBe("");
       expect(readdirSync(result.cwd)).toEqual([]);
@@ -164,7 +167,7 @@ describe("subcommand and option help", () => {
   describe("built executable subcommand help", () => {
     it.each([
       [["node", "--help"], "Usage: ariadne node <add|get|list|remove|update> ..."],
-      [["node", "add", "--help"], "Usage: ariadne node add <type> <id> --title <title> --payload <json>"],
+      [["node", "add", "--help"], NODE_ADD_USAGE],
       [["edge", "--help"], "Usage: ariadne edge <add|list|remove> ..."],
     ])("executes built cli with %j", async (args, expectedUsage) => {
       const builtCli = resolve(

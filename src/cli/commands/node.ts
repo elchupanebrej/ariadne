@@ -76,7 +76,7 @@ async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
     );
   }
   const [type, id] = positionals;
-  if (!isNodeType(type)) throw new Error(`Unknown node type: ${type}`);
+  if (!isNodeType(type)) throw new Error(unknownNodeType(type));
   const title = flagValue(flags, "title");
   const payload = parsePayload(flags);
 
@@ -107,7 +107,7 @@ async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
   const type = flags.get("type");
   const provenance = flags.get("provenance");
   if (typeof type === "string" && !isNodeType(type)) {
-    throw new Error(`Unknown node type: ${type}`);
+    throw new Error(unknownNodeType(type));
   }
   if (typeof provenance === "string" && !isProvenance(provenance)) {
     throw new Error(`Unknown provenance: ${provenance}`);
@@ -170,8 +170,12 @@ async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
   });
 }
 
+const NODE_TYPE_LIST = NODE_TYPES.join(", ");
+const NODE_TYPE_HINT = `Valid node types (uppercase): ${NODE_TYPE_LIST}`;
+const unknownNodeType = (value: string) => `Unknown node type: ${value}. ${NODE_TYPE_HINT}`;
+
 const NODE_USAGE = "Usage: ariadne node <add|get|list|remove|update> ...\n";
-const NODE_ADD_USAGE = "Usage: ariadne node add <type> <id> --title <title> --payload <json>\n";
+const NODE_ADD_USAGE = `Usage: ariadne node add <type> <id> --title <title> --payload <json>\n${NODE_TYPE_HINT}\n`;
 const NODE_GET_USAGE = "Usage: ariadne node get <id>\n";
 const NODE_LIST_USAGE = "Usage: ariadne node list [--type] [--provenance]\n";
 const NODE_REMOVE_USAGE = "Usage: ariadne node remove <id>\n";
