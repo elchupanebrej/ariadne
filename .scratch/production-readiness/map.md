@@ -22,6 +22,9 @@ A decision-complete Production Hardening Specification for every shipped Ariadne
 
 <!-- One line per resolved child ticket: a gist plus a link to the detailed answer. -->
 
+- [Research the supported runtime matrix](issues/01-research-supported-runtime-matrix.md) — support Node 22/24 LTS on a four-job Linux/Windows/macOS matrix, with package-manager boundary smokes folded into Linux/Node 24.
+- [Research filesystem durability and process coordination](issues/02-research-filesystem-durability.md) — use one root lock and one flushed framed journal as authority; rebuild projections, never steal locks by age alone, and promise process-crash consistency rather than universal power-loss durability.
+
 ## Not yet specified
 
 - The exact benchmark corpus and maximum supported graph/history size remain fog until the storage transaction model and platform matrix are settled.
