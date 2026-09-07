@@ -3,7 +3,7 @@
 - Status: RESOLVED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-08-30
+- Revised: 2026-09-07
 
 ## Statement
 

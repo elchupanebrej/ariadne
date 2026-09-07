@@ -3,7 +3,7 @@
 - Status: PROPOSED
 - Provenance: PROPOSED
 - Type: CAN
-- Revised: 2026-09-03
+- Revised: 2026-09-07
 
 ## Statement
 

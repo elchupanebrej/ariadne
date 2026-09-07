@@ -3,7 +3,7 @@
 - Status: SELECTED
 - Provenance: DERIVED
 - Type: VAL-SELECT
-- Revised: 2026-08-30
+- Revised: 2026-09-07
 
 ## Statement
 

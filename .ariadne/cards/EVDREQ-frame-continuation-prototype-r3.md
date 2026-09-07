@@ -3,7 +3,7 @@
 - Status: REMOVED
 - Provenance: PROPOSED
 - Type: EVDREQ
-- Revised: 2026-08-30
+- Revised: 2026-09-07
 
 ## Statement
 

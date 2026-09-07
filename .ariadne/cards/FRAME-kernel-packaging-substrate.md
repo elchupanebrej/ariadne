@@ -3,7 +3,7 @@
 - Status: RESOLVED
 - Provenance: DECIDED
 - Type: FRAME
-- Revised: 2026-08-24
+- Revised: 2026-09-07
 
 ## Statement
 

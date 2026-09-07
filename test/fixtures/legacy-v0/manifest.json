@@ -1,0 +1,1151 @@
+{
+  "name": "legacy-v0",
+  "sourceFormat": "v0",
+  "createdAt": "2026-09-07T21:35:30.000Z",
+  "description": "Frozen v0 legacy Ariadne workspace golden fixture captured prior to V1 migration",
+  "entityCounts": {
+    "nodes": 280,
+    "edges": 413,
+    "notices": 1,
+    "totalGraphRecords": 881,
+    "cardCount": 280
+  },
+  "files": {
+    "GRAPH.jsonl": {
+      "sha256": "42319de4a9fdb9bc03cbb02a7ba7019c8afe2df7860e5d215f82a1c693f28756",
+      "sizeBytes": 656236
+    },
+    "NOTICES.jsonl": {
+      "sha256": "35ea69d556370d97b2b8680b2f6bd1918f6165e9753c497618ff6782cdf3444f",
+      "sizeBytes": 434
+    },
+    "STATE.yaml": {
+      "sha256": "080011e01f20ce2fba02e1e567aece10d9917a2293575b3085b0967d13717165",
+      "sizeBytes": 5730
+    },
+    "INDEX.md": {
+      "sha256": "101bf44638feacde1bc35814142829bcb6c79770b331d457c316cab3332424bd",
+      "sizeBytes": 4291
+    },
+    "cards/ASM-RPT-01.md": {
+      "sha256": "19079f9313c90f7e2894291c78b019b7a56d0c4ec69be0da312f51d2b292d37a",
+      "sizeBytes": 489
+    },
+    "cards/ASM-RPT-02.md": {
+      "sha256": "a810928965c9ad9e0476d9a717ede01b8905dcbd1e2c75b740bbdb0484451c8f",
+      "sizeBytes": 395
+    },
+    "cards/ASM-dedicated-runtime-necessity.md": {
+      "sha256": "610081c0bc77c2883a309fb353b1df8fd185200b109b31a0efe86547141c7e62",
+      "sizeBytes": 644
+    },
+    "cards/ASM-fresh-session-reteaching.md": {
+      "sha256": "cfec88fca6e384867d745cbf1ca7f1ec3552e54f3ec835980c0f3ac443fb66fc",
+      "sizeBytes": 596
+    },
+    "cards/ASM-matt-ownership-boundary.md": {
+      "sha256": "5de18cb200f87f58f506b413bb0734a3c7b856ee2df9d5f6cfa74c1cd6d56cd9",
+      "sizeBytes": 585
+    },
+    "cards/CAN-ariadne-controller-kernel.md": {
+      "sha256": "302e3bd6ffac796e8f4a2bc64a735979f9a566eac43e8b9a30b03be0d3144775",
+      "sizeBytes": 2136
+    },
+    "cards/CAN-artifact-catalog-method-teaching.md": {
+      "sha256": "207164e8d91217db5d124fbeb5ce1274dec8abdda79768bd62264cc0b02b9146",
+      "sizeBytes": 1007
+    },
+    "cards/CAN-author-guided-demonstration-evaluation.md": {
+      "sha256": "c8cc52eb9e1801c3a1645f69cb1d268c62b6c4e9d103fc7dc88ab84a3f6d8aae",
+      "sizeBytes": 696
+    },
+    "cards/CAN-central-runtime-safety-control.md": {
+      "sha256": "accebd591521f1f5d4b4508cf24058793d6962050cac64594b4449909124ce73",
+      "sizeBytes": 846
+    },
+    "cards/CAN-colocated-neutral-file-kernel.md": {
+      "sha256": "ffa70ddc0c4eb81f472e295a9da80895ea1c85361531ab7e5060a77651c5a7e9",
+      "sizeBytes": 2289
+    },
+    "cards/CAN-cross-skill-wrapper.md": {
+      "sha256": "627fe2ec8a0bc54fda654596dcfa744ee7c0b1e7a7051f1319b964975fef70f3",
+      "sizeBytes": 1379
+    },
+    "cards/CAN-dedicated-orchestration-runtime.md": {
+      "sha256": "a3cfdd558bc4d6a4d5aace50ee23fc6968da34714744f913576b417decf14312",
+      "sizeBytes": 2689
+    },
+    "cards/CAN-detached-fixed-point-audit.md": {
+      "sha256": "c3a037f5730ea296a681c745a764851e61cd4597eaf5c9fa1a984c52cd16fcfd",
+      "sizeBytes": 930
+    },
+    "cards/CAN-failure-driven-harness-vertical-slice.md": {
+      "sha256": "6b2ea9f65896f63622dd8d009596d77e30bad8c541a4daf85f315ae0341e0617",
+      "sizeBytes": 1841
+    },
+    "cards/CAN-framework-first-harness-lab.md": {
+      "sha256": "219503a060f6f7502b6da3d33a95ea02d988c6ba122a71aeebcbeb881fa6ce50",
+      "sizeBytes": 1167
+    },
+    "cards/CAN-graph-native-frame-continuation.md": {
+      "sha256": "b565a43d9861a16782a5218025a6a6ef247eea627e0551f059e3337cd3818be7",
+      "sizeBytes": 2425
+    },
+    "cards/CAN-harness-capability-catalog.md": {
+      "sha256": "ecbacb6921143a5616965d660a91f68c87bc47e21eda01eac6c6095087e300ec",
+      "sizeBytes": 1089
+    },
+    "cards/CAN-host-only-runtime-safety.md": {
+      "sha256": "c5fbaf0eb361fb37b56ec330608c311cc8cfb7df91efd35812d0b3b5203992b2",
+      "sizeBytes": 927
+    },
+    "cards/CAN-independent-harness-versions.md": {
+      "sha256": "55ee5465f5cb61a842495254d0a1db8769ed662fcfe21a378dfb800db9001d6f",
+      "sizeBytes": 1030
+    },
+    "cards/CAN-layered-method-skill-harness.md": {
+      "sha256": "208337313a1f2e306ab716cb4c9f4e9fcb2067ad7b7ef55d1212476ded028a0d",
+      "sizeBytes": 1458
+    },
+    "cards/CAN-live-recursive-self-hosting.md": {
+      "sha256": "0fc86583e6199d0d5c4837cdfdc271a9211e102eb338e51bce9855807bd0a2c3",
+      "sizeBytes": 807
+    },
+    "cards/CAN-lockstep-harness-release.md": {
+      "sha256": "2557fe776db9bd5327689cff579e83b40f8792e19f07788cc1b7642dc44b1ea7",
+      "sizeBytes": 1010
+    },
+    "cards/CAN-matched-clean-session-evaluation.md": {
+      "sha256": "ecd2193dbfb685fbb3b91b158f6d664843946fbb0b1ba9f0251e7910f842ba67",
+      "sizeBytes": 1322
+    },
+    "cards/CAN-merge-event-suffixes.md": {
+      "sha256": "0fa33b9584741993b09568891c0539f3f0ab16223fe8bd4189f656b041f967c6",
+      "sizeBytes": 610
+    },
+    "cards/CAN-merge-materialized-variants.md": {
+      "sha256": "e58bef7f75c4196311b28f5ae5b5a4720af1a1c4587ed9c1f263e615c3f99db4",
+      "sizeBytes": 617
+    },
+    "cards/CAN-merge-sidecar-variants.md": {
+      "sha256": "d816c932ee5e2159f31d316a950d9b2b0446a3082bb6090580f9c10d2f8e542b",
+      "sizeBytes": 624
+    },
+    "cards/CAN-method-contract-embedded-manifest.md": {
+      "sha256": "9e4c13ced6d2965577d5108352b3fa1ed67c20949059f34e3f5d97133869cea7",
+      "sizeBytes": 2006
+    },
+    "cards/CAN-method-contract-module-bundle.md": {
+      "sha256": "fc0eb91b81a539671dec38f3d554f25f8836d282af38543adcba0cb85bbb993d",
+      "sizeBytes": 1654
+    },
+    "cards/CAN-method-contract-schema-document.md": {
+      "sha256": "c30841f3303adb8d8885665e013e72fce881a9eb38df7ee586b7b11b9d3cfc6f",
+      "sizeBytes": 1668
+    },
+    "cards/CAN-method-contract-wrapper-teaching.md": {
+      "sha256": "e8461909d136c2676587ced7b6c80a6ce362933bd51a190c2da7f10c7a764263",
+      "sizeBytes": 976
+    },
+    "cards/CAN-owner-gated-runtime-safety.md": {
+      "sha256": "8c2407d55cdc97ef685b77ecb5956c66aea817ef298fbe8e625eebdb8a3b5b2b",
+      "sizeBytes": 1254
+    },
+    "cards/CAN-persisted-active-frame-spine.md": {
+      "sha256": "d3555cb41ec67aad2193964e3e33849adcae70bb95e09ac5f8b48542a935f5dd",
+      "sizeBytes": 2031
+    },
+    "cards/CAN-pointer-only-matt-ariadne-adapters.md": {
+      "sha256": "32fb3fe554643a8976685c2158cec0c10c9ee7fcc3b9b3479dd62771bafd9546",
+      "sizeBytes": 1207
+    },
+    "cards/CAN-portable-minimal-release-contract.md": {
+      "sha256": "94724aa65a992f62ef04604d516ccb14af59284e0421a6c609893bb68f888b01",
+      "sizeBytes": 2497
+    },
+    "cards/CAN-reference-manual-teaching.md": {
+      "sha256": "5a9ee31833d637b93dce851f414fd8646a476cb1b1041e3b6201bf4efc583256",
+      "sizeBytes": 927
+    },
+    "cards/CAN-root-uncertainty-preflight.md": {
+      "sha256": "0fc11c91d5d6a5bf49d98020d6a898b514e1d4296f817fef2d63658ff7ae2099",
+      "sizeBytes": 1472
+    },
+    "cards/CAN-root-uncertainty-vocabulary.md": {
+      "sha256": "ca0ebd33912d69dc4ab71f76c3a4552ad3dd86b8d4ede819d8e4fed5be9cab1c",
+      "sizeBytes": 1307
+    },
+    "cards/CAN-shadow-contract-method-teaching.md": {
+      "sha256": "a9970329b9cf0cfeb46ac8f710444e5f5fb90c389c3cc421f5c502b7c54be3bf",
+      "sizeBytes": 1124
+    },
+    "cards/CAN-staged-snapshot-fixed-point.md": {
+      "sha256": "f9f2c7c4140af2d7c688fd42da2279de743c9421b5ea54da67275cf10772ca0e",
+      "sizeBytes": 1355
+    },
+    "cards/CAN-standalone-sqlite-kernel.md": {
+      "sha256": "70f8ac44af29399c183f7893376ab1e8f00443f23b398e7d0d0e3517fad49f6a",
+      "sizeBytes": 2223
+    },
+    "cards/CAN-structural-self-check-evaluation.md": {
+      "sha256": "977293d41028c178f9a6d443d0182e8d5599314defb7b6fb873015d9c7287ac5",
+      "sizeBytes": 784
+    },
+    "cards/CAN-task-first-method-vertical-slice.md": {
+      "sha256": "8f357b9c17034fa46c63b828b5dc85d733b34f035ac615b5dbf96f8412fd07cd",
+      "sizeBytes": 1650
+    },
+    "cards/CAN-task-first-progressive-teaching.md": {
+      "sha256": "8583bbd0813a488591abc7975366ac4ba094188d6000bc095803e716f59ea11c",
+      "sizeBytes": 1658
+    },
+    "cards/CAN-tested-harness-release-bundle.md": {
+      "sha256": "3af8a322d978bfe64b9cf3e51a4f1ed0e005037908b77bc5030e4dbe23539d9b",
+      "sizeBytes": 1267
+    },
+    "cards/CAN-thin-owner-artifact-baseline.md": {
+      "sha256": "ba2c757476d2f384a06ba052b901bc6e37fa44d7bff1cf1c15d9195f37a5c888",
+      "sizeBytes": 2079
+    },
+    "cards/CLM-clean-session-validator-quality.md": {
+      "sha256": "648207e73eacb87d0f5f455df969cf8edd7e62a9f27a47ab70238d7765da3517",
+      "sizeBytes": 745
+    },
+    "cards/CLM-neutral-orchestration-preserves-ownership.md": {
+      "sha256": "426143c46f450365fb1b998a54f9037f38f8321641733393825efddc26ad6bdd",
+      "sizeBytes": 893
+    },
+    "cards/CLM-owner-adapters-clean-session-conformance.md": {
+      "sha256": "27c1d4463c7e49c04136dc330fd623842e7bc4d4b4a62c4367f71b085ac51728",
+      "sizeBytes": 896
+    },
+    "cards/CLM-teaching-skills-clean-session-transfer.md": {
+      "sha256": "0f7ec38485453b181952baa8b38d6f4a5c7f757d2cc41b480d1da02eb27b384b",
+      "sizeBytes": 986
+    },
+    "cards/CTR-RPT-01.md": {
+      "sha256": "0abaf76539472fcc3a4dc9c3928a8425a6558838e7707e35cfd8fa09f8798a45",
+      "sizeBytes": 471
+    },
+    "cards/CTR-continuity-vs-authority-boundary.md": {
+      "sha256": "9d8f5e2bf6f82bda95602d46a8a17a17cff511d851e9d9f7c741534d57132841",
+      "sizeBytes": 1177
+    },
+    "cards/CTR-merge-lossless-validity.md": {
+      "sha256": "f1c9ec3e81f314ab8d34a21dc0a0586f653af280bcdb9d2ea14deb029b606ca7",
+      "sizeBytes": 654
+    },
+    "cards/CTR-minimal-kernel-vs-atomic-continuity.md": {
+      "sha256": "e199055de67ee7aeb3147d6aaa55bf651cc41379cf765fbedfeb1850f0f70bad",
+      "sizeBytes": 929
+    },
+    "cards/CTR-recall-vs-context-load.md": {
+      "sha256": "2d5f777e9f1b5444883c44a41ca88fe3943731fa9f29066a1208eb1854348aa0",
+      "sizeBytes": 887
+    },
+    "cards/DEC-RPT-01.md": {
+      "sha256": "0f28db6ee4d63d0b74bb4ee3038d6cafbdedf953800c5a2ae96688088c1d0897",
+      "sizeBytes": 682
+    },
+    "cards/DEC-RPT-02.md": {
+      "sha256": "63d060a06a76b741c84bf8a72b14c0c4e7a0f766aa34251c54da09ab482bbcb4",
+      "sizeBytes": 656
+    },
+    "cards/DEC-RPT-03.md": {
+      "sha256": "fa7c6472b7b3b920ad4818fbe9592f5eb7fd126db8984eeb7bd39fd915208a37",
+      "sizeBytes": 602
+    },
+    "cards/DEC-RPT-04.md": {
+      "sha256": "1fd0d7ea82c74ef91b1695196f76e5e4ce9b4e3870dee7e2cc355bbce9bf6f51",
+      "sizeBytes": 550
+    },
+    "cards/DEC-RPT-05.md": {
+      "sha256": "8f37f6bb7361de3880a80e256d727f5b350cd36dc6932af0e7edc352efc74e50",
+      "sizeBytes": 530
+    },
+    "cards/DEC-RPT-06.md": {
+      "sha256": "13efbc039213ccb3ddfaf54608b52b042cedb50983a07242f52c599d66621e09",
+      "sizeBytes": 575
+    },
+    "cards/DEC-RPT-07.md": {
+      "sha256": "4253337c40009a4ec743faa2e1af85ded8a05cace712e502afcad260b6a80333",
+      "sizeBytes": 609
+    },
+    "cards/DEC-RPT-08.md": {
+      "sha256": "f738df0d031aa7bb372cb13e05a95bd466ea754aadb676b8e1f58575b265c48a",
+      "sizeBytes": 483
+    },
+    "cards/DEC-RPT-09.md": {
+      "sha256": "ee4e8fa32cad283ff4059082125191a287176dfa2c2538cb2a2e183a47210854",
+      "sizeBytes": 479
+    },
+    "cards/DEC-RPT-10.md": {
+      "sha256": "9d14cfc28ddb2047b76a9e6df138c9f53d3a9d91d49c7b5312326ba00899fdf9",
+      "sizeBytes": 457
+    },
+    "cards/DEC-RPT-11.md": {
+      "sha256": "4c1838b64f9f243e64cb3c7adce1ed95a3ffd64c4da0a55f8aae940def12f999",
+      "sizeBytes": 496
+    },
+    "cards/DEC-RPT-12.md": {
+      "sha256": "818ad9e0ae0e8ea9ee24f4d5f3503a31465ed675e4bdeafb8ae921986349436e",
+      "sizeBytes": 456
+    },
+    "cards/DEC-RPT-13.md": {
+      "sha256": "9e398db973823d5fc1e07470b58a4216511534701d465bbbc16bd775c7fc7a49",
+      "sizeBytes": 473
+    },
+    "cards/DEC-ariadne-teaching-skill-contract.md": {
+      "sha256": "c6655cd59fe982c983c07f9aecbd66a3f7dbebcab0088b37b73fb6b95c18aaaf",
+      "sizeBytes": 9425
+    },
+    "cards/DEC-artifact-links-target-files.md": {
+      "sha256": "11ede0ac23530ddbd8160c85e9d4c5f92f2d7fbcb21ab32840233a632d3be1c5",
+      "sizeBytes": 1252
+    },
+    "cards/DEC-book-diagrams-rendered-svg.md": {
+      "sha256": "4f5e59146d8a342d0af987417116b29ada5238fb990d28aab7b2fc474109c77a",
+      "sizeBytes": 436
+    },
+    "cards/DEC-book-format-pdf-pipeline.md": {
+      "sha256": "9f31d81dd726b1774653f2a1331c6a45a246c63ebde3ed1ffcfe2d797de851da",
+      "sizeBytes": 473
+    },
+    "cards/DEC-book-link-policy.md": {
+      "sha256": "a0ec22d43e78401c13b592ae5d74bb3936f17a308e6908243c440e8f0ff37762",
+      "sizeBytes": 573
+    },
+    "cards/DEC-book-pdf-via-html-chrome.md": {
+      "sha256": "0ff2870b87e7729b388c8641478a906827c88a7640444270490a70c099cd99f8",
+      "sizeBytes": 491
+    },
+    "cards/DEC-book-renumber-within-part.md": {
+      "sha256": "45a8eb9c07ca5e33222a8c556641bde5b598427c513f3e3f8b3f3397a0a1f68a",
+      "sizeBytes": 551
+    },
+    "cards/DEC-clean-session-verification-contract.md": {
+      "sha256": "a73dc4e272a9acaa111b0d0f9f95e4cdecade7ff9b8fbe52eccf3bd6a403145b",
+      "sizeBytes": 8265
+    },
+    "cards/DEC-compact-method-contract.md": {
+      "sha256": "d330a45d88f5ebe7c935f374cd6fbd4b338ccba4b30f65beee6f3eb4709ea6f5",
+      "sizeBytes": 1035
+    },
+    "cards/DEC-graph-native-frame-continuation.md": {
+      "sha256": "a230903c5819387b3c884d2f7fc30faca835be9b180937bd7f834cac1f44e490",
+      "sizeBytes": 4113
+    },
+    "cards/DEC-harness-authoring-teaching-skill-contract.md": {
+      "sha256": "b4f5892c61b918ebf6204dc289146181299302778a79fa7df27a8ffb55e8dfa5",
+      "sizeBytes": 16198
+    },
+    "cards/DEC-harness-bundle-authority.md": {
+      "sha256": "a2911bfc080fa02f01c0064f9dab7def4e561f7d41ed2b625d63acd34bf2f6b3",
+      "sizeBytes": 1090
+    },
+    "cards/DEC-harness-bundle-migration.md": {
+      "sha256": "61995303f168db2ba94f67d90dd4084f0076e834eb99cf601d10b9874d808b6e",
+      "sizeBytes": 1680
+    },
+    "cards/DEC-harness-bundle-retirement.md": {
+      "sha256": "ebb5c3a8e1f1ee5fe73982e0c3cb48691ad1f1a7ea44162d497e9e6245955e26",
+      "sizeBytes": 1901
+    },
+    "cards/DEC-harness-change-propagation.md": {
+      "sha256": "b37137f04828b528f1d05156e0050d6cb9b039c0627f5327d45b515ca905fd75",
+      "sizeBytes": 1122
+    },
+    "cards/DEC-harness-compatibility-policy.md": {
+      "sha256": "cd592c37d84f77af426a678641d1c7a56aba1edb9132e475a7bfcd1f004abfc7",
+      "sizeBytes": 1071
+    },
+    "cards/DEC-harness-feedback-channel.md": {
+      "sha256": "90c0469555d81b5d8788acb20bd542056d7639a70d575724e344963cd3543ae5",
+      "sizeBytes": 1021
+    },
+    "cards/DEC-harness-lifecycle-review-triggers.md": {
+      "sha256": "46f79baa08a640e2da7640e5b208b54ef413e220e17731c765af29aa26fed191",
+      "sizeBytes": 1264
+    },
+    "cards/DEC-harness-release-topology.md": {
+      "sha256": "b248370d79e962eae116863b4078cbde709bc0e0dd8f9e647a790f6925472b43",
+      "sizeBytes": 1089
+    },
+    "cards/DEC-harness-version-identity.md": {
+      "sha256": "fa1e853b0e416f1636b16ad27b3e1426a9c1be2801268a4ce1db4f6341e66b7f",
+      "sizeBytes": 1158
+    },
+    "cards/DEC-kernel-packaging-substrate.md": {
+      "sha256": "e0c7bc05bf290b5ec4aad5442195575fdb837919715c46ffa090f35179cfafe2",
+      "sizeBytes": 2850
+    },
+    "cards/DEC-matt-ariadne-adapter-contract.md": {
+      "sha256": "b66bbd19658a88b5b7eb1d5bf2f20f6c2efba997859779c35b304f9e3def16b3",
+      "sizeBytes": 4177
+    },
+    "cards/DEC-merge-active-ancestor.md": {
+      "sha256": "c2275c526ad5679d54664d62980c64cd17681b3d2222ce4370647716acc083a3",
+      "sizeBytes": 704
+    },
+    "cards/DEC-merge-agent-handoff.md": {
+      "sha256": "6fe48073b532fe1a3f49122662fe994688af130a9080b48d37837199b910c124",
+      "sizeBytes": 709
+    },
+    "cards/DEC-merge-atomic-reconciliation.md": {
+      "sha256": "e1e684f5ceaae42bd7918bfcfaefa17b2e534d7ff6114d0f2283858530b0d83b",
+      "sizeBytes": 733
+    },
+    "cards/DEC-merge-base-plus-delta-log.md": {
+      "sha256": "80e777499b9311b7eb486fb60dd3246e8b34fe52c6fe5df9b0a7340d34f14e48",
+      "sizeBytes": 705
+    },
+    "cards/DEC-merge-causal-quarantine.md": {
+      "sha256": "e5b12ec16a1ecd0f0bf357cb8b18dbd3537db259e6de8ac7917cf502227c1edc",
+      "sizeBytes": 731
+    },
+    "cards/DEC-merge-clean-vocabulary.md": {
+      "sha256": "2bf37ba2cb666e500b37d4b16edb4b4a13a1569f6660ca7081d54b7dde91c9db",
+      "sizeBytes": 703
+    },
+    "cards/DEC-merge-conflict-identity.md": {
+      "sha256": "b33ca01363f9d4271d4299c30a894e33b48ec6f3c66be762f630b4dd0c7aed71",
+      "sizeBytes": 716
+    },
+    "cards/DEC-merge-conflict-status.md": {
+      "sha256": "1ba5c0abe5353b42cce8b50434b00e31d4c2c1d3bdf5b81af73650ca2a13c9f3",
+      "sizeBytes": 733
+    },
+    "cards/DEC-merge-contract-confirmed.md": {
+      "sha256": "478ff8dfa068feb30ed6cf496be22bbb86b49f2a177300c3e88707e10c59a664",
+      "sizeBytes": 731
+    },
+    "cards/DEC-merge-delete-three-way.md": {
+      "sha256": "f9454b7a90666f22821dd4472d0e99c9d8ea5e081744cd5cf4b1a82b60a08f51",
+      "sizeBytes": 725
+    },
+    "cards/DEC-merge-explicit-identity.md": {
+      "sha256": "350973457aa05eb37637800e44e63c1ef2b9ad64e53a94dc1a049c2154dfabe5",
+      "sizeBytes": 736
+    },
+    "cards/DEC-merge-graph-boundary.md": {
+      "sha256": "df0c7cfde94fb6fdac1e0491fc622e0c2d9ce4f753b003311455dd3821f83343",
+      "sizeBytes": 677
+    },
+    "cards/DEC-merge-local-install.md": {
+      "sha256": "68a66c9454e6dbe217eef5819b496aa763085dbc1ab482813e194883435f4845",
+      "sizeBytes": 772
+    },
+    "cards/DEC-merge-materialized-variants.md": {
+      "sha256": "7cb75d62e7ac5e5f2c5f32a4a4b84746efa9f3a4940357af15a286b7218fddce",
+      "sizeBytes": 722
+    },
+    "cards/DEC-merge-nonblocking-local-policy.md": {
+      "sha256": "0795f8d412f4c5aa8544c421cfb9313887b15cd1680ced226fcf3c6184078a45",
+      "sizeBytes": 687
+    },
+    "cards/DEC-merge-postmerge-verification.md": {
+      "sha256": "473a2f6df268b3d011a7e678913dc0252a455cb78fa2e552cfbbbfd9f3f86e6a",
+      "sizeBytes": 713
+    },
+    "cards/DEC-merge-projection-staging-boundary.md": {
+      "sha256": "27773142e02f837700b152b57f61307cc07daf8c5b324e5ea0ad3ac416afc64d",
+      "sizeBytes": 709
+    },
+    "cards/DEC-merge-projection-sync.md": {
+      "sha256": "ee1b304f78e40cf8292209dc1f050bdf6e049582d6e4d161fc4636beda8d6eac",
+      "sizeBytes": 747
+    },
+    "cards/DEC-merge-protocol-v1.md": {
+      "sha256": "8b3617858685d9a99f3457e72b28072fa3692645d1b67a5819cb48bf2ab687cd",
+      "sizeBytes": 686
+    },
+    "cards/DEC-merge-receipt-persistence.md": {
+      "sha256": "c5e509b7f0bf9a25fac50e09e09c22576dd8147b9971f340b4bf61cb5d857647",
+      "sizeBytes": 677
+    },
+    "cards/DEC-merge-reconciliation-authority.md": {
+      "sha256": "87cda67acefcdafc0c9330f7b17e4b509757292ce10790d8bdbdd195c79403c4",
+      "sizeBytes": 721
+    },
+    "cards/DEC-merge-resolve-input-contract.md": {
+      "sha256": "c7a21bda45b6b06f48747ba86e753ea558d69fcf0725a609193a978d8ac2aeb8",
+      "sizeBytes": 692
+    },
+    "cards/DEC-merge-resource-ceilings.md": {
+      "sha256": "a4ba1a9a9374f0c691875e2e3c5a06a6e516babc6c9798267aaa1620181c421f",
+      "sizeBytes": 716
+    },
+    "cards/DEC-merge-topology-divergence.md": {
+      "sha256": "b0f3193f3b7eaa8a5f527f3851b450a32254bb6aae4eadd8209f40e93fb46327",
+      "sizeBytes": 757
+    },
+    "cards/DEC-merge-v1-operation-scope.md": {
+      "sha256": "a44e77f05358774fb2b8cb8ae24aa3df0e463dbf8ab1db55c5360f538f823077",
+      "sizeBytes": 691
+    },
+    "cards/DEC-method-contract-shape.md": {
+      "sha256": "071871869b13f93303afbc910c41b6f4f2aefc3b17dbe16b40ea69a8987a046a",
+      "sizeBytes": 8046
+    },
+    "cards/DEC-methodological-harness-lifecycle.md": {
+      "sha256": "b01871e4ddfc8d042e68b4410cd47025d4c884cf004069b677da85f5885f56e0",
+      "sizeBytes": 2430
+    },
+    "cards/DEC-methodology-authoring-teaching-skill-contract.md": {
+      "sha256": "08fa4a43f562e1e9431615cd63b5b12ca116a6222a8820a61f260230dd5d2e78",
+      "sizeBytes": 10609
+    },
+    "cards/DEC-minimum-orchestration-contract.md": {
+      "sha256": "7892670424c1878b67efb054e4d6222d753ed0bc0623241ec0d5ee510d4f662f",
+      "sizeBytes": 4730
+    },
+    "cards/DEC-neutral-orchestration-subsystem.md": {
+      "sha256": "dad2a528e9aec2cb6ec0874a3d447da33c99edf866ded3142041683fe09f7320",
+      "sizeBytes": 1660
+    },
+    "cards/DEC-orchestration-runtime-in-scope.md": {
+      "sha256": "4bb1e354a42d675441781c0ef3f828bbd6f5ad59d339d56370df9f507eb78517",
+      "sizeBytes": 2251
+    },
+    "cards/DEC-runtime-safety-recovery-contract.md": {
+      "sha256": "7bacd365e4ac2556ce0afa835ba83fb476c1ba9d0f20862c63d2ebcc367dffe8",
+      "sizeBytes": 7366
+    },
+    "cards/DEC-semantic-gate-preflight-contract.md": {
+      "sha256": "3be831b811b3072540ba8257d49041134b0b1f26838fd89b809c120d08399bbc",
+      "sizeBytes": 1796
+    },
+    "cards/DEC-staged-fixed-point-contract.md": {
+      "sha256": "ad7372394d55f60641d17aa7a3cd06782f9bfdb94a25b85fa2a83af729c28c7d",
+      "sizeBytes": 4012
+    },
+    "cards/DEC-staged-self-application.md": {
+      "sha256": "53ca2c8dbe47f21a13ec1dd258ec767a1bfa4e435b7e34bafa5c238d09dde2a5",
+      "sizeBytes": 1081
+    },
+    "cards/DEC-uncertainty-interaction-contract.md": {
+      "sha256": "3f3d2b51baa46e573e307bed8e4947872afb7b400e147872b598d935a7a7c943",
+      "sizeBytes": 1514
+    },
+    "cards/DEC-wayfinder-destination-specification.md": {
+      "sha256": "ebefb9c74bbf05be1a74c4257198744746bc3e80a5482143954ddfacf031be82",
+      "sizeBytes": 1016
+    },
+    "cards/DEP-harness-authoring-bootstrap-boundary.md": {
+      "sha256": "b1a7a52b19747df712e5f8bd9439078f3bb7e2f60855dd77d4f28af0024e69f9",
+      "sizeBytes": 2613
+    },
+    "cards/DEP-harness-lifecycle-propagation.md": {
+      "sha256": "247f0be72e9a5ca8550a939c9662ed8d707520d1ef713d35cf4f31b59a59dfe4",
+      "sizeBytes": 3018
+    },
+    "cards/DEP-matt-ariadne-adapter-boundary.md": {
+      "sha256": "01d0b936bbfb60c7d1c242321b77bb2b89650ad3677586abadf73c58b819f935",
+      "sizeBytes": 2936
+    },
+    "cards/DEP-neutral-orchestration-boundary.md": {
+      "sha256": "8422bec2d5b829cdb3897400ad8f365418af4b1cfe96d1a590adb2c21739da0a",
+      "sizeBytes": 1991
+    },
+    "cards/DYN-owner-gated-recovery-loop.md": {
+      "sha256": "228eefda33ea546460f16d642607b4ae02dfacea49b660abb5635d2c8583f15a",
+      "sizeBytes": 3885
+    },
+    "cards/EVD-ariadne-teaching-flow-prototype-r3.md": {
+      "sha256": "665bc08c3848f5176bbcc503b307dee90a4d4884e23f58a085b919c62059c932",
+      "sizeBytes": 1287
+    },
+    "cards/EVD-book-link-audit.md": {
+      "sha256": "acae69b8fda5443a2fb8d018c1dfe199237ebb094940a632f034fb5ef892d301",
+      "sizeBytes": 759
+    },
+    "cards/EVD-book-pdf-artifact.md": {
+      "sha256": "28166f1dde2aa96e6196a21049711f074d65986eab9b11bf34455763f8427937",
+      "sizeBytes": 471
+    },
+    "cards/EVD-book-structural-pass.md": {
+      "sha256": "21a7a9a596f98f3a63e8eb27cb6a9ce2c2b60ea89c0045b4c6dea3f53bd31599",
+      "sizeBytes": 547
+    },
+    "cards/EVD-frame-continuation-prototype-r3.md": {
+      "sha256": "6dd292b77efc863d41d79f875d55d3c1d09db0a7a2260e5a78f2ce2a1f435996",
+      "sizeBytes": 1409
+    },
+    "cards/EVD-graph-native-harness-contract-r1.md": {
+      "sha256": "8e92a7a65829f0aa3fbd48295491fc358448633491f78bad347abc8a025e69c4",
+      "sizeBytes": 2413
+    },
+    "cards/EVD-harness-authoring-teaching-flow-prototype-r3.md": {
+      "sha256": "ae18ccd0daacda47d98e2beb79c2f9faac0ce96074cdec360006f527ff15c707",
+      "sizeBytes": 1609
+    },
+    "cards/EVD-kernel-packaging-prototype-r3.md": {
+      "sha256": "773e651dfbd32e40b25f3795fa86a1dafca6b90f9a7795b39375e6c1504de855",
+      "sizeBytes": 1531
+    },
+    "cards/EVD-matt-ariadne-adapter-prototype-r3.md": {
+      "sha256": "db12b28c0ffca2c929d6886f2d03c5cbff99f6c67127d39652873ef463dc0d47",
+      "sizeBytes": 1355
+    },
+    "cards/EVD-method-contract-shape-prototype.md": {
+      "sha256": "a8eb8ac9d11b50a5b220d5d9e6f6f04756a8684488e3c14e1476a2733ed10c68",
+      "sizeBytes": 2236
+    },
+    "cards/EVD-methodology-authoring-teaching-flow-prototype-r3.md": {
+      "sha256": "51db9cb5f27c9dc0aeae8107877a5025bbd6617977b1ec5a76e453c0c7eee3a8",
+      "sizeBytes": 1416
+    },
+    "cards/EVD-modern-agent-harness-practices.md": {
+      "sha256": "3e95a2efaef6917bac25f3f03cccd0fc49186ee88402e23563d8b5f7d9f3fd68",
+      "sizeBytes": 1313
+    },
+    "cards/EVD-neutral-orchestration-boundary-r1.md": {
+      "sha256": "6e97d7823a213a57a98a37e0626a48d02fffb2bdad45cf27cbdc9bfcd27e1eef",
+      "sizeBytes": 1783
+    },
+    "cards/EVD-packed-install-contract-r6.md": {
+      "sha256": "2be021ebab4b3348584ca6470df941f54defb9d45e0f0e70df9af42cc4c22c73",
+      "sizeBytes": 1513
+    },
+    "cards/EVD-peer-repository-harness-patterns.md": {
+      "sha256": "6becdc8c9584aaf67bbda6062c299758841f0479be56210a0fdbfc4c0df9a586",
+      "sizeBytes": 2631
+    },
+    "cards/EVD-staged-fixed-point-prototype.md": {
+      "sha256": "0949986bf0016c2f6422988617a2f981727f2c8aad8a1651c305f549cdbe2ffa",
+      "sizeBytes": 1488
+    },
+    "cards/EVD-static-uncertainty-coverage.md": {
+      "sha256": "d0510a32998491a40706a98939a4bd19398911ed4f2cb1e7083acdaa4bf899d2",
+      "sizeBytes": 1851
+    },
+    "cards/EVDREQ-ariadne-teaching-flow-prototype-r3.md": {
+      "sha256": "ddc3ebfa63f867084c59a9fec46a7c71d7b8f5e35efa0c82ebe7e907a5bb9e8e",
+      "sizeBytes": 675
+    },
+    "cards/EVDREQ-frame-continuation-prototype-r3.md": {
+      "sha256": "03039f84d0923fd7b19975efd1a0811cf93737f08e3e31e931a406e07420f8b4",
+      "sizeBytes": 1249
+    },
+    "cards/EVDREQ-harness-authoring-teaching-flow-prototype-r3.md": {
+      "sha256": "66d65eacb35e9329199a81b3155e207ab4d71f2924e65504b4388b74e71a112b",
+      "sizeBytes": 858
+    },
+    "cards/EVDREQ-kernel-packaging-prototype-r3.md": {
+      "sha256": "800a5003621702e80f655ffdb8b1e9e25eb108c6a833c9ec467931f61a844e25",
+      "sizeBytes": 1864
+    },
+    "cards/EVDREQ-link-check-run.md": {
+      "sha256": "e3d220fcbe5c3eb59f49f27dc378564ebd77eb8ecf846edc71e86d55a092c0ae",
+      "sizeBytes": 367
+    },
+    "cards/EVDREQ-matt-ariadne-adapter-prototype-r3.md": {
+      "sha256": "78c336a8ffe42b0f6e74fca991afbf852ab46a59163755b9054b90f53e3740a9",
+      "sizeBytes": 1205
+    },
+    "cards/EVDREQ-method-contract-shape-prototype.md": {
+      "sha256": "1bfbfcd270b9e0ce434a75cef2aaa877bc2982d01de90e766f864e223101e367",
+      "sizeBytes": 1855
+    },
+    "cards/EVDREQ-methodology-authoring-teaching-flow-prototype-r3.md": {
+      "sha256": "e1b320d19631f94ebd314f02b5a51c5648c6395f24f30ebe5c2d313b3fa4f899",
+      "sizeBytes": 805
+    },
+    "cards/EVDREQ-modern-agent-harness-practices.md": {
+      "sha256": "5a475d7819aaf5e5849fdcc5cb5a9968d330b9087b4c21362ad0121a497b5447",
+      "sizeBytes": 1219
+    },
+    "cards/EVDREQ-neutral-orchestration-boundary.md": {
+      "sha256": "c637b0f312dc28fe12497f445deb6d6629c8c841ae31e93318289c3d46fb7350",
+      "sizeBytes": 1472
+    },
+    "cards/EVDREQ-packed-install-contract-r6.md": {
+      "sha256": "8a2ee0e6cee6413939b14faa36097ce8db411bdc182d830b15f4fcf5c75b07aa",
+      "sizeBytes": 1173
+    },
+    "cards/EVDREQ-peer-repository-harness-patterns.md": {
+      "sha256": "78b6d5034077036de2173aaef0c2679292144a98f3046cbe8c57d7e82351750a",
+      "sizeBytes": 1999
+    },
+    "cards/EVDREQ-publisher-style-guide.md": {
+      "sha256": "eb29529a316bdabcb7aeda6a498046bea3aa9e2cc19423968317a32edb7a3810",
+      "sizeBytes": 401
+    },
+    "cards/EVDREQ-staged-fixed-point-prototype.md": {
+      "sha256": "0ee828f66b8568e5e058c8b600e7c084573563bddeb853ecd637bcdc3059205b",
+      "sizeBytes": 1058
+    },
+    "cards/EVDREQ-static-uncertainty-coverage.md": {
+      "sha256": "8b46d25371e4ab45d4cf02845aa63b92e96bd747557b0836bf7db84a3744dd29",
+      "sizeBytes": 1354
+    },
+    "cards/FRAME-RPT-001.md": {
+      "sha256": "61d2bc2b0a2509a4360461b6cc8d1b1d7f278bcb14d48b7828f64bde67c6bbe4",
+      "sizeBytes": 396
+    },
+    "cards/FRAME-ariadne-teaching-skill.md": {
+      "sha256": "cd43ddd3355b1c81fb540625049b87cc6051769fc3b67427ba6eb250c3e796ed",
+      "sizeBytes": 2599
+    },
+    "cards/FRAME-clean-session-verification-contract.md": {
+      "sha256": "690ecea350038551ce69f8e714ac91291976dbb1628d4ffb5e9823727ee20ef1",
+      "sizeBytes": 5011
+    },
+    "cards/FRAME-doc-readiness-nine-ops-en.md": {
+      "sha256": "00128a9bfbb014f629ebb728e4d39dea4cb4ca5affce4a08ec416066cb9e7480",
+      "sizeBytes": 486
+    },
+    "cards/FRAME-epistemic-branch-merge.md": {
+      "sha256": "59a80837438e0fe4b45b2a83facff3e7e2bdda898504af7c8e49a2d784e5863d",
+      "sizeBytes": 1038
+    },
+    "cards/FRAME-kernel-packaging-substrate.md": {
+      "sha256": "cc51196a444d1ebc19f075774d80f80d235edffb802a6bcfdef0bfd9d04a71e0",
+      "sizeBytes": 3044
+    },
+    "cards/FRAME-methodological-harness-lifecycle.md": {
+      "sha256": "88c049126483f01b4a61c06dd0aaac490e98d8ef1e9ef89d8979ed1af6054479",
+      "sizeBytes": 2847
+    },
+    "cards/FRAME-methodology-authoring-teaching-skill.md": {
+      "sha256": "7e19ffa90b045eca424a5153f1d3f41f6cac8f11aaaee95c1ece65e088bb8670",
+      "sizeBytes": 2995
+    },
+    "cards/FRAME-methodology-skill-harness-system.md": {
+      "sha256": "5b997cb4cf6d4ffcabc461f8c2a262eeed6e29e61c4fe190823767da8bc3c8d9",
+      "sizeBytes": 3701
+    },
+    "cards/FRAME-runtime-safety-recovery-contract.md": {
+      "sha256": "b011a1aa99d8427ee3f0892f30ce42770ff8780b472aefd16c4b1804698cdc56",
+      "sizeBytes": 3677
+    },
+    "cards/FRAME-semantic-gate-preflight-diagnostics.md": {
+      "sha256": "726e24029c813adbdf3f448d3743488d077bb9b7541ffb74fb6240e251386e8d",
+      "sizeBytes": 964
+    },
+    "cards/FRAME-uncertainty-substrate.md": {
+      "sha256": "1d3dd614ba08f1494fb27ca9408861c9d6b0a7f9bbd4bd554a799f9cfd3942a9",
+      "sizeBytes": 2871
+    },
+    "cards/HYP-missing-epistemic-handoff.md": {
+      "sha256": "7d887929faa55657b05ba627f5344072183a638faea1443d374d630ed30a8ec4",
+      "sizeBytes": 882
+    },
+    "cards/HYP-narrow-root-trigger.md": {
+      "sha256": "6689409fb8e65f964c2c5a3f2b48f7f3a7ffdb6c946e30e989b0bec8574b02ad",
+      "sizeBytes": 880
+    },
+    "cards/OBS-adapter-contract-post-evidence-gate.md": {
+      "sha256": "691a257f742c0cf0c029bb2621b0e20dcb339c8a03092383a44f2e6740b54e6b",
+      "sizeBytes": 1519
+    },
+    "cards/OBS-adapter-dependency-edge-contract.md": {
+      "sha256": "ea8f1f6bcde7775a3216efbbf2f209b47cdc124a7b6496c476a16bccc3539546",
+      "sizeBytes": 878
+    },
+    "cards/OBS-ariadne-cli-build-wsl1.md": {
+      "sha256": "ae6a2a2498cf2030cf2838bc4536b310bb38f21e199f483b2b4f1f26c076315c",
+      "sizeBytes": 895
+    },
+    "cards/OBS-ariadne-flow-missed.md": {
+      "sha256": "146bffd8a8a219a688af24ed1ed703f4eb184ae7ecd1a4000f2437ebd2426f28",
+      "sizeBytes": 571
+    },
+    "cards/OBS-ariadne-tooling-failures.md": {
+      "sha256": "8ed1b650edb11e2ab5c1699fe94597aeb561f3a81273e266c81e664249749aee",
+      "sizeBytes": 2580
+    },
+    "cards/OBS-book-anchors-valid.md": {
+      "sha256": "53e1a0d3cf1c9d5ce35f2bed011f0f9459b5baabf5a56b18c63acd88ff3a71b8",
+      "sizeBytes": 385
+    },
+    "cards/OBS-book-bibliography-present.md": {
+      "sha256": "f6ff82d60300ba9a0a91d1620b84f368f034893c5de8aba0f7ac4e4776535bce",
+      "sizeBytes": 340
+    },
+    "cards/OBS-book-fences-balanced.md": {
+      "sha256": "63aca2cc7c2f0e838d0126ad484fe29ed6325fa3610c87b900f12f06961a3a44",
+      "sizeBytes": 265
+    },
+    "cards/OBS-book-html-export-synced.md": {
+      "sha256": "83209c30c894ea6b88cbf20024c3752d6ed74a15783250d4b0f1a37e93f03a2c",
+      "sizeBytes": 309
+    },
+    "cards/OBS-book-no-placeholders.md": {
+      "sha256": "c78e8e812fb8e435baa61015853da264e0ad2946303870f7478957151c006870",
+      "sizeBytes": 347
+    },
+    "cards/OBS-book-numbering-gaps.md": {
+      "sha256": "e9eb84eb0bee9710c9ef29b5a75e9685bf964b55c9ca008d34fa0269fe5d78a7",
+      "sizeBytes": 521
+    },
+    "cards/OBS-clean-session-verification-post-decision-gate.md": {
+      "sha256": "ed762f0ea344eea9cde50517578255f831e657d736ff2e6b2fbef80971415857",
+      "sizeBytes": 2652
+    },
+    "cards/OBS-current-matt-bridge-ingest-only.md": {
+      "sha256": "4b68b2169d6c3e04be9a5c298dfda95cc55a1c0d6ea330dcabd8b03ecb482974",
+      "sizeBytes": 703
+    },
+    "cards/OBS-existing-ariadne-harness-seam.md": {
+      "sha256": "a2d4c70fb1cb002a6e5ecf7fcfbe30ec909f70935312ab6208c6c8c3f6473caf",
+      "sizeBytes": 868
+    },
+    "cards/OBS-fixed-point-edge-contract.md": {
+      "sha256": "8fe7853c8ef7991df08cdebe17fe189ef3f4d0a1facd645cdeff91f1f8ba046f",
+      "sizeBytes": 730
+    },
+    "cards/OBS-fixed-point-post-evidence-gate.md": {
+      "sha256": "55eda4cf9a747dfcf8c36683843340fab37a1acdda2bbaf57683871b47989fb6",
+      "sizeBytes": 1085
+    },
+    "cards/OBS-fixed-point-pre-evidence-gate.md": {
+      "sha256": "885b22a15eb9fe67bc7f5ee5d5f55577c3d7612e0632e82c0760eb32cf477f97",
+      "sizeBytes": 836
+    },
+    "cards/OBS-git-merge-installation-local.md": {
+      "sha256": "8ba5d3b58c4ef50fd53c098021384347649885c6ad90427a4cc2e74bb3befb91",
+      "sizeBytes": 490
+    },
+    "cards/OBS-git-three-way-driver.md": {
+      "sha256": "850e88c8f42d61128498034d1bf5bfa24c97363a795e8da2121d3c8d7b58e364",
+      "sizeBytes": 410
+    },
+    "cards/OBS-graph-last-write-wins.md": {
+      "sha256": "20ed6e52e295a8663c4786ab1dbca8cf849a8fab96a64713687a6dc49dad4644",
+      "sizeBytes": 368
+    },
+    "cards/OBS-harness-authoring-post-evidence-gate.md": {
+      "sha256": "800673dda9d90ba81b96bf6dd8a5bc4719c9106cddfd4421804b6d68b6c4adac",
+      "sizeBytes": 1634
+    },
+    "cards/OBS-harness-interface-package-shape.md": {
+      "sha256": "edc95ae5ff1c27509c2088a32e0dc88e43846dd1d01d574a1ef9b7618b7002ad",
+      "sizeBytes": 1570
+    },
+    "cards/OBS-kernel-packaging-post-prototype-gate.md": {
+      "sha256": "c76b4f9a744a0a8e87bcc65d3c856a3de0cdc27e3836b7167ff87c75c018239d",
+      "sizeBytes": 1402
+    },
+    "cards/OBS-merge-causal-relations.md": {
+      "sha256": "3681efe9c0bf9faa359806d842fbf642e4adc75ab1de0d8d987c34b471f2fc90",
+      "sizeBytes": 527
+    },
+    "cards/OBS-merge-derived-projection-transaction.md": {
+      "sha256": "87ef5e967d756ce330f2dd5d177c8e6a526efc3c40d4d5324e8c50bfba9d943c",
+      "sizeBytes": 467
+    },
+    "cards/OBS-merge-gate-status-gap.md": {
+      "sha256": "7b52963930fb9052f63d17354a909341bb022fa111e6042ba4944daacb6b883f",
+      "sizeBytes": 479
+    },
+    "cards/OBS-merge-no-protocol-version.md": {
+      "sha256": "ae5b68d6fdbc589e62c04ec96f746477cac09eb5dcbf7480bf8a80272091a8f6",
+      "sizeBytes": 406
+    },
+    "cards/OBS-merge-no-revision-binding.md": {
+      "sha256": "29456a50ee913694c25e8b50717de97c02e18e29238e19d9d75d328352e7bc34",
+      "sizeBytes": 418
+    },
+    "cards/OBS-merge-no-staging.md": {
+      "sha256": "3c290e2bb864ecbab23b203cc33df14b0223c3594132acb4752b83e3981e7b2d",
+      "sizeBytes": 427
+    },
+    "cards/OBS-methodological-guide-self-application.md": {
+      "sha256": "9da27e99c70811c8137f97f24b0f9d71930da4fa046ce04acfbf000376b6bd66",
+      "sizeBytes": 544
+    },
+    "cards/OBS-methodological-harness-shell-quoting.md": {
+      "sha256": "a819a893fc22a22c3076a11d2857ee4ca979646f269941e0c3eaac5a6ea3fd7b",
+      "sizeBytes": 763
+    },
+    "cards/OBS-methodology-authoring-post-evidence-gate.md": {
+      "sha256": "2c742b4e258e49f82724356e6cf065c984db5dde04a0d51a0d46e1d04ea35b44",
+      "sizeBytes": 1146
+    },
+    "cards/OBS-runtime-safety-post-decision-gate.md": {
+      "sha256": "aa61ed84feac5c0323fe9741d0520b5c8b8b86159d3f362a5cc8e0b9d393d508",
+      "sizeBytes": 1771
+    },
+    "cards/OBS-self-application-orientation-gap.md": {
+      "sha256": "4a6be01b28edac0d71bdb3a2cf7102d97b729ac397b41c234654cd0f1720ace1",
+      "sizeBytes": 1401
+    },
+    "cards/SPACE-ariadne-teaching-skill.md": {
+      "sha256": "f07844bb481596854384d01b5b6eba594a0670bf5bcd6648688ee06513410481",
+      "sizeBytes": 1003
+    },
+    "cards/SPACE-epistemic-branch-merge.md": {
+      "sha256": "510b9c57918702b978a0215379ee693a907a4d6ede6d21790e082cef2c51ed49",
+      "sizeBytes": 692
+    },
+    "cards/SPACE-kernel-packaging-substrate.md": {
+      "sha256": "d2241012f075f249bf38a1e1381d80ebe8aec47d5d3348c52a8fe311382d1e73",
+      "sizeBytes": 3571
+    },
+    "cards/SPACE-method-contract-shape.md": {
+      "sha256": "b20ce22ba3df90a4712e23984b0b19d8af0aeb0ddd90bfe22cea6c09e45d0ae2",
+      "sizeBytes": 1828
+    },
+    "cards/SPACE-methodology-authoring-teaching-skill.md": {
+      "sha256": "e9320fe1abe8293ea4ed1b219ff91bad483163b4fca183f45d38dfadc6ee48a4",
+      "sizeBytes": 1159
+    },
+    "cards/SPACE-peer-harness-continuation.md": {
+      "sha256": "29101c798818da128bb8617b3a5d8ff36b77a74bb2da73d2504060f3f8135066",
+      "sizeBytes": 2689
+    },
+    "cards/SPACE-staged-fixed-point-contract.md": {
+      "sha256": "001de1e124bfaea912bd7b66bf004a077d828cdd4901a7de155c34ee191cb1b6",
+      "sizeBytes": 1355
+    },
+    "cards/TRF-uncertainty-first-ingress.md": {
+      "sha256": "dfe933607891f642e9235ba60665255fab2bf92f11049e00c6b83e52453ad437",
+      "sizeBytes": 2080
+    },
+    "cards/UNK-auto-handoff-policy.md": {
+      "sha256": "cd494b8ea69630271b2b157c9bc5ebec7ade7df55818cc19a47b1ba377c77e34",
+      "sizeBytes": 898
+    },
+    "cards/UNK-external-link-rot.md": {
+      "sha256": "fd5d9cf6a9427bf3d81fbe3405352ca6f9a8585bc2d2dfbe4bdcf24920c87d17",
+      "sizeBytes": 442
+    },
+    "cards/UNK-grill-handoff-shape.md": {
+      "sha256": "70f08af3066c956658a70f5f0b9c1b71fbe9acdecad6befd3c015611142ad9e5",
+      "sizeBytes": 887
+    },
+    "cards/UNK-harness-lifecycle-release-topology.md": {
+      "sha256": "2d134223c329b2dbd7efe2dd2d360637df3f82769b3c0e91cd378edc3622996c",
+      "sizeBytes": 742
+    },
+    "cards/UNK-harness-product-boundary.md": {
+      "sha256": "26966bfac1db2272fc1adbe81dbcd6d232f87d823f1476a3d4e1b857874fa69b",
+      "sizeBytes": 822
+    },
+    "cards/UNK-kernel-packaging-substrate.md": {
+      "sha256": "c126f2fe6c2a7e202b6cdb4ee6b7a6270cec0fd889a7cabc7263adb2b7c190a8",
+      "sizeBytes": 1416
+    },
+    "cards/UNK-matt-ariadne-adapter-contract.md": {
+      "sha256": "067b40dc8af041c8811c9cbc43ab0acc03bf7e530e7ba07e06b25cfc739060b8",
+      "sizeBytes": 736
+    },
+    "cards/UNK-merge-active-subject.md": {
+      "sha256": "7ca4e5394a300fdaa518323e9c425c7996f00f1337f81662751d4c8b2c1d3203",
+      "sizeBytes": 411
+    },
+    "cards/UNK-merge-agent-handoff.md": {
+      "sha256": "db7881b08423dba64e7f009117030bf0f3b0d5a3efd28d795e05c29fd2b0fbf1",
+      "sizeBytes": 401
+    },
+    "cards/UNK-merge-artifact-scope.md": {
+      "sha256": "780f26106a1b3ed8753168af6b81cd0e6bbdd5c80718a88e15e89baddbd83ba4",
+      "sizeBytes": 420
+    },
+    "cards/UNK-merge-conflict-identity.md": {
+      "sha256": "1ca19cbc69b33353fc405f942ce9da9924dad5047eee0673f374d4ad2f5e3a81",
+      "sizeBytes": 414
+    },
+    "cards/UNK-merge-contradiction-status.md": {
+      "sha256": "f652090c5602895519e1fad2424c9cd64a32ed4e1ec3fd7e11a79b7b88bccde2",
+      "sizeBytes": 455
+    },
+    "cards/UNK-merge-delete-semantics.md": {
+      "sha256": "40f734f6cb1eeb52e16484d2c39eb6e9780c6e93b6c19d729cde313c0d7edf47",
+      "sizeBytes": 391
+    },
+    "cards/UNK-merge-evidence-freshness.md": {
+      "sha256": "b3aac4bff5fcd6a7739c4fbe4a7afbd3360c35b26a2a4ad34af97546918579db",
+      "sizeBytes": 453
+    },
+    "cards/UNK-merge-git-operation-scope.md": {
+      "sha256": "92ab97ae087f652ec0045a2f583dbfc260f80ff34cbf682cc4654a0c6995dbce",
+      "sizeBytes": 407
+    },
+    "cards/UNK-merge-installation-contract.md": {
+      "sha256": "c6f3dee1dcc87d558d7eee6e2f0ae32b82cd6e6d734c385bb42b3bf0ef7e75dc",
+      "sizeBytes": 491
+    },
+    "cards/UNK-merge-outcome-vocabulary.md": {
+      "sha256": "29cdbf3cae7ca1c3cf51d3e6641a002cd0ed9fb62b5e8e33a2213c1cd79634f4",
+      "sizeBytes": 458
+    },
+    "cards/UNK-merge-output-history-shape.md": {
+      "sha256": "0c48433f9229434b8a1563a2fc9b82afe608cba579768b28a5776e8705ec005c",
+      "sizeBytes": 381
+    },
+    "cards/UNK-merge-policy-blocking.md": {
+      "sha256": "e4f4426d23148ac6d9d877690b0796be2d0ea65ab313a7a2a083c885f6e09e21",
+      "sizeBytes": 479
+    },
+    "cards/UNK-merge-preservation-target.md": {
+      "sha256": "f129cec9ab7a64c8adfbbbbfb879ee065e9e0a991e895540830a7346f8aec817",
+      "sizeBytes": 445
+    },
+    "cards/UNK-merge-projection-staging.md": {
+      "sha256": "0937a3e33b16ebe68d0d85bb0f110654b7aac214fa59b87b7919ae799b88c2ec",
+      "sizeBytes": 395
+    },
+    "cards/UNK-merge-projection-sync.md": {
+      "sha256": "26a87ce76a8a65be85575a0c28b0be7f92654b96091df34aa0673eff08094673",
+      "sizeBytes": 456
+    },
+    "cards/UNK-merge-protocol-version.md": {
+      "sha256": "f0e677003f4ffb9bf3c3b9e5975060877d5722e76235c234dba6f29396313c12",
+      "sizeBytes": 418
+    },
+    "cards/UNK-merge-quarantine-closure.md": {
+      "sha256": "6fabcfdbe084be71b2126786adcb36baa9ab4f33ef6f2dc1263c6e17184f0537",
+      "sizeBytes": 413
+    },
+    "cards/UNK-merge-receipt-persistence.md": {
+      "sha256": "6f5062f1ec454174c2f163c307d45f6c791052789fbc2cc0c4e6f8710961aa5f",
+      "sizeBytes": 401
+    },
+    "cards/UNK-merge-reconciliation-authority.md": {
+      "sha256": "3334c38c5ab0aecfb1d5247d9ca671854b8c158069316ed7a2594ed6859f2eb1",
+      "sizeBytes": 399
+    },
+    "cards/UNK-merge-resolution-transaction.md": {
+      "sha256": "54999c49e259e6dfac89185a1cfa5b98bf6263565237e61cf403a6a915e67a43",
+      "sizeBytes": 395
+    },
+    "cards/UNK-merge-resolve-input.md": {
+      "sha256": "cef4d2353f73c395b70b7acf58c08f0c6fcd089be7aeea32df1f23eebac09da2",
+      "sizeBytes": 428
+    },
+    "cards/UNK-merge-resource-limits.md": {
+      "sha256": "a3b2c8b56b9d32e756d62d98431f3f6ec90a93abbcc60ade8f09dd79c3eb0b9a",
+      "sizeBytes": 437
+    },
+    "cards/UNK-merge-semantic-identity.md": {
+      "sha256": "ff32bb062d3e9bd7d77cd5194af4f049183c7754353b375cc068f962d057169f",
+      "sizeBytes": 371
+    },
+    "cards/UNK-merge-topology-policy.md": {
+      "sha256": "ef4fffb3be82479e0f77ffdcde9e011edc8ed20262ad0a95ac2a481ca1c9429a",
+      "sizeBytes": 434
+    },
+    "cards/UNK-method-normative-source.md": {
+      "sha256": "2aa15f377040af164c826a80e322dd796055d066a0f26f9a26c5e006e3fa3904",
+      "sizeBytes": 702
+    },
+    "cards/UNK-modern-agent-harness-practices.md": {
+      "sha256": "292d9796b4c4720187757e013fa5938a83ffec0a4f6663885a8a6556e2cf716a",
+      "sizeBytes": 923
+    },
+    "cards/UNK-orchestration-runtime-ownership.md": {
+      "sha256": "7b351989c3d194a8af9cea94678bd7c1c396a81991d226512dcb4ffcfdcec0c6",
+      "sizeBytes": 803
+    },
+    "cards/UNK-peer-repository-harness-gaps.md": {
+      "sha256": "ff3db01b07af2878a823ef946014239a7ff4e1ab84a91468032d24c68fd85b0f",
+      "sizeBytes": 1840
+    },
+    "cards/UNK-publisher-format-requirements.md": {
+      "sha256": "c82b9845981f5950ddfe6630080aa45f9fb8da86a44bcd337550445713db472c",
+      "sizeBytes": 527
+    },
+    "cards/UNK-recursive-self-application-topology.md": {
+      "sha256": "2c8b6b84fb1a7cf897a7a09b068b090b03314688ada65fa2374b0056efaa8aa0",
+      "sizeBytes": 859
+    },
+    "cards/UNK-runtime-safety-recovery-semantics.md": {
+      "sha256": "dee92e245b120eb15481891ad6d5e97f5a69e3f9c5734f7533634f0e5b722731",
+      "sizeBytes": 1031
+    },
+    "cards/UNK-section-numbering-intent.md": {
+      "sha256": "ebc37bb973c093a6c077842414b09734c7c81c85ddbe965dbbd60f1d897e7131",
+      "sizeBytes": 432
+    },
+    "cards/UNK-semantic-preflight-placement.md": {
+      "sha256": "79d02d9645bce851025e63d66209e46550d59e5fb8f24aa18901c4d2269002be",
+      "sizeBytes": 671
+    },
+    "cards/UNK-semantic-principle-contract.md": {
+      "sha256": "d0150c9fdde4ab35ac0745b03285d9db5ff4600d151a6960c858c89b0bbe5a82",
+      "sizeBytes": 757
+    },
+    "cards/UNK-staged-fixed-point-contract.md": {
+      "sha256": "eec30713c430e262384daf4a4b20f644f8b8b334c82179fa927c79955b7eda83",
+      "sizeBytes": 881
+    },
+    "cards/UNK-uncertainty-trigger-boundary.md": {
+      "sha256": "cddc55176faac4e98d67cddf682564e050a7ee3a31f62a08244bfc02b3d2d350",
+      "sizeBytes": 957
+    },
+    "cards/UNK-wayfinder-destination-boundary.md": {
+      "sha256": "1a2a70dacb3d7606ee05d463ed79d7ded96af740eac3b02bfbae8436b04965bd",
+      "sizeBytes": 697
+    },
+    "cards/VAL-SELECT-ariadne-teaching-skill.md": {
+      "sha256": "a098a1c3df5fea3eef6551d046b4f305373bd2e2db60fdd349e2c5205003a2f3",
+      "sizeBytes": 3350
+    },
+    "cards/VAL-SELECT-clean-session-verification.md": {
+      "sha256": "7bdd675dd921b2a630b4f8e0afc54d9c2cef599a905e57b0711dad2a7d67ae30",
+      "sizeBytes": 5269
+    },
+    "cards/VAL-SELECT-harness-authoring-teaching-skill.md": {
+      "sha256": "d06589c7a3010a91055ac140def947542fce634f7edf33431e3c3af35c020846",
+      "sizeBytes": 4934
+    },
+    "cards/VAL-SELECT-harness-lifecycle-topology.md": {
+      "sha256": "a9550e2372ddb5d927155c9c5e87f8730b688d66e0a62a89905e681565d08559",
+      "sizeBytes": 2324
+    },
+    "cards/VAL-SELECT-kernel-packaging-substrate.md": {
+      "sha256": "4d52fdc9528a68bb451408c47d142e260aa982f42b12bf8d2319d3700e775577",
+      "sizeBytes": 3279
+    },
+    "cards/VAL-SELECT-matt-ariadne-adapter-contract.md": {
+      "sha256": "22056faa44fc3c78c1f1fb9528803a6b7d5e3589ea246a5875092babc0280cde",
+      "sizeBytes": 3164
+    },
+    "cards/VAL-SELECT-method-contract-shape.md": {
+      "sha256": "3d3b296afbf9e7234490a7e326af40b209159f68e35f50c7e15b83e0d4d5242c",
+      "sizeBytes": 5082
+    },
+    "cards/VAL-SELECT-methodological-harness-defaults.md": {
+      "sha256": "6051ce9a86bc8d1eb9191225dc0c16060194f66a51062a6599abffc92e60aa80",
+      "sizeBytes": 1445
+    },
+    "cards/VAL-SELECT-methodology-authoring-teaching-skill.md": {
+      "sha256": "3e91fcf3c05aab859d06b17c4d591fc8e8102acd587d474e70a10a77410a6122",
+      "sizeBytes": 3978
+    },
+    "cards/VAL-SELECT-minimum-orchestration-contract.md": {
+      "sha256": "a91edf96dea7f654cfb19a4fe679821ed399ca62935c4e309e0c93d00be63597",
+      "sizeBytes": 2762
+    },
+    "cards/VAL-SELECT-peer-harness-direction.md": {
+      "sha256": "ff392df9101cc57921656bd5ffc04dde3947687820147bdad051e059798f990f",
+      "sizeBytes": 4216
+    },
+    "cards/VAL-SELECT-runtime-safety-recovery.md": {
+      "sha256": "69353d1bc211784103213a7b320aee47ec34befed70afe7c86beb959656fd5d7",
+      "sizeBytes": 5257
+    },
+    "cards/VAL-SELECT-staged-fixed-point-contract.md": {
+      "sha256": "821781829ae041150ad9c5c2d6b161f86eac4b5cdd7af3a5fce6a3d3025eec8a",
+      "sizeBytes": 3638
+    },
+    "cards/VAL-SELECT-uncertainty-ingress.md": {
+      "sha256": "e1d816a625c6896e66e50d3127f2cff50e49a2ed5477b08f3b2135ba387c88ea",
+      "sizeBytes": 4343
+    },
+    "cards/VAL-method-contract-shape.md": {
+      "sha256": "95a95c47749f023329caa6452c2536e7b0d193b4698c3670e76dd3154817c22a",
+      "sizeBytes": 1806
+    },
+    "cards/VAL-neutral-orchestration-boundary-r1.md": {
+      "sha256": "1cf5a062a31d38f84fb6f9a9a9f6c7b79df8e080bb705c62a8c80b4c507653b8",
+      "sizeBytes": 2045
+    },
+    "cards/VAL-staged-fixed-point-prototype.md": {
+      "sha256": "336114c2fe235aa70434722c44a160a54d090e96ceef637d92f434e5d080b365",
+      "sizeBytes": 951
+    }
+  }
+}

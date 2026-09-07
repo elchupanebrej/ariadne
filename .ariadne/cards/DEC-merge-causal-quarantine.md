@@ -3,7 +3,7 @@
 - Status: DECIDED
 - Provenance: DECIDED
 - Type: DEC
-- Revised: 2026-09-03
+- Revised: 2026-09-07
 
 ## Statement
 

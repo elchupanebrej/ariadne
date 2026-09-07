@@ -3,7 +3,7 @@
 - Status: ACTIVE
 - Provenance: DECIDED
 - Type: DYN
-- Revised: 2026-08-24
+- Revised: 2026-09-07
 
 ## Statement
 

@@ -3,7 +3,7 @@
 - Status: FALSIFIED
 - Provenance: MEASURED
 - Type: EVD
-- Revised: 2026-08-30
+- Revised: 2026-09-07
 
 ## Statement
 

@@ -3,7 +3,7 @@
 - Status: OPEN
 - Provenance: PROPOSED
 - Type: VAL-SELECT
-- Revised: 2026-08-24
+- Revised: 2026-09-07
 
 ## Statement
 
