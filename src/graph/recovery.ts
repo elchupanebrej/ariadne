@@ -127,10 +127,12 @@ export async function scanAndRecoverJournal(
     }
 
     if (!isValid) {
-      if (!isFinalFrame) {
+      if (!isFinalFrame || records.length === 0) {
         throw new AriadneError({
           code: "CORRUPT_PERSISTED_HISTORY",
-          message: "Middle corruption or checksum mismatch detected in canonical history",
+          message: records.length === 0
+            ? "Canonical history contains no verified prefix before an invalid frame"
+            : "Middle corruption or checksum mismatch detected in canonical history",
           repair: "Inspect .ariadne/GRAPH.jsonl or restore from backup.",
           detail: {
             journalPath,
@@ -169,6 +171,19 @@ export async function scanAndRecoverJournal(
     records.push(parsed as FramedRecord<unknown>);
     lastValidOffset = recordEnd;
     lineStart = recordEnd;
+
+    // Keep the append boundary unambiguous when a previously valid writer
+    // stopped immediately after the final frame. The correction is made while
+    // callers hold the root lock, before any new canonical record is appended.
+    if (nextNewline === -1) {
+      const handle = await fs.promises.open(journalPath, "a");
+      try {
+        await handle.writeFile("\n", "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+    }
   }
 
   // Check if there was trailing data after lastValidOffset that is non-whitespace

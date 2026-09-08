@@ -184,7 +184,7 @@ describe("fail-closed orchestration boundaries", () => {
     await saveAttempt(root, second);
 
     // Torn write on the final line is tolerated; recovery falls back.
-    const ledgerPath = join(root, "attempts", "b-ledger.jsonl");
+    const ledgerPath = join(root, ".orchestration", "attempts", "b-ledger.jsonl");
     const history = await readFile(ledgerPath, "utf8");
     await writeFile(ledgerPath, history + '{"id":"b-ledger","revi', "utf8");
     const recovered = await loadAttempt(root, "b-ledger");
@@ -205,7 +205,7 @@ describe("fail-closed orchestration boundaries", () => {
 
     // A shape-invalid committed record fails closed even though it parses.
     await writeFile(ledgerPath, `${JSON.stringify({ id: "b-ledger" })}\n${history}`, "utf8");
-    await expect(loadAttempt(root, "b-ledger")).rejects.toThrow(/Invalid committed history/);
+    await expect(loadAttempt(root, "b-ledger")).rejects.toThrow(/Middle corruption|Cannot read attempt/);
   });
 
   it("distinguishes a missing attempt from corrupted state", async () => {
@@ -218,9 +218,12 @@ describe("fail-closed orchestration boundaries", () => {
     }
     expect(caught?.reason).toBe("attempt_missing");
     expect(caught?.toDisposition().pendingAction).toBe("host://pending/register-attempt");
+    expect(caught?.toDisposition().resumePredicate).toBe(
+      "attempt id exists under <root>/.orchestration/attempts/",
+    );
 
     await saveAttempt(root, createAttempt({ id: "b-real" }));
-    const ledgerPath = join(root, "attempts", "b-real.jsonl");
+    const ledgerPath = join(root, ".orchestration", "attempts", "b-real.jsonl");
     await writeFile(ledgerPath, "garbage\n", "utf8");
     try {
       await loadAttempt(root, "b-real");

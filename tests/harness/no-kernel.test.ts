@@ -43,14 +43,20 @@ describe("no Orchestration Kernel is retained", () => {
     }
   });
 
-  it("limits the thin attempt module to its exact declared import surface", async () => {
+  it("limits the attempt module to its approved hardened-persistence import surface", async () => {
     const source = await readFile(join(harnessRoot, "attempt.ts"), "utf8");
     const imports = [...source.matchAll(/^import\s+[^;]*from\s+"([^"]+)";/gm)].map(
       (match) => match[1],
     );
-    // Fixed allowlist: any new dependency on network, IPC, worker, lock,
-    // queue, or database facilities fails here.
-    const allowed = new Set(["node:fs/promises", "node:path", "../adapters/lifecycle.js"]);
+    // Fixed allowlist: the attempt module may use the lifecycle contract, the
+    // canonical framed journal, and canonical diagnostics. Any direct
+    // dependency on network, IPC, worker, lock, queue, or database facilities
+    // still fails here.
+    const allowed = new Set([
+      "../adapters/lifecycle.js",
+      "../core/errors.js",
+      "../graph/journal.js",
+    ]);
     for (const specifier of imports) {
       expect({ specifier, allowed: allowed.has(specifier) }).toEqual({
         specifier,
@@ -60,9 +66,9 @@ describe("no Orchestration Kernel is retained", () => {
     // Ceiling: textual scan cannot see dynamic import() or re-exports.
   });
 
-  it("keeps the attempt module separate from the controller, graph storage, gates, and Epistemic Overlay", async () => {
+  it("keeps the attempt module separate from the controller, gates, and Epistemic Overlay", async () => {
     const attemptSource = await readFile(join(harnessRoot, "attempt.ts"), "utf8");
-    for (const forbidden of ["../graph/", "../gates/", "../core/", "./controller.js"]) {
+    for (const forbidden of ["../gates/", "./controller.js"]) {
       expect(attemptSource).not.toContain(forbidden);
     }
     // And nothing in those subsystems reaches back into the attempt module.

@@ -4,8 +4,14 @@ import os from "node:os";
 import { describe, expect, it } from "vitest";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import { GraphStorage } from "../../src/graph/storage.js";
-import { readFramedRecords, verifyFrame } from "../../src/graph/journal.js";
+import {
+  appendAttemptEvent,
+  createFramedRecord,
+  readFramedRecords,
+  verifyFrame,
+} from "../../src/graph/journal.js";
 import { emitGsdOperationalNotice } from "../../src/adapters/gsd/operational-notice.js";
+import { createAttempt, loadAttempt, saveAttempt } from "../../src/harness/attempt.js";
 
 describe("hardened persistence active path", () => {
   it("routes public filesystem graph mutations through framed canonical records", async () => {
@@ -120,7 +126,137 @@ describe("hardened persistence active path", () => {
 
       const records = await readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"));
       expect(records).toHaveLength(1);
+      expect(records[0].idempotencyKey).toMatch(/^graph-event:/u);
       expect(records[0].payload).toMatchObject({ kind: "node", node: { id: "TASK-active" } });
+
+      await storage.appendNode({
+        id: "TASK-active",
+        type: "TASK",
+        provenance_type: "FACT",
+        statement: "GraphStorage shares the hardened path",
+      });
+      await storage.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "TASK-active",
+            type: "TASK",
+            provenance_type: "FACT",
+            statement: "GraphStorage shares the hardened path",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            id: "TASK-active",
+            type: "TASK",
+            provenance_type: "FACT",
+            statement: "GraphStorage shares the hardened path",
+          },
+        },
+      ]);
+      await expect(readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"))).resolves.toHaveLength(1);
+    } finally {
+      fs.rmSync(storageRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("repairs a valid canonical tail without a newline before appending", async () => {
+    const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-active-newline-"));
+
+    try {
+      const first = createFramedRecord({
+        payload: {
+          kind: "node",
+          node: {
+            id: "TASK-existing",
+            type: "TASK",
+            provenance_type: "FACT",
+            statement: "Existing canonical event",
+          },
+        },
+        sequence: 1,
+        idempotencyKey: "graph-event:existing",
+      });
+      fs.writeFileSync(path.join(storageRoot, "GRAPH.jsonl"), JSON.stringify(first), "utf8");
+
+      await new GraphStorage(storageRoot).appendNode({
+        id: "TASK-next",
+        type: "TASK",
+        provenance_type: "FACT",
+        statement: "Appended after a valid unterminated frame",
+      });
+
+      const records = await readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"));
+      expect(records).toHaveLength(2);
+      expect(records.map(({ sequence }) => sequence)).toEqual([1, 2]);
+    } finally {
+      fs.rmSync(storageRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("routes orchestration attempt snapshots through the framed attempt authority", async () => {
+    const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-active-attempt-"));
+
+    try {
+      const attempt = createAttempt({
+        id: "attempt-active",
+        pins: ["contract://method@sha256:active"],
+        replayBudget: 1,
+      });
+      await saveAttempt(storageRoot, attempt);
+
+      const attemptPath = path.join(
+        storageRoot,
+        ".orchestration",
+        "attempts",
+        "attempt-active.jsonl",
+      );
+      const records = await readFramedRecords(attemptPath);
+      expect(records).toHaveLength(1);
+      expect(records[0].idempotencyKey).toBe("attempt:attempt-active:revision:1");
+      expect(records[0].payload).toMatchObject({ id: "attempt-active", revision: 1 });
+      expect(fs.existsSync(path.join(storageRoot, "attempts", "attempt-active.jsonl"))).toBe(false);
+      await expect(loadAttempt(storageRoot, "attempt-active")).resolves.toMatchObject({
+        id: "attempt-active",
+        revision: 1,
+      });
+
+      const duplicate = await appendAttemptEvent(
+        storageRoot,
+        "attempt-active",
+        records[0].payload,
+        { idempotencyKey: "attempt:attempt-active:revision:1" },
+      );
+      expect(duplicate.outcome).toBe("committed");
+      await expect(readFramedRecords(attemptPath)).resolves.toHaveLength(1);
+    } finally {
+      fs.rmSync(storageRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects mutation when a legacy attempt ledger is present", async () => {
+    const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-active-legacy-attempt-"));
+
+    try {
+      fs.mkdirSync(path.join(storageRoot, "attempts"), { recursive: true });
+      fs.writeFileSync(
+        path.join(storageRoot, "attempts", "attempt-legacy.jsonl"),
+        `${JSON.stringify({ id: "attempt-legacy", revision: 1 })}\n`,
+        "utf8",
+      );
+      const before = fs.readFileSync(
+        path.join(storageRoot, "attempts", "attempt-legacy.jsonl"),
+        "utf8",
+      );
+
+      await expect(
+        saveAttempt(storageRoot, createAttempt({ id: "attempt-new" })),
+      ).rejects.toMatchObject({ code: "MIGRATION_REQUIRED" });
+      expect(
+        fs.readFileSync(path.join(storageRoot, "attempts", "attempt-legacy.jsonl"), "utf8"),
+      ).toBe(before);
+      expect(fs.existsSync(path.join(storageRoot, ".orchestration"))).toBe(false);
     } finally {
       fs.rmSync(storageRoot, { recursive: true, force: true });
     }

@@ -422,7 +422,9 @@ export function getAttemptLedgerPath(storageRoot: string, attemptId: string): st
 
 const scanCanonicalJournal = async (
   filePath: string,
+  options: { repair?: boolean } = {},
 ): Promise<{ records: FramedRecord<unknown>[] }> => {
+  const repair = options.repair ?? true;
   let buffer: Buffer;
   try {
     buffer = await fs.promises.readFile(filePath);
@@ -445,7 +447,7 @@ const scanCanonicalJournal = async (
     try {
       parsed = JSON.parse(line);
     } catch {
-      if (!isFinal) {
+      if (!isFinal || records.length === 0) {
         throw new AriadneError({
           code: "CORRUPT_PERSISTED_HISTORY",
           message: "Middle corruption detected in canonical history",
@@ -453,16 +455,19 @@ const scanCanonicalJournal = async (
           detail: { filePath, offset },
         });
       }
+      if (!repair) return { records };
       await fs.promises.truncate(filePath, lastValidOffset);
       return { records };
     }
     const valid = verifyFrame(parsed) &&
       (records.length === 0 || parsed.sequence === records.at(-1)!.sequence + 1);
     if (!valid) {
-      if (!isFinal) {
+      if (!isFinal || records.length === 0) {
         throw new AriadneError({
           code: "CORRUPT_PERSISTED_HISTORY",
-          message: "Middle corruption or sequence break detected in canonical history",
+          message: records.length === 0
+            ? "Canonical history contains no verified prefix before an invalid frame"
+            : "Middle corruption or sequence break detected in canonical history",
           repair: "Inspect the canonical journal or restore from backup.",
           detail: { filePath, offset },
         });
@@ -472,6 +477,15 @@ const scanCanonicalJournal = async (
     }
     records.push(parsed as FramedRecord<unknown>);
     lastValidOffset = recordEnd;
+    if (newline === -1 && repair) {
+      const handle = await fs.promises.open(filePath, "a");
+      try {
+        await handle.writeFile("\n", "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+    }
     offset = recordEnd;
   }
   return { records };
@@ -497,10 +511,12 @@ export interface ExecuteWriteCycleOptions<TResult = unknown, TPayload = unknown>
     payload: TPayload;
     result?: TResult;
     projections?: ProjectionItem[];
+    idempotencyKey?: string;
   } | Promise<{
     payload: TPayload;
     result?: TResult;
     projections?: ProjectionItem[];
+    idempotencyKey?: string;
   }>;
   projections?:
     | ProjectionItem[]
@@ -513,6 +529,7 @@ export interface ExecuteWriteCycleOptions<TResult = unknown, TPayload = unknown>
   syncFn?: (handle: fs.promises.FileHandle) => Promise<void>;
   projectionErrorSimulator?: () => void;
   frameMetadata?: Record<string, unknown> | ((payload: TPayload) => Record<string, unknown>);
+  idempotentResult?: (payload: unknown) => TResult;
 }
 
 /**
@@ -606,6 +623,9 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
             const mut = await options.mutate({ existingRecords });
             activePayload = mut.payload;
             activeResult = (mut.result !== undefined ? mut.result : activePayload) as TResult;
+            if (mut.idempotencyKey !== undefined) {
+              options = { ...options, idempotencyKey: mut.idempotencyKey };
+            }
             if (mut.projections) {
               stagedProjections = [...mut.projections];
             }
@@ -691,7 +711,9 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
                     ...(await options.projections({
                       record: candidateFrame,
                       existingRecords,
-                      result: match.payload as TResult,
+                    result: options.idempotentResult
+                      ? options.idempotentResult(match.payload)
+                      : (match.payload as TResult),
                     })),
                   ];
                 }
@@ -711,7 +733,9 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
               }
               return {
                 outcome: "committed",
-                result: match.payload as TResult,
+                result: options.idempotentResult
+                  ? options.idempotentResult(match.payload)
+                  : (match.payload as TResult),
                 sequence: match.sequence,
                 record: match,
               };
@@ -835,7 +859,7 @@ export async function readAttemptEvents<T = unknown>(
   attemptId: string,
 ): Promise<FramedRecord<T>[]> {
   const attemptPath = getAttemptLedgerPath(storageRoot, attemptId);
-  return readFramedRecords<T>(attemptPath);
+  return (await scanCanonicalJournal(attemptPath, { repair: false })).records as FramedRecord<T>[];
 }
 
 /**

@@ -1,4 +1,5 @@
 import { mkdir, readFile, rm } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { AriadneError } from "../core/errors.js";
 import type { GraphEvent } from "./storage.js";
@@ -7,6 +8,7 @@ import {
   createFramedRecord,
   readFramedRecords,
   stageAndSwapProjection,
+  type FramedRecord,
 } from "./journal.js";
 import { assertNotLegacyWorkspace } from "./legacy.js";
 import { withRootLock } from "./lock.js";
@@ -46,6 +48,9 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 const isFramedLine = (value: unknown): boolean =>
   isObject(value) && "schemaVersion" in value;
+
+const graphEventIdempotencyKey = (event: GraphEvent): string =>
+  `graph-event:${createHash("sha256").update(JSON.stringify(event), "utf8").digest("hex")}`;
 
 const parseLegacyEvents = async (graphPath: string, content: string): Promise<GraphEvent[]> => {
   const lines = content.split("\n");
@@ -193,13 +198,39 @@ export class FileSystemStorageDriver implements StorageDriver {
     if (events.length === 0) return;
     await this.inMutation(async () => {
       const existing = await readFramedRecords(this.graphPath);
-      assertWithinCapacity({ eventCount: existing.length + events.length });
-      const frames = events.map((event, index) =>
-        createFramedRecord({
-          payload: event,
-          sequence: existing.length + index + 1,
-        }),
+      const existingByKey = new Map(
+        existing
+          .filter((record) => record.idempotencyKey !== undefined)
+          .map((record) => [record.idempotencyKey as string, record]),
       );
+      const frames: FramedRecord<GraphEvent>[] = [];
+      for (const event of events) {
+        const idempotencyKey = graphEventIdempotencyKey(event);
+        const candidate: FramedRecord<GraphEvent> = createFramedRecord({
+          payload: event,
+          sequence: existing.length + frames.length + 1,
+          idempotencyKey,
+        });
+        const previous = existingByKey.get(idempotencyKey);
+        if (previous) {
+          if (previous.payloadDigest !== candidate.payloadDigest) {
+            throw new AriadneError({
+              code: "IDEMPOTENCY_CONFLICT",
+              message: `Idempotency key '${idempotencyKey}' reused with different payload digest`,
+              detail: {
+                idempotencyKey,
+                existingDigest: previous.payloadDigest,
+                attemptedDigest: candidate.payloadDigest,
+              },
+            });
+          }
+          continue;
+        }
+        frames.push(candidate);
+        existingByKey.set(idempotencyKey, candidate);
+      }
+      assertWithinCapacity({ eventCount: existing.length + frames.length });
+      if (frames.length === 0) return;
       try {
         await appendCanonicalRecords(this.graphPath, frames);
       } catch (error) {

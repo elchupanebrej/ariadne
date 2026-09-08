@@ -116,14 +116,17 @@ describe("thin-path effect safety (fault-injected clean-session runs)", () => {
     const winner = transition(staleView, "waiting");
     await saveAttempt(root, winner);
 
-    // The stale writer appends its outdated record...
+    // The stale writer retries its outdated record. Idempotency recognizes the
+    // already committed revision and does not append a duplicate snapshot.
     await saveAttempt(root, staleView);
 
-    // ...and the next legitimate write exposes the revision break inside
-    // committed history.
+    // The next legitimate write remains readable after the stale retry.
     await saveAttempt(root, winner);
-    await expect(loadAttempt(root, id)).rejects.toThrow(BoundaryError);
-    await expect(reconstructNextAction(root, id)).rejects.toThrow(/Invalid committed history/);
+    await expect(loadAttempt(root, id)).resolves.toMatchObject({
+      revision: winner.revision,
+      status: winner.status,
+    });
+    await expect(reconstructNextAction(root, id)).resolves.toMatchObject({ action: "escalate" });
   });
 
   it("rejects duplicate and gapped events independently per workspace", async () => {
@@ -234,7 +237,10 @@ describe("thin-path effect safety (fault-injected clean-session runs)", () => {
     expect(stored.ownerPointers).toEqual([]);
     // A pointer-only ledger stays tiny; any payload copy would inflate it.
     const MAX_POINTER_ONLY_LEDGER_BYTES = 2000;
-    const raw = await readFile(join(root, "attempts", `${id}.jsonl`), "utf8");
+    const raw = await readFile(
+      join(root, ".orchestration", "attempts", `${id}.jsonl`),
+      "utf8",
+    );
     expect(raw.length).toBeLessThan(MAX_POINTER_ONLY_LEDGER_BYTES);
   });
 

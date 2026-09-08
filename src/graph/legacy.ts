@@ -63,6 +63,44 @@ export async function isLegacyWorkspace(storageRoot: string): Promise<boolean> {
   if (await hasLegacyAuthority("GRAPH.jsonl")) return true;
   if (await hasLegacyAuthority("NOTICES.jsonl")) return true;
 
+  const hasLegacyAttempts = async (directory: string): Promise<boolean> => {
+    let entries: fs.Dirent[];
+    try {
+      entries = await fs.promises.readdir(path.join(canonicalRoot, directory), {
+        withFileTypes: true,
+      });
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
+    }
+
+    for (const entry of entries) {
+      if (!entry.isFile() || !entry.name.endsWith(".jsonl")) continue;
+      const filePath = path.join(canonicalRoot, directory, entry.name);
+      const content = await fs.promises.readFile(filePath, "utf8");
+      for (const line of content.split("\n").filter((candidate) => candidate.trim())) {
+        try {
+          const parsed: unknown = JSON.parse(line);
+          if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            (parsed as { schemaVersion?: unknown }).schemaVersion !== 1
+          ) {
+            return true;
+          }
+        } catch {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // The pre-v1 harness used <root>/attempts/*.jsonl. It is a legacy authority,
+  // even when GRAPH.jsonl and NOTICES.jsonl have already been upgraded.
+  if (await hasLegacyAttempts("attempts")) return true;
+  if (await hasLegacyAttempts(path.join(".orchestration", "attempts"))) return true;
+
   const hasCanonicalAuthorityFile = await Promise.all(["GRAPH.jsonl", "NOTICES.jsonl"].map(async (fileName) => {
     try {
       await fs.promises.access(path.join(canonicalRoot, fileName));

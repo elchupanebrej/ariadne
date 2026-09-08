@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+import { readFramedRecords } from "../../src/graph/journal.js";
 import {
   applyEvent,
   createAttempt,
@@ -18,9 +19,10 @@ const readLedgerRecord = async (
   root: string,
   id: string,
 ): Promise<Record<string, unknown>> => {
-  const raw = await readFile(join(root, "attempts", `${id}.jsonl`), "utf8");
-  const lines = raw.trim().split("\n");
-  return JSON.parse(lines[lines.length - 1]) as Record<string, unknown>;
+  const records = await readFramedRecords(
+    join(root, ".orchestration", "attempts", `${id}.jsonl`),
+  );
+  return records.at(-1)?.payload as Record<string, unknown>;
 };
 
 const builtModule = new URL("../../dist/harness/attempt.js", import.meta.url).href;
@@ -280,8 +282,8 @@ describe("thin Orchestration Attempt continuity", () => {
     await expect(loadAttempt(root, "missing")).rejects.toThrow(/Attempt not found/);
 
     await saveAttempt(root, createAttempt({ id: "att-corrupt" }));
-    const ledgerPath = join(root, "attempts", "att-corrupt.jsonl");
+    const ledgerPath = join(root, ".orchestration", "attempts", "att-corrupt.jsonl");
     await writeFile(ledgerPath, "{not json", "utf8");
-    await expect(loadAttempt(root, "att-corrupt")).rejects.toThrow(/No recoverable record/);
+    await expect(loadAttempt(root, "att-corrupt")).rejects.toThrow(/Canonical history|Cannot read attempt/);
   });
 });

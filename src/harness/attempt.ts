@@ -1,10 +1,14 @@
-import { appendFile, mkdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
 import {
   assertOwnerScheme,
   sha256Digest,
   type LifecycleStatus,
 } from "../adapters/lifecycle.js";
+import {
+  executeWriteCycle,
+  readAttemptEvents,
+  type FramedRecord,
+} from "../graph/journal.js";
+import { AriadneError } from "../core/errors.js";
 
 export interface OrchestrationAttempt {
   id: string;
@@ -271,7 +275,7 @@ const REASON_PROFILES: Record<AttemptReason, ReasonProfile> = {
   attempt_missing: {
     authorityRef: "host://authority/attempt-registration",
     pendingAction: "host://pending/register-attempt",
-    resumePredicate: "attempt id exists under <root>/attempts/",
+    resumePredicate: "attempt id exists under <root>/.orchestration/attempts/",
   },
   replay_declaration_invalid: {
     authorityRef: "owner://authority/replay-authorization",
@@ -418,42 +422,118 @@ async function decideApproval(
   return { action: "resume_approval", approvalRef: ref, deadline: attempt.deadline };
 }
 
-const attemptsDir = (rootDirectory: string): string => join(rootDirectory, "attempts");
-const attemptPath = (rootDirectory: string, id: string): string =>
-  join(attemptsDir(rootDirectory), `${id}.jsonl`);
+type PersistedAttempt = Record<string, unknown>;
 
-function serialize(attempt: OrchestrationAttempt): string {
+function persistedAttempt(attempt: OrchestrationAttempt): PersistedAttempt {
   const record: Record<string, unknown> = {};
   for (const field of ATTEMPT_FIELDS) {
     if (attempt[field] !== undefined) record[field] = attempt[field];
   }
-  return `${JSON.stringify(record)}\n`;
+  return record;
 }
 
-// ponytail: append-only JSONL snapshots; concurrent writers need file locking
-// or a revision compare-and-swap if that ever happens.
 export async function saveAttempt(
   rootDirectory: string,
   attempt: OrchestrationAttempt,
 ): Promise<void> {
-  await mkdir(attemptsDir(rootDirectory), { recursive: true });
-  await appendFile(attemptPath(rootDirectory, attempt.id), serialize(attempt), "utf8");
+  const payload = persistedAttempt(attempt);
+  const idempotencyKey = `attempt:${attempt.id}:revision:${attempt.revision}`;
+  const outcome = await executeWriteCycle<PersistedAttempt, PersistedAttempt>({
+    storageRoot: rootDirectory,
+    authority: "attempt",
+    attemptId: attempt.id,
+    payload,
+    result: payload,
+    idempotencyKey,
+    preValidate: ({ existingRecords }) => {
+      if (!isValidRecord(payload, attempt.id, attempt.revision)) {
+        throw new AriadneError({
+          code: "INVALID_INPUT",
+          message: `Attempt ${attempt.id} is not a valid pointer-only state at revision ${attempt.revision}`,
+          repair: "Persist an attempt created by createAttempt and advance it through a valid mutation.",
+          detail: { attemptId: attempt.id, revision: attempt.revision },
+        });
+      }
+
+      const existing = existingRecords.find((record) => record.idempotencyKey === idempotencyKey);
+      if (existing) return;
+
+      if (existingRecords.length === 0) {
+        if (attempt.revision !== 1) {
+          throw new AriadneError({
+            code: "INVALID_INPUT",
+            message: `First persisted revision for attempt ${attempt.id} must be 1, received ${attempt.revision}`,
+            repair: "Start the attempt with createAttempt before persisting later revisions.",
+            detail: { attemptId: attempt.id, revision: attempt.revision },
+          });
+        }
+        return;
+      }
+
+      let current: OrchestrationAttempt;
+      try {
+        current = attemptFromRecords(attempt.id, existingRecords);
+      } catch (error) {
+        throw new AriadneError({
+          code: "CORRUPT_PERSISTED_HISTORY",
+          message: `Cannot validate attempt ${attempt.id} before mutation: ${String(error)}`,
+          repair: "Inspect the canonical attempt ledger or restore it from backup.",
+          detail: { attemptId: attempt.id },
+        });
+      }
+
+      if (attempt.revision !== current.revision + 1) {
+        throw new AriadneError({
+          code: "INVALID_INPUT",
+          message: `Attempt ${attempt.id} revision ${attempt.revision} does not advance committed revision ${current.revision}`,
+          repair: "Reload the attempt and apply the mutation to the latest committed revision.",
+          detail: {
+            attemptId: attempt.id,
+            committedRevision: current.revision,
+            attemptedRevision: attempt.revision,
+          },
+        });
+      }
+    },
+  });
+  if (outcome.outcome !== "committed") throw outcome.error;
 }
+
+const attemptFromRecords = (
+  id: string,
+  records: readonly FramedRecord<unknown>[],
+): OrchestrationAttempt => {
+  let previousRevision = 0;
+  let latest: OrchestrationAttempt | undefined;
+  for (const [index, record] of records.entries()) {
+    const parsed = record.payload as Record<string, unknown>;
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !isValidRecord(parsed, id, previousRevision + 1)
+    ) {
+      throw new BoundaryError(
+        "ledger_corrupt",
+        `Invalid committed history at line ${index + 1} of attempt ${id}; fail closed`,
+      );
+    }
+    previousRevision += 1;
+    latest = parsed as unknown as OrchestrationAttempt;
+  }
+  if (!latest) throw new BoundaryError("attempt_missing", `Attempt not found in repository-visible state: ${id}`);
+  return latest;
+};
 
 export async function loadAttempt(
   rootDirectory: string,
   id: string,
 ): Promise<OrchestrationAttempt> {
-  let raw: string;
   try {
-    raw = await readFile(attemptPath(rootDirectory, id), "utf8");
+    return attemptFromRecords(id, await readAttemptEvents(rootDirectory, id));
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      throw new BoundaryError("attempt_missing", `Attempt not found in repository-visible state: ${id}`);
-    }
+    if (error instanceof BoundaryError) throw error;
     throw new BoundaryError("ledger_corrupt", `Cannot read attempt ${id}: ${String(error)}`);
   }
-  return recoverLedger(id, raw);
 }
 
 const LIFECYCLE_STATUSES: ReadonlySet<string> = new Set([
@@ -470,56 +550,61 @@ function isValidRecord(
   id: string,
   expectedRevision: number,
 ): boolean {
+  const optionalString = (field: string): boolean =>
+    parsed[field] === undefined || typeof parsed[field] === "string";
+  const stringArray = (field: string): boolean =>
+    Array.isArray(parsed[field]) && parsed[field].every((value) => typeof value === "string");
+
   return (
     parsed["id"] === id &&
     parsed["revision"] === expectedRevision &&
     typeof parsed["status"] === "string" &&
     LIFECYCLE_STATUSES.has(parsed["status"]) &&
-    typeof parsed["dispatches"] === "number" &&
-    typeof parsed["replayBudget"] === "number" &&
-    typeof parsed["cursor"] === "number" &&
+    Number.isSafeInteger(parsed["dispatches"]) &&
+    (parsed["dispatches"] as number) >= 0 &&
+    Number.isSafeInteger(parsed["replayBudget"]) &&
+    (parsed["replayBudget"] as number) >= 0 &&
+    Number.isSafeInteger(parsed["cursor"]) &&
+    (parsed["cursor"] as number) >= 0 &&
     typeof parsed["cancellationIntent"] === "boolean" &&
-    Array.isArray(parsed["pins"]) &&
-    Array.isArray(parsed["ownerPointers"])
+    stringArray("pins") &&
+    stringArray("ownerPointers") &&
+    optionalString("step") &&
+    optionalString("idempotencyKey") &&
+    optionalString("deadline") &&
+    optionalString("eventDigest") &&
+    optionalString("pendingApprovalRef")
   );
 }
 
 // Recovery accepts at most an incomplete final local record; corruption or a
 // revision break anywhere in earlier committed history fails closed.
-function recoverLedger(id: string, raw: string): OrchestrationAttempt {
-  const lines = raw.split("\n").filter((line) => line.trim().length > 0);
-  let previousRevision = 0;
-  let latest: OrchestrationAttempt | undefined;
-  for (let index = 0; index < lines.length; index += 1) {
-    const isFinalLine = index === lines.length - 1;
-    const failClosed = (detail: string): BoundaryError =>
-      new BoundaryError(
-        "ledger_corrupt",
-        `${detail} at line ${index + 1} of attempt ${id}; fail closed`,
-      );
-    let parsed: Record<string, unknown> | undefined;
-    try {
-      parsed = JSON.parse(lines[index]) as Record<string, unknown>;
-    } catch {
-      // Unparseable line.
-    }
-    if (!parsed || !isValidRecord(parsed, id, previousRevision + 1)) {
-      if (!isFinalLine) {
-        throw failClosed(
-          parsed ? "Invalid committed history" : "Corrupted committed history",
-        );
-      }
-      // An incomplete final local record is tolerated; fall back to the last
-      // committed one.
-      break;
-    }
-    previousRevision += 1;
-    latest = parsed as unknown as OrchestrationAttempt;
-  }
-  if (!latest) {
-    throw new BoundaryError("ledger_corrupt", `No recoverable record for attempt ${id}`);
-  }
-  return latest;
+async function updateAttempt<T>(
+  rootDirectory: string,
+  id: string,
+  mutate: (
+    attempt: OrchestrationAttempt,
+  ) => { attempt: OrchestrationAttempt; result: T } | Promise<{ attempt: OrchestrationAttempt; result: T }>,
+): Promise<T> {
+  let idempotentResult: T | undefined;
+  const outcome = await executeWriteCycle<T, PersistedAttempt>({
+    storageRoot: rootDirectory,
+    authority: "attempt",
+    attemptId: id,
+    mutate: async ({ existingRecords }) => {
+      const current = attemptFromRecords(id, existingRecords);
+      const updated = await mutate(current);
+      idempotentResult = updated.result;
+      return {
+        payload: persistedAttempt(updated.attempt),
+        result: updated.result,
+        idempotencyKey: `attempt:${id}:revision:${updated.attempt.revision}`,
+      };
+    },
+    idempotentResult: () => idempotentResult as T,
+  });
+  if (outcome.outcome !== "committed") throw outcome.error;
+  return outcome.result;
 }
 
 export async function reconstructNextAction(
@@ -571,20 +656,18 @@ export async function joinDirectResult(
     }
   }
 
-  const attempt = await loadAttempt(rootDirectory, id);
-  if (attempt.ownerPointers.includes(request.receiptRef)) {
-    return { ok: true, attempt };
-  }
-  // ponytail: single-writer JSONL ledger without CAS; concurrent writers need
-  // file locking or a revision compare-and-swap if that ever happens.
-  const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(request.receiptRef));
-  const ownerPointers = [...attempt.ownerPointers, request.receiptRef];
-  if (request.artifactRef && !ownerPointers.includes(request.artifactRef)) {
-    ownerPointers.push(request.artifactRef);
-  }
-  const joined: OrchestrationAttempt = { ...advanced, ownerPointers };
-  await saveAttempt(rootDirectory, joined);
-  return { ok: true, attempt: joined };
+  return updateAttempt(rootDirectory, id, (attempt) => {
+    if (attempt.ownerPointers.includes(request.receiptRef)) {
+      return { result: { ok: true, attempt }, attempt };
+    }
+    const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(request.receiptRef));
+    const ownerPointers = [...attempt.ownerPointers, request.receiptRef];
+    if (request.artifactRef && !ownerPointers.includes(request.artifactRef)) {
+      ownerPointers.push(request.artifactRef);
+    }
+    const joined: OrchestrationAttempt = { ...advanced, ownerPointers };
+    return { result: { ok: true, attempt: joined }, attempt: joined };
+  });
 }
 
 export interface ReplayDeclaration {
@@ -603,38 +686,47 @@ export async function planReplay(
   declaration: ReplayDeclaration,
   options: { now?: () => Date } = {},
 ): Promise<GuardOutcome<"replay_declaration_invalid" | "prior_effect_unresolved" | "replay_budget_exhausted">> {
-  const attempt = await loadAttempt(rootDirectory, id);
-  const deadlineValid =
-    typeof declaration.deadline === "string" &&
-    Number.isFinite(Date.parse(declaration.deadline)) &&
-    (options.now ?? (() => new Date()))() < new Date(declaration.deadline);
-  const stableKey = declaration.key === attempt.idempotencyKey;
-  const specificOperation = typeof declaration.operation === "string" && /\S/.test(declaration.operation);
-  if (!stableKey || !specificOperation || !deadlineValid) {
-    return {
-      ok: false,
-      ...failedDisposition("replay_declaration_invalid", [], attempt.deadline),
+  return updateAttempt<GuardOutcome<"replay_declaration_invalid" | "prior_effect_unresolved" | "replay_budget_exhausted">>(rootDirectory, id, (attempt) => {
+    const deadlineValid =
+      typeof declaration.deadline === "string" &&
+      Number.isFinite(Date.parse(declaration.deadline)) &&
+      (options.now ?? (() => new Date()))() < new Date(declaration.deadline);
+    const stableKey = declaration.key === attempt.idempotencyKey;
+    const specificOperation = typeof declaration.operation === "string" && /\S/.test(declaration.operation);
+    if (!stableKey || !specificOperation || !deadlineValid) {
+      return {
+        attempt,
+        result: {
+          ok: false,
+          ...failedDisposition("replay_declaration_invalid", [], attempt.deadline),
+        },
+      };
+    }
+    if (!attempt.ownerPointers.some((ptr) => ptr.startsWith("owner://receipt/"))) {
+      return {
+        attempt,
+        result: {
+          ok: false,
+          ...failedDisposition("prior_effect_unresolved", [...attempt.ownerPointers], attempt.deadline),
+        },
+      };
+    }
+    if (budgetExhausted(attempt)) {
+      return {
+        attempt,
+        result: {
+          ok: false,
+          ...failedDisposition("replay_budget_exhausted", [], attempt.deadline),
+        },
+      };
+    }
+    const replayed: OrchestrationAttempt = {
+      ...attempt,
+      dispatches: attempt.dispatches + 1,
+      revision: attempt.revision + 1,
     };
-  }
-  if (!attempt.ownerPointers.some((ptr) => ptr.startsWith("owner://receipt/"))) {
-    return {
-      ok: false,
-      ...failedDisposition("prior_effect_unresolved", [...attempt.ownerPointers], attempt.deadline),
-    };
-  }
-  if (budgetExhausted(attempt)) {
-    return {
-      ok: false,
-      ...failedDisposition("replay_budget_exhausted", [], attempt.deadline),
-    };
-  }
-  const replayed: OrchestrationAttempt = {
-    ...attempt,
-    dispatches: attempt.dispatches + 1,
-    revision: attempt.revision + 1,
-  };
-  await saveAttempt(rootDirectory, replayed);
-  return { ok: true, attempt: replayed };
+    return { attempt: replayed, result: { ok: true, attempt: replayed } };
+  });
 }
 
 export type EffectVerdict = "committed" | "no_effect";
@@ -655,27 +747,27 @@ export async function resolveEffects(
       `Only committed or no-effect receipts resolve ambiguity; received '${verdict}'`,
     );
   }
-  const attempt = await loadAttempt(rootDirectory, id);
-  if (TERMINAL_STATUSES.has(attempt.status)) {
-    throw new BoundaryError(
-      "invalid_transition",
-      `Cannot resolve effects on terminal attempt ${id}`,
-    );
-  }
-  const inspectionReceipt = `owner://receipt/inspection-${pointerDigest(receiptRef)}`;
-  const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(receiptRef));
-  const resolved: OrchestrationAttempt = {
-    ...advanced,
-    ownerPointers: [
-      ...advanced.ownerPointers,
-      receiptRef,
-      ...(advanced.ownerPointers.includes(inspectionReceipt)
-        ? []
-        : [inspectionReceipt]),
-    ],
-  };
-  await saveAttempt(rootDirectory, resolved);
-  return resolved;
+  return updateAttempt(rootDirectory, id, (attempt) => {
+    if (TERMINAL_STATUSES.has(attempt.status)) {
+      throw new BoundaryError(
+        "invalid_transition",
+        `Cannot resolve effects on terminal attempt ${id}`,
+      );
+    }
+    const inspectionReceipt = `owner://receipt/inspection-${pointerDigest(receiptRef)}`;
+    const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(receiptRef));
+    const resolved: OrchestrationAttempt = {
+      ...advanced,
+      ownerPointers: [
+        ...advanced.ownerPointers,
+        receiptRef,
+        ...(advanced.ownerPointers.includes(inspectionReceipt)
+          ? []
+          : [inspectionReceipt]),
+      ],
+    };
+    return { attempt: resolved, result: resolved };
+  });
 }
 
 export type CancellationOutcomeKind =
@@ -693,26 +785,26 @@ export async function resolveCancellation(
   outcome: CancellationOutcomeKind,
 ): Promise<OrchestrationAttempt> {
   assertOwnerScheme(cancelReceiptRef, ["host", "owner"], "cancelReceiptRef");
-  let attempt = await loadAttempt(rootDirectory, id);
-  if (!attempt.cancellationIntent) {
-    throw new BoundaryError("invalid_transition", `No cancellation intent on attempt ${id}`);
-  }
-  const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(`cancel:${cancelReceiptRef}`));
-  if (outcome === "ambiguous") {
-    // Ambiguity keeps the intent open; only inspection advances state.
-    attempt = { ...advanced };
-  } else {
-    // The owner receipt is the authority for the terminal mapping.
-    attempt = {
-      ...advanced,
-      cancellationIntent: false,
-      status: outcome === "committed_success" ? "succeeded" : "canceled",
-    };
-  }
-  if (!attempt.ownerPointers.includes(cancelReceiptRef)) {
-    attempt.ownerPointers = [...attempt.ownerPointers, cancelReceiptRef];
-  }
-  await saveAttempt(rootDirectory, attempt);
-  return attempt;
+  return updateAttempt(rootDirectory, id, (attempt) => {
+    if (!attempt.cancellationIntent) {
+      throw new BoundaryError("invalid_transition", `No cancellation intent on attempt ${id}`);
+    }
+    const advanced = applyEvent(attempt, attempt.cursor + 1, pointerDigest(`cancel:${cancelReceiptRef}`));
+    let resolved: OrchestrationAttempt;
+    if (outcome === "ambiguous") {
+      // Ambiguity keeps the intent open; only inspection advances state.
+      resolved = { ...advanced };
+    } else {
+      // The owner receipt is the authority for the terminal mapping.
+      resolved = {
+        ...advanced,
+        cancellationIntent: false,
+        status: outcome === "committed_success" ? "succeeded" : "canceled",
+      };
+    }
+    if (!resolved.ownerPointers.includes(cancelReceiptRef)) {
+      resolved = { ...resolved, ownerPointers: [...resolved.ownerPointers, cancelReceiptRef] };
+    }
+    return { attempt: resolved, result: resolved };
+  });
 }
-

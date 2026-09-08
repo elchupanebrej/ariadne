@@ -5,12 +5,24 @@ Make the hardened persistence protocol the only active path for every library an
 
 **Blocked by:** None
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Every public and CLI mutation uses the same root lock and journal protocol.
-- [ ] The durable commit point is reached only after the journal write is synchronized successfully.
-- [ ] Projection updates are staged and atomically replaced after the journal commit.
-- [ ] Lock ownership is verified on release, and an active or ambiguous owner is never stolen.
-- [ ] Legacy and mixed-format workspaces cannot be mutated through any entry point.
-- [ ] Integration tests prove that the old persistence paths are no longer active.
-- [ ] Failure outcomes and diagnostics match the approved persistence contract.
+- [x] Every public and CLI mutation uses the same root lock and journal protocol.
+- [x] The durable commit point is reached only after the journal write is synchronized successfully.
+- [x] Projection updates are staged and atomically replaced after the journal commit.
+- [x] Lock ownership is verified on release, and an active or ambiguous owner is never stolen.
+- [x] Legacy and mixed-format workspaces cannot be mutated through any entry point.
+- [x] Integration tests prove that the old persistence paths are no longer active.
+- [x] Failure outcomes and diagnostics match the approved persistence contract.
+
+## Implementation / verification
+
+Implemented canonical attempt persistence in `src/harness/attempt.ts`: loading and mutations now use the hardened framed journal under `.orchestration/attempts/`, with validation, idempotency, revision checks, canonical diagnostics, and legacy-workspace rejection. The no-kernel contract now explicitly approves only the lifecycle, framed-journal, and diagnostic seams while retaining the real kernel-separation guarantees.
+
+Verification completed 2026-09-08:
+
+- Focused persistence/no-kernel tests: 7 files, 72 tests passed.
+- `npm run typecheck`: passed.
+- `npm run build`: passed.
+- Full suite `npm test`: 76 files, 861 tests passed.
+- Implement-skill code review against `d5a34d5`: Standards — no findings; Spec — no findings.
