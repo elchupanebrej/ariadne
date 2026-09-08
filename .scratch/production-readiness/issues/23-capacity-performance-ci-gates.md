@@ -5,7 +5,7 @@ Make capacity and performance evidence a trustworthy release gate. The default C
 
 **Blocked by:** 18, 22
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 - [ ] CI runs the required ceiling benchmark rather than a smoke-only tier.
 - [ ] The benchmark exercises the declared node, edge, event, card, report, and process capacities.
@@ -15,7 +15,7 @@ Make capacity and performance evidence a trustworthy release gate. The default C
 - [ ] Benchmark evidence records the tested tier, thresholds, measured values, and pass/fail result.
 - [ ] The benchmark and its CI gate are reproducible on the supported Linux runtime.
 
-## Verification note
+## Comments
 
 The benchmark gate implementation is present in the working change set: CI now
 selects the ceiling tier explicitly, the report includes declared and observed
