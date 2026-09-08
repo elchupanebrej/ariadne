@@ -6,6 +6,27 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import * as publicApi from "../../src/index.js";
 import { runCli } from "../../src/cli/index.js";
+import type {
+  DiagnosticCode,
+  DiagnosticPayload,
+  ProfileCompletionResult,
+  ProfileCompletionState,
+  ResolvedProfile,
+  RunCliOptions,
+  ValidateMethodContractOptions,
+  MethodContractValidationResult,
+} from "../../src/index.js";
+
+type PublicApiTypeContract = {
+  diagnosticCode: DiagnosticCode;
+  diagnosticPayload: DiagnosticPayload;
+  profileCompletionResult: ProfileCompletionResult;
+  profileCompletionState: ProfileCompletionState;
+  resolvedProfile: ResolvedProfile;
+  runCliOptions: RunCliOptions;
+  validateMethodContractOptions: ValidateMethodContractOptions;
+  methodContractValidationResult: MethodContractValidationResult;
+};
 
 const capture = () => {
   let output = "";
@@ -104,6 +125,57 @@ describe("Public API Surface Reset (src/index.ts)", () => {
     expect(typeof publicApi.checkProfileCompletion).toBe("function");
     expect(typeof publicApi.runCli).toBe("function");
     expect(typeof publicApi.AriadneError).toBe("function");
+  });
+
+  it("keeps the canonical error payload usable alongside the public error class", () => {
+    const payload: DiagnosticPayload = {
+      code: "INVALID_INPUT",
+      message: "The public payload is usable",
+    };
+    const error = new publicApi.AriadneError(payload);
+
+    expect(error.code).toBe(payload.code);
+    expect(error.message).toBe(payload.message);
+  });
+
+  it("keeps validation, profile, and CLI option types part of the public contract", () => {
+    const contractTypes: PublicApiTypeContract = {
+      diagnosticCode: "INVALID_INPUT",
+      diagnosticPayload: { code: "INVALID_INPUT", message: "payload" },
+      profileCompletionResult: {
+        complete: false,
+        missingArtifacts: [],
+        invalidArtifacts: [],
+        missingReceipts: [],
+        problems: [],
+        externalVerificationPassed: false,
+        selfConsistencyPassed: false,
+      },
+      profileCompletionState: {},
+      resolvedProfile: {
+        name: "public-api-test",
+        profile: {
+          require_artifacts: [],
+          require_receipts: [],
+        },
+        obligations: {
+          artifacts: [],
+          receipts: [],
+          external_verification_receipts: [],
+          self_consistency_receipts: [],
+        },
+        verification_hooks: [],
+      },
+      runCliOptions: {},
+      validateMethodContractOptions: {},
+      methodContractValidationResult: {
+        valid: false,
+        problems: [],
+        diagnostics: [],
+      },
+    };
+
+    expect(contractTypes.runCliOptions).toEqual({});
   });
 
   it("does not leak internal storage drivers, command handlers, multiagent deltas, or adapters", () => {
@@ -282,73 +354,87 @@ describe("CLI Exit Status Code Harmonization (0/1/2)", () => {
 describe("Declaration Completeness (dist/index.d.ts)", () => {
   const dtsPath = fileURLToPath(new URL("../../dist/index.d.ts", import.meta.url));
 
-  it("contains strictly the 24 public types and 24 values", () => {
-    if (!existsSync(dtsPath)) return;
+  const expectedRuntimeValues = [
+    "NODE_TYPES",
+    "PROVENANCE_TYPES",
+    "TRANSITION_LIFECYCLE",
+    "NodeIdSchema",
+    "NodeTypeSchema",
+    "ProvenanceTypeSchema",
+    "TransitionLifecycleSchema",
+    "NodeSchemas",
+    "NodeSchema",
+    "EDGE_TYPES",
+    "EdgeTypeSchema",
+    "EdgeSchema",
+    "AriadneEpistemicEnvelopeSchema",
+    "exportEnvelopeJsonSchema",
+    "StateSchema",
+    "EpistemicGraph",
+    "EpistemicGateEngine",
+    "MethodContractSchema",
+    "validateMethodContract",
+    "resolveMethodContract",
+    "resolveProfile",
+    "checkProfileCompletion",
+    "runCli",
+    "AriadneError",
+  ].sort();
+
+  const expectedTypeOnlyExports = [
+    "Node",
+    "NodeId",
+    "NodeType",
+    "ProvenanceType",
+    "TransitionLifecycle",
+    "EdgeType",
+    "EpistemicEdge",
+    "AriadneEpistemicEnvelope",
+    "AriadneState",
+    "MaterializedGraph",
+    "NodeFilter",
+    "EdgeFilter",
+    "InvalidationTraceEntry",
+    "ReportOptions",
+    "ReportOutput",
+    "ReportSummary",
+    "GateName",
+    "GateCommand",
+    "GateDiagnostic",
+    "GateResult",
+    "GateReceipt",
+    "GateVerificationOptions",
+    "MethodContract",
+    "MethodContractPin",
+    "ValidateMethodContractOptions",
+    "MethodContractValidationResult",
+    "ResolvedProfile",
+    "ProfileCompletionState",
+    "ProfileCompletionResult",
+    "RunCliOptions",
+    "DiagnosticCode",
+    "DiagnosticPayload",
+  ].sort();
+
+  const exportedNames = (content: string, typeOnly: boolean): string[] => {
+    const keyword = typeOnly ? "export type" : "export";
+    const names: string[] = [];
+    const pattern = new RegExp(`${keyword} \\{([^}]*)\\} from`, "g");
+    for (const match of content.matchAll(pattern)) {
+      for (const item of match[1].split(",")) {
+        const name = item.trim().replace(/\\s+/g, " ").replace(/,$/, "");
+        if (name) names.push(name.split(" as ")[0]);
+      }
+    }
+    return names.sort();
+  };
+
+  it("contains exactly the authoritative public runtime and type exports", () => {
+    expect(existsSync(dtsPath)).toBe(true);
     const content = readFileSync(dtsPath, "utf8");
 
-    // 24 runtime values
-    const expectedValues = [
-      "NODE_TYPES",
-      "PROVENANCE_TYPES",
-      "TRANSITION_LIFECYCLE",
-      "NodeIdSchema",
-      "NodeTypeSchema",
-      "ProvenanceTypeSchema",
-      "TransitionLifecycleSchema",
-      "NodeSchemas",
-      "NodeSchema",
-      "EDGE_TYPES",
-      "EdgeTypeSchema",
-      "EdgeSchema",
-      "AriadneEpistemicEnvelopeSchema",
-      "exportEnvelopeJsonSchema",
-      "StateSchema",
-      "EpistemicGraph",
-      "EpistemicGateEngine",
-      "MethodContractSchema",
-      "validateMethodContract",
-      "resolveMethodContract",
-      "resolveProfile",
-      "checkProfileCompletion",
-      "runCli",
-      "AriadneError",
-    ];
-
-    for (const val of expectedValues) {
-      expect(content).toContain(val);
-    }
-
-    // 24 public types
-    const expectedTypes = [
-      "Node",
-      "NodeId",
-      "NodeType",
-      "ProvenanceType",
-      "TransitionLifecycle",
-      "EdgeType",
-      "EpistemicEdge",
-      "AriadneEpistemicEnvelope",
-      "AriadneState",
-      "MaterializedGraph",
-      "NodeFilter",
-      "EdgeFilter",
-      "InvalidationTraceEntry",
-      "ReportOptions",
-      "ReportOutput",
-      "ReportSummary",
-      "GateName",
-      "GateCommand",
-      "GateDiagnostic",
-      "GateResult",
-      "GateReceipt",
-      "GateVerificationOptions",
-      "MethodContract",
-      "MethodContractPin",
-    ];
-
-    for (const type of expectedTypes) {
-      expect(content).toContain(type);
-    }
+    expect(exportedNames(content, false)).toEqual(expectedRuntimeValues);
+    expect(exportedNames(content, true)).toEqual(expectedTypeOnlyExports);
 
     // No internal modules or drivers leaked
     expect(content).not.toContain("FileStorageDriver");

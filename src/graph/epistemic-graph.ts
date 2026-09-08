@@ -106,17 +106,19 @@ export interface EdgeFilter {
 }
 
 export class EpistemicGraph {
-  public readonly driver: StorageDriver;
+  #driver!: StorageDriver;
 
-  constructor(driver: StorageDriver) {
-    this.driver = driver;
+  private constructor() {
   }
 
   static open(root = ".ariadne"): EpistemicGraph {
-    return new EpistemicGraph(new FileSystemStorageDriver(root));
+    const graph = new EpistemicGraph();
+    graph.#driver = new FileSystemStorageDriver(root);
+    return graph;
   }
 
   static inMemory(initialGraph?: MaterializedGraph): EpistemicGraph {
+    const graph = new EpistemicGraph();
     const driver = new InMemoryStorageDriver();
     if (initialGraph) {
       const events: GraphEvent[] = [
@@ -130,20 +132,21 @@ export class EpistemicGraph {
       }
       driver.state = updateStateForGraph({}, initialGraph);
     }
-    return new EpistemicGraph(driver);
+    graph.#driver = driver;
+    return graph;
   }
 
   async init(): Promise<void> {
-    await this.driver.init();
+    await this.#driver.init();
   }
 
   async materialize(): Promise<MaterializedGraph> {
-    const events = (await this.driver.readEvents()).map((event) => GraphEventSchema.parse(event));
+    const events = (await this.#driver.readEvents()).map((event) => GraphEventSchema.parse(event));
     return applyEvents({ nodes: [], edges: [] }, events);
   }
 
   async getState(): Promise<AriadneState> {
-    const raw = await this.driver.readState();
+    const raw = await this.#driver.readState();
     return (raw ?? {}) as AriadneState;
   }
 
@@ -207,7 +210,7 @@ export class EpistemicGraph {
     const provenance_type = (payload.provenance_type as ProvenanceType | undefined) ?? "PROPOSED";
     const parsed = parser.parse({ ...payload, type, id, title, statement, provenance_type }) as Node;
 
-    return await this.driver.withLock(async () => {
+    return await this.#driver.withLock(async () => {
       const current = await this.materialize();
       if (current.nodes.some((n) => n.id === id)) {
         throw new Error(`Node ${id} already exists`);
@@ -221,19 +224,19 @@ export class EpistemicGraph {
         );
       }
 
-      const existingEvents = await this.driver.readEvents();
+      const existingEvents = await this.#driver.readEvents();
       assertWithinCapacity({
         nodeCount: next.nodes.length,
         edgeCount: next.edges.length,
         eventCount: existingEvents.length + 1,
       });
 
-      await this.driver.appendEvents([{ kind: "node", node: parsed }]);
-      await this.driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
-      await this.driver.writeIndex(renderIndex(next));
+      await this.#driver.appendEvents([{ kind: "node", node: parsed }]);
+      await this.#driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
+      await this.#driver.writeIndex(renderIndex(next));
 
-      const prevState = (await this.driver.readState()) ?? {};
-      await this.driver.writeState(updateStateForGraph(prevState, next));
+      const prevState = (await this.#driver.readState()) ?? {};
+      await this.#driver.writeState(updateStateForGraph(prevState, next));
 
       return parsed;
     });
@@ -246,7 +249,7 @@ export class EpistemicGraph {
     id: string,
     patch: { title?: string; payload?: Record<string, unknown>; status?: string },
   ): Promise<Node> {
-    return await this.driver.withLock(async () => {
+    return await this.#driver.withLock(async () => {
       const current = await this.materialize();
       const existing = current.nodes.find((n) => n.id === id);
       if (!existing) {
@@ -280,19 +283,19 @@ export class EpistemicGraph {
         );
       }
 
-      const existingEvents = await this.driver.readEvents();
+      const existingEvents = await this.#driver.readEvents();
       assertWithinCapacity({
         nodeCount: next.nodes.length,
         edgeCount: next.edges.length,
         eventCount: existingEvents.length + 1,
       });
 
-      await this.driver.appendEvents([{ kind: "node", node: parsed }]);
-      await this.driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
-      await this.driver.writeIndex(renderIndex(next));
+      await this.#driver.appendEvents([{ kind: "node", node: parsed }]);
+      await this.#driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
+      await this.#driver.writeIndex(renderIndex(next));
 
-      const prevState = (await this.driver.readState()) ?? {};
-      await this.driver.writeState(updateStateForGraph(prevState, next));
+      const prevState = (await this.#driver.readState()) ?? {};
+      await this.#driver.writeState(updateStateForGraph(prevState, next));
 
       return parsed;
     });
@@ -316,7 +319,7 @@ export class EpistemicGraph {
     }
     const edge = EdgeSchema.parse({ source, type: canonicalRelation, target });
 
-    return await this.driver.withLock(async () => {
+    return await this.#driver.withLock(async () => {
       const current = await this.materialize();
       if (!current.nodes.some((n) => n.id === source)) {
         throw new Error(`Edge source ${source} does not exist`);
@@ -336,15 +339,15 @@ export class EpistemicGraph {
         );
       }
 
-      const existingEvents = await this.driver.readEvents();
+      const existingEvents = await this.#driver.readEvents();
       assertWithinCapacity({
         nodeCount: next.nodes.length,
         edgeCount: next.edges.length,
         eventCount: existingEvents.length + 1,
       });
 
-      await this.driver.appendEvents([{ kind: "edge", edge }]);
-      await this.driver.writeIndex(renderIndex(next));
+      await this.#driver.appendEvents([{ kind: "edge", edge }]);
+      await this.#driver.writeIndex(renderIndex(next));
 
       return edge;
     });
@@ -360,7 +363,7 @@ export class EpistemicGraph {
     }
     const edge = EdgeSchema.parse({ source, type: canonicalRelation, target });
 
-    return await this.driver.withLock(async () => {
+    return await this.#driver.withLock(async () => {
       const current = await this.materialize();
       const existing = current.edges.find((e) => edgeKey(e) === edgeKey(edge));
       if (!existing) {
@@ -375,15 +378,15 @@ export class EpistemicGraph {
         );
       }
 
-      const existingEvents = await this.driver.readEvents();
+      const existingEvents = await this.#driver.readEvents();
       assertWithinCapacity({
         nodeCount: next.nodes.length,
         edgeCount: next.edges.length,
         eventCount: existingEvents.length + 1,
       });
 
-      await this.driver.appendEvents([{ kind: "edge", edge, tombstone: true }]);
-      await this.driver.writeIndex(renderIndex(next));
+      await this.#driver.appendEvents([{ kind: "edge", edge, tombstone: true }]);
+      await this.#driver.writeIndex(renderIndex(next));
 
       return edge;
     });
@@ -405,7 +408,7 @@ export class EpistemicGraph {
     const changed = (before: Node, after: Node): boolean =>
       JSON.stringify(before) !== JSON.stringify(after);
 
-    const result = await this.driver.withLock(async () => {
+    const result = await this.#driver.withLock(async () => {
       const current = await this.materialize();
       const target = current.nodes.find(({ id }) => id === nodeId);
       if (!target) throw new Error(`Node not found: ${nodeId}`);
@@ -429,27 +432,27 @@ export class EpistemicGraph {
         .map(({ node_id }) => node_id)
         .sort((left, right) => left.localeCompare(right));
 
-      const existingEvents = await this.driver.readEvents();
+      const existingEvents = await this.#driver.readEvents();
       assertWithinCapacity({
         nodeCount: invalidation.graph.nodes.length,
         edgeCount: invalidation.graph.edges.length,
         eventCount: existingEvents.length + events.length,
       });
 
-      await this.driver.appendEvents(events);
-      await this.driver.writeCards(
+      await this.#driver.appendEvents(events);
+      await this.#driver.writeCards(
         updatedNodes.map((node) => ({ id: node.id, content: renderCard(node) })),
       );
-      await this.driver.writeIndex(renderIndex(invalidation.graph));
+      await this.#driver.writeIndex(renderIndex(invalidation.graph));
 
-      const priorState = (await this.driver.readState()) ?? {};
+      const priorState = (await this.#driver.readState()) ?? {};
       const nextState = updateStateForGraph(priorState, invalidation.graph);
       nextState.last_invalidation = {
         node_id: nodeId,
         evidence_id: evidenceId,
         affected_node_ids: affectedNodeIds,
       };
-      await this.driver.writeState(nextState);
+      await this.#driver.writeState(nextState);
 
       return {
         falsified_node_id: nodeId,
@@ -461,8 +464,8 @@ export class EpistemicGraph {
 
     const rootPath =
       options?.rootPath ??
-      (this.driver instanceof FileSystemStorageDriver
-        ? dirname(this.driver.root)
+      (this.#driver instanceof FileSystemStorageDriver
+        ? dirname(this.#driver.root)
         : process.cwd());
 
     try {
@@ -494,10 +497,10 @@ export class EpistemicGraph {
    * Build a decision tree or epistemic forest report.
    */
   async report(options: ReportOptions = {}): Promise<ReportOutput> {
-    const events = (await this.driver.readEvents()).map((event) => GraphEventSchema.parse(event));
+    const events = (await this.#driver.readEvents()).map((event) => GraphEventSchema.parse(event));
     const graphPath =
-      this.driver instanceof FileSystemStorageDriver
-        ? this.driver.graphPath
+      this.#driver instanceof FileSystemStorageDriver
+        ? this.#driver.graphPath
         : undefined;
     return buildReport(events, { graphPath, ...options });
   }

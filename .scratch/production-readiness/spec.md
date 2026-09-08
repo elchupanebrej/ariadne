@@ -244,9 +244,17 @@ export {
 
 // CLI Embedding Seam
 export { runCli };
+
+// Canonical operational error
+export { AriadneError };
 ```
 
-#### 5.2.2 Type-Only Exports (Exactly 24 Types)
+The 24-value count includes the canonical `AriadneError` class. The three
+schema/vocabulary groups above contain 15 values, the graph and gate classes
+add 2, the method-contract group adds 5, `runCli` adds 1, and the error class
+adds 1.
+
+#### 5.2.2 Type-Only Exports (Exactly 32 Types)
 ```typescript
 export type {
   Node, NodeId, NodeType, ProvenanceType, TransitionLifecycle,
@@ -259,9 +267,17 @@ export type {
   MethodContract, MethodContractPin,
   ValidateMethodContractOptions, MethodContractValidationResult,
   ResolvedProfile, ProfileCompletionState, ProfileCompletionResult,
-  RunCliOptions
+  RunCliOptions,
+  DiagnosticCode, DiagnosticPayload
 };
 ```
+
+The 32 type-only exports are the supported graph, gate, method-contract,
+profile, CLI, and diagnostic payload vocabulary. `DiagnosticCode` makes the
+closed operational error catalog usable in TypeScript, while
+`DiagnosticPayload` describes the stable structured error shape. Error
+formatters, storage drivers, command handlers, and other implementation
+helpers remain internal.
 
 #### 5.2.3 Internalized Seams (Explicitly Non-Exported)
 The following modules and types are strictly internal implementation details:
@@ -669,7 +685,7 @@ gantt
 ### 11.4 Stage 4: Public Surface Reset, Module Trimming & Doc Sync
 - **Objective**: Cleanse root export surface, delete speculative modules, and standardize CLI commands.
 - **Key Tasks**:
-  1. Refactor `src/index.ts` to export exactly the 24 runtime values and 24 types.
+  1. Refactor `src/index.ts` to export exactly the 24 runtime values and 32 types.
   2. Standardize CLI to single `ariadne` binary; remove `ariadne-reasoning` binary, `op`, and `envelope` commands.
   3. Standardize CLI exit codes: `0` (success/help), `1` (negative domain verdict), `2` (infrastructure/integrity fatal stop).
   4. **Ponytail Deletions**: Delete `src/capabilities/`, `src/teach-harness/`, and `src/teach-methodology/`.
@@ -717,7 +733,7 @@ gantt
 Ariadne `0.2.0` is officially accepted for production release when and only when:
 1. **Zero Data Loss Path**: The persistence engine demonstrates deterministic recovery from simulated process crashes, power halts during projection staging, and incomplete frame writes without data loss or silent state corruption.
 2. **Legacy Safety**: Every legacy unmigrated workspace is protected from mutation by `AriadneError(MIGRATION_REQUIRED)`, and `ariadne migrate` successfully migrates the repository's own `.ariadne` state with 100% entity and event fidelity.
-3. **Strict Surface Parity**: The root package export exposes exactly the 24 runtime values and 24 types; all internal drivers and speculative modules are deleted.
+3. **Strict Surface Parity**: The root package export exposes exactly the 24 runtime values and 32 types; all internal drivers and speculative modules are deleted.
 4. **4-Platform Determinism**: CI builds green across Linux x64 Node 22/24, Windows x64 Node 24, and macOS arm64 Node 24 with 0 flaky tests.
 5. **Capacity Compliance**: The 10,000-node / 25,000-edge / 50,000-event benchmark meets all latency tiers (<100ms / <1s / <10s) and stays under 256 MB peak RSS.
 6. **Supply Chain Security**: No dependencies with vulnerabilities $\ge$ `moderate`; GitHub Actions workflows use 40-character SHA pinning; npm package publishes with SLSA provenance via OIDC.

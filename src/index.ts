@@ -53,7 +53,7 @@ export {
   AriadneError,
 } from "./core/errors.js";
 
-// Types (Exactly 24)
+// Types (Exactly 32)
 export type {
   Node,
   NodeId,
@@ -97,4 +97,16 @@ export type {
 export type {
   MethodContract,
   MethodContractPin,
+  ValidateMethodContractOptions,
+  MethodContractValidationResult,
+  ResolvedProfile,
+  ProfileCompletionState,
+  ProfileCompletionResult,
 } from "./method-contract/index.js";
+
+export type {
+  DiagnosticCode,
+  DiagnosticPayload,
+} from "./core/errors.js";
+
+export type { RunCliOptions } from "./cli/index.js";

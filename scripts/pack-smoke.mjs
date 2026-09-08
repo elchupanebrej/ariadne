@@ -4,6 +4,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -12,6 +13,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const publicConsumerFixture = join(repoRoot, "tests/fixtures/public-api-consumer");
 
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
 const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -161,27 +163,7 @@ try {
 
     // Runtime Node import test
     const testImportScript = join(consumerNpm, "test-import.mjs");
-    writeFileSync(
-      testImportScript,
-      `import { EpistemicGraph, EpistemicGateEngine, AriadneError, runCli } from "ariadne-reasoning";
-
-if (typeof EpistemicGraph !== "function") throw new Error("EpistemicGraph is not defined");
-if (typeof EpistemicGateEngine !== "function") throw new Error("EpistemicGateEngine is not defined");
-if (typeof AriadneError !== "function") throw new Error("AriadneError is not defined");
-if (typeof runCli !== "function") throw new Error("runCli is not defined");
-
-const graph = EpistemicGraph.inMemory();
-if (!graph) throw new Error("Failed to instantiate EpistemicGraph");
-
-const engine = new EpistemicGateEngine();
-if (!engine) throw new Error("Failed to instantiate EpistemicGateEngine");
-
-const err = new AriadneError({ code: "INVALID_INPUT", message: "smoke verification test" });
-if (err.code !== "INVALID_INPUT") throw new Error("Failed to instantiate AriadneError");
-
-console.log("Node import symbols verified successfully");
-`,
-    );
+    writeFileSync(testImportScript, readFileSync(join(publicConsumerFixture, "index.mjs")));
     run(process.execPath, [testImportScript], consumerNpm);
 
     // 4 canonical skills test
@@ -209,43 +191,7 @@ console.log("Node import symbols verified successfully");
     // Typecheck using tsc --noEmit
     writeFileSync(
       join(consumerNpm, "index.ts"),
-      `import { EpistemicGraph, EpistemicGateEngine, AriadneError, runCli } from "ariadne-reasoning";
-import type {
-  Node,
-  NodeId,
-  NodeType,
-  ProvenanceType,
-  TransitionLifecycle,
-  EdgeType,
-  EpistemicEdge,
-  AriadneEpistemicEnvelope,
-  AriadneState,
-  MaterializedGraph,
-  NodeFilter,
-  EdgeFilter,
-  InvalidationTraceEntry,
-  ReportOptions,
-  ReportOutput,
-  ReportSummary,
-  GateName,
-  GateCommand,
-  GateDiagnostic,
-  GateResult,
-  GateReceipt,
-  GateVerificationOptions,
-  MethodContract,
-  MethodContractPin,
-} from "ariadne-reasoning";
-
-const graph: EpistemicGraph = EpistemicGraph.inMemory();
-const engine: EpistemicGateEngine = new EpistemicGateEngine();
-const err: AriadneError = new AriadneError({ code: "INVALID_INPUT", message: "smoke test" });
-const cli: typeof runCli = runCli;
-
-if (!graph || !engine || !err || typeof cli !== "function") {
-  throw new Error("Failed smoke type assertions");
-}
-`,
+      readFileSync(join(publicConsumerFixture, "index.ts")),
     );
 
     writeFileSync(
@@ -320,4 +266,3 @@ if (!graph || !engine || !err || typeof cli !== "function") {
 } finally {
   rmSync(tmpBase, { recursive: true, force: true });
 }
-
