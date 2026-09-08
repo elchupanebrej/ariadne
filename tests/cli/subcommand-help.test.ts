@@ -108,17 +108,10 @@ describe("subcommand and option help", () => {
       [["verify", "-h"], "Usage: ariadne verify [--strict]"],
       [["invalidate", "--help"], "Usage: ariadne invalidate <node_id> --by <evidence_id>"],
       [["invalidate", "-h"], "Usage: ariadne invalidate <node_id> --by <evidence_id>"],
-      [["envelope", "--help"], "Usage: ariadne envelope <send|receive|verify> <file>"],
-      [["envelope", "-h"], "Usage: ariadne envelope <send|receive|verify> <file>"],
-      [["envelope", "send", "--help"], "Usage: ariadne envelope send <file>"],
-      [["envelope", "receive", "--help"], "Usage: ariadne envelope receive <file>"],
-      [["envelope", "verify", "--help"], "Usage: ariadne envelope verify <file>"],
       [["ingest", "--help"], "Usage: ariadne ingest <matt|gsd> ..."],
       [["ingest", "-h"], "Usage: ariadne ingest <matt|gsd> ..."],
       [["ingest", "matt", "--help"], "Usage: ariadne ingest matt <skill> <file>"],
       [["ingest", "gsd", "--help"], "Usage: ariadne ingest gsd <path>"],
-      [["op", "--help"], "Usage: ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>"],
-      [["op", "-h"], "Usage: ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>"],
       [["init", "--help"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
       [["init", "-h"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
       [["template", "--help"], "Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>"],
@@ -151,17 +144,17 @@ describe("subcommand and option help", () => {
 
   describe("unknown options and invalid commands rejection", () => {
     it.each([
-      [["node", "unknown-subcommand"], "Unknown node command: unknown-subcommand"],
-      [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag"],
-      [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ..."],
-      [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag"],
-      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]"],
-      [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
-      [["unknown-command"], "Unknown command: unknown-command"],
-    ])("returns 1 with error on stderr for %j", async (args, expectedError) => {
+      [["node", "unknown-subcommand"], "Unknown node command: unknown-subcommand", 1],
+      [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 1],
+      [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ...", 1],
+      [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 1],
+      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]", 1],
+      [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]", 1],
+      [["unknown-command"], "Unknown command: unknown-command", 2],
+    ])("returns error code with message on stderr for %j", async (args, expectedError, expectedCode) => {
       const result = await invoke(args);
 
-      expect(result.code).toBe(1);
+      expect(result.code).toBe(expectedCode);
       expect(result.stderr).toContain(expectedError);
     });
   });

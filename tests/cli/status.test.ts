@@ -157,6 +157,6 @@ describe("ariadne status", () => {
     );
 
     expect(result.code).toBe(0);
-    expect(result.stdout.trim()).toBe("0.1.0");
+    expect(result.stdout.trim()).toBe("0.2.0");
   }, 30_000);
 });
