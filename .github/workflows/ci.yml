@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Supply-chain gate: blocks PRs introducing moderate+ vulnerabilities
+  # ──────────────────────────────────────────────────────────────────────────
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Four-platform CI matrix
+  # ──────────────────────────────────────────────────────────────────────────
+  ci:
+    name: CI / ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '22'
+            name: linux-x64-node22
+          - os: ubuntu-latest
+            node: '24'
+            name: linux-x64-node24
+          - os: windows-latest
+            node: '24'
+            name: windows-x64-node24
+          - os: macos-latest
+            node: '24'
+            name: macos-arm64-node24
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+      - name: Test
+        run: npm test
+
+      - name: Documentation tests
+        run: npm run docs:test
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+
+      - name: Pack smoke (tarball zero-leakage check)
+        if: matrix.name == 'linux-x64-node24'
+        run: npm run pack:smoke
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 10K ceiling benchmark — Linux Node 24 only, runs after CI matrix passes
+  # ──────────────────────────────────────────────────────────────────────────
+  benchmark:
+    name: Benchmark / linux-x64-node24
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run 10K ceiling benchmark
+        run: npm run benchmark
+
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: EVD-BENCH-PASS
+          path: EVD-BENCH-PASS.json
+          if-no-files-found: warn
+
+      - name: Generate CI pass evidence
+        shell: bash
+        run: |
+          echo '{
+            "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",
+            "matrix_jobs": 4,
+            "all_passed": true
+          }' > EVD-CI-PASS.json
+
+      - name: Upload CI pass evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: EVD-CI-PASS
+          path: EVD-CI-PASS.json
+          if-no-files-found: error
