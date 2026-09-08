@@ -132,7 +132,7 @@ describe("ariadne node", () => {
         ["node", "add", "frame", "FRAME-1", "--title", "T", "--payload", "{}"],
         { cwd, stdout: capture().stream, stderr: addErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(addErr.text()).toContain("Unknown node type: frame");
     expect(addErr.text()).toContain(typeList);
     expect(addErr.text()).toContain("uppercase");
@@ -140,7 +140,7 @@ describe("ariadne node", () => {
     const listErr = capture();
     expect(
       await runCli(["node", "list", "--type", "frame"], { cwd, stdout: capture().stream, stderr: listErr.stream }),
-    ).toBe(1);
+    ).toBe(2);
     expect(listErr.text()).toContain("Unknown node type: frame");
     expect(listErr.text()).toContain(typeList);
 
@@ -159,7 +159,7 @@ describe("ariadne node", () => {
         ["node", "add", "ASM", "not-an-asm-id", "--title", "Invalid", "--payload", "{}"],
         { cwd, stdout: stdout.stream, stderr: stderr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(stderr.text()).toContain("Error:");
     expect(existsSync(join(cwd, ".ariadne", "GRAPH.jsonl"))).toBe(false);
   });
@@ -230,7 +230,7 @@ describe("ariadne node", () => {
         ["node", "update", "ASM-999", "--payload", JSON.stringify({ provenance_type: "ASSUMED", statement: "x" })],
         { cwd, stdout: capture().stream, stderr: notFoundErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(notFoundErr.text()).toContain("Node not found: ASM-999");
 
     // 2. Invalid JSON
@@ -240,7 +240,7 @@ describe("ariadne node", () => {
         ["node", "update", "ASM-1", "--payload", "{bad json"],
         { cwd, stdout: capture().stream, stderr: invalidJsonErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(invalidJsonErr.text()).toContain("Invalid --payload JSON");
 
     // 3. Schema violation (invalid provenance type)
@@ -250,7 +250,7 @@ describe("ariadne node", () => {
         ["node", "update", "ASM-1", "--payload", JSON.stringify({ provenance_type: "INVALID_PROV" })],
         { cwd, stdout: capture().stream, stderr: schemaErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(schemaErr.text()).toContain("Error:");
 
     // 4. Attempted id change
@@ -260,7 +260,7 @@ describe("ariadne node", () => {
         ["node", "update", "ASM-1", "--payload", JSON.stringify({ id: "ASM-2", provenance_type: "ASSUMED" })],
         { cwd, stdout: capture().stream, stderr: idChangeErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(idChangeErr.text()).toContain("Cannot change node id");
 
     // 5. Attempted type change
@@ -270,7 +270,7 @@ describe("ariadne node", () => {
         ["node", "update", "ASM-1", "--payload", JSON.stringify({ type: "CAN", provenance_type: "PROPOSED" })],
         { cwd, stdout: capture().stream, stderr: typeChangeErr.stream },
       ),
-    ).toBe(1);
+    ).toBe(2);
     expect(typeChangeErr.text()).toContain("Cannot change node type");
 
     // Verify storage remained completely unmodified
@@ -280,4 +280,3 @@ describe("ariadne node", () => {
     expect(indexAfter).toBe(initialIndex);
   });
 });
-

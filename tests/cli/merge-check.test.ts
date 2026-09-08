@@ -435,7 +435,7 @@ describe("ariadne merge-check", () => {
       await writeFile(graphPath, malformed);
 
       const result = await invoke(cwd, ["merge-check", "--json"]);
-      expect(result.code).toBe(1);
+      expect(result.code).toBe(2);
       expect(await readFile(graphPath, "utf8")).toBe(malformed);
     } finally {
       await rm(cwd, { recursive: true, force: true });

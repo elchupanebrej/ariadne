@@ -144,12 +144,12 @@ describe("subcommand and option help", () => {
 
   describe("unknown options and invalid commands rejection", () => {
     it.each([
-      [["node", "unknown-subcommand"], "Unknown node command: unknown-subcommand", 1],
-      [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 1],
-      [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ...", 1],
-      [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 1],
-      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]", 1],
-      [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]", 1],
+      [["node", "unknown-subcommand"], "Unknown node command: unknown-subcommand", 2],
+      [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 2],
+      [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ...", 2],
+      [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 2],
+      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]", 2],
+      [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]", 2],
       [["unknown-command"], "Unknown command: unknown-command", 2],
     ])("returns error code with message on stderr for %j", async (args, expectedError, expectedCode) => {
       const result = await invoke(args);

@@ -175,15 +175,15 @@ describe("ariadne invalidate", () => {
     const before = await storage.readEvents();
 
     const missing = await invoke(cwd, ["invalidate", "ASM-404", "--by", "EVD-1"]);
-    expect(missing.code).toBe(1);
+    expect(missing.code).toBe(2);
     expect(missing.stderr.text()).toContain("ASM-404");
 
     const wrongEvidence = await invoke(cwd, ["invalidate", "ASM-1", "--by", "ASM-1"]);
-    expect(wrongEvidence.code).toBe(1);
+    expect(wrongEvidence.code).toBe(2);
     expect(wrongEvidence.stderr.text()).toContain("EVD");
 
     const wrongTarget = await invoke(cwd, ["invalidate", "TASK-1", "--by", "EVD-1"]);
-    expect(wrongTarget.code).toBe(1);
+    expect(wrongTarget.code).toBe(2);
     expect(wrongTarget.stderr.text()).toContain("ASM or HYP");
 
     expect(await storage.readEvents()).toEqual(before);
@@ -202,7 +202,7 @@ describe("ariadne invalidate", () => {
 
     const result = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-2"]);
 
-    expect(result.code).toBe(1);
+    expect(result.code).toBe(2);
     expect(result.stderr.text()).toMatch(/incomplete|verdict|method|rung|receipt|environment/i);
     expect(await storage.readEvents()).toEqual(before);
   });

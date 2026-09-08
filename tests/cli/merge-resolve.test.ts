@@ -666,7 +666,7 @@ describe("merge contradiction reconciliation", () => {
         ],
         { cwd: directory, stdout: stdout.stream, stderr: stderr.stream },
       );
-      expect(both).toBe(1);
+      expect(both).toBe(2);
       expect(stderr.text()).toMatch(/exactly one/i);
     } finally {
       await rm(directory, { recursive: true, force: true });
@@ -687,7 +687,7 @@ describe("merge contradiction reconciliation", () => {
         String(conflict.base_digest),
       ]);
 
-      expect(result.code).toBe(1);
+      expect(result.code).toBe(2);
       expect(result.stderr()).toMatch(/only once|exactly one/i);
     } finally {
       await rm(directory, { recursive: true, force: true });

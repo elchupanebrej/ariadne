@@ -247,7 +247,7 @@ describe("ariadne gate", () => {
     );
 
     const invalid = await invoke(cwd, ["gate", "unknown"]);
-    expect(invalid.code).toBe(1);
+    expect(invalid.code).toBe(2);
     expect(invalid.stderr.text()).toContain("Unknown gate");
   });
 

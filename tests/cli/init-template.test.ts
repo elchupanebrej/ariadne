@@ -71,7 +71,7 @@ describe("ariadne init", () => {
     await mkdir(join(shadowed, ".planning", "ariadne"), { recursive: true });
     await writeFile(join(shadowed, ".planning", "ariadne", "STATE.md"), "shadow\n", "utf8");
     const rejected = await invoke(shadowed, ["init", "--mode", "gsd"]);
-    expect(rejected.code).toBe(1);
+    expect(rejected.code).toBe(2);
     expect(rejected.stderr.text()).toContain("shadow state");
     expect(await exists(join(shadowed, ".planning", "ariadne", "STATE.yaml"))).toBe(false);
   });
@@ -84,7 +84,7 @@ describe("ariadne init", () => {
     await writeFile(join(root, "KEEP.txt"), "keep\n", "utf8");
 
     const refused = await invoke(cwd, ["init"]);
-    expect(refused.code).toBe(1);
+    expect(refused.code).toBe(2);
     expect(refused.stderr.text()).toContain("--force");
     expect(await readFile(join(root, "STATE.yaml"), "utf8")).toContain("custom");
 

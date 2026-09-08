@@ -458,7 +458,7 @@ describe("ariadne status FRAME-id continuation", () => {
     const cwd = await seedWorkspace(readySeed);
     const { code, stderr, json } = await runStatusJson(cwd, ["FRAME-missing-1", "--json"]);
 
-    expect(code).toBe(1);
+    expect(code).toBe(2);
     expect(stderr).toContain("Unknown FRAME");
     expect(json).toBeUndefined();
   });

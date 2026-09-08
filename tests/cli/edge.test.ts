@@ -66,11 +66,11 @@ describe("ariadne edge", () => {
   it("rejects missing endpoints and invalid relations before persistence", async () => {
     const { cwd, storage } = await workspace();
     const missing = await invoke(cwd, ["edge", "add", "TASK-2", "supports", "TASK-404"]);
-    expect(missing.code).toBe(1);
+    expect(missing.code).toBe(2);
     expect(missing.stderr.text()).toContain("does not exist");
 
     const invalid = await invoke(cwd, ["edge", "add", "TASK-2", "not_a_relation", "TASK-1"]);
-    expect(invalid.code).toBe(1);
+    expect(invalid.code).toBe(2);
     expect(invalid.stderr.text()).toContain("edge");
     expect((await storage.materialize()).edges).toEqual([]);
   });
@@ -80,17 +80,17 @@ describe("ariadne edge", () => {
     const relationList = EDGE_TYPES.join(", ");
 
     const addErr = await invoke(cwd, ["edge", "add", "TASK-1", "raises", "TASK-2"]);
-    expect(addErr.code).toBe(1);
+    expect(addErr.code).toBe(2);
     expect(addErr.stderr.text()).toContain("Invalid edge relation: raises");
     expect(addErr.stderr.text()).toContain(relationList);
 
     const removeErr = await invoke(cwd, ["edge", "remove", "TASK-1", "raises", "TASK-2"]);
-    expect(removeErr.code).toBe(1);
+    expect(removeErr.code).toBe(2);
     expect(removeErr.stderr.text()).toContain("Invalid edge relation: raises");
     expect(removeErr.stderr.text()).toContain(relationList);
 
     const listErr = await invoke(cwd, ["edge", "list", "--relation", "raises"]);
-    expect(listErr.code).toBe(1);
+    expect(listErr.code).toBe(2);
     expect(listErr.stderr.text()).toContain("Invalid edge relation: raises");
     expect(listErr.stderr.text()).toContain(relationList);
 
@@ -107,7 +107,7 @@ describe("ariadne edge", () => {
     expect((await invoke(cwd, ["edge", "add", "TASK-2", "depends_on", "TASK-1"])).code).toBe(0);
     const cycle = await invoke(cwd, ["edge", "add", "TASK-1", "depends_on", "TASK-2"]);
 
-    expect(cycle.code).toBe(1);
+    expect(cycle.code).toBe(2);
     expect(cycle.stderr.text()).toContain("CYCLE");
     expect((await storage.materialize()).edges).toHaveLength(1);
   });
@@ -115,13 +115,13 @@ describe("ariadne edge", () => {
   it("reports actual vs expected argument count on arity errors", async () => {
     const { cwd } = await workspace();
     const twoArgs = await invoke(cwd, ["edge", "add", "TASK-2", "TASK-1"]);
-    expect(twoArgs.code).toBe(1);
+    expect(twoArgs.code).toBe(2);
     expect(twoArgs.stderr.text()).toContain(
       "Usage: ariadne edge add <from_id> <relation> <to_id> (got 2, expected 3)",
     );
 
     const noArgs = await invoke(cwd, ["edge", "remove"]);
-    expect(noArgs.code).toBe(1);
+    expect(noArgs.code).toBe(2);
     expect(noArgs.stderr.text()).toContain(
       "Usage: ariadne edge remove <from_id> <relation> <to_id> (got 0, expected 3)",
     );

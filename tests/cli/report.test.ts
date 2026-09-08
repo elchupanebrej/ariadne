@@ -283,7 +283,7 @@ describe("ariadne report command", () => {
       stderr: stderr.stream,
     });
 
-    expect(code).toBe(1);
+    expect(code).toBe(2);
     expect(stderr.text()).toContain("Unknown FRAME");
   });
 

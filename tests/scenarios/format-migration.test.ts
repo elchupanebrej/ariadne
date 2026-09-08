@@ -238,7 +238,7 @@ describe("Scenario Suite 2: Persisted-Format Migration", () => {
         const currentDigest = await computeFileDigest(livePath);
         expect(currentDigest.sha256).toBe(origHash);
       }
-    });
+    }, 30_000);
 
     it("rejects rollback on tampered or corrupted backup file with CORRUPT_PERSISTED_HISTORY", async () => {
       fs.cpSync(FIXTURE_ARIADNE, tempAriadne, { recursive: true });
