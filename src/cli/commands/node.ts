@@ -8,6 +8,7 @@ import {
   type ProvenanceType,
 } from "../../core/types/nodes.js";
 import { hasHelp, resolveCliWorkspace, maybeEmitCompactionAdvisory, type CliIO } from "../workspace.js";
+import { syntaxError } from "../contract.js";
 import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 type Flags = Map<string, string | true>;
@@ -30,7 +31,7 @@ const parseFlags = (
       continue;
     }
     if (!valueFlags.includes(arg) || index + 1 >= args.length) {
-      throw new Error(`Unknown or incomplete option: ${arg}`);
+      throw syntaxError(`Unknown or incomplete option: ${arg}`);
     }
     flags.set(arg.slice(2), args[index + 1]);
     index += 1;
@@ -47,7 +48,7 @@ const isProvenance = (value: string): value is ProvenanceType =>
 const flagValue = (flags: Flags, name: string): string => {
   const value = flags.get(name);
   if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`Missing required option: --${name}`);
+    throw syntaxError(`Missing required option: --${name}`);
   }
   return value;
 };
@@ -57,11 +58,11 @@ const parsePayload = (flags: Flags): Record<string, unknown> => {
   try {
     const parsed: unknown = JSON.parse(payloadText);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("payload must be a JSON object");
+      throw syntaxError("payload must be a JSON object");
     }
     return parsed as Record<string, unknown>;
   } catch (error) {
-    throw new Error(
+    throw syntaxError(
       `Invalid --payload JSON: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
@@ -72,10 +73,10 @@ const graphFor = async (io: CliIO) => (await resolveCliWorkspace(io)).graph;
 async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
   if (positionals.length !== 2) {
-    throw new Error(`${NODE_ADD_USAGE.trim()} (got ${positionals.length}, expected 2)`);
+    throw syntaxError(`${NODE_ADD_USAGE.trim()} (got ${positionals.length}, expected 2)`);
   }
   const [type, id] = positionals;
-  if (!isNodeType(type)) throw new Error(unknownNodeType(type));
+  if (!isNodeType(type)) throw syntaxError(unknownNodeType(type));
   const title = flagValue(flags, "title");
   const payload = parsePayload(flags);
 
@@ -91,7 +92,7 @@ async function addNode(args: readonly string[], io: CliIO): Promise<Node> {
 async function getNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, []);
   if (positionals.length !== 1 || flags.size > 0) {
-    throw new Error("Usage: ariadne node get <id>");
+    throw syntaxError("Usage: ariadne node get <id>");
   }
   const [id] = positionals;
   const graph = await graphFor(io);
@@ -102,14 +103,14 @@ async function getNode(args: readonly string[], io: CliIO): Promise<Node> {
 
 async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
   const { positionals, flags } = parseFlags(args, ["--type", "--provenance"]);
-  if (positionals.length > 0) throw new Error("Usage: ariadne node list [--type] [--provenance]");
+  if (positionals.length > 0) throw syntaxError("Usage: ariadne node list [--type] [--provenance]");
   const type = flags.get("type");
   const provenance = flags.get("provenance");
   if (typeof type === "string" && !isNodeType(type)) {
-    throw new Error(unknownNodeType(type));
+    throw syntaxError(unknownNodeType(type));
   }
   if (typeof provenance === "string" && !isProvenance(provenance)) {
-    throw new Error(`Unknown provenance: ${provenance}`);
+    throw syntaxError(`Unknown provenance: ${provenance}`);
   }
 
   const graph = await graphFor(io);
@@ -122,7 +123,7 @@ async function listNodes(args: readonly string[], io: CliIO): Promise<Node[]> {
 async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, []);
   if (positionals.length !== 1 || flags.size > 0) {
-    throw new Error("Usage: ariadne node remove <id>");
+    throw syntaxError("Usage: ariadne node remove <id>");
   }
   const [id] = positionals;
   const graph = await graphFor(io);
@@ -138,7 +139,7 @@ async function removeNode(args: readonly string[], io: CliIO): Promise<Node> {
 async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
   const { positionals, flags } = parseFlags(args, ["--title", "--payload"]);
   if (positionals.length !== 1) {
-    throw new Error(
+    throw syntaxError(
       "Usage: ariadne node update <id> [--title <title>] --payload <json>",
     );
   }
@@ -147,7 +148,7 @@ async function updateNode(args: readonly string[], io: CliIO): Promise<Node> {
 
   const title = flags.get("title");
   if (typeof title === "string" && title.trim() === "") {
-    throw new Error("Missing required option: --title");
+    throw syntaxError("Missing required option: --title");
   }
 
   const graph = await graphFor(io);
@@ -173,7 +174,7 @@ const NODE_TYPE_LIST = NODE_TYPES.join(", ");
 const NODE_TYPE_HINT = `Valid node types (uppercase): ${NODE_TYPE_LIST}`;
 const unknownNodeType = (value: string) => `Unknown node type: ${value}. ${NODE_TYPE_HINT}`;
 
-const NODE_USAGE = "Usage: ariadne node <add|get|list|remove|update> ...\n";
+const NODE_USAGE = "Usage: ariadne node (add|update|get|list|remove) [options]\n";
 const NODE_ADD_USAGE = `Usage: ariadne node add <type> <id> --title <title> --payload <json>\n${NODE_TYPE_HINT}\n`;
 const NODE_GET_USAGE = "Usage: ariadne node get <id>\n";
 const NODE_LIST_USAGE = "Usage: ariadne node list [--type] [--provenance]\n";
@@ -233,7 +234,7 @@ export async function runNode(args: readonly string[], io: CliIO): Promise<numbe
       result = await updateNode(rest, io);
       break;
     default:
-      throw new Error(`Unknown node command: ${subcommand}`);
+      throw syntaxError(`Unknown node command: ${subcommand}`);
   }
   io.stdout.write(`${JSON.stringify(result)}\n`);
   await maybeEmitCompactionAdvisory(environment.storageRoot, io);

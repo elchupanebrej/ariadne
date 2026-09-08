@@ -6,21 +6,24 @@ import {
   MERGE_PROTOCOL_VERSION,
   type MergeReceipt,
 } from "../../merge/three-way.js";
-import { hasHelp, type CliIO } from "../workspace.js";
+import { hasHelp, syntaxError, writeDomainDiagnostic } from "../contract.js";
+import type { CliIO } from "../workspace.js";
 
 const MERGE_USAGE =
-  "Usage: ariadne merge-driver [--json] [--protocol-version <n>] <ancestor> <current> <incoming>\n";
+  "Usage: ariadne merge-driver <ancestor> <current> <other> <result>\n";
 
 type ParsedArgs = {
-  files: [string, string, string];
+  files: [string, string, string, string];
   json: boolean;
   protocolVersion: number;
+  legacy: boolean;
 };
 
 const parseArgs = (args: readonly string[]): ParsedArgs => {
   const positionals: string[] = [];
   let json = false;
   let protocolVersion: number = MERGE_PROTOCOL_VERSION;
+  let protocolSeen = false;
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === "--json") {
@@ -28,16 +31,30 @@ const parseArgs = (args: readonly string[]): ParsedArgs => {
       continue;
     }
     if (arg === "--protocol-version" || arg.startsWith("--protocol-version=")) {
+      if (protocolSeen) throw syntaxError(MERGE_USAGE.trim());
+      protocolSeen = true;
       const value = arg === "--protocol-version" ? args[++index] : arg.slice("--protocol-version=".length);
-      if (!value || !/^\d+$/u.test(value)) throw new Error(MERGE_USAGE.trim());
+      if (!value || !/^\d+$/u.test(value)) throw syntaxError(MERGE_USAGE.trim());
       protocolVersion = Number(value);
       continue;
     }
-    if (arg.startsWith("--")) throw new Error(MERGE_USAGE.trim());
+    if (arg === "--format" || arg.startsWith("--format=")) {
+      const value = arg === "--format" ? args[++index] : arg.slice("--format=".length);
+      if (json || value !== "json") throw syntaxError("Merge-driver supports only --format json.");
+      json = true;
+      continue;
+    }
+    if (arg.startsWith("--")) throw syntaxError(MERGE_USAGE.trim());
     positionals.push(arg);
   }
-  if (positionals.length !== 3) throw new Error(MERGE_USAGE.trim());
-  return { files: positionals as ParsedArgs["files"], json, protocolVersion };
+  if (positionals.length !== 3 && positionals.length !== 4) {
+    throw syntaxError(MERGE_USAGE.trim());
+  }
+  const legacy = positionals.length === 3;
+  const files = legacy
+    ? [positionals[0]!, positionals[1]!, positionals[2]!, positionals[1]!] as ParsedArgs["files"]
+    : positionals as ParsedArgs["files"];
+  return { files, json, protocolVersion, legacy };
 };
 
 const gitDirectory = async (cwd: string): Promise<string | undefined> => {
@@ -105,8 +122,8 @@ export async function runMergeDriver(args: readonly string[], io: CliIO): Promis
     io.stdout.write(MERGE_USAGE);
     return 0;
   }
-  const { files, json, protocolVersion } = parseArgs(args);
-  const [basePath, currentPath, incomingPath] = files;
+  const { files, json, protocolVersion, legacy } = parseArgs(args);
+  const [basePath, currentPath, incomingPath, resultPath] = files;
   const [base, current, incoming] = await Promise.all([
     readFile(basePath, "utf8"),
     readFile(currentPath, "utf8"),
@@ -118,12 +135,28 @@ export async function runMergeDriver(args: readonly string[], io: CliIO): Promis
     { protocolVersion, ...(operation ? { operation } : {}) },
   );
   if (result.receipt.outcome !== "FAILED" && result.output !== null) {
-    await replaceAtomically(currentPath, result.output);
+    await replaceAtomically(resultPath, result.output);
   }
 
-  if (json) io.stdout.write(`${JSON.stringify(result.receipt)}\n`);
-  io.stderr.write(summary(result.receipt));
-  return result.receipt.outcome === "FAILED" ? 1 : 0;
+  if (json || !legacy) io.stdout.write(`${JSON.stringify(result.receipt)}\n`);
+  if (!json) io.stderr.write(summary(result.receipt));
+  if (result.receipt.outcome === "FAILED") return legacy ? 1 : 2;
+  if (result.receipt.outcome === "DIVERGED") {
+    if (!legacy) {
+      writeDomainDiagnostic(
+        io,
+        json ? "json" : "human",
+        "MERGE_DIVERGED",
+        "Ariadne merge completed with unresolved epistemic divergence.",
+        {
+          conflicts: result.receipt.created_conflict_ids,
+          diagnostics: result.receipt.diagnostics,
+        },
+      );
+    }
+    return legacy ? 0 : 1;
+  }
+  return 0;
 }
 
 export { MERGE_USAGE };

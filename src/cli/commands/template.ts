@@ -1,4 +1,5 @@
-import { hasHelp, type CliIO } from "../workspace.js";
+import { hasHelp, parseOptions, syntaxError, type OptionSpec } from "../contract.js";
+import type { CliIO } from "../workspace.js";
 
 export type TemplateType = "FRAME" | "DIAG" | "LEAN-TASK" | "TRANS";
 
@@ -102,12 +103,13 @@ const TEMPLATES: Record<TemplateType, string> = {
 `,
 };
 
-const TEMPLATE_USAGE = "Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>\n";
+const TEMPLATE_USAGE = "Usage: ariadne template (init|apply|list) [options]\n";
 
-const parse = (args: readonly string[]): TemplateType => {
-  if (args.length !== 1) throw new Error(TEMPLATE_USAGE.trim());
-  const type = args[0].toUpperCase() as TemplateType;
-  if (!(type in TEMPLATES)) throw new Error(`Unknown template: ${args[0]}`);
+const parseType = (value: string | undefined): TemplateType => {
+  const type = (value ?? "FRAME").toUpperCase() as TemplateType;
+  if (!(type in TEMPLATES)) {
+    throw syntaxError(`Unknown template type: ${value}`);
+  }
   return type;
 };
 
@@ -116,6 +118,29 @@ export function runTemplate(args: readonly string[], io: CliIO): number {
     io.stdout.write(TEMPLATE_USAGE);
     return 0;
   }
-  io.stdout.write(TEMPLATES[parse(args)]);
-  return 0;
+  const [action, ...rest] = args;
+  if (action === "list") {
+    if (rest.length > 0) throw syntaxError(TEMPLATE_USAGE.trim());
+    io.stdout.write("init\napply\nlist\n");
+    return 0;
+  }
+  if (action === "init") {
+    if (rest.length > 0) throw syntaxError(TEMPLATE_USAGE.trim());
+    io.stdout.write(TEMPLATES.FRAME);
+    return 0;
+  }
+  if (action === "apply") {
+    const specs: OptionSpec[] = [{ name: "type", takesValue: true }];
+    const parsed = parseOptions(rest, specs, TEMPLATE_USAGE.trim());
+    if (parsed.positionals.length > 0 || parsed.flags.size > 0) {
+      throw syntaxError(TEMPLATE_USAGE.trim());
+    }
+    io.stdout.write(TEMPLATES[parseType(parsed.values.get("type"))]);
+    return 0;
+  }
+  if (action !== undefined && rest.length === 0 && action.toUpperCase() in TEMPLATES) {
+    io.stdout.write(TEMPLATES[action.toUpperCase() as TemplateType]);
+    return 0;
+  }
+  throw syntaxError(TEMPLATE_USAGE.trim());
 }

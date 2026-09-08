@@ -1,12 +1,16 @@
 import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import {
   reconcileMergeContradiction,
   type MergeReconciliationReceipt,
 } from "../../merge/reconcile.js";
 import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
+import { parseOptions, parseOutputFormat, syntaxError, writeDomainDiagnostic } from "../contract.js";
 
 const MERGE_RESOLVE_USAGE =
-  "Usage: ariadne merge-resolve <conflict-id> --expected-digest <digest> (--select-digest <digest> | --delta <file>) [--decision-owner <owner>] [--json]\n";
+  "Usage: ariadne merge-resolve [--auto]\n" +
+  "       ariadne merge-resolve <conflict-id> --expected-digest <digest> " +
+  "(--select-digest <digest> | --delta <file>) [--decision-owner <owner>] [--format json]\n";
 
 type ParsedArgs = {
   conflictId: string;
@@ -15,57 +19,57 @@ type ParsedArgs = {
   deltaPath?: string;
   decisionOwner?: string;
   json: boolean;
-};
-
-const required = (value: string | undefined, option: string): string => {
-  if (!value || value.trim() === "")
-    throw new Error(`Missing required option: ${option}`);
-  return value;
+  auto: boolean;
 };
 
 const parseArgs = (args: readonly string[]): ParsedArgs => {
-  const [conflictId, ...rest] = args;
-  if (!conflictId || conflictId.startsWith("--"))
-    throw new Error(MERGE_RESOLVE_USAGE.trim());
-  let expectedDigest: string | undefined;
-  let selectDigest: string | undefined;
-  let deltaPath: string | undefined;
-  let decisionOwner: string | undefined;
-  let json = false;
-  const seenValueOptions = new Set<string>();
-  for (let index = 0; index < rest.length; index += 1) {
-    const arg = rest[index];
-    if (arg === "--json") {
-      json = true;
-      continue;
-    }
-    if (
-      arg === "--expected-digest" ||
-      arg === "--select-digest" ||
-      arg === "--delta" ||
-      arg === "--decision-owner"
-    ) {
-      const value = rest[++index];
-      if (!value || value.startsWith("--"))
-        throw new Error(MERGE_RESOLVE_USAGE.trim());
-      if (seenValueOptions.has(arg))
-        throw new Error(`Option ${arg} may be specified only once`);
-      seenValueOptions.add(arg);
-      if (arg === "--expected-digest") expectedDigest = value;
-      else if (arg === "--select-digest") selectDigest = value;
-      else if (arg === "--delta") deltaPath = value;
-      else decisionOwner = value;
-      continue;
-    }
-    throw new Error(MERGE_RESOLVE_USAGE.trim());
+  const output = parseOutputFormat(args, ["json"], "human", MERGE_RESOLVE_USAGE.trim());
+  const legacyJson = output.rest.filter((arg) => arg === "--json");
+  if (legacyJson.length > 1 || (legacyJson.length === 1 && output.format === "json")) {
+    throw syntaxError("Specify only one JSON output option.");
   }
+  const parsed = parseOptions(
+    output.rest.filter((arg) => arg !== "--json"),
+    [
+      { name: "expected-digest", takesValue: true },
+      { name: "select-digest", takesValue: true },
+      { name: "delta", takesValue: true },
+      { name: "decision-owner", takesValue: true },
+      { name: "auto" },
+    ],
+    MERGE_RESOLVE_USAGE.trim(),
+  );
+  if (parsed.positionals.length === 0 && parsed.flags.has("auto")) {
+    if (
+      parsed.values.size > 0 ||
+      parsed.flags.size !== 1
+    ) {
+      throw syntaxError(MERGE_RESOLVE_USAGE.trim());
+    }
+    return {
+      conflictId: "",
+      expectedDigest: "",
+      json: output.format === "json" || legacyJson.length === 1,
+      auto: true,
+    };
+  }
+  if (parsed.positionals.length !== 1 || parsed.flags.size > 0) {
+    throw syntaxError(MERGE_RESOLVE_USAGE.trim());
+  }
+  const expectedDigest = parsed.values.get("expected-digest");
+  if (!expectedDigest) throw syntaxError("Missing required option: --expected-digest");
   return {
-    conflictId,
-    expectedDigest: required(expectedDigest, "--expected-digest"),
-    ...(selectDigest !== undefined ? { selectDigest } : {}),
-    ...(deltaPath !== undefined ? { deltaPath } : {}),
-    ...(decisionOwner !== undefined ? { decisionOwner } : {}),
-    json,
+    conflictId: parsed.positionals[0]!,
+    expectedDigest,
+    ...(parsed.values.has("select-digest")
+      ? { selectDigest: parsed.values.get("select-digest")! }
+      : {}),
+    ...(parsed.values.has("delta") ? { deltaPath: parsed.values.get("delta")! } : {}),
+    ...(parsed.values.has("decision-owner")
+      ? { decisionOwner: parsed.values.get("decision-owner")! }
+      : {}),
+    json: output.format === "json" || legacyJson.length === 1,
+    auto: false,
   };
 };
 
@@ -83,16 +87,35 @@ export async function runMergeResolve(
     return 0;
   }
   const parsed = parseArgs(args);
+  if (parsed.auto) {
+    const { storage } = await resolveCliWorkspace(io);
+    const conflicts = (await storage.materialize()).nodes
+      .filter((node) => node.type === "CTR" && node.status === "MERGE_CONFLICT")
+      .map(({ id }) => id)
+      .sort();
+    if (conflicts.length === 0) {
+      io.stdout.write("No unresolved merge contradictions.\n");
+      return 0;
+    }
+    writeDomainDiagnostic(
+      io,
+      parsed.json ? "json" : "human",
+      "MERGE_DIVERGED",
+      "Automatic merge resolution requires an explicit conflict selection.",
+      { conflicts },
+    );
+    return 1;
+  }
   if (
     (parsed.selectDigest === undefined) ===
     (parsed.deltaPath === undefined)
   ) {
-    throw new Error("Exactly one of --select-digest or --delta is required");
+    throw syntaxError("Exactly one of --select-digest or --delta is required");
   }
   const delta =
     parsed.deltaPath === undefined
       ? undefined
-      : await readFile(parsed.deltaPath, "utf8");
+      : await readFile(resolve(io.cwd, parsed.deltaPath), "utf8");
   const { storage } = await resolveCliWorkspace(io);
   const authorization =
     parsed.decisionOwner === undefined
@@ -114,7 +137,17 @@ export async function runMergeResolve(
         };
   const receipt = await reconcileMergeContradiction(storage, request);
   if (parsed.json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
-  io.stderr.write(summary(receipt));
+  if (receipt.outcome !== "RESOLVED" && receipt.outcome !== "ALREADY_RESOLVED") {
+    writeDomainDiagnostic(
+      io,
+      parsed.json ? "json" : "human",
+      "MERGE_DIVERGED",
+      "Ariadne merge reconciliation did not resolve the contradiction.",
+      { conflict: receipt.conflict_id, outcome: receipt.outcome, diagnostics: receipt.diagnostics },
+    );
+  } else {
+    io.stderr.write(summary(receipt));
+  }
   return receipt.outcome === "RESOLVED" ||
     receipt.outcome === "ALREADY_RESOLVED"
     ? 0

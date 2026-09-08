@@ -5,7 +5,7 @@ Bring the CLI implementation, help output, parser, command handlers, and integra
 
 **Blocked by:** 18, 21
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 - [ ] Every canonical command form accepts the documented positional arguments and options.
 - [ ] Ingest, report, visualization, migration, and merge-driver formats are parsed and displayed consistently.

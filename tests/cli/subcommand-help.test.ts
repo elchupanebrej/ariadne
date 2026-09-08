@@ -38,10 +38,10 @@ const invoke = (args: string[], cwd?: string) => {
 describe("subcommand and option help", () => {
   describe("group-level help", () => {
     it.each([
-      ["node", "--help", "Usage: ariadne node <add|get|list|remove|update> ..."],
-      ["node", "-h", "Usage: ariadne node <add|get|list|remove|update> ..."],
-      ["edge", "--help", "Usage: ariadne edge <add|list|remove> ..."],
-      ["edge", "-h", "Usage: ariadne edge <add|list|remove> ..."],
+      ["node", "--help", "Usage: ariadne node (add|update|get|list|remove) [options]"],
+      ["node", "-h", "Usage: ariadne node (add|update|get|list|remove) [options]"],
+      ["edge", "--help", "Usage: ariadne edge (add|remove|list) [options]"],
+      ["edge", "-h", "Usage: ariadne edge (add|remove|list) [options]"],
     ])("returns 0 and usage for %s %s without creating files", async (cmd, flag, expectedUsage) => {
       const result = await invoke([cmd, flag]);
 
@@ -100,22 +100,20 @@ describe("subcommand and option help", () => {
 
   describe("other command families help", () => {
     it.each([
-      [["status", "--help"], "Usage: ariadne status [FRAME-id] [--json]"],
-      [["status", "-h"], "Usage: ariadne status [FRAME-id] [--json]"],
-      [["gate", "--help"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
-      [["gate", "-h"], "Usage: ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]"],
-      [["verify", "--help"], "Usage: ariadne verify [--strict]"],
-      [["verify", "-h"], "Usage: ariadne verify [--strict]"],
-      [["invalidate", "--help"], "Usage: ariadne invalidate <node_id> --by <evidence_id>"],
-      [["invalidate", "-h"], "Usage: ariadne invalidate <node_id> --by <evidence_id>"],
-      [["ingest", "--help"], "Usage: ariadne ingest <matt|gsd> ..."],
-      [["ingest", "-h"], "Usage: ariadne ingest <matt|gsd> ..."],
-      [["ingest", "matt", "--help"], "Usage: ariadne ingest matt <skill> <file>"],
-      [["ingest", "gsd", "--help"], "Usage: ariadne ingest gsd <path>"],
-      [["init", "--help"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
-      [["init", "-h"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]"],
-      [["template", "--help"], "Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>"],
-      [["template", "-h"], "Usage: ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>"],
+      [["status", "--help"], "Usage: ariadne status [--format json]"],
+      [["status", "-h"], "Usage: ariadne status [--format json]"],
+      [["gate", "--help"], "Usage: ariadne gate <name> [--format json]"],
+      [["gate", "-h"], "Usage: ariadne gate <name> [--format json]"],
+      [["verify", "--help"], "Usage: ariadne verify [--format json]"],
+      [["verify", "-h"], "Usage: ariadne verify [--format json]"],
+      [["invalidate", "--help"], "Usage: ariadne invalidate <node-id> [--reason <text>]"],
+      [["invalidate", "-h"], "Usage: ariadne invalidate <node-id> [--reason <text>]"],
+      [["ingest", "--help"], "Usage: ariadne ingest <file> [--type <type>]"],
+      [["ingest", "-h"], "Usage: ariadne ingest <file> [--type <type>]"],
+      [["init", "--help"], "Usage: ariadne init [--root <path>]"],
+      [["init", "-h"], "Usage: ariadne init [--root <path>]"],
+      [["template", "--help"], "Usage: ariadne template (init|apply|list) [options]"],
+      [["template", "-h"], "Usage: ariadne template (init|apply|list) [options]"],
     ])("returns 0 and usage for %j without creating files", async (args, expectedUsage) => {
       const result = await invoke(args);
 
@@ -136,7 +134,7 @@ describe("subcommand and option help", () => {
 
       expect(result.code).toBe(0);
       expect(result.stdout).toContain("Usage:");
-      expect(result.stdout).toContain("ariadne node <add|get|list|remove|update> ...");
+      expect(result.stdout).toContain("ariadne node (add|update|get|list|remove) [options]");
       expect(result.stderr).toBe("");
       expect(readdirSync(result.cwd)).toEqual([]);
     });
@@ -146,10 +144,10 @@ describe("subcommand and option help", () => {
     it.each([
       [["node", "unknown-subcommand"], "Unknown node command: unknown-subcommand", 2],
       [["node", "add", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 2],
-      [["edge", "unknown-subcommand"], "Usage: ariadne edge <add|list|remove> ...", 2],
+      [["edge", "unknown-subcommand"], "Usage: ariadne edge (add|remove|list) [options]", 2],
       [["edge", "list", "--unknown-flag"], "Unknown or incomplete option: --unknown-flag", 2],
-      [["status", "--unknown-flag"], "Usage: ariadne status [FRAME-id] [--json]", 2],
-      [["init", "--unknown-flag"], "Usage: ariadne init [--mode auto|standalone|gsd] [--force]", 2],
+      [["status", "--unknown-flag"], "Usage: ariadne status [--format json]", 2],
+      [["init", "--unknown-flag"], "Usage: ariadne init [--root <path>]", 2],
       [["unknown-command"], "Unknown command: unknown-command", 2],
     ])("returns error code with message on stderr for %j", async (args, expectedError, expectedCode) => {
       const result = await invoke(args);
@@ -161,9 +159,9 @@ describe("subcommand and option help", () => {
 
   describe("built executable subcommand help", () => {
     it.each([
-      [["node", "--help"], "Usage: ariadne node <add|get|list|remove|update> ..."],
+      [["node", "--help"], "Usage: ariadne node (add|update|get|list|remove) [options]"],
       [["node", "add", "--help"], NODE_ADD_USAGE],
-      [["edge", "--help"], "Usage: ariadne edge <add|list|remove> ..."],
+      [["edge", "--help"], "Usage: ariadne edge (add|remove|list) [options]"],
     ])("executes built cli with %j", async (args, expectedUsage) => {
       const builtCli = resolve(
         fileURLToPath(new URL("../../dist/cli/index.js", import.meta.url)),

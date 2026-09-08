@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { resolve } from "node:path";
 import { realpathSync } from "node:fs";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
@@ -19,38 +18,8 @@ import { runMergeDoctor, runMergeSetup } from "./commands/merge-integration.js";
 import { runMergeCheck } from "./commands/merge-check.js";
 import { runMergeSync } from "./commands/merge-sync.js";
 import { runMigrate } from "./commands/migrate.js";
-import { hasHelp, type CliIO } from "./workspace.js";
 import { AriadneError, formatDiagnostic } from "../core/errors.js";
-
-const VERSION = "0.2.0";
-
-const HELP = `Ariadne ${VERSION}
-
-Usage:
-  ariadne status [FRAME-id] [--json]
-  ariadne node <add|get|list|remove|update> ...
-  ariadne edge <add|list|remove> ...
-  ariadne invalidate <node_id> --by <evidence_id>
-  ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]
-  ariadne verify [--strict]
-  ariadne ingest matt <skill> <file>
-  ariadne ingest gsd <path>
-  ariadne report [FRAME-id] [--json]
-  ariadne viz [FRAME-id] [--json]
-  ariadne init [--mode auto|standalone|gsd] [--force]
-  ariadne template <FRAME|DIAG|LEAN-TASK|TRANS>
-  ariadne merge-driver [--json] <ancestor> <current> <incoming>
-  ariadne merge-resolve <conflict-id> --expected-digest <digest> (--select-digest <digest> | --delta <file>) [--json]
-  ariadne merge-setup [--json]
-  ariadne merge-doctor [--json]
-  ariadne merge-check [--json]
-  ariadne merge-sync [--json] [--stage-derived]
-  ariadne migrate [--dry-run] [--rollback <id>] [--json]
-
-Options:
-  -h, --help       Show this help
-  -v, --version    Show the CLI version
-`;
+import { CLI_HELP, CLI_VERSION, hasHelp, normalizeCliError, type CliIO } from "./contract.js";
 
 export type RunCliOptions = {
   cwd?: string;
@@ -71,11 +40,11 @@ export async function runCli(
 
   try {
     if (!command || command === "--help" || command === "-h") {
-      io.stdout.write(HELP);
+      io.stdout.write(CLI_HELP);
       return 0;
     }
     if (command === "--version" || command === "-v") {
-      io.stdout.write(`${VERSION}\n`);
+      io.stdout.write(`${CLI_VERSION}\n`);
       return 0;
     }
     if (command === "status") return await runStatus(args.slice(1), io);
@@ -86,7 +55,7 @@ export async function runCli(
     if (command === "gate") return await runGate(args.slice(1), io);
     if (command === "verify") {
       if (hasHelp(args.slice(1))) {
-        io.stdout.write("Usage: ariadne verify [--strict]\n");
+        io.stdout.write("Usage: ariadne verify [--format json]\n");
         return 0;
       }
       return await runGate(["all", ...args.slice(1)], io);
@@ -114,7 +83,7 @@ export async function runCli(
     });
   } catch (error) {
     const isJson = isJsonRequested(args);
-    const formatted = formatDiagnostic(error, { json: isJson });
+    const formatted = formatDiagnostic(normalizeCliError(error), { json: isJson });
     io.stderr.write(formatted.text);
     return formatted.exitCode;
   }

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { detectGsd } from "../../adapters/gsd/detector.js";
 import { MERGE_PROTOCOL_VERSION } from "../../merge/three-way.js";
 import { hasHelp, type CliIO } from "../workspace.js";
+import { parseOptions, parseOutputFormat, syntaxError } from "../contract.js";
 
 const runFile = promisify(execFile);
 const DRIVER_KEY = "merge.ariadne.driver";
@@ -51,8 +52,8 @@ type IntegrationReceipt = {
   diagnostics?: string[];
 };
 
-const SETUP_USAGE = "Usage: ariadne merge-setup [--json]\n";
-const DOCTOR_USAGE = "Usage: ariadne merge-doctor [--json]\n";
+const SETUP_USAGE = "Usage: ariadne merge-setup [--hooks]\n";
+const DOCTOR_USAGE = "Usage: ariadne merge-doctor [--format json]\n";
 
 const git = async (cwd: string, args: string[]): Promise<string> =>
   (await runFile("git", ["-C", cwd, ...args], { encoding: "utf8" })).stdout;
@@ -495,9 +496,27 @@ const summary = (name: string, receipt: IntegrationReceipt): string => {
   return `Ariadne ${name} ${receipt.passed ? "passed" : "failed"} for ${receipt.graph_path}; ${[...failed, ...diagnostics].join("; ") || "all checks passed"}\n`;
 };
 
-const parseJsonFlag = (args: readonly string[], usage: string): boolean => {
-  if (args.some((arg) => arg !== "--json")) throw new Error(usage.trim());
-  return args.includes("--json");
+const parseCommandOptions = (
+  args: readonly string[],
+  usage: string,
+  flags: readonly string[] = [],
+): { json: boolean; flags: Set<string> } => {
+  const output = parseOutputFormat(args, ["json"], "human", usage.trim());
+  const legacyJson = output.rest.filter((arg) => arg === "--json");
+  if (legacyJson.length > 1 || (legacyJson.length === 1 && output.format === "json")) {
+    throw syntaxError("Specify only one JSON output option.");
+  }
+  const rest = output.rest.filter((arg) => arg !== "--json");
+  const parsed = parseOptions(
+    rest,
+    flags.map((name) => ({ name })),
+    usage.trim(),
+  );
+  if (parsed.positionals.length > 0) throw syntaxError(usage.trim());
+  return {
+    json: output.format === "json" || legacyJson.length === 1,
+    flags: parsed.flags,
+  };
 };
 
 export async function runMergeSetup(
@@ -508,7 +527,7 @@ export async function runMergeSetup(
     io.stdout.write(SETUP_USAGE);
     return 0;
   }
-  const json = parseJsonFlag(args, SETUP_USAGE);
+  const { json } = parseCommandOptions(args, SETUP_USAGE, ["hooks"]);
   const root = await repositoryRoot(io.cwd);
   const graphPath = graphPathFor(root);
   const currentDriver = await tryGit(root, [
@@ -597,7 +616,7 @@ export async function runMergeDoctor(
     io.stdout.write(DOCTOR_USAGE);
     return 0;
   }
-  const json = parseJsonFlag(args, DOCTOR_USAGE);
+  const { json } = parseCommandOptions(args, DOCTOR_USAGE);
   const root = await repositoryRoot(io.cwd);
   const graphPath = graphPathFor(root);
   const driver = await tryGit(root, ["config", "--local", "--get", DRIVER_KEY]);

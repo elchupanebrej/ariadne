@@ -420,7 +420,7 @@ describe("CLI Integration & Error Interception", () => {
 
     expect(exitCode).toBe(2);
     expect(stdout.text()).toBe("");
-    expect(stderr.text()).toBe("Error: [INVARIANT_VIOLATION] Unknown gate: not-a-gate\n");
+    expect(stderr.text()).toBe("Error: [INVALID_INPUT] Unknown gate: not-a-gate\n");
   });
 });
 

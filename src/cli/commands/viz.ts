@@ -10,7 +10,8 @@ import {
   reachableCount,
   type FoldedGraph,
 } from "../../graph/traversal.js";
-import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
+import { hasHelp, parseOutputFormat, syntaxError } from "../contract.js";
+import { resolveCliWorkspace, type CliIO } from "../workspace.js";
 import {
   answerText,
   LOG_TYPES,
@@ -163,6 +164,64 @@ export type VizOutput = {
   html: string;
   summary: ReportSummary;
 };
+
+const graphLabel = (value: unknown): string =>
+  String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/gu, " ");
+
+export function buildDot(events: readonly GraphEvent[]): string {
+  const graph = fold(events);
+  const lines = ["digraph Ariadne {", "  rankdir=LR;"];
+  for (const node of [...graph.nodes.values()].sort((left, right) => left.id.localeCompare(right.id))) {
+    lines.push(`  ${JSON.stringify(node.id)} [label="${graphLabel(`${node.id}\\n${node.title}`)}"];`);
+  }
+  for (const edge of graph.edges) {
+    lines.push(`  ${JSON.stringify(edge.source)} -> ${JSON.stringify(edge.target)} [label="${graphLabel(edge.type)}"];`);
+  }
+  lines.push("}", "");
+  return lines.join("\n");
+}
+
+export function buildMermaid(events: readonly GraphEvent[]): string {
+  const graph = fold(events);
+  const ids = [...graph.nodes.values()]
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map((node, index) => ({ node, key: `n${index}` }));
+  const keys = new Map(ids.map(({ node, key }) => [node.id, key]));
+  const lines = ["flowchart TD"];
+  for (const { node, key } of ids) {
+    lines.push(`  ${key}["${graphLabel(`${node.id}: ${node.title}`)}"]`);
+  }
+  for (const edge of graph.edges) {
+    const source = keys.get(edge.source);
+    const target = keys.get(edge.target);
+    if (source && target) lines.push(`  ${source} -->|${graphLabel(edge.type)}| ${target}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+export function buildSvg(events: readonly GraphEvent[]): string {
+  const graph = fold(events);
+  const nodes = [...graph.nodes.values()].sort((left, right) => left.id.localeCompare(right.id));
+  const width = 720;
+  const rowHeight = 34;
+  const height = Math.max(48, (nodes.length + 1) * rowHeight);
+  const escSvg = (value: unknown): string =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const lines = [
+    `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ariadne epistemic graph" viewBox="0 0 ${width} ${height}">`,
+    `  <title>Ariadne epistemic graph</title>`,
+  ];
+  nodes.forEach((node, index) => {
+    const y = (index + 1) * rowHeight;
+    lines.push(`  <text x="12" y="${y}" font-family="monospace" font-size="14">${escSvg(`${node.id}: ${node.title}`)}</text>`);
+  });
+  lines.push("</svg>", "");
+  return lines.join("\n");
+}
 
 export function buildViz(
   events: readonly GraphEvent[],
@@ -357,19 +416,40 @@ ${logRows.join("\n")}
   };
 }
 
-const VIZ_USAGE = "Usage: ariadne viz [FRAME-id] [--json]\n";
+const VIZ_USAGE = "Usage: ariadne viz [--format (dot|svg|mermaid)]\n";
 
 export async function runViz(args: readonly string[], io: CliIO): Promise<number> {
   if (hasHelp(args)) {
     io.stdout.write(VIZ_USAGE);
     return 0;
   }
-  const json = args.includes("--json");
-  const positional = args.filter((arg) => arg !== "--json");
-  if (positional.length > 1) throw new Error(VIZ_USAGE.trim());
-  const [frameArg] = positional;
+  const output = parseOutputFormat<"dot" | "svg" | "mermaid" | "html">(
+    args,
+    ["dot", "svg", "mermaid"],
+    "html",
+    VIZ_USAGE.trim(),
+  );
+  const legacyJson = output.rest.includes("--json");
+  const rest = output.rest.filter((arg) => arg !== "--json");
+  if (rest.length > 1 || rest.some((arg) => arg.startsWith("--"))) {
+    throw syntaxError(VIZ_USAGE.trim());
+  }
+  const frameArg = rest[0];
 
   const { environment, storage } = await resolveCliWorkspace(io);
+  const events = await storage.readEvents();
+  if (!legacyJson && output.format === "dot") {
+    io.stdout.write(buildDot(events));
+    return 0;
+  }
+  if (!legacyJson && output.format === "svg") {
+    io.stdout.write(buildSvg(events));
+    return 0;
+  }
+  if (!legacyJson && output.format === "mermaid") {
+    io.stdout.write(buildMermaid(events));
+    return 0;
+  }
   const reportsDirectory = join(storage.rootDirectory, "reports");
   await mkdir(reportsDirectory, { recursive: true });
   // Hrefs resolve from the report's own directory, so card links are
@@ -389,7 +469,7 @@ export async function runViz(args: readonly string[], io: CliIO): Promise<number
   const fileName = `${ordinal}-${slugify(slugSource)}.html`;
   await writeFile(join(reportsDirectory, fileName), viz.html, "utf8");
 
-  if (json) {
+  if (legacyJson) {
     io.stdout.write(
       `${JSON.stringify({
         file: `${toRootRelative(environment.rootPath, reportsDirectory)}/${fileName}`,

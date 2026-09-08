@@ -9,14 +9,14 @@ import {
   type RollbackResult,
 } from "../../graph/migration.js";
 import { AriadneError } from "../../core/errors.js";
+import { parseOptions, parseOutputFormat, syntaxError } from "../contract.js";
 
 const MIGRATE_USAGE = `Usage:
-  ariadne migrate [--dry-run] [--rollback <migration-id>] [--json]
+  ariadne migrate [--dry-run] [--rollback <id>]
 
 Options:
   --dry-run                 Preview migration changes without modifying disk
-  --rollback <migration-id> Restore workspace from an immutable backup snapshot
-  --json                    Output structured JSON
+  --rollback <id>           Restore workspace from an immutable backup snapshot
   -h, --help                Show this help
 `;
 
@@ -27,50 +27,38 @@ export interface ParsedMigrateArgs {
 }
 
 export function parseMigrateArgs(args: readonly string[]): ParsedMigrateArgs {
-  let dryRun = false;
-  let rollbackId: string | undefined = undefined;
-  let json = false;
-
-  for (let i = 0; i < args.length; i += 1) {
-    const arg = args[i];
-    if (arg === "--dry-run") {
-      dryRun = true;
-    } else if (arg === "--json" || arg === "--format=json") {
-      json = true;
-    } else if (arg === "--format" && args[i + 1] === "json") {
-      json = true;
-      i += 1;
-    } else if (arg === "--rollback") {
-      const nextArg = args[i + 1];
-      if (!nextArg || nextArg.startsWith("--")) {
-        throw new AriadneError({
-          code: "INVALID_INPUT",
-          message: "Flag --rollback requires a migration ID argument",
-          repair: "Specify the migration ID to restore: 'ariadne migrate --rollback <id>'",
-        });
-      }
-      rollbackId = nextArg;
-      i += 1;
-    } else if (arg.startsWith("--rollback=")) {
-      const val = arg.slice("--rollback=".length);
-      if (!val) {
-        throw new AriadneError({
-          code: "INVALID_INPUT",
-          message: "Flag --rollback requires a migration ID argument",
-          repair: "Specify the migration ID to restore: 'ariadne migrate --rollback=<id>'",
-        });
-      }
-      rollbackId = val;
-    } else {
-      throw new AriadneError({
-        code: "INVALID_INPUT",
-        message: `Unknown argument for migrate: '${arg}'`,
-        repair: "Run 'ariadne migrate --help' to see valid options.",
-      });
-    }
+  const output = parseOutputFormat(args, ["json"], "human", MIGRATE_USAGE.trim());
+  const compatibilityJson = output.rest.filter((arg) => arg === "--json");
+  const withoutCompatibilityJson = output.rest.filter((arg) => arg !== "--json");
+  if (compatibilityJson.length > 1 || (compatibilityJson.length === 1 && output.format === "json")) {
+    throw syntaxError("Specify only one JSON output option.");
   }
-
-  return { dryRun, rollbackId, json };
+  const normalized = withoutCompatibilityJson.flatMap((arg) => {
+    if (arg.startsWith("--rollback=")) return ["--rollback", arg.slice("--rollback=".length)];
+    return [arg];
+  });
+  const parsed = parseOptions(
+    normalized,
+    [
+      { name: "dry-run" },
+      { name: "rollback", takesValue: true },
+    ],
+    MIGRATE_USAGE.trim(),
+  );
+  if (parsed.positionals.length > 0) throw syntaxError(MIGRATE_USAGE.trim());
+  const dryRun = parsed.flags.has("dry-run");
+  const rollbackId = parsed.values.get("rollback");
+  if (rollbackId !== undefined && rollbackId.trim() === "") {
+    throw syntaxError("Option --rollback requires a migration ID.");
+  }
+  if (dryRun && rollbackId !== undefined) {
+    throw syntaxError("Options --dry-run and --rollback cannot be used together.");
+  }
+  return {
+    dryRun,
+    ...(rollbackId === undefined ? {} : { rollbackId }),
+    json: output.format === "json" || compatibilityJson.length === 1,
+  };
 }
 
 export async function runMigrate(

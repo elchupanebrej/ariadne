@@ -8,9 +8,15 @@ import { isFrontierNode, GraphStorage } from "../../graph/storage.js";
 import { buildMergeCheckReceipt } from "./merge-check.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
+import {
+  parseOptions,
+  parseOutputFormat,
+  syntaxError,
+  writeDomainDiagnostic,
+} from "../contract.js";
 
 const runFile = promisify(execFile);
-const USAGE = "Usage: ariadne merge-sync [--json] [--stage-derived]\n";
+const USAGE = "Usage: ariadne merge-sync [--format json] [--stage-derived]\n";
 
 const exists = async (path: string): Promise<boolean> => {
   try {
@@ -342,9 +348,21 @@ export async function runMergeSync(
     io.stdout.write(USAGE);
     return 0;
   }
-  if (args.some((arg) => arg !== "--json" && arg !== "--stage-derived")) {
-    throw new Error(USAGE.trim());
+  const output = parseOutputFormat(args, ["json"], "human", USAGE.trim());
+  const legacyJson = output.rest.filter((arg) => arg === "--json");
+  if (legacyJson.length > 1 || (legacyJson.length === 1 && output.format === "json")) {
+    throw syntaxError("Specify only one JSON output option.");
   }
+  const parsed = parseOptions(
+    output.rest.filter((arg) => arg !== "--json"),
+    [{ name: "stage-derived" }],
+    USAGE.trim(),
+  );
+  if (parsed.positionals.length > 0) {
+    throw syntaxError(USAGE.trim());
+  }
+  const json = output.format === "json" || legacyJson.length === 1;
+  const shouldStageDerived = parsed.flags.has("stage-derived");
 
   const { environment } = await resolveCliWorkspace(io);
   const storage = new GraphStorage(environment.storageRoot);
@@ -380,7 +398,7 @@ export async function runMergeSync(
     );
     state = await syncState(storage, graph);
   });
-  const staged = args.includes("--stage-derived")
+  const staged = shouldStageDerived
     ? await stageDerived(
         environment.rootPath,
         storage,
@@ -404,7 +422,7 @@ export async function runMergeSync(
     validation,
     publication: mergeCheck,
   };
-  if (args.includes("--json")) {
+  if (json) {
     io.stdout.write(`${JSON.stringify(receipt, null, 2)}\n`);
   } else {
     io.stdout.write(
@@ -421,6 +439,15 @@ export async function runMergeSync(
         ),
         "",
       ].join("\n"),
+    );
+  }
+  if (!validation.passed) {
+    writeDomainDiagnostic(
+      io,
+      json ? "json" : "human",
+      "GATE_FAILED",
+      "Ariadne merge synchronization completed with failed validation.",
+      { gate: "all", diagnostics: validation.diagnostics },
     );
   }
   return validation.passed ? 0 : 1;

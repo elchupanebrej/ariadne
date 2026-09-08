@@ -214,7 +214,7 @@ describe("ariadne viz command", () => {
     const code = await runCli(["viz", "--help"], { cwd, stdout: stdout.stream, stderr: capture().stream });
 
     expect(code).toBe(0);
-    expect(stdout.text().trim()).toBe("Usage: ariadne viz [FRAME-id] [--json]");
+    expect(stdout.text().trim()).toBe("Usage: ariadne viz [--format (dot|svg|mermaid)]");
     expect(readdirSync(cwd)).toEqual([]);
   });
 

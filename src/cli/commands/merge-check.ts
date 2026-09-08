@@ -6,6 +6,12 @@ import {
 } from "../../merge/three-way.js";
 import { GraphEventSchema, type GraphEvent } from "../../graph/storage.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
+import {
+  parseOptions,
+  parseOutputFormat,
+  syntaxError,
+  writeDomainDiagnostic,
+} from "../contract.js";
 import type { CliIO } from "../workspace.js";
 import type { MaterializedGraph } from "../../graph/storage.js";
 
@@ -24,7 +30,7 @@ export type MergeCheckReceipt = {
   diagnostics: MergeCheckDiagnostic[];
 };
 
-const USAGE = "Usage: ariadne merge-check [--json]\n";
+const USAGE = "Usage: ariadne merge-check [--format json]\n";
 
 const cardPath = (root: string, storageRoot: string, id: string): string =>
   relative(root, join(storageRoot, "cards", `${id}.md`)).replaceAll("\\", "/");
@@ -110,7 +116,19 @@ export async function runMergeCheck(
     io.stdout.write(USAGE);
     return 0;
   }
-  if (args.some((arg) => arg !== "--json")) throw new Error(USAGE.trim());
+  const output = parseOutputFormat(args, ["json"], "human", USAGE.trim());
+  const legacyJson = output.rest.filter((arg) => arg === "--json");
+  if (legacyJson.length > 1 || (legacyJson.length === 1 && output.format === "json")) {
+    throw syntaxError("Specify only one JSON output option.");
+  }
+  const parsed = parseOptions(
+    output.rest.filter((arg) => arg !== "--json"),
+    [],
+    USAGE.trim(),
+  );
+  if (parsed.positionals.length > 0 || parsed.flags.size > 0) {
+    throw syntaxError(USAGE.trim());
+  }
 
   const { environment } = await resolveCliWorkspace(io);
   const receipt = buildMergeCheckReceipt(
@@ -118,7 +136,7 @@ export async function runMergeCheck(
     environment.storageRoot,
     await readOnlyMaterialize(environment.storageRoot),
   );
-  if (args.includes("--json")) {
+  if (output.format === "json" || legacyJson.length === 1) {
     io.stdout.write(`${JSON.stringify(receipt, null, 2)}\n`);
   } else {
     io.stdout.write(
@@ -129,6 +147,15 @@ export async function runMergeCheck(
         ),
         "",
       ].join("\n"),
+    );
+  }
+  if (!receipt.passed) {
+    writeDomainDiagnostic(
+      io,
+      output.format === "json" || legacyJson.length === 1 ? "json" : "human",
+      "MERGE_DIVERGED",
+      "Ariadne publication is blocked by unresolved merge contradictions.",
+      { conflicts: receipt.unresolved_conflicts },
     );
   }
   return receipt.passed ? 0 : 1;

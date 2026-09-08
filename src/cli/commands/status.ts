@@ -9,7 +9,8 @@ import {
   mergeContradictionGuidance,
   mergeContradictionSubject,
 } from "../../merge/three-way.js";
-import { hasHelp, resolveCliWorkspace } from "../workspace.js";
+import { hasHelp, parseOutputFormat, syntaxError } from "../contract.js";
+import { resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
 
 export type { CliIO } from "../workspace.js";
@@ -581,33 +582,33 @@ export function buildContinuation(
   return null;
 }
 
-const STATUS_USAGE = "Usage: ariadne status [FRAME-id] [--json]\n";
+const STATUS_USAGE = "Usage: ariadne status [--format json]\n";
 
 export async function runStatus(args: readonly string[], io: CliIO): Promise<number> {
   if (hasHelp(args)) {
     io.stdout.write(STATUS_USAGE);
     return 0;
   }
-  const json = args.includes("--json");
-  const positional = args.filter((arg) => arg !== "--json");
-  if (positional.length > 1 || positional.some((arg) => arg.startsWith("--"))) {
-    throw new Error(STATUS_USAGE.trim());
+  const output = parseOutputFormat(args, ["json"], "human", STATUS_USAGE.trim());
+  const legacyJson = output.rest.includes("--json");
+  const rest = output.rest.filter((arg) => arg !== "--json");
+  if (rest.length > 1 || rest.some((arg) => arg.startsWith("--"))) {
+    throw syntaxError(STATUS_USAGE.trim());
   }
-  const [frameId] = positional;
+  const frameId = rest[0];
 
   const { storage } = await resolveCliWorkspace(io);
   const graph = await storage.materialize();
   const report = buildStatusReport(await storage.readState<State>(), graph);
-
   let continuation: Continuation | null = null;
   if (frameId !== undefined) {
     if (!graph.nodes.some((node) => node.id === frameId)) {
-      throw new Error(`Unknown FRAME: ${frameId}`);
+      throw syntaxError(`Unknown FRAME: ${frameId}`);
     }
     continuation = buildContinuation(graph, frameId);
   }
 
-  if (json) {
+  if (output.format === "json" || legacyJson) {
     io.stdout.write(
       `${JSON.stringify(continuation ? { ...report, continuation } : report)}\n`,
     );

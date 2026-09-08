@@ -5,6 +5,7 @@ import {
   unknownEdgeRelation,
 } from "../../core/schemas/edges.js";
 import { hasHelp, resolveCliWorkspace, maybeEmitCompactionAdvisory, type CliIO } from "../workspace.js";
+import { syntaxError } from "../contract.js";
 import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 type Flags = Map<string, string>;
@@ -22,7 +23,7 @@ const parseFlags = (
       continue;
     }
     if (!allowed.includes(arg) || index + 1 >= args.length) {
-      throw new Error(`Unknown or incomplete option: ${arg}`);
+      throw syntaxError(`Unknown or incomplete option: ${arg}`);
     }
     flags.set(arg.slice(2), args[index + 1]);
     index += 1;
@@ -34,7 +35,7 @@ const graphFor = async (io: CliIO) => (await resolveCliWorkspace(io)).graph;
 
 const parseEdgeArgs = (args: readonly string[], usage: string): [string, string, string] => {
   if (args.length !== 3) {
-    throw new Error(`${usage} (got ${args.length}, expected 3)`);
+    throw syntaxError(`${usage} (got ${args.length}, expected 3)`);
   }
   return [args[0], args[1], args[2]];
 };
@@ -51,13 +52,13 @@ async function addEdge(
 
 async function listEdges(args: readonly string[], io: CliIO): Promise<EpistemicEdge[]> {
   const { positionals, flags } = parseFlags(args, ["--from", "--to", "--relation"]);
-  if (positionals.length > 0) throw new Error("Usage: ariadne edge list [--from] [--to] [--relation]");
+  if (positionals.length > 0) throw syntaxError("Usage: ariadne edge list [--from] [--to] [--relation]");
   const from = flags.get("from");
   const to = flags.get("to");
   const relation = flags.get("relation");
   const canonicalRelation = relation ? canonicalEdgeRelation(relation) : undefined;
   if (relation && !canonicalRelation) {
-    throw new Error(unknownEdgeRelation(relation));
+    throw syntaxError(unknownEdgeRelation(relation));
   }
 
   const graph = await graphFor(io);
@@ -78,7 +79,7 @@ async function removeEdge(
   return await graph.removeEdge(source, relation, target);
 }
 
-const EDGE_USAGE = "Usage: ariadne edge <add|list|remove> ...\n";
+const EDGE_USAGE = "Usage: ariadne edge (add|remove|list) [options]\n";
 const EDGE_ADD_USAGE = "Usage: ariadne edge add <from_id> <relation> <to_id>";
 const EDGE_ADD_HELP = `${EDGE_ADD_USAGE}\n${EDGE_TYPE_HINT}`;
 const EDGE_LIST_USAGE = "Usage: ariadne edge list [--from] [--to] [--relation]\n";
@@ -121,7 +122,7 @@ export async function runEdge(args: readonly string[], io: CliIO): Promise<numbe
       result = await removeEdge(rest, EDGE_REMOVE_USAGE, io);
       break;
     default:
-      throw new Error(EDGE_USAGE.trim());
+      throw syntaxError(EDGE_USAGE.trim());
   }
   io.stdout.write(`${JSON.stringify(result)}\n`);
   await maybeEmitCompactionAdvisory(environment.storageRoot, io);

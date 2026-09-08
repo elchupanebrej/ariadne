@@ -1,5 +1,5 @@
 import { access, mkdir } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import {
   assertNoShadowState,
   detectGsd,
@@ -11,10 +11,8 @@ import { resetCanonicalAuthority, stageAndSwapProjection } from "../../graph/jou
 import { withRootLock } from "../../graph/lock.js";
 import { renderIndex } from "../../graph/storage.js";
 import { toRootRelative } from "../../core/root-relative.js";
-import { hasHelp } from "../workspace.js";
+import { hasHelp, parseOptions, syntaxError } from "../contract.js";
 import type { CliIO } from "./status.js";
-
-export type InitMode = "auto" | "standalone" | "gsd";
 
 const MANAGED_FILES = ["STATE.yaml", "GRAPH.jsonl", "INDEX.md"] as const;
 
@@ -35,54 +33,58 @@ const exists = async (path: string): Promise<boolean> => {
   }
 };
 
-const INIT_USAGE = "Usage: ariadne init [--mode auto|standalone|gsd] [--force]\n";
+const INIT_USAGE = "Usage: ariadne init [--root <path>]\n";
 
-const parse = (args: readonly string[]): { mode: InitMode; force: boolean } => {
-  let mode: InitMode = "auto";
-  let modeSet = false;
-  let force = false;
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index];
-    if (arg === "--force") {
-      if (force) throw new Error(INIT_USAGE.trim());
-      force = true;
-      continue;
-    }
-    if (arg === "--mode" || arg.startsWith("--mode=")) {
-      if (modeSet) throw new Error(INIT_USAGE.trim());
-      const value = arg === "--mode" ? args[++index] : arg.slice("--mode=".length);
-      if (value !== "auto" && value !== "standalone" && value !== "gsd") {
-        throw new Error(INIT_USAGE.trim());
-      }
-      mode = value;
-      modeSet = true;
-      continue;
-    }
-    throw new Error(INIT_USAGE.trim());
+type InitMode = "auto" | "standalone" | "gsd";
+
+const parse = (args: readonly string[]): { root?: string; mode: InitMode; force: boolean } => {
+  const parsed = parseOptions(
+    args,
+    [
+      { name: "root", takesValue: true },
+      { name: "mode", takesValue: true },
+      { name: "force" },
+    ],
+    INIT_USAGE.trim(),
+  );
+  if (
+    parsed.positionals.length > 0 ||
+    [...parsed.flags].some((flag) => flag !== "force")
+  ) {
+    throw syntaxError(INIT_USAGE.trim());
   }
-  return { mode, force };
-};
-
-const environmentFor = (root: string, mode: InitMode): GsdEnvironment => {
-  if (mode === "standalone") return detectGsd(root, { override: false });
-  if (mode === "gsd") return detectGsd(root, { override: true });
-  return detectGsd(root);
+  const root = parsed.values.get("root");
+  const requestedMode = parsed.values.get("mode") ?? "auto";
+  if (requestedMode !== "auto" && requestedMode !== "standalone" && requestedMode !== "gsd") {
+    throw syntaxError(`Unknown init mode: ${requestedMode}. ${INIT_USAGE.trim()}`);
+  }
+  return {
+    ...(root === undefined ? {} : { root }),
+    mode: requestedMode,
+    force: parsed.flags.has("force"),
+  };
 };
 
 export async function runInit(args: readonly string[], io: CliIO): Promise<number> {
-  if (hasHelp(args, ["--mode"])) {
+  if (hasHelp(args)) {
     io.stdout.write(INIT_USAGE);
     return 0;
   }
-  const { mode, force } = parse(args);
-  const environment = environmentFor(io.cwd, mode);
+  const { root: rootArg, mode, force } = parse(args);
+  const root = rootArg === undefined ? io.cwd : resolve(io.cwd, rootArg);
+  const environment =
+    mode === "standalone"
+      ? detectGsd(root, { override: false })
+      : mode === "gsd"
+        ? detectGsd(root, { override: true })
+        : detectGsd(root);
   if (environment.active) assertNoShadowState(environment);
 
   const storage = new GraphStorage(environment.storageRoot);
   const existing = (await Promise.all(MANAGED_FILES.map((name) => exists(join(storage.rootDirectory, name)))))
     .some(Boolean);
   if (existing && !force) {
-    throw new Error(
+    throw syntaxError(
       `Ariadne workspace is already initialized at ${storage.rootDirectory}; use --force to replace managed files`,
     );
   }
@@ -106,9 +108,9 @@ export async function runInit(args: readonly string[], io: CliIO): Promise<numbe
   io.stdout.write(
     `${JSON.stringify({
       mode: environment.active ? "gsd" : "standalone",
-      storage_root: toRootRelative(io.cwd, storage.rootDirectory),
+      storage_root: toRootRelative(root, storage.rootDirectory),
       files: [...MANAGED_FILES],
-      force,
+      ...(force ? { force } : {}),
     })}\n`,
   );
   return 0;
