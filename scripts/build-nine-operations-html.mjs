@@ -4,8 +4,9 @@ import { fileURLToPath } from "node:url";
 import { marked } from "marked";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const sourcePath = `${root}docs/nine_operations_software_en.md`;
-const outputPath = `${root}docs/nine_operations_software_en.html`;
+const sourceArg = process.argv.slice(2).find((a) => !a.startsWith("-"));
+const sourcePath = sourceArg ? `${root}${sourceArg}` : `${root}docs/nine_operations_software_en.md`;
+const outputPath = sourcePath.replace(/\.md$/, ".html");
 const checkOnly = process.argv.includes("--check");
 
 function escapeHtml(value) {
@@ -44,26 +45,75 @@ function createSlugger() {
 }
 
 // GitHub's $`...`$ form protects TeX from Markdown parsing. MathJax expects $...$.
+// Additionally, escape markdown-active characters inside TeX-like $...$ spans so
+// marked cannot split one formula across inline elements (MathJax then sees it
+// whole). Currency dollars ($42,000) have no \, ^ or _ and stay literal text.
+function escapeMarkdownInTeX(text) {
+  return text.replace(/(?<!\\)([_*~`])/g, "\\$1");
+}
 function normalizeGitHubMath(markdown) {
   let fence;
-  return markdown
-    .split(/(?<=\n)/)
-    .map((line) => {
-      if (fence) {
-        const close = line.match(/^\s*([`~]{3,})\s*$/);
-        if (close && close[1][0] === fence.char && close[1].length >= fence.length) {
-          fence = undefined;
-        }
-        return line;
+  const lines = markdown.split(/(?<=\n)/).map((line) => {
+    if (fence) {
+      const close = line.match(/^\s*([`~]{3,})\s*$/);
+      if (close && close[1][0] === fence.char && close[1].length >= fence.length) {
+        fence = undefined;
       }
+      return line;
+    }
 
-      const open = line.match(/^\s*([`~]{3,})/);
-      if (open) {
-        fence = { char: open[1][0], length: open[1].length };
-        return line;
+    const open = line.match(/^\s*([`~]{3,})/);
+    if (open) {
+      fence = { char: open[1][0], length: open[1].length };
+      return line;
+    }
+
+    const githubForm = line.replace(/\$`([^`\n]+)`\$/g, (_, expression) => `$${expression}$`);
+    return githubForm
+      .replace(/\$\$([^$\n]+)\$\$/g, (match, expression) =>
+        /\\|\^|_/.test(expression) ? `$$${escapeMarkdownInTeX(expression)}$$` : match,
+      )
+      .replace(/\$([^$\n]+)\$/g, (match, expression) =>
+        /\\|\^|_/.test(expression) ? `$${escapeMarkdownInTeX(expression)}$` : match,
+      );
+  });
+  return lines.join("");
+}
+
+// Same protection for \(...\) and \[...\] delimited math (used by edition 2).
+// Display blocks span multiple lines, so non-fence segments are processed as
+// whole text blocks rather than line by line.
+function normalizeDelimitedMath(markdown) {
+  const segments = [];
+  let fence;
+  let plain = [];
+  for (const line of markdown.split(/(?<=\n)/)) {
+    if (fence) {
+      segments.push({ fence: true, text: line });
+      const close = line.match(/^\s*([`~]{3,})\s*$/);
+      if (close && close[1][0] === fence.char && close[1].length >= fence.length) {
+        fence = undefined;
       }
+      continue;
+    }
+    const open = line.match(/^\s*([`~]{3,})/);
+    if (open) {
+      if (plain.length) segments.push({ fence: false, text: plain.join("") });
+      plain = [];
+      fence = { char: open[1][0], length: open[1].length };
+      segments.push({ fence: true, text: line });
+      continue;
+    }
+    plain.push(line);
+  }
+  if (plain.length) segments.push({ fence: false, text: plain.join("") });
 
-      return line.replace(/\$`([^`\n]+)`\$/g, (_, expression) => `$${expression}$`);
+  return segments
+    .map(({ fence: isFence, text }) => {
+      if (isFence) return text;
+      return text
+        .replace(/\\\(([\s\S]*?)\\\)/g, (_, expression) => `\\\\(${escapeMarkdownInTeX(expression)}\\\\)`)
+        .replace(/\\\[([\s\S]*?)\\\]/g, (_, expression) => `\\\\[${escapeMarkdownInTeX(expression)}\\\\]`);
     })
     .join("");
 }
@@ -95,7 +145,7 @@ function renderMarkdown(markdown) {
     return `<pre><code${className}>${escapeHtml(text)}</code></pre>\n`;
   };
 
-  const body = marked.parse(normalizeGitHubMath(markdown), {
+  const body = marked.parse(normalizeDelimitedMath(normalizeGitHubMath(markdown)), {
     gfm: true,
     renderer,
   });
@@ -222,7 +272,8 @@ function buildDocument(markdown) {
   </script>
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad:false, theme:'dark', securityLevel:'loose', flowchart:{ htmlLabels:true, useMaxWidth:true } });
+    mermaid.initialize({ startOnLoad:false, theme:'default', securityLevel:'loose', flowchart:{ htmlLabels:true, useMaxWidth:true } });
+    window.__mermaid = mermaid;
     const diagrams = [...document.querySelectorAll('pre.mermaid')];
     let sequence = 0;
     let queue = Promise.resolve();
@@ -293,14 +344,18 @@ function validateDocument(html) {
     throw new Error("C/C++ examples are not allowed; use TypeScript");
   }
 
-  const telemetrySection = html
-    .split('<h5 id="11231-concrete-architectural-example-telemetry-ingestion-pipeline">')[1]
-    ?.split(/<h[1-4]\b/)[0];
-  const telemetryExamples = telemetrySection?.match(/<code class="language-typescript">/g)?.length ?? 0;
-  if (telemetryExamples !== 2) throw new Error("Telemetry before/after examples must be separate");
+  // Doc-specific assertion: only applies to editions containing this section.
+  const telemetryAnchor = '<h5 id="11231-concrete-architectural-example-telemetry-ingestion-pipeline">';
+  if (html.includes(telemetryAnchor)) {
+    const telemetrySection = html.split(telemetryAnchor)[1]?.split(/<h[1-4]\b/)[0];
+    const telemetryExamples = telemetrySection?.match(/<code class="language-typescript">/g)?.length ?? 0;
+    if (telemetryExamples !== 2) throw new Error("Telemetry before/after examples must be separate");
+  }
 
   const numberedTableCells = [...html.matchAll(/<td(?:\s[^>]*)?>([\s\S]*?)<\/td>/g)]
-    .map((match) => plainText(match[1]).trim())
+    // "<strong>1. Frame</strong>" is an operation name, not a row number.
+    .filter(([, raw]) => !/^\s*<(?:strong|b)>/.test(raw))
+    .map(([, raw]) => plainText(raw).trim())
     .filter((text) => /^\d+\.\s/.test(text));
   if (numberedTableCells.length) {
     throw new Error("Table row numbers must use a separate column");

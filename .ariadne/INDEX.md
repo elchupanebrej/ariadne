@@ -1,6 +1,6 @@
 # Ariadne Epistemic Index
 
-Nodes: 280 · Edges: 413 · Active: 278
+Nodes: 278 · Edges: 411 · Active: 276
 Unknowns: 44 · Candidates: 40
 
 ## Frontier
@@ -33,4 +33,4 @@ Unknowns: 44 · Candidates: 40
 | CAN-task-first-method-vertical-slice | PROPOSED | EVALUATED | Start with one real guide-authoring task, pin the Method Contract, draft A0, expand A1-A7 only as t… |
 | CAN-task-first-progressive-teaching | PROPOSED | SELECTED | Start with one small repository task, route each uncertainty through Ariadne SKILL.md, load only tr… |
 
-*Omitted 107 additional frontier nodes for compactness.*
+*Omitted 105 additional frontier nodes for compactness.*
