@@ -9,8 +9,6 @@ import { runInvalidation } from "./commands/invalidate.js";
 import { runIngest } from "./commands/ingest.js";
 import { runInit } from "./commands/init.js";
 import { runNode } from "./commands/node.js";
-import { runEnvelope } from "./commands/envelope.js";
-import { runOperation } from "./commands/op.js";
 import { runReport } from "./commands/report.js";
 import { runStatus } from "./commands/status.js";
 import { runTemplate } from "./commands/template.js";
@@ -20,9 +18,11 @@ import { runMergeResolve } from "./commands/merge-resolve.js";
 import { runMergeDoctor, runMergeSetup } from "./commands/merge-integration.js";
 import { runMergeCheck } from "./commands/merge-check.js";
 import { runMergeSync } from "./commands/merge-sync.js";
+import { runMigrate } from "./commands/migrate.js";
 import { hasHelp, type CliIO } from "./workspace.js";
+import { AriadneError, formatDiagnostic } from "../core/errors.js";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 
 const HELP = `Ariadne ${VERSION}
 
@@ -33,10 +33,8 @@ Usage:
   ariadne invalidate <node_id> --by <evidence_id>
   ariadne gate <structural|semantic|epistemic|decision-scope|all> [--strict]
   ariadne verify [--strict]
-  ariadne envelope <send|receive|verify> <file>
   ariadne ingest matt <skill> <file>
   ariadne ingest gsd <path>
-  ariadne op <frame|diagnose|transform|explore|knowledge|dependencies|dynamics|value|validate>
   ariadne report [FRAME-id] [--json]
   ariadne viz [FRAME-id] [--json]
   ariadne init [--mode auto|standalone|gsd] [--force]
@@ -47,6 +45,7 @@ Usage:
   ariadne merge-doctor [--json]
   ariadne merge-check [--json]
   ariadne merge-sync [--json] [--stage-derived]
+  ariadne migrate [--dry-run] [--rollback <id>] [--json]
 
 Options:
   -h, --help       Show this help
@@ -58,9 +57,6 @@ export type RunCliOptions = {
   stdout?: Writable;
   stderr?: Writable;
 };
-
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 export async function runCli(
   args: readonly string[],
@@ -95,11 +91,9 @@ export async function runCli(
       }
       return await runGate(["all", ...args.slice(1)], io);
     }
-    if (command === "envelope") return await runEnvelope(args.slice(1), io);
     if (command === "ingest") return await runIngest(args.slice(1), io);
     if (command === "report") return await runReport(args.slice(1), io);
     if (command === "viz") return await runViz(args.slice(1), io);
-    if (command === "op") return runOperation(args.slice(1), io);
     if (command === "init") return await runInit(args.slice(1), io);
     if (command === "template") return runTemplate(args.slice(1), io);
     if (command === "merge-driver")
@@ -113,11 +107,30 @@ export async function runCli(
     if (command === "merge-check")
       return await runMergeCheck(args.slice(1), io);
     if (command === "merge-sync") return await runMergeSync(args.slice(1), io);
-    throw new Error(`Unknown command: ${command}`);
+    if (command === "migrate") return await runMigrate(args.slice(1), io);
+    throw new AriadneError({
+      code: "INVALID_INPUT",
+      message: `Unknown command: ${command}`,
+    });
   } catch (error) {
-    io.stderr.write(`Error: ${errorMessage(error)}\n`);
-    return 1;
+    const isJson = isJsonRequested(args);
+    const formatted = formatDiagnostic(error, { json: isJson });
+    io.stderr.write(formatted.text);
+    return formatted.exitCode;
   }
+}
+
+function isJsonRequested(args: readonly string[]): boolean {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--json" || arg === "--format=json") {
+      return true;
+    }
+    if (arg === "--format" && args[index + 1] === "json") {
+      return true;
+    }
+  }
+  return false;
 }
 
 const invokedFile = process.argv[1] ? realpathSync(process.argv[1]) : undefined;

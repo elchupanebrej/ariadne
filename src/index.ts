@@ -1,43 +1,100 @@
-export * from "./core/schemas/nodes.js";
-export * from "./core/types/nodes.js";
-export * from "./core/schemas/edges.js";
-export * from "./core/types/provenance.js";
-export * from "./core/schemas/envelope.js";
-export * from "./core/schemas/json-schema-export.js";
-export { runInit } from "./cli/commands/init.js";
-export type { InitMode } from "./cli/commands/init.js";
-export { runTemplate } from "./cli/commands/template.js";
-export type { TemplateType } from "./cli/commands/template.js";
-export * from "./graph/storage.js";
-export * from "./graph/storage-driver.js";
-export * from "./graph/epistemic-graph.js";
-export { runGate } from "./cli/commands/gate.js";
+// Runtime values (Exactly 24)
+export {
+  NODE_TYPES,
+  PROVENANCE_TYPES,
+  TRANSITION_LIFECYCLE,
+  NodeIdSchema,
+  NodeTypeSchema,
+  ProvenanceTypeSchema,
+  TransitionLifecycleSchema,
+  NodeSchemas,
+  NodeSchema,
+} from "./core/schemas/nodes.js";
+
+export {
+  EDGE_TYPES,
+  EdgeTypeSchema,
+  EdgeSchema,
+} from "./core/schemas/edges.js";
+
+export {
+  AriadneEpistemicEnvelopeSchema,
+} from "./core/schemas/envelope.js";
+
+export {
+  exportEnvelopeJsonSchema,
+} from "./core/schemas/json-schema-export.js";
+
+export {
+  StateSchema,
+} from "./graph/storage.js";
+
+export {
+  EpistemicGraph,
+} from "./graph/epistemic-graph.js";
+
+export {
+  EpistemicGateEngine,
+} from "./gates/gate-engine.js";
+
+export {
+  MethodContractSchema,
+  validateMethodContract,
+  resolveMethodContract,
+  resolveProfile,
+  checkProfileCompletion,
+} from "./method-contract/index.js";
+
+export {
+  runCli,
+} from "./cli/index.js";
+
+export {
+  AriadneError,
+} from "./core/errors.js";
+
+// Types (Exactly 24)
 export type {
-  GateCommand,
+  Node,
+  NodeId,
+  NodeType,
+  ProvenanceType,
+  TransitionLifecycle,
+} from "./core/schemas/nodes.js";
+
+export type {
+  EdgeType,
+  EpistemicEdge,
+} from "./core/schemas/edges.js";
+
+export type {
+  AriadneEpistemicEnvelope,
+} from "./core/schemas/envelope.js";
+
+export type {
+  AriadneState,
+  MaterializedGraph,
+} from "./graph/storage.js";
+
+export type {
+  NodeFilter,
+  EdgeFilter,
+  InvalidationTraceEntry,
+  ReportOptions,
+  ReportOutput,
+  ReportSummary,
+} from "./graph/epistemic-graph.js";
+
+export type {
   GateName,
-  GateReceipt,
+  GateCommand,
+  GateDiagnostic,
   GateResult,
-} from "./cli/commands/gate.js";
-export { runCli } from "./cli/index.js";
+  GateReceipt,
+  GateVerificationOptions,
+} from "./gates/gate-engine.js";
 
-export type { RunCliOptions } from "./cli/index.js";
-export * from "./graph/integrity.js";
-export * from "./graph/derivation.js";
-export * from "./graph/invalidation.js";
-export * from "./gates/index.js";
-export * from "./adapters/gsd/detector.js";
-export * from "./adapters/gsd/projector.js";
-export * from "./adapters/gsd/operational-notice.js";
-export * from "./adapters/gsd/migrate.js";
-export * from "./adapters/lifecycle.js";
-export * from "./adapters/matt/index.js";
-export * from "./adapters/ariadne/index.js";
-export * from "./adapters/handoff/generator.js";
-export * from "./capabilities/provider-manager.js";
-export * from "./harness/controller.js";
-
-export * from "./multiagent/delta.js";
-export * from "./multiagent/worktree-manager.js";
-export * from "./method-contract/index.js";
-export * from "./merge/three-way.js";
-export * from "./merge/reconcile.js";
+export type {
+  MethodContract,
+  MethodContractPin,
+} from "./method-contract/index.js";
