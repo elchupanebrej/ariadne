@@ -31,9 +31,7 @@ describe("ecosystem modes A, B, and C", () => {
       await setupMattMarker(root);
       const controller = new AriadneHarnessController({ rootDirectory: root });
 
-      expect(controller.mode).toBe("A");
       expect(controller.storageRoot).toBe(join(root, ".planning", "ariadne"));
-      expect(controller.providerFor("matt").kind).toBe("matt");
 
       const projection = await controller.projectGsd();
       expect(projection.decisions).toEqual(
@@ -115,14 +113,12 @@ describe("ecosystem modes A, B, and C", () => {
     }
   });
 
-  it("Mode B uses the native provider when Matt is absent", async () => {
+  it("Mode B projects GSD when Matt is absent", async () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-mode-b-"));
     try {
       await setupGsd(root);
-      const controller = new AriadneHarnessController({ rootDirectory: root, mattAvailable: false });
+      const controller = new AriadneHarnessController({ rootDirectory: root });
 
-      expect(controller.mode).toBe("B");
-      expect(controller.providerFor("matt")).toMatchObject({ kind: "native", available: true });
       await expect(controller.projectGsd()).resolves.toMatchObject({
         decisions: expect.any(Array),
       });
@@ -137,9 +133,7 @@ describe("ecosystem modes A, B, and C", () => {
       await setupMattMarker(root);
       const controller = new AriadneHarnessController({ rootDirectory: root });
 
-      expect(controller.mode).toBe("C");
       expect(controller.storageRoot).toBe(join(root, ".ariadne"));
-      expect(controller.providerFor("matt").kind).toBe("matt");
 
       const evidence = await controller.ingestMattArtifact("research", {
         statement: "A primary source was reviewed.",

@@ -12,15 +12,13 @@ import {
 } from "../adapters/gsd/projector.js";
 import type { Node } from "../core/schemas/nodes.js";
 import { GraphStorage, type MaterializedGraph } from "../graph/storage.js";
-import {
-  CapabilityProviderManager,
-  type Capability,
-  type EcosystemMode,
-  type ProviderManagerOptions,
-  type ProviderSelection,
-} from "../capabilities/provider-manager.js";
+import { detectGsd, type GsdDetectionOptions } from "../adapters/gsd/detector.js";
 
-export type AriadneHarnessControllerOptions = ProviderManagerOptions;
+export type AriadneHarnessControllerOptions = {
+  rootDirectory?: string;
+  storageRoot?: string;
+  gsd?: GsdDetectionOptions;
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -42,27 +40,14 @@ const isBlockingDecision = (node: Node): boolean =>
 
 export class AriadneHarnessController {
   readonly rootDirectory: string;
-  readonly capabilities: CapabilityProviderManager;
   readonly storage: GraphStorage;
   readonly storageRoot: string;
 
   constructor(options: AriadneHarnessControllerOptions = {}) {
     this.rootDirectory = resolve(options.rootDirectory ?? process.cwd());
-    this.capabilities = new CapabilityProviderManager(this.rootDirectory, options);
-    this.storageRoot = this.capabilities.gsd.storageRoot;
+    const gsd = detectGsd(this.rootDirectory, options.gsd);
+    this.storageRoot = options.storageRoot ?? gsd.storageRoot;
     this.storage = new GraphStorage(this.storageRoot);
-  }
-
-  get mode(): EcosystemMode {
-    return this.capabilities.mode;
-  }
-
-  get provider(): CapabilityProviderManager {
-    return this.capabilities;
-  }
-
-  providerFor(capability: Capability = "reasoning"): ProviderSelection {
-    return this.capabilities.providerFor(capability);
   }
 
   async projectGsd(options: Omit<ProjectGsdOptions, "rootDirectory"> = {}): Promise<GsdProjection> {

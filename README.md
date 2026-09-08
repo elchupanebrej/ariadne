@@ -20,21 +20,22 @@ install-time scripts (works under npm 12, pnpm ≥ 10, and Yarn ≥ 4.14 default
 ### CLI
 
 ```sh
-ariadne init <project-dir>            # scaffold a project graph
-ariadne status <FRAME-id>             # one next operation for a frame
-ariadne report <FRAME-id> --json      # frame report with continuation fields
+ariadne init                          # scaffold a project graph
+ariadne status                        # one next operation and frontier
+ariadne report --json                 # frame report with continuation fields
 ariadne gate <name>                   # run a validation gate
 ```
 
 ### Library
 
 ```ts
-import { runCli } from "ariadne-reasoning";
+import { runCli, EpistemicGraph, EpistemicGateEngine } from "ariadne-reasoning";
 ```
 
-The root entry point exposes the retained public surfaces: graph storage and
-derivation, gates, adapters, the method contract, and the thin harness path
-(controller and related modules).
+The root entry point exposes the intentional public surface: core node and edge
+schemas, the deep `EpistemicGraph` engine, `EpistemicGateEngine`, method contract
+validation, and `runCli`. Internal storage drivers, adapter internals, and speculative
+controllers are private implementation details.
 
 ## License
 

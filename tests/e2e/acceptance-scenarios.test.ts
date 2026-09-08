@@ -207,20 +207,6 @@ describe("normative acceptance scenarios A-J", () => {
     }
   }, 60_000);
 
-  it("G: uses the native provider when GSD is active and Matt is absent", async () => {
-    const root = await temporaryRoot();
-    try {
-      await gsdFiles(root);
-      const controller = new AriadneHarnessController({ rootDirectory: root, mattAvailable: false });
-
-      expect(controller.mode).toBe("B");
-      expect(controller.providerFor("matt")).toMatchObject({ kind: "native", available: true });
-      await expect(controller.projectGsd()).resolves.toMatchObject({ decisions: expect.any(Array) });
-    } finally {
-      await rm(root, { recursive: true, force: true });
-    }
-  });
-
   it("H: keeps GSD-owned documents canonical and writes only the overlay state", async () => {
     const root = await temporaryRoot();
     try {
@@ -231,7 +217,7 @@ describe("normative acceptance scenarios A-J", () => {
         stdout: new PassThrough(),
         stderr: new PassThrough(),
       });
-      const controller = new AriadneHarnessController({ rootDirectory: root, mattAvailable: false });
+      const controller = new AriadneHarnessController({ rootDirectory: root });
       await controller.persistNode({
         id: "TASK-001",
         type: "TASK",

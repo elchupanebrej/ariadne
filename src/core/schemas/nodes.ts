@@ -6,8 +6,17 @@ import {
   type NodeType,
 } from "../types/nodes.js";
 
-export { NODE_TYPES } from "../types/nodes.js";
-export type { NodeType } from "../types/nodes.js";
+export {
+  NODE_TYPES,
+  PROVENANCE_TYPES,
+  TRANSITION_LIFECYCLE,
+} from "../types/nodes.js";
+export type {
+  NodeType,
+  ProvenanceType,
+  TransitionLifecycle,
+  NodeId,
+} from "../types/nodes.js";
 
 const NODE_ID_SUFFIX = "[0-9A-Za-z_-]+";
 

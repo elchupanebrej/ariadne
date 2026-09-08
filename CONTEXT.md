@@ -4,6 +4,58 @@ Ariadne is a software reasoning skill, CLI, and epistemic layer that models engi
 
 ## Language
 
+### Release Compatibility
+
+**Release Compatibility Contract**:
+The explicit allowlist of installed Ariadne interfaces whose names, behavior, data shapes, and error semantics are protected by Semantic Versioning; source reachability and undocumented exports do not create the contract.
+_Avoid_: Package surface, accidental API, all exported code
+
+### Boundaries & Trust
+
+**Trusted-Host Model**:
+Ariadne runs with the invoking host's permissions and protects its own invariants and designated filesystem boundaries; it is not a sandbox.
+_Avoid_: sandboxed runtime, isolated execution
+
+**Explicit Command**:
+A command and argument vector supplied by the user or an owning integration for host execution; imported content never gains command authority.
+_Avoid_: imported command, implicit command
+
+**Imported Artifact**:
+External file content ingested as data into Ariadne; it cannot execute, escape designated paths, or bypass validation.
+_Avoid_: trusted input, executable input
+
+**Containment Boundary**:
+A canonical filesystem root within which Ariadne may access a designated artifact; resolved paths outside it, including symlink escapes, are rejected.
+_Avoid_: path-prefix check
+
+**Storage Root**:
+The caller-designated directory containing Ariadne's persisted graph, state, and derived artifacts.
+_Avoid_: workspace root, database directory
+
+**Canonical Record**:
+A validated durable record whose history determines a domain state and is never reconstructed from a derived projection.
+_Avoid_: source of truth, cache, snapshot
+
+**Derived Projection**:
+A rebuildable representation of canonical records for reading or interoperability; it cannot authorize replacement of canonical history.
+_Avoid_: replica, shadow state, source record
+
+**Persisted-Format Version**:
+The compatibility identity of a stored authority or derived projection, independent of package and Merge Protocol versions; it determines whether data may be read, migrated, or rejected.
+_Avoid_: package version, release version, merge protocol version
+
+**Persisted-Format Migration**:
+A verified conversion that preserves canonical records and domain meaning while producing a supported persisted representation; it does not change ownership or history.
+_Avoid_: data rewrite, silent upgrade, projection refresh
+
+**Managed File**:
+An artifact whose path and format are owned by Ariadne or an explicitly enabled adapter, and which may be replaced only by that owner's documented operation.
+_Avoid_: arbitrary output file, user file
+
+**Security Contract**:
+The explicit boundary of Ariadne's integrity, validation, containment, and fail-closed guarantees, together with the host capabilities and adversarial conditions it does not claim to control.
+_Avoid_: security posture, sandbox promise
+
 ### Epistemic Foundations & Provenance
 
 **Epistemic State**:
@@ -27,7 +79,7 @@ A typed metadata graph attached to tasks and plans that tracks claims, hypothese
 _Avoid_: State machine, ticket wrapper, meta-plan
 
 **Epistemic Graph Engine**:
-The deep domain module that encapsulates graph mutation invariants, deductive DAG integrity, atomic multi-artifact synchronization, and transitive invalidation cascade behind a unified interface.
+The deep domain module that encapsulates graph mutation invariants, deductive DAG integrity, canonical graph-record commits, rebuildable projections, and transitive invalidation cascade behind a unified interface.
 _Avoid_: Graph database, storage helper, JSONL writer, repo wrapper
 
 **Branch Epistemic Model**:

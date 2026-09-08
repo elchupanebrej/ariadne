@@ -7,5 +7,5 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "exclude": ["src/teach-ariadne", "src/teach-harness", "src/teach-methodology"]
+  "exclude": ["src/teach-ariadne"]
 }
