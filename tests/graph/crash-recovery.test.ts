@@ -116,7 +116,7 @@ describe("Crash Recovery and Legacy Workspace Mutation Gate", () => {
       expect(secondScan.truncatedBytes).toBe(0);
     });
 
-    it("safely truncates corrupted final frame with newline and invalid checksum", async () => {
+    it("refuses a complete checksum-invalid final frame without truncating it", async () => {
       const journalPath = path.join(tempDir, "GRAPH.jsonl");
 
       const frame1 = createFrame({ kind: "node", node: { id: "HYP-1", type: "HYP", provenance_type: "PROPOSED", statement: "First valid" } }, { sequence: 1 });
@@ -136,12 +136,31 @@ describe("Crash Recovery and Legacy Workspace Mutation Gate", () => {
 
       fs.appendFileSync(journalPath, corruptFinalFrame, "utf8");
 
-      const scan = await scanAndRecoverJournal(journalPath);
-      expect(scan.recoveredTail).toBe(true);
-      expect(scan.truncatedBytes).toBe(Buffer.byteLength(corruptFinalFrame, "utf8"));
-      expect(scan.validRecords).toBe(1);
-      expect(scan.diagnostic?.code).toBe("INCOMPLETE_TAIL");
-      expect(fs.statSync(journalPath).size).toBe(verifiedSize);
+      await expect(scanAndRecoverJournal(journalPath)).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      expect(fs.statSync(journalPath).size).toBe(
+        verifiedSize + Buffer.byteLength(corruptFinalFrame, "utf8"),
+      );
+    });
+
+    it("refuses malformed final JSON without truncating it", async () => {
+      const journalPath = path.join(tempDir, "GRAPH.jsonl");
+      const frame1 = createFrame(
+        { kind: "node", node: { id: "HYP-1", type: "HYP", provenance_type: "PROPOSED", statement: "First valid" } },
+        { sequence: 1 },
+      );
+      await appendCanonicalRecord(journalPath, frame1);
+      const verifiedSize = fs.statSync(journalPath).size;
+      const malformedFinalLine = '{"schemaVersion":1,"sequence":2,"payload":}\n';
+      fs.appendFileSync(journalPath, malformedFinalLine, "utf8");
+
+      await expect(scanAndRecoverJournal(journalPath)).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      expect(fs.statSync(journalPath).size).toBe(
+        verifiedSize + Buffer.byteLength(malformedFinalLine, "utf8"),
+      );
     });
 
     it("fails closed immediately with CORRUPT_PERSISTED_HISTORY on middle-log corruption and strictly does not truncate", async () => {
@@ -208,9 +227,62 @@ describe("Crash Recovery and Legacy Workspace Mutation Gate", () => {
       expect((caughtError as AriadneError).code).toBe("CORRUPT_PERSISTED_HISTORY");
       expect(fs.statSync(journalPath).size).toBe(sizeBefore);
     });
+
+    it("refuses a schema-invalid final payload without truncating the canonical record", async () => {
+      const journalPath = path.join(tempDir, "GRAPH.jsonl");
+      const invalidPayload = {
+        kind: "node",
+        node: {
+          id: "HYP-invalid",
+          type: "HYP",
+          provenance_type: "PROPOSED",
+          statement: "",
+          secret: "do-not-include-in-diagnostics",
+        },
+      };
+      await appendCanonicalRecord(journalPath, createFrame(invalidPayload, { sequence: 1 }));
+      const before = fs.readFileSync(journalPath);
+
+      await expect(scanAndRecoverJournal(journalPath)).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      expect(fs.readFileSync(journalPath)).toEqual(before);
+    });
   });
 
   describe("Projection Repair Engine (rebuildProjections)", () => {
+    it("fails closed when a framed payload is not a valid graph event", async () => {
+      const graphPath = path.join(tempDir, "GRAPH.jsonl");
+      const invalidPayload = {
+        kind: "node",
+        node: {
+          id: "HYP-invalid",
+          type: "HYP",
+          provenance_type: "PROPOSED",
+          statement: "",
+          secret: "do-not-include-in-diagnostics",
+        },
+      };
+      await appendCanonicalRecord(graphPath, createFrame(invalidPayload, { sequence: 1 }));
+      const indexPath = path.join(tempDir, "INDEX.md");
+      fs.writeFileSync(indexPath, "existing projection", "utf8");
+
+      let caught: unknown;
+      try {
+        await rebuildProjections(tempDir);
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBeInstanceOf(AriadneError);
+      expect((caught as AriadneError).code).toBe("CORRUPT_PERSISTED_HISTORY");
+      expect((caught as AriadneError).message).not.toContain("do-not-include-in-diagnostics");
+      expect(JSON.stringify((caught as AriadneError).detail)).not.toContain(
+        "do-not-include-in-diagnostics",
+      );
+      expect(fs.readFileSync(indexPath, "utf8")).toBe("existing projection");
+    });
+
     it("reconstructs STATE.yaml, INDEX.md, and all cards/*.md faithfully from canonical records", async () => {
       const storageRoot = tempDir;
       const graphPath = path.join(storageRoot, "GRAPH.jsonl");

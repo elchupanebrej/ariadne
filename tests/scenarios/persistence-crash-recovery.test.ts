@@ -364,7 +364,7 @@ describe("Scenario Suite 1: Persistence & Crash Recovery", () => {
       expect(secondScan.diagnostic).toBeUndefined();
     });
 
-    it("truncates corrupt final frame with invalid checksum and emits INCOMPLETE_TAIL", async () => {
+    it("refuses a complete checksum-invalid final frame without truncating it", async () => {
       const frame1 = createFrame(
         { kind: "node", node: { id: "HYP-1", type: "HYP", provenance_type: "PROPOSED", statement: "First valid" } },
         { sequence: 1 },
@@ -385,11 +385,12 @@ describe("Scenario Suite 1: Persistence & Crash Recovery", () => {
 
       fs.appendFileSync(graphPath, corruptFinalLine, "utf8");
 
-      const scanResult = await scanAndRecoverJournal(graphPath);
-      expect(scanResult.recoveredTail).toBe(true);
-      expect(scanResult.diagnostic?.code).toBe("INCOMPLETE_TAIL");
-      expect(scanResult.validRecords).toBe(1);
-      expect(fs.statSync(graphPath).size).toBe(verifiedSize);
+      await expect(scanAndRecoverJournal(graphPath)).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      expect(fs.statSync(graphPath).size).toBe(
+        verifiedSize + Buffer.byteLength(corruptFinalLine, "utf8"),
+      );
     });
   });
 

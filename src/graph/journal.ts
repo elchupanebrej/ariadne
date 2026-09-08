@@ -35,14 +35,46 @@ export interface FramedRecord<T = unknown> {
  */
 export const FramedRecordSchema = z.object({
   schemaVersion: z.literal(1),
-  sequence: z.number().int().nonnegative(),
+  sequence: z.number().int().safe().min(1),
   idempotencyKey: z.string().optional(),
   payloadDigest: z.string().regex(/^[0-9a-f]{64}$/i),
-  payloadLength: z.number().int().nonnegative(),
-  crc32: z.number().int(),
+  payloadLength: z.number().int().safe().nonnegative(),
+  crc32: z.number().int().safe().min(0).max(0xffffffff),
   timestamp: z.string(),
   payload: z.unknown(),
 });
+
+export type JournalFailureClass =
+  | "framing"
+  | "checksum"
+  | "sequence"
+  | "record_schema"
+  | "mixed_version"
+  | "unsupported_version";
+
+export interface JournalScanDiagnostic {
+  code: "INCOMPLETE_TAIL";
+  message: string;
+  repair: string;
+  detail: Record<string, unknown>;
+}
+
+export interface JournalScanResult {
+  validRecords: number;
+  recoveredTail: boolean;
+  truncatedBytes: number;
+  lastSequence: number;
+  diagnostic?: JournalScanDiagnostic;
+  records: FramedRecord<unknown>[];
+}
+
+export interface JournalScanOptions {
+  repair?: boolean;
+  repairFinalNewline?: boolean;
+  workspaceRoot?: string;
+  authority?: string;
+  validatePayload?: (payload: unknown) => boolean;
+}
 
 /**
  * Four-discriminant persistence outcome union.
@@ -160,8 +192,97 @@ export function createFrame<T = unknown>(
   });
 }
 
+type FrameValidation =
+  | { valid: true; record: FramedRecord<unknown> }
+  | {
+      valid: false;
+      failureClass: Exclude<JournalFailureClass, "sequence" | "record_schema">;
+      reason: string;
+      version?: unknown;
+    };
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const inspectFrame = (frame: unknown): FrameValidation => {
+  if (!isObjectRecord(frame)) {
+    return { valid: false, failureClass: "framing", reason: "record is not a JSON object" };
+  }
+
+  const rec = frame;
+  if (rec.schemaVersion !== 1) {
+    return {
+      valid: false,
+      failureClass:
+        typeof rec.schemaVersion === "number" && rec.schemaVersion > 1
+          ? "unsupported_version"
+          : "mixed_version",
+      reason: "record does not use persisted format version 1",
+      version: rec.schemaVersion,
+    };
+  }
+  if (
+    typeof rec.sequence !== "number" ||
+    !Number.isSafeInteger(rec.sequence) ||
+    rec.sequence < 1
+  ) {
+    return { valid: false, failureClass: "framing", reason: "sequence is not a positive safe integer" };
+  }
+  if (rec.idempotencyKey !== undefined && typeof rec.idempotencyKey !== "string") {
+    return { valid: false, failureClass: "framing", reason: "idempotency key is not a string" };
+  }
+  if (typeof rec.payloadDigest !== "string" || !/^[0-9a-f]{64}$/iu.test(rec.payloadDigest)) {
+    return { valid: false, failureClass: "checksum", reason: "payload digest has an invalid format" };
+  }
+  if (
+    typeof rec.payloadLength !== "number" ||
+    !Number.isSafeInteger(rec.payloadLength) ||
+    rec.payloadLength < 0
+  ) {
+    return { valid: false, failureClass: "framing", reason: "payload length is invalid" };
+  }
+  if (
+    typeof rec.crc32 !== "number" ||
+    !Number.isSafeInteger(rec.crc32) ||
+    rec.crc32 < 0 ||
+    rec.crc32 > 0xffffffff
+  ) {
+    return { valid: false, failureClass: "checksum", reason: "CRC32 checksum is invalid" };
+  }
+  if (typeof rec.timestamp !== "string") {
+    return { valid: false, failureClass: "framing", reason: "timestamp is not a string" };
+  }
+  if (!("payload" in rec)) {
+    return { valid: false, failureClass: "framing", reason: "payload is missing" };
+  }
+
+  let serialized: string;
+  try {
+    const value = JSON.stringify(rec.payload);
+    if (value === undefined) {
+      return { valid: false, failureClass: "framing", reason: "payload is not JSON-serializable" };
+    }
+    serialized = value;
+  } catch {
+    return { valid: false, failureClass: "framing", reason: "payload is not JSON-serializable" };
+  }
+
+  if (Buffer.byteLength(serialized, "utf8") !== rec.payloadLength) {
+    return { valid: false, failureClass: "framing", reason: "payload length does not match payload" };
+  }
+  if ((crc32(serialized) >>> 0) !== (rec.crc32 >>> 0)) {
+    return { valid: false, failureClass: "checksum", reason: "CRC32 checksum does not match payload" };
+  }
+  const digest = createHash("sha256").update(serialized, "utf8").digest("hex");
+  if (digest.toLowerCase() !== rec.payloadDigest.toLowerCase()) {
+    return { valid: false, failureClass: "checksum", reason: "SHA-256 payload digest does not match payload" };
+  }
+
+  return { valid: true, record: rec as unknown as FramedRecord<unknown> };
+};
+
 /**
- * Verifies that a frame envelope is valid: schemaVersion is 1, sequence is an integer >= 0,
+ * Verifies that a frame envelope is valid: schemaVersion is 1, sequence is a positive safe integer,
  * and payloadLength, CRC32, and SHA-256 payloadDigest strictly match the serialized payload.
  *
  * @param frame - Candidate frame object or serialized JSON string.
@@ -177,65 +298,8 @@ export function verifyFrame<T = unknown>(frame: unknown): frame is FramedRecord<
     }
   }
 
-  if (!target || typeof target !== "object") {
-    return false;
-  }
-
-  const rec = target as Record<string, unknown>;
-  if (rec.schemaVersion !== 1) {
-    return false;
-  }
-  if (typeof rec.sequence !== "number" || !Number.isInteger(rec.sequence) || rec.sequence < 0) {
-    return false;
-  }
-  if (rec.idempotencyKey !== undefined && typeof rec.idempotencyKey !== "string") {
-    return false;
-  }
-  if (typeof rec.payloadDigest !== "string" || !/^[0-9a-f]{64}$/i.test(rec.payloadDigest)) {
-    return false;
-  }
-  if (
-    typeof rec.payloadLength !== "number" ||
-    !Number.isInteger(rec.payloadLength) ||
-    rec.payloadLength < 0
-  ) {
-    return false;
-  }
-  if (typeof rec.crc32 !== "number" || !Number.isInteger(rec.crc32)) {
-    return false;
-  }
-  if (typeof rec.timestamp !== "string") {
-    return false;
-  }
-  if (!("payload" in rec)) {
-    return false;
-  }
-
-  let serialized: string;
-  try {
-    const s = JSON.stringify(rec.payload);
-    if (s === undefined) return false;
-    serialized = s;
-  } catch {
-    return false;
-  }
-
-  const actualLength = Buffer.byteLength(serialized, "utf8");
-  if (actualLength !== rec.payloadLength) {
-    return false;
-  }
-
-  const actualCrc = crc32(serialized);
-  if ((actualCrc >>> 0) !== (rec.crc32 >>> 0)) {
-    return false;
-  }
-
-  const actualDigest = createHash("sha256").update(serialized, "utf8").digest("hex");
-  if (actualDigest.toLowerCase() !== rec.payloadDigest.toLowerCase()) {
-    return false;
-  }
-
-  return true;
+  const inspected = inspectFrame(target);
+  return inspected.valid;
 }
 
 /**
@@ -254,18 +318,325 @@ export function parseFramedRecord<T = unknown>(line: string): FramedRecord<T> {
     });
   }
 
-  if (!verifyFrame<T>(parsed)) {
+  const inspected = inspectFrame(parsed);
+  if (!inspected.valid) {
     throw new AriadneError({
       code: "CORRUPT_PERSISTED_HISTORY",
-      message: "Framed record failed verification (mismatched length, CRC32, or SHA-256 payload digest)",
-      repair: "Inspect canonical journal file for corrupted frame records.",
+      message: `Framed record failed ${inspected.failureClass} validation.`,
+      repair: "Inspect the canonical journal or restore it from a trusted backup.",
     });
   }
 
-  return parsed;
+  return inspected.record as FramedRecord<T>;
 }
 
 export const parseFrame = parseFramedRecord;
+
+const inferWorkspaceRoot = (filePath: string): string => {
+  const parent = path.dirname(filePath);
+  if (path.basename(parent) === "attempts" && path.basename(path.dirname(parent)) === ".orchestration") {
+    return path.dirname(path.dirname(parent));
+  }
+  return parent;
+};
+
+const canonicalWorkspaceRoot = (filePath: string, workspaceRoot?: string): string =>
+  canonicalizePath(workspaceRoot ?? inferWorkspaceRoot(filePath));
+
+const relativeAuthorityPath = (workspaceRoot: string, filePath: string): string => {
+  const relative = path.relative(workspaceRoot, filePath);
+  return relative && !relative.startsWith("..") && !path.isAbsolute(relative)
+    ? relative
+    : path.basename(filePath);
+};
+
+const diagnosticDetail = (
+  filePath: string,
+  options: JournalScanOptions,
+  line: number,
+  offset: number,
+  failureClass: JournalFailureClass,
+  sequence?: number,
+): Record<string, unknown> => {
+  const workspace = canonicalWorkspaceRoot(filePath, options.workspaceRoot);
+  const authority = options.authority ?? relativeAuthorityPath(workspace, filePath);
+  return {
+    workspace,
+    authority,
+    recordLocation: {
+      line,
+      byteOffset: offset,
+      ...(sequence === undefined ? {} : { sequence }),
+    },
+    failureClass,
+    safeNextAction:
+      failureClass === "unsupported_version"
+        ? "Upgrade Ariadne to a binary that supports the persisted format before retrying."
+        : "Inspect the canonical authority or restore it from a trusted backup before retrying.",
+  };
+};
+
+const journalFailure = (
+  filePath: string,
+  options: JournalScanOptions,
+  line: number,
+  offset: number,
+  failureClass: JournalFailureClass,
+  reason: string,
+  sequence?: number,
+  version?: unknown,
+  middleRecord = false,
+): AriadneError => {
+  const authority = options.authority ?? path.basename(filePath);
+  const code = failureClass === "unsupported_version"
+    ? "UNSUPPORTED_FORMAT"
+    : "CORRUPT_PERSISTED_HISTORY";
+  const repair = code === "UNSUPPORTED_FORMAT"
+    ? "Upgrade Ariadne to a binary that supports the persisted format before retrying."
+    : "Inspect the canonical authority or restore it from a trusted backup before retrying.";
+  const detail = diagnosticDetail(filePath, options, line, offset, failureClass, sequence);
+  if (version !== undefined) detail.version = version;
+  const context = middleRecord
+    ? "Middle corruption or checksum mismatch detected in canonical history. "
+    : "";
+  return new AriadneError({
+    code,
+    message: `${context}Canonical authority '${authority}' failed ${failureClass} validation at record ${line}: ${reason}.`,
+    repair,
+    detail,
+  });
+};
+
+const hasUnclosedJsonStructure = (line: string): boolean => {
+  const stack: string[] = [];
+  let inString = false;
+  let escaped = false;
+
+  for (const character of line) {
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+    } else if (character === "{" || character === "[") {
+      stack.push(character);
+    } else if (character === "}" || character === "]") {
+      const expected = character === "}" ? "{" : "[";
+      if (stack.at(-1) !== expected) return false;
+      stack.pop();
+    }
+  }
+
+  return inString || escaped || stack.length > 0;
+};
+
+const isProvablyIncompleteJsonTail = (line: string, error: unknown): boolean => {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith("{")) return false;
+
+  const message = error instanceof Error ? error.message : String(error);
+  const positionMatch = /position (\d+)/iu.exec(message);
+  const significantLength = line.trimEnd().length;
+  const errorAtEnd =
+    positionMatch !== null && Number(positionMatch[1]) >= significantLength;
+  const endOfInputError = /unexpected end of json input|unterminated string/iu.test(message);
+
+  // Node reports some incomplete objects at the parser's EOF position and others
+  // as an end-of-input/unterminated-string error. Both are repairable only when
+  // the bytes are still an unfinished JSON value, never merely because parsing failed.
+  return (errorAtEnd || endOfInputError) && hasUnclosedJsonStructure(line);
+};
+
+/**
+ * Reads a framed JSONL authority, validates its envelope and sequence, and
+ * optionally validates each payload. Only an EOF parse error is truncatable:
+ * a complete JSON value with bad framing, checksums, schema, or sequence is
+ * persisted evidence and therefore fails closed.
+ */
+export async function scanFramedJournal(
+  filePath: string,
+  options: JournalScanOptions = {},
+): Promise<JournalScanResult> {
+  const repair = options.repair ?? false;
+  let buffer: Buffer;
+  try {
+    buffer = await fs.promises.readFile(filePath);
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return {
+        validRecords: 0,
+        recoveredTail: false,
+        truncatedBytes: 0,
+        lastSequence: 0,
+        records: [],
+      };
+    }
+    throw error;
+  }
+
+  if (buffer.length === 0) {
+    return {
+      validRecords: 0,
+      recoveredTail: false,
+      truncatedBytes: 0,
+      lastSequence: 0,
+      records: [],
+    };
+  }
+
+  let offset = 0;
+  let lineNumber = 0;
+  let lastValidOffset = 0;
+  const records: FramedRecord<unknown>[] = [];
+
+  while (offset < buffer.length) {
+    lineNumber += 1;
+    const newline = buffer.indexOf(0x0a, offset);
+    const hasNewline = newline !== -1;
+    const end = hasNewline ? newline : buffer.length;
+    const recordEnd = hasNewline ? newline + 1 : buffer.length;
+    const line = buffer.subarray(offset, end).toString("utf8").replace(/\r$/u, "");
+
+    if (line.trim().length === 0) {
+      throw journalFailure(
+        filePath,
+        options,
+        lineNumber,
+        offset,
+        "framing",
+        "empty record",
+        undefined,
+        undefined,
+        records.length > 0 && recordEnd < buffer.length,
+      );
+    }
+
+    let parsed: unknown;
+    let parseError: unknown;
+    try {
+      parsed = JSON.parse(line);
+    } catch (error) {
+      parseError = error;
+    }
+
+    if (parseError !== undefined) {
+      const isFinal = recordEnd === buffer.length;
+      if (isFinal && isProvablyIncompleteJsonTail(line, parseError) && repair) {
+        const truncatedBytes = buffer.length - lastValidOffset;
+        await fs.promises.truncate(filePath, lastValidOffset);
+        const detail = diagnosticDetail(
+          filePath,
+          options,
+          lineNumber,
+          offset,
+          "framing",
+        );
+        detail.safeNextAction =
+          "Re-apply the uncommitted operation after the incomplete tail is removed.";
+        return {
+          validRecords: records.length,
+          recoveredTail: true,
+          truncatedBytes,
+          lastSequence: records.at(-1)?.sequence ?? 0,
+          diagnostic: {
+            code: "INCOMPLETE_TAIL",
+            message: `Incomplete final frame detected and safely truncated (${truncatedBytes} bytes at offset ${lastValidOffset}).`,
+            repair: "Re-apply the uncommitted operation after recovery completes.",
+            detail,
+          },
+          records,
+        };
+      }
+      throw journalFailure(
+        filePath,
+        options,
+        lineNumber,
+        offset,
+        "framing",
+        "malformed JSON record",
+        undefined,
+        undefined,
+        records.length > 0 && recordEnd < buffer.length,
+      );
+    }
+
+    const inspected = inspectFrame(parsed);
+    if (!inspected.valid) {
+      throw journalFailure(
+        filePath,
+        options,
+        lineNumber,
+        offset,
+        inspected.failureClass,
+        inspected.reason,
+        isObjectRecord(parsed) && typeof parsed.sequence === "number"
+          ? parsed.sequence
+          : undefined,
+        inspected.version,
+        records.length > 0 && recordEnd < buffer.length,
+      );
+    }
+
+    const expectedSequence = records.length === 0 ? 1 : records.at(-1)!.sequence + 1;
+    if (inspected.record.sequence !== expectedSequence) {
+      throw journalFailure(
+        filePath,
+        options,
+        lineNumber,
+        offset,
+        "sequence",
+        `expected sequence ${expectedSequence}, received ${inspected.record.sequence}`,
+        inspected.record.sequence,
+        undefined,
+        records.length > 0 && recordEnd < buffer.length,
+      );
+    }
+
+    if (options.validatePayload && !options.validatePayload(inspected.record.payload)) {
+      throw journalFailure(
+        filePath,
+        options,
+        lineNumber,
+        offset,
+        "record_schema",
+        "payload does not satisfy the authority record schema",
+        inspected.record.sequence,
+        undefined,
+        records.length > 0 && recordEnd < buffer.length,
+      );
+    }
+
+    records.push(inspected.record);
+    lastValidOffset = recordEnd;
+    offset = recordEnd;
+
+    if (!hasNewline && repair && options.repairFinalNewline !== false) {
+      const handle = await fs.promises.open(filePath, "a");
+      try {
+        await handle.writeFile("\n", "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+    }
+  }
+
+  return {
+    validRecords: records.length,
+    recoveredTail: false,
+    truncatedBytes: 0,
+    lastSequence: records.at(-1)?.sequence ?? 0,
+    records,
+  };
+}
 
 /**
  * Reads and verifies all framed records from a canonical ledger file.
@@ -274,27 +645,8 @@ export const parseFrame = parseFramedRecord;
 export async function readFramedRecords<T = unknown>(
   filePath: string,
 ): Promise<FramedRecord<T>[]> {
-  let content: string;
-  try {
-    content = await fs.promises.readFile(filePath, "utf8");
-  } catch (err: unknown) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "code" in err &&
-      (err as { code: string }).code === "ENOENT"
-    ) {
-      return [];
-    }
-    throw err;
-  }
-
-  const lines = content.split("\n").filter((line) => line.trim().length > 0);
-  const records: FramedRecord<T>[] = [];
-  for (const line of lines) {
-    records.push(parseFramedRecord<T>(line));
-  }
-  return records;
+  const result = await scanFramedJournal(filePath);
+  return result.records as FramedRecord<T>[];
 }
 
 /**
@@ -422,73 +774,13 @@ export function getAttemptLedgerPath(storageRoot: string, attemptId: string): st
 
 const scanCanonicalJournal = async (
   filePath: string,
-  options: { repair?: boolean } = {},
+  options: { repair?: boolean; repairFinalNewline?: boolean } = {},
 ): Promise<{ records: FramedRecord<unknown>[] }> => {
-  const repair = options.repair ?? true;
-  let buffer: Buffer;
-  try {
-    buffer = await fs.promises.readFile(filePath);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { records: [] };
-    throw error;
-  }
-
-  const records: FramedRecord<unknown>[] = [];
-  let offset = 0;
-  let lastValidOffset = 0;
-  while (offset < buffer.length) {
-    const newline = buffer.indexOf(0x0a, offset);
-    const end = newline === -1 ? buffer.length : newline;
-    const recordEnd = newline === -1 ? buffer.length : newline + 1;
-    const line = buffer.subarray(offset, end).toString("utf8").replace(/\r$/u, "");
-    const remaining = buffer.subarray(recordEnd).toString("utf8").trim();
-    const isFinal = remaining.length === 0;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(line);
-    } catch {
-      if (!isFinal || records.length === 0) {
-        throw new AriadneError({
-          code: "CORRUPT_PERSISTED_HISTORY",
-          message: "Middle corruption detected in canonical history",
-          repair: "Inspect the canonical journal or restore from backup.",
-          detail: { filePath, offset },
-        });
-      }
-      if (!repair) return { records };
-      await fs.promises.truncate(filePath, lastValidOffset);
-      return { records };
-    }
-    const valid = verifyFrame(parsed) &&
-      (records.length === 0 || parsed.sequence === records.at(-1)!.sequence + 1);
-    if (!valid) {
-      if (!isFinal || records.length === 0) {
-        throw new AriadneError({
-          code: "CORRUPT_PERSISTED_HISTORY",
-          message: records.length === 0
-            ? "Canonical history contains no verified prefix before an invalid frame"
-            : "Middle corruption or sequence break detected in canonical history",
-          repair: "Inspect the canonical journal or restore from backup.",
-          detail: { filePath, offset },
-        });
-      }
-      await fs.promises.truncate(filePath, lastValidOffset);
-      return { records };
-    }
-    records.push(parsed as FramedRecord<unknown>);
-    lastValidOffset = recordEnd;
-    if (newline === -1 && repair) {
-      const handle = await fs.promises.open(filePath, "a");
-      try {
-        await handle.writeFile("\n", "utf8");
-        await handle.sync();
-      } finally {
-        await handle.close();
-      }
-    }
-    offset = recordEnd;
-  }
-  return { records };
+  const result = await scanFramedJournal(filePath, {
+    repair: options.repair ?? true,
+    repairFinalNewline: options.repairFinalNewline,
+  });
+  return { records: result.records };
 };
 
 /**
@@ -859,7 +1151,12 @@ export async function readAttemptEvents<T = unknown>(
   attemptId: string,
 ): Promise<FramedRecord<T>[]> {
   const attemptPath = getAttemptLedgerPath(storageRoot, attemptId);
-  return (await scanCanonicalJournal(attemptPath, { repair: false })).records as FramedRecord<T>[];
+  return (
+    await scanCanonicalJournal(attemptPath, {
+      repair: true,
+      repairFinalNewline: false,
+    })
+  ).records as FramedRecord<T>[];
 }
 
 /**

@@ -7,15 +7,15 @@ import path from "node:path";
 import { AriadneError } from "../core/errors.js";
 import { canonicalizePath } from "../core/containment.js";
 import {
-  verifyFrame,
+  scanFramedJournal,
   stageAndSwapProjection,
-  type FramedRecord,
+  type JournalScanOptions,
+  type JournalScanResult,
 } from "./journal.js";
 import { withRootLock } from "./lock.js";
-import { NodeSchema } from "../core/schemas/nodes.js";
-import { EdgeSchema } from "../core/schemas/edges.js";
+import { OperationalNoticeSchema } from "../adapters/gsd/operational-notice.js";
 import {
-  GraphEventSchema,
+  parseGraphEventPayload,
   renderIndex,
   renderCard,
   applyEvents,
@@ -24,201 +24,37 @@ import {
   type GraphEvent,
 } from "./storage.js";
 
-export interface JournalScanDiagnostic {
-  code: "INCOMPLETE_TAIL";
-  message: string;
-  repair?: string;
-  detail?: Record<string, unknown>;
-}
-
-export interface JournalScanResult {
-  validRecords: number;
-  recoveredTail: boolean;
-  truncatedBytes: number;
-  lastSequence: number;
-  diagnostic?: JournalScanDiagnostic;
-  records: FramedRecord<unknown>[];
-}
+export type { JournalScanDiagnostic, JournalScanResult } from "./journal.js";
 
 /**
  * Scans a canonical journal (e.g. GRAPH.jsonl or NOTICES.jsonl) and verifies each frame.
- * If the final record at EOF is truncated, incomplete, or corrupted (torn write from a crash/power halt),
- * it safely truncates the file back to the last verified frame offset using fs.promises.truncate
- * and returns a recovery result with recoveredTail: true, byte count truncated, and an INCOMPLETE_TAIL diagnostic.
+ * If the final record at EOF is provably incomplete JSON from a torn write, it safely truncates
+ * the file back to the last verified frame offset using fs.promises.truncate and returns a recovery
+ * result with recoveredTail: true, byte count truncated, and an INCOMPLETE_TAIL diagnostic.
+ * A complete frame with invalid framing, checksums, sequence, or payload schema is never truncated.
  *
- * Any corruption, checksum mismatch, schema invalidity, or sequence break occurring prior to
- * the final frame is catastrophic middle-log corruption: automatic truncation is strictly prohibited
- * and it immediately throws AriadneError(CORRUPT_PERSISTED_HISTORY).
+ * Any corruption, checksum mismatch, schema invalidity, or sequence break in a complete frame—whether
+ * before or at the final record—is persisted evidence: automatic truncation is strictly prohibited and
+ * it immediately throws AriadneError(CORRUPT_PERSISTED_HISTORY).
  */
 export async function scanAndRecoverJournal(
   journalPath: string,
+  options: Omit<JournalScanOptions, "repair"> = {},
 ): Promise<JournalScanResult> {
-  let buffer: Buffer;
-  try {
-    buffer = await fs.promises.readFile(journalPath);
-  } catch (err: unknown) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "code" in err &&
-      (err as { code: string }).code === "ENOENT"
-    ) {
-      return {
-        validRecords: 0,
-        recoveredTail: false,
-        truncatedBytes: 0,
-        lastSequence: 0,
-        records: [],
-      };
-    }
-    throw err;
-  }
-
-  if (buffer.length === 0) {
-    return {
-      validRecords: 0,
-      recoveredTail: false,
-      truncatedBytes: 0,
-      lastSequence: 0,
-      records: [],
-    };
-  }
-
-  let lineStart = 0;
-  let lastValidOffset = 0;
-  const records: FramedRecord<unknown>[] = [];
-
-  while (lineStart < buffer.length) {
-    const nextNewline = buffer.indexOf(0x0a, lineStart);
-    const lineEnd = nextNewline === -1 ? buffer.length : nextNewline;
-    const recordEnd = nextNewline === -1 ? buffer.length : nextNewline + 1;
-
-    const lineBytes = buffer.subarray(lineStart, lineEnd);
-    const lineStr = lineBytes.toString("utf8").replace(/\r$/, "");
-
-    if (lineStr.trim().length === 0) {
-      lineStart = recordEnd;
-      continue;
-    }
-
-    const remainingAfter = buffer.subarray(recordEnd).toString("utf8").trim();
-    const isFinalFrame = remainingAfter.length === 0;
-
-    let parsed: unknown;
-    let isValid = true;
-
-    try {
-      parsed = JSON.parse(lineStr);
-    } catch {
-      isValid = false;
-    }
-
-    if (isValid && !verifyFrame(parsed)) {
-      isValid = false;
-    }
-
-    if (isValid) {
-      const rec = parsed as FramedRecord<unknown>;
-      if (records.length > 0) {
-        if (rec.sequence !== records[records.length - 1].sequence + 1) {
-          isValid = false;
-        }
-      }
-    }
-
-    if (!isValid) {
-      if (!isFinalFrame || records.length === 0) {
-        throw new AriadneError({
-          code: "CORRUPT_PERSISTED_HISTORY",
-          message: records.length === 0
-            ? "Canonical history contains no verified prefix before an invalid frame"
-            : "Middle corruption or checksum mismatch detected in canonical history",
-          repair: "Inspect .ariadne/GRAPH.jsonl or restore from backup.",
-          detail: {
-            journalPath,
-            offset: lineStart,
-            sequence:
-              parsed && typeof parsed === "object" && "sequence" in parsed
-                ? (parsed as { sequence?: unknown }).sequence
-                : undefined,
-          },
-        });
-      }
-
-      // Final frame incomplete / corrupted: truncate back to last valid frame offset
-      const truncatedBytes = buffer.length - lastValidOffset;
-      await fs.promises.truncate(journalPath, lastValidOffset);
-
-      return {
-        validRecords: records.length,
-        recoveredTail: true,
-        truncatedBytes,
-        lastSequence: records.length > 0 ? records[records.length - 1].sequence : 0,
-        diagnostic: {
-          code: "INCOMPLETE_TAIL",
-          message: `Incomplete final frame detected and safely truncated (${truncatedBytes} bytes at offset ${lastValidOffset})`,
-          repair: "Inspect canonical journal or re-apply uncommitted operation.",
-          detail: {
-            journalPath,
-            lastValidOffset,
-            truncatedBytes,
-          },
-        },
-        records,
-      };
-    }
-
-    records.push(parsed as FramedRecord<unknown>);
-    lastValidOffset = recordEnd;
-    lineStart = recordEnd;
-
-    // Keep the append boundary unambiguous when a previously valid writer
-    // stopped immediately after the final frame. The correction is made while
-    // callers hold the root lock, before any new canonical record is appended.
-    if (nextNewline === -1) {
-      const handle = await fs.promises.open(journalPath, "a");
-      try {
-        await handle.writeFile("\n", "utf8");
-        await handle.sync();
-      } finally {
-        await handle.close();
-      }
-    }
-  }
-
-  // Check if there was trailing data after lastValidOffset that is non-whitespace
-  if (lastValidOffset < buffer.length) {
-    const trailing = buffer.subarray(lastValidOffset).toString("utf8").trim();
-    if (trailing.length > 0) {
-      const truncatedBytes = buffer.length - lastValidOffset;
-      await fs.promises.truncate(journalPath, lastValidOffset);
-      return {
-        validRecords: records.length,
-        recoveredTail: true,
-        truncatedBytes,
-        lastSequence: records.length > 0 ? records[records.length - 1].sequence : 0,
-        diagnostic: {
-          code: "INCOMPLETE_TAIL",
-          message: `Incomplete final frame detected and safely truncated (${truncatedBytes} bytes at offset ${lastValidOffset})`,
-          repair: "Inspect canonical journal or re-apply uncommitted operation.",
-          detail: {
-            journalPath,
-            lastValidOffset,
-            truncatedBytes,
-          },
-        },
-        records,
-      };
-    }
-  }
-
-  return {
-    validRecords: records.length,
-    recoveredTail: false,
-    truncatedBytes: 0,
-    lastSequence: records.length > 0 ? records[records.length - 1].sequence : 0,
-    records,
-  };
+  const authority = options.authority ?? path.basename(journalPath);
+  const validatePayload = options.validatePayload ?? (
+    authority === "GRAPH.jsonl"
+      ? (payload: unknown) => parseGraphEventPayload(payload) !== undefined
+      : authority === "NOTICES.jsonl"
+        ? (payload: unknown) => OperationalNoticeSchema.safeParse(payload).success
+        : undefined
+  );
+  return scanFramedJournal(journalPath, {
+    ...options,
+    authority,
+    validatePayload,
+    repair: true,
+  });
 }
 
 /**
@@ -231,26 +67,34 @@ export async function rebuildProjections(storageRoot: string): Promise<void> {
 
   await withRootLock(canonicalRoot, async () => {
     const graphPath = path.join(canonicalRoot, "GRAPH.jsonl");
-    const scanResult = await scanAndRecoverJournal(graphPath);
+    const scanResult = await scanFramedJournal(graphPath, {
+      repair: true,
+      workspaceRoot: canonicalRoot,
+      authority: "GRAPH.jsonl",
+      validatePayload: (payload) => parseGraphEventPayload(payload) !== undefined,
+    });
 
-    const events: GraphEvent[] = [];
-    for (const record of scanResult.records) {
-      const payload = record.payload;
-      const parsedEvent = GraphEventSchema.safeParse(payload);
-      if (parsedEvent.success) {
-        events.push(parsedEvent.data);
-      } else {
-        const parsedNode = NodeSchema.safeParse(payload);
-        if (parsedNode.success) {
-          events.push({ kind: "node", node: parsedNode.data });
-        } else {
-          const parsedEdge = EdgeSchema.safeParse(payload);
-          if (parsedEdge.success) {
-            events.push({ kind: "edge", edge: parsedEdge.data });
-          }
-        }
+    const events: GraphEvent[] = scanResult.records.map((record, index) => {
+      const event = parseGraphEventPayload(record.payload);
+      // scanFramedJournal already performed this validation. Keeping the
+      // explicit guard makes the projection input boundary fail closed if the
+      // validator and mapper ever drift apart.
+      if (!event) {
+        throw new AriadneError({
+          code: "CORRUPT_PERSISTED_HISTORY",
+          message: "Canonical graph payload failed schema validation during projection rebuild.",
+          repair: "Inspect the canonical authority or restore it from a trusted backup before retrying.",
+          detail: {
+            workspace: canonicalRoot,
+            authority: "GRAPH.jsonl",
+            recordLocation: { line: index + 1 },
+            failureClass: "record_schema",
+            safeNextAction: "Inspect the canonical authority or restore it from a trusted backup before retrying.",
+          },
+        });
       }
-    }
+      return event;
+    });
 
     const graph: MaterializedGraph = applyEvents({ nodes: [], edges: [] }, events);
 

@@ -30,6 +30,23 @@ export const GraphEventSchema = z.discriminatedUnion("kind", [
 
 export type GraphEvent = z.infer<typeof GraphEventSchema>;
 
+/**
+ * Validates one payload recovered from GRAPH.jsonl and normalizes the legacy
+ * node/edge payload shape still understood by the migration boundary.
+ */
+export const parseGraphEventPayload = (payload: unknown): GraphEvent | undefined => {
+  const event = GraphEventSchema.safeParse(payload);
+  if (event.success) return event.data;
+
+  const node = NodeSchema.safeParse(payload);
+  if (node.success) return { kind: "node", node: node.data };
+
+  const edge = EdgeSchema.safeParse(payload);
+  if (edge.success) return { kind: "edge", edge: edge.data };
+
+  return undefined;
+};
+
 const StateIdSchema = z.string().regex(/^[A-Z][A-Z0-9-]*-[0-9A-Za-z_-]+$/u);
 const StateReferenceSchema = z.union([
   StateIdSchema,

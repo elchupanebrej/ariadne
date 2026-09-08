@@ -191,13 +191,11 @@ describe("fail-closed orchestration boundaries", () => {
     expect(recovered.revision).toBe(2);
     expect(recovered.status).toBe("running");
 
-    // A shape-invalid final record counts as incomplete and is dropped too.
-    await writeFile(
-      ledgerPath,
-      `${history}${JSON.stringify({ id: "b-ledger", revision: 9 })}\n`,
-      "utf8",
-    );
-    expect((await loadAttempt(root, "b-ledger")).revision).toBe(2);
+    // A complete shape-invalid final record is persisted corruption, not an incomplete tail.
+    const shapeInvalidHistory = `${history}${JSON.stringify({ id: "b-ledger", revision: 9 })}\n`;
+    await writeFile(ledgerPath, shapeInvalidHistory, "utf8");
+    await expect(loadAttempt(root, "b-ledger")).rejects.toThrow(/Cannot read attempt|failed mixed_version/);
+    expect(await readFile(ledgerPath, "utf8")).toBe(shapeInvalidHistory);
 
     // Corruption inside committed history fails closed.
     await writeFile(ledgerPath, `garbage\n${history}`, "utf8");
