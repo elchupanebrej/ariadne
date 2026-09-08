@@ -4,7 +4,8 @@ import {
   EDGE_TYPE_HINT,
   unknownEdgeRelation,
 } from "../../core/schemas/edges.js";
-import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace, maybeEmitCompactionAdvisory, type CliIO } from "../workspace.js";
+import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 type Flags = Map<string, string>;
 
@@ -90,32 +91,39 @@ export async function runEdge(args: readonly string[], io: CliIO): Promise<numbe
     return 0;
   }
   const rest = args.slice(1);
+  if (command === "add" && hasHelp(rest)) {
+    io.stdout.write(`${EDGE_ADD_HELP}\n`);
+    return 0;
+  }
+  if (command === "list" && hasHelp(rest, ["--from", "--to", "--relation"])) {
+    io.stdout.write(EDGE_LIST_USAGE);
+    return 0;
+  }
+  if (command === "remove" && hasHelp(rest)) {
+    io.stdout.write(`${EDGE_REMOVE_USAGE}\n`);
+    return 0;
+  }
+
+  const { environment } = await resolveCliWorkspace(io);
+  if (command === "add" || command === "remove") {
+    await assertNotLegacyWorkspace(environment.storageRoot);
+  }
+
   let result: EpistemicEdge | EpistemicEdge[];
   switch (command) {
     case "add":
-      if (hasHelp(rest)) {
-        io.stdout.write(`${EDGE_ADD_HELP}\n`);
-        return 0;
-      }
       result = await addEdge(rest, EDGE_ADD_USAGE, io);
       break;
     case "list":
-      if (hasHelp(rest, ["--from", "--to", "--relation"])) {
-        io.stdout.write(EDGE_LIST_USAGE);
-        return 0;
-      }
       result = await listEdges(rest, io);
       break;
     case "remove":
-      if (hasHelp(rest)) {
-        io.stdout.write(`${EDGE_REMOVE_USAGE}\n`);
-        return 0;
-      }
       result = await removeEdge(rest, EDGE_REMOVE_USAGE, io);
       break;
     default:
       throw new Error(EDGE_USAGE.trim());
   }
   io.stdout.write(`${JSON.stringify(result)}\n`);
+  await maybeEmitCompactionAdvisory(environment.storageRoot, io);
   return 0;
 }

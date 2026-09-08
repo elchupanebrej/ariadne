@@ -12,6 +12,8 @@ import {
 import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import type { GraphEvent, MaterializedGraph } from "./storage.js";
+import { createFramedRecord } from "./journal.js";
+import { assertWithinCapacity } from "./capacity.js";
 
 // Concurrency queues for same-process serialization
 const pathQueues = new Map<string, Promise<unknown>>();
@@ -151,7 +153,12 @@ export class FileSystemStorageDriver implements StorageDriver {
       const events: GraphEvent[] = [];
       for (const line of lines) {
         try {
-          events.push(JSON.parse(line));
+          const parsed = JSON.parse(line);
+          const event =
+            parsed && typeof parsed === "object" && "schemaVersion" in parsed && "payload" in parsed
+              ? (parsed as { payload: unknown }).payload
+              : parsed;
+          events.push(event as GraphEvent);
         } catch {
           // If reading fails on corrupt line, try tail repair and re-read
           await this.repairJournalTail();
@@ -160,7 +167,12 @@ export class FileSystemStorageDriver implements StorageDriver {
             .split("\n")
             .map((l) => l.trim())
             .filter(Boolean)
-            .map((l) => JSON.parse(l));
+            .map((l) => {
+              const parsed = JSON.parse(l);
+              return (parsed && typeof parsed === "object" && "schemaVersion" in parsed && "payload" in parsed
+                ? (parsed as { payload: unknown }).payload
+                : parsed) as GraphEvent;
+            });
         }
       }
       return events;
@@ -173,7 +185,20 @@ export class FileSystemStorageDriver implements StorageDriver {
   async appendEvents(events: readonly GraphEvent[]): Promise<void> {
     if (events.length === 0) return;
     await mkdir(this.root, { recursive: true });
-    const payload = events.map((event) => JSON.stringify(event)).join("\n") + "\n";
+    let existingCount = 0;
+    try {
+      const existing = await readFile(this.graphPath, "utf8");
+      existingCount = existing.split("\n").filter((l) => l.trim().length > 0).length;
+    } catch {
+      // file does not exist yet
+    }
+    assertWithinCapacity({ eventCount: existingCount + events.length });
+    const payload =
+      events
+        .map((event, idx) =>
+          JSON.stringify(createFramedRecord({ payload: event, sequence: existingCount + idx + 1 })),
+        )
+        .join("\n") + "\n";
     await appendFile(this.graphPath, payload, "utf8");
   }
 
@@ -190,7 +215,11 @@ export class FileSystemStorageDriver implements StorageDriver {
   async writeState(state: Record<string, unknown>): Promise<void> {
     await mkdir(this.root, { recursive: true });
     const tempPath = `${this.statePath}.${randomUUID()}.tmp`;
-    await writeFile(tempPath, JSON.stringify(state, null, 2) + "\n", "utf8");
+    const toWrite = {
+      schema_version: 1,
+      ...state,
+    };
+    await writeFile(tempPath, JSON.stringify(toWrite, null, 2) + "\n", "utf8");
     await rename(tempPath, this.statePath);
   }
 
@@ -243,6 +272,7 @@ export class InMemoryStorageDriver implements StorageDriver {
   }
 
   async appendEvents(newEvents: readonly GraphEvent[]): Promise<void> {
+    assertWithinCapacity({ eventCount: this.events.length + newEvents.length });
     this.events.push(...newEvents);
   }
 

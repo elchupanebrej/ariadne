@@ -16,12 +16,14 @@ import {
   EdgeSchema,
   type EpistemicEdge,
 } from "../core/schemas/edges.js";
+import { createFramedRecord } from "./journal.js";
 import {
   NodeSchema,
   type Node,
 } from "../core/schemas/nodes.js";
 import type { ProvenanceType } from "../core/types/nodes.js";
 import { validateGraph } from "./integrity.js";
+import { assertWithinCapacity } from "./capacity.js";
 
 export type MaterializedGraph = {
   nodes: Node[];
@@ -120,10 +122,10 @@ const withFileLock = async <T>(
   }
 };
 
-const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
+export const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
   `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
 
-const applyEvents = (
+export const applyEvents = (
   graph: MaterializedGraph,
   events: readonly GraphEvent[],
 ): MaterializedGraph => {
@@ -175,7 +177,7 @@ export const isFrontierNode = (
   node: { provenance_type: ProvenanceType; status?: string; tombstone?: boolean },
 ): boolean => !isTerminalNode(node);
 
-const stateForGraph = (
+export const stateForGraph = (
   state: Record<string, unknown>,
   graph: MaterializedGraph,
 ): Record<string, unknown> => {
@@ -360,11 +362,21 @@ export class GraphStorage {
         if (currentContents && !currentContents.endsWith("\n")) {
           currentContents += "\n";
         }
+        const existingLines = currentContents.split("\n").filter((l) => l.trim().length > 0);
+        assertWithinCapacity({
+          nodeCount: prospective.nodes.length,
+          edgeCount: prospective.edges.length,
+          eventCount: existingLines.length + parsed.length,
+        });
+        const startSeq = existingLines.length;
+        const framedLines = parsed.map((event, idx) =>
+          JSON.stringify(createFramedRecord({ payload: event, sequence: startSeq + idx + 1 })),
+        );
         const temporaryPath = `${this.graphPath}.${randomUUID()}.tmp`;
         try {
           await writeFile(
             temporaryPath,
-            `${currentContents}${parsed.map((event) => JSON.stringify(event)).join("\n")}\n`,
+            `${currentContents}${framedLines.join("\n")}\n`,
             "utf8",
           );
           await rename(temporaryPath, this.graphPath);
@@ -465,7 +477,11 @@ export class GraphStorage {
         await truncate(this.graphPath, offset === 0 ? 0 : offset + 1);
         return events;
       }
-      events.push(GraphEventSchema.parse(value));
+      const candidate =
+        value && typeof value === "object" && "schemaVersion" in value && "payload" in value
+          ? (value as { payload: unknown }).payload
+          : value;
+      events.push(GraphEventSchema.parse(candidate));
     }
     if (recoverPartialTail && !hasFinalNewline && lastMeaningfulIndex >= 0) {
       await appendFile(this.graphPath, "\n", "utf8");

@@ -1,5 +1,6 @@
-import { hasHelp, resolveCliWorkspace } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace, maybeEmitCompactionAdvisory } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
+import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 const INVALIDATE_USAGE = "Usage: ariadne invalidate <node_id> --by <evidence_id>\n";
 
@@ -20,6 +21,7 @@ export async function runInvalidation(
   }
   const { nodeId, evidenceId } = parseArgs(args);
   const { environment, graph } = await resolveCliWorkspace(io);
+  await assertNotLegacyWorkspace(environment.storageRoot);
 
   const result = await graph.invalidate(nodeId, evidenceId, {
     rootPath: environment.rootPath,
@@ -27,5 +29,6 @@ export async function runInvalidation(
   });
 
   io.stdout.write(`${JSON.stringify(result)}\n`);
+  await maybeEmitCompactionAdvisory(environment.storageRoot, io);
   return 0;
 }

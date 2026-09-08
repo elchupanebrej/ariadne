@@ -45,7 +45,12 @@ const readOnlyMaterialize = async (
   const nodes = new Map<string, MaterializedGraph["nodes"][number]>();
   const edges = new Map<string, MaterializedGraph["edges"][number]>();
   for (const line of content.split(/\r?\n/u).filter((value) => value.trim())) {
-    const event: GraphEvent = GraphEventSchema.parse(JSON.parse(line));
+    const raw = JSON.parse(line);
+    const candidate =
+      raw && typeof raw === "object" && "schemaVersion" in raw && "payload" in raw
+        ? (raw as { payload: unknown }).payload
+        : raw;
+    const event: GraphEvent = GraphEventSchema.parse(candidate);
     if (event.kind === "node") nodes.set(event.node.id, event.node);
     else {
       const key = `${event.edge.source}\u0000${event.edge.type}\u0000${event.edge.target}`;

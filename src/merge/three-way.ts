@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { createFramedRecord } from "../graph/journal.js";
 import {
   GraphEventSchema,
   type GraphEvent,
@@ -69,6 +70,7 @@ type ParsedInput = {
   edgeStates: Map<string, EdgeState>;
   digest: string;
   diagnostics: MergeDiagnostic[];
+  isFramed?: boolean;
 };
 
 const sourceLabels: Record<MergeSource, string> = {
@@ -255,6 +257,7 @@ const parseInput = (
   }
 
   const events: GraphEvent[] = [];
+  let isFramed = false;
   for (const [index, line] of raw.split(/\r?\n/u).entries()) {
     if (!line.trim()) continue;
     let value: unknown;
@@ -268,7 +271,14 @@ const parseInput = (
       });
       break;
     }
-    const parsed = GraphEventSchema.safeParse(value);
+    const candidate =
+      value && typeof value === "object" && "schemaVersion" in value && "payload" in value
+        ? (value as { payload: unknown }).payload
+        : value;
+    if (value && typeof value === "object" && "schemaVersion" in value && "payload" in value) {
+      isFramed = true;
+    }
+    const parsed = GraphEventSchema.safeParse(candidate);
     if (!parsed.success) {
       diagnostics.push({
         code: "INVALID_GRAPH_EVENT",
@@ -287,6 +297,7 @@ const parseInput = (
       edgeStates: edgeStatesFor(events),
       digest: fallbackDigest,
       diagnostics,
+      isFramed,
     };
   }
 
@@ -324,6 +335,7 @@ const parseInput = (
     edgeStates: edgeStatesFor(events),
     digest: digest(events.map(canonicalJson).join("\n")),
     diagnostics,
+    isFramed,
   };
 };
 
@@ -1257,7 +1269,19 @@ export function mergeBranchModels(
       `${right.kind === "node" ? "0" : "1"}:${rightSubject}`,
     );
   });
-  const suffix = finalEvents.map(canonicalJson).join("\n");
+  const isFramed = Boolean(parsed.base.isFramed || parsed.current.isFramed || parsed.incoming.isFramed);
+  const suffix = finalEvents
+    .map((event, index) =>
+      isFramed
+        ? JSON.stringify(
+            createFramedRecord({
+              payload: event,
+              sequence: parsed.base.events.length + index + 1,
+            }),
+          )
+        : canonicalJson(event),
+    )
+    .join("\n");
   const output = suffix
     ? `${inputs.base}${inputs.base.endsWith("\n") ? "" : "\n"}${suffix}\n`
     : inputs.base;

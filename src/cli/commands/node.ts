@@ -7,7 +7,8 @@ import {
   PROVENANCE_TYPES,
   type ProvenanceType,
 } from "../../core/types/nodes.js";
-import { hasHelp, resolveCliWorkspace, type CliIO } from "../workspace.js";
+import { hasHelp, resolveCliWorkspace, maybeEmitCompactionAdvisory, type CliIO } from "../workspace.js";
+import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 type Flags = Map<string, string | true>;
 
@@ -188,46 +189,53 @@ export async function runNode(args: readonly string[], io: CliIO): Promise<numbe
   if (!subcommand) throw new Error(NODE_USAGE.trim());
 
   const rest = args.slice(1);
+  if (subcommand === "add" && hasHelp(rest, ["--title", "--payload"])) {
+    io.stdout.write(NODE_ADD_USAGE);
+    return 0;
+  }
+  if (subcommand === "get" && hasHelp(rest)) {
+    io.stdout.write(NODE_GET_USAGE);
+    return 0;
+  }
+  if (subcommand === "list" && hasHelp(rest, ["--type", "--provenance"])) {
+    io.stdout.write(NODE_LIST_USAGE);
+    return 0;
+  }
+  if (subcommand === "remove" && hasHelp(rest)) {
+    io.stdout.write(NODE_REMOVE_USAGE);
+    return 0;
+  }
+  if (subcommand === "update" && hasHelp(rest, ["--title", "--payload"])) {
+    io.stdout.write(NODE_UPDATE_USAGE);
+    return 0;
+  }
+
+  const { environment } = await resolveCliWorkspace(io);
+  if (subcommand === "add" || subcommand === "remove" || subcommand === "update") {
+    await assertNotLegacyWorkspace(environment.storageRoot);
+  }
+
   let result: Node | Node[];
   switch (subcommand) {
     case "add":
-      if (hasHelp(rest, ["--title", "--payload"])) {
-        io.stdout.write(NODE_ADD_USAGE);
-        return 0;
-      }
       result = await addNode(rest, io);
       break;
     case "get":
-      if (hasHelp(rest)) {
-        io.stdout.write(NODE_GET_USAGE);
-        return 0;
-      }
       result = await getNode(rest, io);
       break;
     case "list":
-      if (hasHelp(rest, ["--type", "--provenance"])) {
-        io.stdout.write(NODE_LIST_USAGE);
-        return 0;
-      }
       result = await listNodes(rest, io);
       break;
     case "remove":
-      if (hasHelp(rest)) {
-        io.stdout.write(NODE_REMOVE_USAGE);
-        return 0;
-      }
       result = await removeNode(rest, io);
       break;
     case "update":
-      if (hasHelp(rest, ["--title", "--payload"])) {
-        io.stdout.write(NODE_UPDATE_USAGE);
-        return 0;
-      }
       result = await updateNode(rest, io);
       break;
     default:
       throw new Error(`Unknown node command: ${subcommand}`);
   }
   io.stdout.write(`${JSON.stringify(result)}\n`);
+  await maybeEmitCompactionAdvisory(environment.storageRoot, io);
   return 0;
 }

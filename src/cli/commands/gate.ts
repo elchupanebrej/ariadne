@@ -7,6 +7,7 @@ import {
 } from "../../gates/gate-engine.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
+import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
 export type { GateCommand, GateName, GateReceipt, GateResult };
 
@@ -35,7 +36,8 @@ export async function runGate(args: readonly string[], io: CliIO): Promise<numbe
     return 0;
   }
   const { gate, strict } = parse(args);
-  const { graph } = await resolveCliWorkspace(io);
+  const { environment, graph } = await resolveCliWorkspace(io);
+  await assertNotLegacyWorkspace(environment.storageRoot);
 
   const receipt = await graph.gate({ gate, strict });
 

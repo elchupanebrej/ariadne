@@ -120,7 +120,14 @@ describe("standalone Mode D recovery", () => {
     const events = (await readFile(join(storageRoot, "GRAPH.jsonl"), "utf8"))
       .trim()
       .split("\n")
-      .map((line) => JSON.parse(line) as { kind: string; node?: { id: string; status?: string } });
+      .map((line) => {
+        const parsed = JSON.parse(line) as {
+          payload?: { kind: string; node?: { id: string; status?: string } };
+          kind?: string;
+          node?: { id: string; status?: string };
+        };
+        return (parsed.payload ?? parsed) as { kind: string; node?: { id: string; status?: string } };
+      });
     expect(events).toHaveLength(7);
     expect(events).toEqual(
       expect.arrayContaining([

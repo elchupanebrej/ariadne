@@ -15,6 +15,7 @@ import { Writable } from "node:stream";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
+import { createFramedRecord } from "../../src/graph/journal.js";
 import { GraphStorage } from "../../src/graph/storage.js";
 
 const exec = promisify(execFile);
@@ -56,16 +57,21 @@ const exists = async (path: string): Promise<boolean> => {
   }
 };
 
-const sharedNode = (statement: string): string =>
-  JSON.stringify({
-    kind: "node",
-    node: {
-      id: "TASK-SHARED",
-      type: "TASK",
-      provenance_type: "PROPOSED",
-      statement,
-    },
-  });
+const sharedNode = (statement: string, sequence = 1): string =>
+  JSON.stringify(
+    createFramedRecord({
+      sequence,
+      payload: {
+        kind: "node",
+        node: {
+          id: "TASK-SHARED",
+          type: "TASK",
+          provenance_type: "PROPOSED",
+          statement,
+        },
+      },
+    }),
+  );
 
 describe("ariadne merge-check", () => {
   it("blocks publication with stable conflict-card links and does not mutate", async () => {
