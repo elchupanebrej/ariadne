@@ -5,7 +5,7 @@ The official execution of the Ariadne 0.2.0 production release and deprecation o
 
 **Blocked by:** 16 — OIDC Trusted Release Pipeline and Evidence Automation
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 - [ ] Release notes for `0.2.0` are curated, reviewed, and committed to `CHANGELOG.md`.
 - [ ] Git tag `v0.2.0` is created and pushed to GitHub repository.
@@ -15,3 +15,7 @@ The official execution of the Ariadne 0.2.0 production release and deprecation o
 - [ ] GitHub Release is verified to contain the uploaded Release Evidence Bundle artifacts.
 - [ ] Experimental prototype 0.1.0 is deprecated on npm:
   `npm deprecate ariadne-reasoning@0.1.0 "0.1.0 was an unhardened experimental prototype. Please upgrade to 0.2.0 and run 'ariadne migrate'."`
+
+## Comments
+
+- 2026-09-08 — Local release preparation is complete, but the external release is blocked. The remote branch lacks `.github/workflows/release.yml` (gh reports 404); npm whoami fails with ENEEDAUTH; the package is not published; and no tag, push, workflow, release, or deprecation occurred. Status remains `claimed`; this change records local preparation only and does not claim external verification.
