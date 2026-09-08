@@ -1,21 +1,20 @@
+import { mkdir, readFile, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { AriadneError } from "../core/errors.js";
+import type { GraphEvent } from "./storage.js";
 import {
-  access,
-  appendFile,
-  mkdir,
-  readFile,
-  rename,
-  rm,
-  stat,
-  truncate,
-  writeFile,
-} from "node:fs/promises";
-import { randomUUID } from "node:crypto";
-import { dirname, join } from "node:path";
-import type { GraphEvent, MaterializedGraph } from "./storage.js";
-import { createFramedRecord } from "./journal.js";
+  appendCanonicalRecords,
+  createFramedRecord,
+  readFramedRecords,
+  stageAndSwapProjection,
+} from "./journal.js";
+import { assertNotLegacyWorkspace } from "./legacy.js";
+import { withRootLock } from "./lock.js";
+import { scanAndRecoverJournal } from "./recovery.js";
 import { assertWithinCapacity } from "./capacity.js";
 
-// Concurrency queues for same-process serialization
+// The directory lock is the cross-process seam. This queue only prevents
+// callers in the same process from needlessly contending on that seam.
 const pathQueues = new Map<string, Promise<unknown>>();
 
 const enqueue = <T>(path: string, operation: () => Promise<T>): Promise<T> => {
@@ -28,23 +27,69 @@ const enqueue = <T>(path: string, operation: () => Promise<T>): Promise<T> => {
   });
 };
 
-const LOCK_WAIT_MS = 10;
-const LOCK_STALE_MS = 5 * 60_000;
-
-const sleep = (milliseconds: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));
-
 export interface StorageDriver {
   readEvents(): Promise<GraphEvent[]>;
   appendEvents(events: readonly GraphEvent[]): Promise<void>;
   readState(): Promise<Record<string, unknown> | null>;
   writeState(state: Record<string, unknown>): Promise<void>;
+  writeStateProjection(content: string): Promise<void>;
   writeIndex(content: string): Promise<void>;
   writeCards(cards: ReadonlyArray<{ id: string; content: string }>): Promise<void>;
   deleteCard(id: string): Promise<void>;
   withLock<T>(operation: () => Promise<T>): Promise<T>;
+  withProjectionLock<T>(operation: () => Promise<T>): Promise<T>;
   init(): Promise<void>;
 }
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isFramedLine = (value: unknown): boolean =>
+  isObject(value) && "schemaVersion" in value;
+
+const parseLegacyEvents = async (graphPath: string, content: string): Promise<GraphEvent[]> => {
+  const lines = content.split("\n");
+  const hasFinalNewline = content.endsWith("\n");
+  if (hasFinalNewline) lines.pop();
+  const lastMeaningfulIndex = lines.reduce(
+    (last, line, index) => (line.trim() ? index : last),
+    -1,
+  );
+  const events: GraphEvent[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (!line.trim()) continue;
+    try {
+      const parsed = JSON.parse(line) as unknown;
+      const payload =
+        isObject(parsed) && "schemaVersion" in parsed && "payload" in parsed
+          ? parsed.payload
+          : parsed;
+      events.push(payload as GraphEvent);
+    } catch (error) {
+      if (index !== lastMeaningfulIndex) {
+        throw new AriadneError({
+          code: "CORRUPT_PERSISTED_HISTORY",
+          message: `Failed to parse GRAPH.jsonl line ${index + 1}`,
+          repair: "Inspect GRAPH.jsonl or restore from backup.",
+          detail: { graphPath, line: index + 1 },
+        });
+      }
+
+      const offset = Buffer.byteLength(lines.slice(0, index).join("\n"));
+      const { truncate } = await import("node:fs/promises");
+      await truncate(graphPath, offset === 0 ? 0 : offset + 1);
+      return events;
+    }
+  }
+
+  if (!hasFinalNewline && lastMeaningfulIndex >= 0) {
+    const { appendFile } = await import("node:fs/promises");
+    await appendFile(graphPath, "\n", "utf8");
+  }
+  return events;
+};
 
 export class FileSystemStorageDriver implements StorageDriver {
   public readonly root: string;
@@ -53,6 +98,7 @@ export class FileSystemStorageDriver implements StorageDriver {
   public readonly indexPath: string;
   public readonly cardsDir: string;
   public readonly lockPath: string;
+  private lockDepth = 0;
 
   constructor(root: string) {
     this.root = root;
@@ -63,208 +109,206 @@ export class FileSystemStorageDriver implements StorageDriver {
     this.lockPath = join(root, ".lock");
   }
 
-  async init(): Promise<void> {
-    await mkdir(this.root, { recursive: true });
-    await mkdir(this.cardsDir, { recursive: true });
+  private async recoverAuthorities(): Promise<void> {
+    await scanAndRecoverJournal(this.graphPath);
+    await scanAndRecoverJournal(join(this.root, "NOTICES.jsonl"));
   }
 
-  async withLock<T>(operation: () => Promise<T>): Promise<T> {
-    return enqueue(this.root, async () => {
-      await mkdir(dirname(this.lockPath), { recursive: true });
-      const startedAt = Date.now();
-      while (true) {
-        try {
-          await mkdir(this.lockPath);
-          await writeFile(join(this.lockPath, "owner"), `${process.pid}\n`, "utf8");
-          break;
-        } catch (error) {
-          if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-          try {
-            const age = Date.now() - (await stat(this.lockPath)).mtimeMs;
-            if (age > LOCK_STALE_MS) await rm(this.lockPath, { recursive: true, force: true });
-          } catch (statError) {
-            if ((statError as NodeJS.ErrnoException).code !== "ENOENT") throw statError;
-          }
-          if (Date.now() - startedAt > LOCK_STALE_MS) {
-            throw new Error(`Timed out waiting for storage lock: ${this.lockPath}`);
-          }
-          await sleep(LOCK_WAIT_MS);
-        }
-      }
+  private async inMutation<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.lockDepth > 0) return operation();
+    return this.withLock(operation);
+  }
 
-      try {
-        return await operation();
-      } finally {
-        await rm(this.lockPath, { recursive: true, force: true });
-      }
+  private projectionFailure(targetPath: string, error: unknown): AriadneError {
+    return new AriadneError({
+      code: "PROJECTION_RECOVERY_NEEDED",
+      message: `Canonical graph is committed but projection '${targetPath}' could not be replaced: ${error instanceof Error ? error.message : String(error)}`,
+      repair: "Run 'ariadne status' or rebuild projections before relying on derived files.",
+      detail: { targetPath },
     });
   }
 
-  private async repairJournalTail(): Promise<void> {
-    let raw: Buffer;
-    try {
-      raw = await readFile(this.graphPath);
-    } catch {
-      return;
-    }
-    if (raw.length === 0) return;
+  async init(): Promise<void> {
+    await assertNotLegacyWorkspace(this.root);
+    await mkdir(this.root, { recursive: true });
+    await mkdir(this.cardsDir, { recursive: true });
+    await this.recoverAuthorities();
+  }
 
-    let validByteLength = 0;
-    let offset = 0;
-
-    while (offset < raw.length) {
-      const nextNewline = raw.indexOf(0x0a, offset);
-      if (nextNewline === -1) {
-        const line = raw.subarray(offset).toString("utf8").trim();
-        if (line.length > 0) {
-          try {
-            JSON.parse(line);
-            validByteLength = raw.length;
-          } catch {
-            // Unparseable partial line without newline -> discard
-          }
-        }
-        break;
-      }
-
-      const line = raw.subarray(offset, nextNewline).toString("utf8").trim();
-      if (line.length > 0) {
+  async withLock<T>(operation: () => Promise<T>): Promise<T> {
+    return enqueue(this.root, async () =>
+      withRootLock(this.root, async () => {
+        await assertNotLegacyWorkspace(this.root);
+        await this.recoverAuthorities();
+        this.lockDepth += 1;
         try {
-          JSON.parse(line);
-          validByteLength = nextNewline + 1;
-        } catch {
-          break;
+          return await operation();
+        } finally {
+          this.lockDepth -= 1;
         }
-      } else {
-        validByteLength = nextNewline + 1;
-      }
-      offset = nextNewline + 1;
-    }
+      }),
+    );
+  }
 
-    if (validByteLength < raw.length) {
-      await truncate(this.graphPath, validByteLength);
-    }
+  async withProjectionLock<T>(operation: () => Promise<T>): Promise<T> {
+    return enqueue(this.root, async () =>
+      withRootLock(this.root, async () => {
+        this.lockDepth += 1;
+        try {
+          return await operation();
+        } finally {
+          this.lockDepth -= 1;
+        }
+      }),
+    );
   }
 
   async readEvents(): Promise<GraphEvent[]> {
+    let content: string;
     try {
-      const content = await readFile(this.graphPath, "utf8");
-      const lines = content.split("\n").map((line) => line.trim()).filter(Boolean);
-      const events: GraphEvent[] = [];
-      for (const line of lines) {
-        try {
-          const parsed = JSON.parse(line);
-          const event =
-            parsed && typeof parsed === "object" && "schemaVersion" in parsed && "payload" in parsed
-              ? (parsed as { payload: unknown }).payload
-              : parsed;
-          events.push(event as GraphEvent);
-        } catch {
-          // If reading fails on corrupt line, try tail repair and re-read
-          await this.repairJournalTail();
-          const repairedContent = await readFile(this.graphPath, "utf8");
-          return repairedContent
-            .split("\n")
-            .map((l) => l.trim())
-            .filter(Boolean)
-            .map((l) => {
-              const parsed = JSON.parse(l);
-              return (parsed && typeof parsed === "object" && "schemaVersion" in parsed && "payload" in parsed
-                ? (parsed as { payload: unknown }).payload
-                : parsed) as GraphEvent;
-            });
-        }
-      }
-      return events;
+      content = await readFile(this.graphPath, "utf8");
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
       throw error;
     }
+
+    const lines = content.split("\n").map((line) => line.trim()).filter(Boolean);
+    if (lines.length === 0) return [];
+
+    let parsedFirst: unknown;
+    try {
+      parsedFirst = JSON.parse(lines[0]) as unknown;
+    } catch {
+      return parseLegacyEvents(this.graphPath, content);
+    }
+    if (isFramedLine(parsedFirst)) {
+      const scan = await scanAndRecoverJournal(this.graphPath);
+      return scan.records.map((record) => record.payload as GraphEvent);
+    }
+
+    return parseLegacyEvents(this.graphPath, content);
   }
 
   async appendEvents(events: readonly GraphEvent[]): Promise<void> {
     if (events.length === 0) return;
-    await mkdir(this.root, { recursive: true });
-    let existingCount = 0;
-    try {
-      const existing = await readFile(this.graphPath, "utf8");
-      existingCount = existing.split("\n").filter((l) => l.trim().length > 0).length;
-    } catch {
-      // file does not exist yet
-    }
-    assertWithinCapacity({ eventCount: existingCount + events.length });
-    const payload =
-      events
-        .map((event, idx) =>
-          JSON.stringify(createFramedRecord({ payload: event, sequence: existingCount + idx + 1 })),
-        )
-        .join("\n") + "\n";
-    await appendFile(this.graphPath, payload, "utf8");
+    await this.inMutation(async () => {
+      const existing = await readFramedRecords(this.graphPath);
+      assertWithinCapacity({ eventCount: existing.length + events.length });
+      const frames = events.map((event, index) =>
+        createFramedRecord({
+          payload: event,
+          sequence: existing.length + index + 1,
+        }),
+      );
+      try {
+        await appendCanonicalRecords(this.graphPath, frames);
+      } catch (error) {
+        throw new AriadneError({
+          code: "COMMIT_UNKNOWN",
+          message: `Canonical graph append or synchronization failed: ${error instanceof Error ? error.message : String(error)}`,
+          repair: "Inspect GRAPH.jsonl before retrying the mutation.",
+          detail: { graphPath: this.graphPath },
+        });
+      }
+    });
   }
 
   async readState(): Promise<Record<string, unknown> | null> {
     try {
       const content = await readFile(this.statePath, "utf8");
-      // JSON is valid YAML subset
-      return JSON.parse(content);
-    } catch {
+      const parsed = JSON.parse(content) as unknown;
+      return isObject(parsed) ? parsed : null;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
       return null;
     }
   }
 
   async writeState(state: Record<string, unknown>): Promise<void> {
-    await mkdir(this.root, { recursive: true });
-    const tempPath = `${this.statePath}.${randomUUID()}.tmp`;
-    const toWrite = {
-      schema_version: 1,
-      ...state,
-    };
-    await writeFile(tempPath, JSON.stringify(toWrite, null, 2) + "\n", "utf8");
-    await rename(tempPath, this.statePath);
+    await this.inMutation(async () => {
+      const toWrite = { schema_version: 1, ...state };
+      try {
+        await stageAndSwapProjection(
+          this.root,
+          this.statePath,
+          `${JSON.stringify(toWrite, null, 2)}\n`,
+        );
+      } catch (error) {
+        throw this.projectionFailure(this.statePath, error);
+      }
+    });
+  }
+
+  async writeStateProjection(content: string): Promise<void> {
+    await this.inMutation(async () => {
+      try {
+        await stageAndSwapProjection(this.root, this.statePath, content);
+      } catch (error) {
+        throw this.projectionFailure(this.statePath, error);
+      }
+    });
   }
 
   async writeIndex(content: string): Promise<void> {
-    await mkdir(this.root, { recursive: true });
-    const tempPath = `${this.indexPath}.${randomUUID()}.tmp`;
-    await writeFile(tempPath, content.endsWith("\n") ? content : content + "\n", "utf8");
-    await rename(tempPath, this.indexPath);
+    await this.inMutation(async () => {
+      try {
+        await stageAndSwapProjection(
+          this.root,
+          this.indexPath,
+          content.endsWith("\n") ? content : `${content}\n`,
+        );
+      } catch (error) {
+        throw this.projectionFailure(this.indexPath, error);
+      }
+    });
   }
 
   async writeCards(cards: ReadonlyArray<{ id: string; content: string }>): Promise<void> {
-    await mkdir(this.cardsDir, { recursive: true });
-    for (const { id, content } of cards) {
-      const cardPath = join(this.cardsDir, `${id}.md`);
-      const tempPath = `${cardPath}.${randomUUID()}.tmp`;
-      await writeFile(tempPath, content.endsWith("\n") ? content : content + "\n", "utf8");
-      await rename(tempPath, cardPath);
-    }
+    await this.inMutation(async () => {
+      try {
+        await Promise.all(
+          cards.map(({ id, content }) =>
+            stageAndSwapProjection(
+              this.root,
+              join(this.cardsDir, `${id}.md`),
+              content.endsWith("\n") ? content : `${content}\n`,
+            ),
+          ),
+        );
+      } catch (error) {
+        throw this.projectionFailure(this.cardsDir, error);
+      }
+    });
   }
 
   async deleteCard(id: string): Promise<void> {
-    const cardPath = join(this.cardsDir, `${id}.md`);
-    await rm(cardPath, { force: true });
+    await this.inMutation(async () => {
+      await rm(join(this.cardsDir, `${id}.md`), { force: true });
+    });
   }
 }
 
 export class InMemoryStorageDriver implements StorageDriver {
   public events: GraphEvent[] = [];
   public state: Record<string, unknown> | null = null;
-  public indexContent: string = "";
+  public indexContent = "";
   public cards: Map<string, string> = new Map();
   private locked = false;
 
   async init(): Promise<void> {}
 
   async withLock<T>(operation: () => Promise<T>): Promise<T> {
-    while (this.locked) {
-      await sleep(2);
-    }
+    while (this.locked) await new Promise((resolve) => setTimeout(resolve, 2));
     this.locked = true;
     try {
       return await operation();
     } finally {
       this.locked = false;
     }
+  }
+
+  async withProjectionLock<T>(operation: () => Promise<T>): Promise<T> {
+    return this.withLock(operation);
   }
 
   async readEvents(): Promise<GraphEvent[]> {
@@ -284,14 +328,16 @@ export class InMemoryStorageDriver implements StorageDriver {
     this.state = JSON.parse(JSON.stringify(state));
   }
 
+  async writeStateProjection(content: string): Promise<void> {
+    this.state = JSON.parse(content) as Record<string, unknown>;
+  }
+
   async writeIndex(content: string): Promise<void> {
     this.indexContent = content;
   }
 
   async writeCards(cards: ReadonlyArray<{ id: string; content: string }>): Promise<void> {
-    for (const card of cards) {
-      this.cards.set(card.id, card.content);
-    }
+    for (const card of cards) this.cards.set(card.id, card.content);
   }
 
   async deleteCard(id: string): Promise<void> {

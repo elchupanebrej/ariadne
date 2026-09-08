@@ -850,6 +850,7 @@ export async function migrateWorkspace(
         const frame = createFramedRecord({
           payload: item.notice,
           sequence: noticeSeq++,
+          idempotencyKey: `operational-notice:${item.notice.falsified_id}:${item.notice.evidence_id}`,
           timestamp: item.timestamp ?? item.notice.created_at ?? new Date().toISOString(),
         });
         stagedNoticeFrames.push(frame);

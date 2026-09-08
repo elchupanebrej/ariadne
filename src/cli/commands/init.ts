@@ -1,4 +1,4 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import {
   assertNoShadowState,
@@ -6,6 +6,10 @@ import {
   type GsdEnvironment,
 } from "../../adapters/gsd/detector.js";
 import { GraphStorage } from "../../graph/storage.js";
+import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
+import { resetCanonicalAuthority, stageAndSwapProjection } from "../../graph/journal.js";
+import { withRootLock } from "../../graph/lock.js";
+import { renderIndex } from "../../graph/storage.js";
 import { toRootRelative } from "../../core/root-relative.js";
 import { hasHelp } from "../workspace.js";
 import type { CliIO } from "./status.js";
@@ -83,10 +87,21 @@ export async function runInit(args: readonly string[], io: CliIO): Promise<numbe
     );
   }
 
-  await mkdir(storage.rootDirectory, { recursive: true });
-  await storage.writeState(initialState(environment));
-  await writeFile(storage.graphPath, "", "utf8");
-  await storage.regenerateIndex();
+  await withRootLock(storage.rootDirectory, async () => {
+    await assertNotLegacyWorkspace(storage.rootDirectory);
+    await mkdir(storage.rootDirectory, { recursive: true });
+    await resetCanonicalAuthority(storage.graphPath);
+    await stageAndSwapProjection(
+      storage.rootDirectory,
+      storage.statePath,
+      `${JSON.stringify(initialState(environment), null, 2)}\n`,
+    );
+    await stageAndSwapProjection(
+      storage.rootDirectory,
+      storage.indexPath,
+      renderIndex({ nodes: [], edges: [] }),
+    );
+  });
 
   io.stdout.write(
     `${JSON.stringify({

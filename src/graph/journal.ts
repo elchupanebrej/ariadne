@@ -350,6 +350,21 @@ export async function appendCanonicalRecords<T = unknown>(
   }
 }
 
+/** Creates or resets an empty canonical authority with a synchronized file handle. */
+export async function resetCanonicalAuthority(
+  filePath: string,
+  options?: { syncFn?: (handle: fs.promises.FileHandle) => Promise<void> },
+): Promise<void> {
+  await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+  const handle = await fs.promises.open(filePath, "w");
+  try {
+    if (options?.syncFn) await options.syncFn(handle);
+    else await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
 /**
  * Stages a single derived projection file in a temporary sibling file (`.tmp.<file>.<pid>.<uuid>`)
  * and atomically swaps it over the live target file using `fs.rename()`.
@@ -405,6 +420,63 @@ export function getAttemptLedgerPath(storageRoot: string, attemptId: string): st
   return assertContainedPath(storageRoot, attemptPath);
 }
 
+const scanCanonicalJournal = async (
+  filePath: string,
+): Promise<{ records: FramedRecord<unknown>[] }> => {
+  let buffer: Buffer;
+  try {
+    buffer = await fs.promises.readFile(filePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { records: [] };
+    throw error;
+  }
+
+  const records: FramedRecord<unknown>[] = [];
+  let offset = 0;
+  let lastValidOffset = 0;
+  while (offset < buffer.length) {
+    const newline = buffer.indexOf(0x0a, offset);
+    const end = newline === -1 ? buffer.length : newline;
+    const recordEnd = newline === -1 ? buffer.length : newline + 1;
+    const line = buffer.subarray(offset, end).toString("utf8").replace(/\r$/u, "");
+    const remaining = buffer.subarray(recordEnd).toString("utf8").trim();
+    const isFinal = remaining.length === 0;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(line);
+    } catch {
+      if (!isFinal) {
+        throw new AriadneError({
+          code: "CORRUPT_PERSISTED_HISTORY",
+          message: "Middle corruption detected in canonical history",
+          repair: "Inspect the canonical journal or restore from backup.",
+          detail: { filePath, offset },
+        });
+      }
+      await fs.promises.truncate(filePath, lastValidOffset);
+      return { records };
+    }
+    const valid = verifyFrame(parsed) &&
+      (records.length === 0 || parsed.sequence === records.at(-1)!.sequence + 1);
+    if (!valid) {
+      if (!isFinal) {
+        throw new AriadneError({
+          code: "CORRUPT_PERSISTED_HISTORY",
+          message: "Middle corruption or sequence break detected in canonical history",
+          repair: "Inspect the canonical journal or restore from backup.",
+          detail: { filePath, offset },
+        });
+      }
+      await fs.promises.truncate(filePath, lastValidOffset);
+      return { records };
+    }
+    records.push(parsed as FramedRecord<unknown>);
+    lastValidOffset = recordEnd;
+    offset = recordEnd;
+  }
+  return { records };
+};
+
 /**
  * Parameters configuring the 5-phase transaction write cycle.
  */
@@ -440,6 +512,7 @@ export interface ExecuteWriteCycleOptions<TResult = unknown, TPayload = unknown>
   lockOptions?: LockOptions;
   syncFn?: (handle: fs.promises.FileHandle) => Promise<void>;
   projectionErrorSimulator?: () => void;
+  frameMetadata?: Record<string, unknown> | ((payload: TPayload) => Record<string, unknown>);
 }
 
 /**
@@ -477,12 +550,7 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
     }
     try {
       canonicalFilePath = getAttemptLedgerPath(canonicalRoot, options.attemptId);
-      defaultLockPath = path.join(
-        canonicalRoot,
-        ".orchestration",
-        "attempts",
-        `${options.attemptId}.lock`,
-      );
+      defaultLockPath = path.join(canonicalRoot, ".lock");
     } catch (err) {
       if (err instanceof AriadneError) {
         return { outcome: "not_committed", code: err.code, error: err };
@@ -513,7 +581,7 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
 
         let existingRecords: FramedRecord<unknown>[] = [];
         try {
-          existingRecords = await readFramedRecords(canonicalFilePath);
+          existingRecords = (await scanCanonicalJournal(canonicalFilePath)).records;
         } catch (readErr) {
           if (readErr instanceof AriadneError) {
             return {
@@ -591,10 +659,15 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
 
         let candidateFrame: FramedRecord<TPayload>;
         try {
-          candidateFrame = createFrame(activePayload, {
+          const frame = createFrame(activePayload, {
             sequence: nextSequence,
             idempotencyKey,
           });
+          const metadata =
+            typeof options.frameMetadata === "function"
+              ? options.frameMetadata(activePayload)
+              : options.frameMetadata;
+          candidateFrame = metadata === undefined ? frame : { ...frame, ...metadata };
         } catch (frameErr) {
           if (frameErr instanceof AriadneError) {
             return { outcome: "not_committed", code: frameErr.code, error: frameErr };
@@ -611,6 +684,31 @@ export async function executeWriteCycle<TResult = unknown, TPayload = unknown>(
           const match = existingRecords.find((r) => r.idempotencyKey === idempotencyKey);
           if (match) {
             if (match.payloadDigest === candidateFrame.payloadDigest) {
+              try {
+                if (typeof options.projections === "function") {
+                  stagedProjections = [
+                    ...stagedProjections,
+                    ...(await options.projections({
+                      record: candidateFrame,
+                      existingRecords,
+                      result: match.payload as TResult,
+                    })),
+                  ];
+                }
+                if (stagedProjections.length > 0) {
+                  await stageAndSwapProjections(canonicalRoot, stagedProjections);
+                }
+              } catch (projectionError) {
+                return {
+                  outcome: "committed_with_recovery_needed",
+                  result: match.payload as TResult,
+                  sequence: match.sequence,
+                  record: match,
+                  error: projectionError instanceof Error
+                    ? projectionError
+                    : new Error(String(projectionError)),
+                };
+              }
               return {
                 outcome: "committed",
                 result: match.payload as TResult,

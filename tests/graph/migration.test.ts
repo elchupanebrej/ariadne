@@ -215,6 +215,7 @@ describe("Persisted-Format Migration Engine", () => {
       const noticeFrames = await readFramedRecords(path.join(ariadneDir, "NOTICES.jsonl"));
       expect(noticeFrames.length).toBe(1);
       expect(noticeFrames[0].schemaVersion).toBe(1);
+      expect(noticeFrames[0].idempotencyKey).toBe("operational-notice:ASM-1:EVD-1");
       expect((noticeFrames[0].payload as any).id).toBe("NOT-001");
 
       // Verify STATE.yaml has schema_version: 1 and preserved overlay fields

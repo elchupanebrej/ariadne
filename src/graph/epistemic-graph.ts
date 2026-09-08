@@ -45,6 +45,7 @@ export type {
 import {
   renderCard,
   renderIndex,
+  GraphEventSchema,
   isFrontierNode,
   type AriadneState,
   type GraphEvent,
@@ -137,7 +138,7 @@ export class EpistemicGraph {
   }
 
   async materialize(): Promise<MaterializedGraph> {
-    const events = await this.driver.readEvents();
+    const events = (await this.driver.readEvents()).map((event) => GraphEventSchema.parse(event));
     return applyEvents({ nodes: [], edges: [] }, events);
   }
 
@@ -493,7 +494,7 @@ export class EpistemicGraph {
    * Build a decision tree or epistemic forest report.
    */
   async report(options: ReportOptions = {}): Promise<ReportOutput> {
-    const events = await this.driver.readEvents();
+    const events = (await this.driver.readEvents()).map((event) => GraphEventSchema.parse(event));
     const graphPath =
       this.driver instanceof FileSystemStorageDriver
         ? this.driver.graphPath

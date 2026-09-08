@@ -28,76 +28,54 @@ export async function isLegacyWorkspace(storageRoot: string): Promise<boolean> {
     return false;
   }
 
-  // Check GRAPH.jsonl
-  const graphPath = path.join(canonicalRoot, "GRAPH.jsonl");
-  try {
-    const graphContent = await fs.promises.readFile(graphPath, "utf8");
-    const lines = graphContent.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
-    if (lines.length > 0) {
-      for (const line of lines) {
+  const hasLegacyAuthority = async (fileName: string): Promise<boolean> => {
+    try {
+      const content = await fs.promises.readFile(path.join(canonicalRoot, fileName), "utf8");
+      const lines = content.split("\n").map((line) => line.trim()).filter(Boolean);
+      let hasFramedRecord = false;
+      for (const [index, line] of lines.entries()) {
         try {
-          const parsed = JSON.parse(line);
-          if (!parsed || typeof parsed !== "object") {
+          const parsed: unknown = JSON.parse(line);
+          if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            !("schemaVersion" in parsed) ||
+            (parsed as { schemaVersion?: unknown }).schemaVersion !== 1
+          ) {
             return true;
           }
-          if (!("schemaVersion" in parsed) || parsed.schemaVersion !== 1) {
-            return true;
-          }
+          hasFramedRecord = true;
         } catch {
-          return true;
-        }
-      }
-      // All present records have schemaVersion === 1
-      return false;
-    }
-  } catch (err: unknown) {
-    if (
-      !(
-        err &&
-        typeof err === "object" &&
-        "code" in err &&
-        (err as { code: string }).code === "ENOENT"
-      )
-    ) {
-      throw err;
-    }
-  }
-
-  // Check NOTICES.jsonl
-  const noticesPath = path.join(canonicalRoot, "NOTICES.jsonl");
-  try {
-    const noticesContent = await fs.promises.readFile(noticesPath, "utf8");
-    const lines = noticesContent.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
-    if (lines.length > 0) {
-      for (const line of lines) {
-        try {
-          const parsed = JSON.parse(line);
-          if (!parsed || typeof parsed !== "object") {
-            return true;
-          }
-          if (!("schemaVersion" in parsed) || parsed.schemaVersion !== 1) {
-            return true;
-          }
-        } catch {
-          return true;
+          // A torn final line in an otherwise framed authority is repaired by
+          // the startup scan; it is not evidence of a v0 workspace.
+          return index === lines.length - 1 && hasFramedRecord ? false : true;
         }
       }
       return false;
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
     }
-  } catch (err: unknown) {
-    if (
-      !(
-        err &&
-        typeof err === "object" &&
-        "code" in err &&
-        (err as { code: string }).code === "ENOENT"
-      )
-    ) {
-      throw err;
-    }
-  }
+  };
 
-  // Check STATE.yaml
+  // Inspect every canonical authority before deciding. Returning after GRAPH.jsonl
+  // used to let a legacy NOTICES.jsonl slip through the mutation gate.
+  if (await hasLegacyAuthority("GRAPH.jsonl")) return true;
+  if (await hasLegacyAuthority("NOTICES.jsonl")) return true;
+
+  const hasCanonicalAuthorityFile = await Promise.all(["GRAPH.jsonl", "NOTICES.jsonl"].map(async (fileName) => {
+    try {
+      await fs.promises.access(path.join(canonicalRoot, fileName));
+      return true;
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
+    }
+  })).then((values) => values.some(Boolean));
+
+  // Check STATE.yaml. An unversioned state-only directory is still a fresh
+  // initialization target; canonical authorities determine persisted history
+  // format, while host-owned state overlays may remain schema-less.
   const statePath = path.join(canonicalRoot, "STATE.yaml");
   try {
     const stateContent = await fs.promises.readFile(statePath, "utf8");
@@ -105,14 +83,14 @@ export async function isLegacyWorkspace(storageRoot: string): Promise<boolean> {
       try {
         const parsed = JSON.parse(stateContent);
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          if (!("schema_version" in parsed) && !("schemaVersion" in parsed)) {
+          if (!hasCanonicalAuthorityFile && !("schema_version" in parsed) && !("schemaVersion" in parsed)) {
             return true;
           }
         } else {
-          return true;
+          return !hasCanonicalAuthorityFile;
         }
       } catch {
-        if (!stateContent.includes("schema_version") && !stateContent.includes("schemaVersion")) {
+        if (!hasCanonicalAuthorityFile && !stateContent.includes("schema_version") && !stateContent.includes("schemaVersion")) {
           return true;
         }
       }

@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
@@ -38,9 +38,9 @@ const removeStaleCards = async (
       entry.name.endsWith(".md") &&
       !ids.has(entry.name.slice(0, -3))
     ) {
-      const path = join(storage.cardsDirectory, entry.name);
-      await rm(path);
-      removed.push(path);
+      const id = entry.name.slice(0, -3);
+      await storage.deleteCard(id);
+      removed.push(join(storage.cardsDirectory, entry.name));
     }
   }
   return removed;
@@ -79,7 +79,7 @@ const preserveStableCards = async (
       if (before === undefined) return;
       const after = await readFile(path, "utf8");
       if (after !== before && withoutRevisionDate(after) === withoutRevisionDate(before)) {
-        await writeFile(path, before, "utf8");
+        await storage.writeCards([{ id, content: before }]);
       }
     }),
   );
@@ -280,8 +280,7 @@ const syncState = async (
     : `${JSON.stringify(next, null, 2)}\n`;
   const changed = previous !== serialized;
   if (changed) {
-    await mkdir(storage.rootDirectory, { recursive: true });
-    await writeFile(storage.statePath, serialized, "utf8");
+    await storage.writeStateProjection(serialized);
   }
   return { path: storage.statePath, changed };
 };
@@ -350,10 +349,6 @@ export async function runMergeSync(
   const { environment } = await resolveCliWorkspace(io);
   const storage = new GraphStorage(environment.storageRoot);
   const graph = await storage.materialize();
-  const previousCards = await existingCards(
-    storage,
-    graph.nodes.map(({ id }) => id),
-  );
   const validation = EpistemicGateEngine.verify(graph, {
     gate: "all",
     strict: true,
@@ -363,17 +358,28 @@ export async function runMergeSync(
     environment.storageRoot,
     graph,
   );
-  const removedCards = await removeStaleCards(
-    storage,
-    new Set(graph.nodes.map(({ id }) => id)),
-  );
-  await storage.regenerateIndex();
-  await preserveStableCards(
-    storage,
-    previousCards,
-    graph.nodes.map(({ id }) => id),
-  );
-  const state = await syncState(storage, graph);
+  let removedCards: string[] = [];
+  let state: { path: string; changed: boolean } = {
+    path: storage.statePath,
+    changed: false,
+  };
+  await storage.withLock(async () => {
+    const previousCards = await existingCards(
+      storage,
+      graph.nodes.map(({ id }) => id),
+    );
+    removedCards = await removeStaleCards(
+      storage,
+      new Set(graph.nodes.map(({ id }) => id)),
+    );
+    await storage.regenerateIndexUnlocked();
+    await preserveStableCards(
+      storage,
+      previousCards,
+      graph.nodes.map(({ id }) => id),
+    );
+    state = await syncState(storage, graph);
+  });
   const staged = args.includes("--stage-derived")
     ? await stageDerived(
         environment.rootPath,
