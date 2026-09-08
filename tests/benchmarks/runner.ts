@@ -265,15 +265,6 @@ export async function runBenchmark(
     const materialized = await coldGraph.materialize();
     const inMemGraph = EpistemicGraph.inMemory(materialized);
 
-    // Memory Peak after materialization
-    const peakSample = readRssBytes(rssReader);
-    const peakRssBytes = peakSample ?? 0;
-    const rssCheck = calculateAttributableRss(
-      baselineSample,
-      peakSample,
-      CAPACITY_LIMITS.MAX_RSS_BYTES,
-    );
-
     // --- Fast Tier (< 100 ms) ---
     const sampleNodeId = dataset.nodes[Math.floor(dataset.nodes.length / 2)].id;
 
@@ -543,6 +534,16 @@ export async function runBenchmark(
       observedCapacities.cards === dataset.capacities.cards &&
       observedCapacities.reports === dataset.capacities.reports &&
       observedCapacities.processes === dataset.capacities.processes;
+
+    // Sample after query, batch, report, and concurrency work so the
+    // attributable measurement covers the whole benchmark session.
+    const peakSample = readRssBytes(rssReader);
+    const peakRssBytes = peakSample ?? 0;
+    const rssCheck = calculateAttributableRss(
+      baselineSample,
+      peakSample,
+      CAPACITY_LIMITS.MAX_RSS_BYTES,
+    );
 
     const allPassed =
       rssCheck.passed && capacityChecksPassed && Object.values(metrics).every((m) => m.passed);
