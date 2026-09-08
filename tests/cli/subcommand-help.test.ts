@@ -10,7 +10,7 @@ import { NODE_TYPES } from "../../src/core/schemas/nodes.js";
 import { EDGE_TYPES } from "../../src/core/schemas/edges.js";
 
 const NODE_ADD_USAGE = `Usage: ariadne node add <type> <id> --title <title> --payload <json>\nValid node types (uppercase): ${NODE_TYPES.join(", ")}`;
-const EDGE_ADD_USAGE = `Usage: ariadne edge add <from_id> <relation> <to_id>\nValid edge relations: ${EDGE_TYPES.join(", ")}`;
+const EDGE_ADD_USAGE = `Usage: ariadne edge add <from_id> <relation> <to_id>\nValid edge relations: ${EDGE_TYPES.join(", ")}; aliases: depends-on, dependsOn, derived-from, derivedFrom`;
 
 const capture = () => {
   let output = "";

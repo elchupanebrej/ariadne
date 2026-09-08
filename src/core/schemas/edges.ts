@@ -43,7 +43,9 @@ export function canonicalEdgeRelation(raw: string): EdgeType | undefined {
 }
 
 export const EDGE_TYPE_LIST = EDGE_TYPES.join(", ");
-export const EDGE_TYPE_HINT = `Valid edge relations: ${EDGE_TYPE_LIST}`;
+const EDGE_RELATION_ALIAS_LIST = Object.keys(EDGE_RELATION_ALIASES).join(", ");
+export const EDGE_TYPE_HINT =
+  `Valid edge relations: ${EDGE_TYPE_LIST}; aliases: ${EDGE_RELATION_ALIAS_LIST}`;
 export const unknownEdgeRelation = (value: string): string =>
   `Invalid edge relation: ${value}. ${EDGE_TYPE_HINT}`;
 

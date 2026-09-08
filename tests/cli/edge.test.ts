@@ -78,11 +78,13 @@ describe("ariadne edge", () => {
   it("enumerates valid edge relations in errors and add help", async () => {
     const { cwd, storage } = await workspace();
     const relationList = EDGE_TYPES.join(", ");
+    const aliasList = ["depends-on", "dependsOn", "derived-from", "derivedFrom"].join(", ");
 
     const addErr = await invoke(cwd, ["edge", "add", "TASK-1", "raises", "TASK-2"]);
     expect(addErr.code).toBe(2);
     expect(addErr.stderr.text()).toContain("Invalid edge relation: raises");
     expect(addErr.stderr.text()).toContain(relationList);
+    expect(addErr.stderr.text()).toContain(`aliases: ${aliasList}`);
 
     const removeErr = await invoke(cwd, ["edge", "remove", "TASK-1", "raises", "TASK-2"]);
     expect(removeErr.code).toBe(2);
@@ -98,7 +100,23 @@ describe("ariadne edge", () => {
     expect(help.code).toBe(0);
     expect(help.stdout.text()).toContain("Usage: ariadne edge add <from_id> <relation> <to_id>");
     expect(help.stdout.text()).toContain(relationList);
+    expect(help.stdout.text()).toContain(`aliases: ${aliasList}`);
 
+    expect((await storage.materialize()).edges).toEqual([]);
+  });
+
+  it("distinguishes endpoint-contract violations from unknown relations", async () => {
+    const { cwd, storage } = await workspace();
+
+    const endpointViolation = await invoke(cwd, ["edge", "add", "TASK-1", "answers", "TASK-2"]);
+    expect(endpointViolation.code).toBe(2);
+    expect(endpointViolation.stderr.text()).toContain("invalid source node type");
+    expect(endpointViolation.stderr.text()).not.toContain("Invalid edge relation:");
+
+    const unknownRelation = await invoke(cwd, ["edge", "add", "TASK-1", "raises", "TASK-2"]);
+    expect(unknownRelation.code).toBe(2);
+    expect(unknownRelation.stderr.text()).toContain("Invalid edge relation: raises");
+    expect(unknownRelation.stderr.text()).not.toContain("invalid source node type");
     expect((await storage.materialize()).edges).toEqual([]);
   });
 

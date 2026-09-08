@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 ## Details
 
@@ -16,11 +16,17 @@
 
 ## Acceptance criteria
 
-- [ ] `ariadne edge add X <unknown-rel> Y` prints the list of valid relations
-- [ ] The relation dictionary is visible in the help of the `edge add` subcommand
-- [ ] An endpoint-contract violation is distinguishable from an unknown relation-name error
+- [x] `ariadne edge add X <unknown-rel> Y` prints the list of valid relations
+- [x] The relation dictionary is visible in the help of the `edge add` subcommand
+- [x] An endpoint-contract violation is distinguishable from an unknown relation-name error
 
 ## Comments
 
 - Transferred from succubus `.scratch/ariadne-cli-defects/issues/02-edge-add-ne-perechislyaet-dopustimye-svyazi.md` after validation (2026-09-03): the discoverability core was confirmed, but the facts about the relation dictionary and "FRAME→UNK inexpressibility" were wrong — corrected here. Status raised to ready-for-agent.
 - Fixed in commit ac93927: `unknownEdgeRelation` helper built from `EDGE_TYPES` used at all three throw sites (`edge add`/`remove` via epistemic-graph, `edge list --relation`); relation list added to `edge add --help`; endpoint-contract path untouched and remains a distinct error.
+- Claimed (2026-09-08): verifying the earlier fix against the current CLI, focused tests, typecheck, build, and full suite before resolving this ticket.
+- Implementation and verification (2026-09-08): extended the existing `EDGE_TYPE_HINT` from the canonical `EDGE_TYPES` list with the four aliases accepted by `canonicalEdgeRelation`; unknown-relation diagnostics and `edge add --help` now enumerate both sets. Added regression coverage for alias discoverability and for distinguishing an endpoint-contract violation from an unknown relation. Focused edge tests pass (7/7), subcommand-help tests pass (48/48), typechecking passes, and the production build passes. The full suite reports 879 passed and 2 unrelated failures.
+
+## Verification blocker
+
+The ticket-specific acceptance criteria pass. The required full-suite gate remains blocked by two unrelated failures: `tests/core/errors.test.ts` expects `INVARIANT_VIOLATION` but receives `INVALID_INPUT` for an unknown gate, and `tests/e2e/mode-d.test.ts` receives a `GATE_FAILED` stderr diagnostic where the test expects empty stderr. The issue remains claimed pending those failures being resolved.
