@@ -14,3 +14,16 @@ Make capacity and performance evidence a trustworthy release gate. The default C
 - [ ] Benchmark tooling is available from a clean install without implicit network downloads.
 - [ ] Benchmark evidence records the tested tier, thresholds, measured values, and pass/fail result.
 - [ ] The benchmark and its CI gate are reproducible on the supported Linux runtime.
+
+## Verification note
+
+The benchmark gate implementation is present in the working change set: CI now
+selects the ceiling tier explicitly, the report includes declared and observed
+capacity values plus thresholds, concurrency is measured, and invalid RSS
+samples fail closed. Smoke and benchmark tests pass, as do typecheck and build.
+
+The local ceiling run was executed with Node.js 26.3.1, which is outside the
+declared Node.js 22/24 engine matrix. It correctly failed the latency gate for
+fast queries, full verification, migration dry-run, and concurrency while
+passing the RSS gate. The ticket remains `claimed` until the ceiling evidence
+passes on the supported Linux Node.js 24 runner.

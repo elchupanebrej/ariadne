@@ -22,10 +22,34 @@ import {
 } from "../../src/graph/storage.js";
 
 export const BENCHMARK_TIERS = {
-  smoke: { nodes: 100, edges: 250, events: 500 },
-  mid: { nodes: 1_000, edges: 2_500, events: 5_000 },
-  ceiling: { nodes: 10_000, edges: 25_000, events: 50_000 },
+  smoke: { nodes: 100, edges: 250, events: 500, cards: 100, reports: 50, processes: 2 },
+  mid: { nodes: 1_000, edges: 2_500, events: 5_000, cards: 1_000, reports: 50, processes: 2 },
+  ceiling: {
+    nodes: 10_000,
+    edges: 25_000,
+    events: 50_000,
+    cards: 10_000,
+    reports: 50,
+    processes: 2,
+  },
 } as const;
+
+export const BENCHMARK_THRESHOLDS = {
+  fastMs: 100,
+  standardMs: 1_000,
+  batchMs: 10_000,
+  rssBytes: 256 * 1024 * 1024,
+  maxConcurrentProcesses: 2,
+} as const;
+
+export type BenchmarkCapacities = {
+  nodes: number;
+  edges: number;
+  events: number;
+  cards: number;
+  reports: number;
+  processes: number;
+};
 
 export type BenchmarkTier = keyof typeof BENCHMARK_TIERS;
 
@@ -35,6 +59,7 @@ export interface BenchmarkDataset {
   edges: EpistemicEdge[];
   events: GraphEvent[];
   seed: number;
+  capacities: BenchmarkCapacities;
 }
 
 export interface GenerateBenchmarkOptions {
@@ -303,6 +328,14 @@ export function generateBenchmarkGraph(
     edges,
     events,
     seed,
+    capacities: {
+      nodes: targetNodes,
+      edges: targetEdges,
+      events: targetEvents,
+      cards: BENCHMARK_TIERS[tier].cards,
+      reports: BENCHMARK_TIERS[tier].reports,
+      processes: BENCHMARK_TIERS[tier].processes,
+    },
   };
 }
 

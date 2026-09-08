@@ -1,5 +1,5 @@
 import { mkdtempSync, rmSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Writable } from "node:stream";
@@ -9,10 +9,11 @@ import { EpistemicGateEngine } from "../../src/gates/gate-engine.js";
 import { runMigrate } from "../../src/cli/commands/migrate.js";
 import { CAPACITY_LIMITS } from "../../src/graph/capacity.js";
 import {
-  BENCHMARK_TIERS,
+  BENCHMARK_THRESHOLDS,
   generateBenchmarkGraph,
   populateBenchmarkStorage,
   type BenchmarkDataset,
+  type BenchmarkCapacities,
   type BenchmarkTier,
 } from "./generator.js";
 
@@ -54,6 +55,21 @@ export interface MetricResult {
   budgetMs: number;
   percentiles: LatencyPercentiles;
   passed: boolean;
+  details?: Record<string, number>;
+}
+
+export interface RssCheckResult {
+  attributableRssBytes: number;
+  passed: boolean;
+  valid: boolean;
+}
+
+export interface ConcurrencyEvidence {
+  requested: number;
+  observed: number;
+  budget: number;
+  p95Ms: number;
+  passed: boolean;
 }
 
 export interface BenchmarkReport {
@@ -63,6 +79,16 @@ export interface BenchmarkReport {
   edgeCount: number;
   eventCount: number;
   seed: number;
+  capacities: BenchmarkCapacities;
+  observedCapacities: {
+    nodes: number;
+    edges: number;
+    events: number;
+    cards: number;
+    reports: number;
+    processes: number;
+  };
+  thresholds: typeof BENCHMARK_THRESHOLDS;
   memory: {
     baselineRssBytes: number;
     peakRssBytes: number;
@@ -70,7 +96,9 @@ export interface BenchmarkReport {
     budgetBytes: number;
     peakRssMb: number;
     passed: boolean;
+    valid: boolean;
   };
+  concurrency: ConcurrencyEvidence;
   metrics: Record<string, MetricResult>;
   allPassed: boolean;
 }
@@ -83,6 +111,47 @@ export interface RunBenchmarkOptions {
   fastIterations?: number;
   standardIterations?: number;
   batchIterations?: number;
+  rssReader?: () => number;
+}
+
+/**
+ * Computes attributable RSS without allowing invalid measurements to pass as
+ * a zero-byte delta. The benchmark intentionally fails closed when either
+ * sample is unavailable or non-finite.
+ */
+export function calculateAttributableRss(
+  baselineRssBytes: number | null | undefined,
+  peakRssBytes: number | null | undefined,
+  budgetBytes = BENCHMARK_THRESHOLDS.rssBytes,
+): RssCheckResult {
+  if (
+    baselineRssBytes === null ||
+    baselineRssBytes === undefined ||
+    peakRssBytes === null ||
+    peakRssBytes === undefined ||
+    !Number.isFinite(baselineRssBytes) ||
+    !Number.isFinite(peakRssBytes) ||
+    baselineRssBytes < 0 ||
+    peakRssBytes < 0
+  ) {
+    return { attributableRssBytes: 0, passed: false, valid: false };
+  }
+
+  const attributableRssBytes = Math.max(0, peakRssBytes - baselineRssBytes);
+  return {
+    attributableRssBytes,
+    passed: attributableRssBytes <= budgetBytes,
+    valid: true,
+  };
+}
+
+function readRssBytes(reader: () => number): number | null {
+  try {
+    const value = reader();
+    return Number.isFinite(value) && value >= 0 ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 async function measureLatency(
@@ -99,6 +168,45 @@ async function measureLatency(
     times.push(duration);
   }
   return times;
+}
+
+interface ConcurrentMeasurement {
+  durationMs: number;
+  peakConcurrency: number;
+}
+
+async function measureConcurrentMaterialization(
+  storageDir: string,
+  processCount: number,
+  iterations: number,
+): Promise<{ samples: number[]; peakConcurrency: number }> {
+  const run = async (): Promise<ConcurrentMeasurement> => {
+    let active = 0;
+    let peakConcurrency = 0;
+    const start = performance.now();
+    await Promise.all(
+      Array.from({ length: processCount }, async () => {
+        active += 1;
+        peakConcurrency = Math.max(peakConcurrency, active);
+        try {
+          await EpistemicGraph.open(storageDir).materialize();
+        } finally {
+          active -= 1;
+        }
+      }),
+    );
+    return { durationMs: performance.now() - start, peakConcurrency };
+  };
+
+  await run();
+  const samples: number[] = [];
+  let peakConcurrency = 0;
+  for (let i = 0; i < iterations; i += 1) {
+    const measurement = await run();
+    samples.push(measurement.durationMs);
+    peakConcurrency = Math.max(peakConcurrency, measurement.peakConcurrency);
+  }
+  return { samples, peakConcurrency };
 }
 
 const nullStream = () =>
@@ -136,14 +244,14 @@ export async function runBenchmark(
     const dataset = generateBenchmarkGraph(tier, { seed });
 
     // 2. Populate Storage Directory
-    await populateBenchmarkStorage(storageDir, dataset, {
-      skipCards: tier === "ceiling",
-    });
+    await populateBenchmarkStorage(storageDir, dataset);
 
     const metrics: Record<string, MetricResult> = {};
 
     // 3. Memory Measurement Baseline
-    const baselineRssBytes = process.memoryUsage().rss;
+    const rssReader = options.rssReader ?? (() => process.memoryUsage().rss);
+    const baselineSample = readRssBytes(rssReader);
+    const baselineRssBytes = baselineSample ?? 0;
 
     // 4. Materialize in-memory graph for Fast tier
     const coldGraph = EpistemicGraph.open(storageDir);
@@ -151,9 +259,13 @@ export async function runBenchmark(
     const inMemGraph = EpistemicGraph.inMemory(materialized);
 
     // Memory Peak after materialization
-    const peakRssBytes = process.memoryUsage().rss;
-    const attributableRssBytes = Math.max(0, peakRssBytes - baselineRssBytes);
-    const memoryPassed = attributableRssBytes <= CAPACITY_LIMITS.MAX_RSS_BYTES;
+    const peakSample = readRssBytes(rssReader);
+    const peakRssBytes = peakSample ?? 0;
+    const rssCheck = calculateAttributableRss(
+      baselineSample,
+      peakSample,
+      CAPACITY_LIMITS.MAX_RSS_BYTES,
+    );
 
     // --- Fast Tier (< 100 ms) ---
     const sampleNodeId = dataset.nodes[Math.floor(dataset.nodes.length / 2)].id;
@@ -165,9 +277,9 @@ export async function runBenchmark(
     metrics.getNode = {
       operation: "getNode",
       tier: "fast",
-      budgetMs: 100,
+      budgetMs: BENCHMARK_THRESHOLDS.fastMs,
       percentiles: getNodeP,
-      passed: getNodeP.p95 < 100,
+      passed: getNodeP.p95 < BENCHMARK_THRESHOLDS.fastMs,
     };
 
     const listNodesSamples = await measureLatency(async () => {
@@ -177,9 +289,9 @@ export async function runBenchmark(
     metrics.listNodes = {
       operation: "listNodes",
       tier: "fast",
-      budgetMs: 100,
+      budgetMs: BENCHMARK_THRESHOLDS.fastMs,
       percentiles: listNodesP,
-      passed: listNodesP.p95 < 100,
+      passed: listNodesP.p95 < BENCHMARK_THRESHOLDS.fastMs,
     };
 
     const listEdgesSamples = await measureLatency(async () => {
@@ -189,9 +301,9 @@ export async function runBenchmark(
     metrics.listEdges = {
       operation: "listEdges",
       tier: "fast",
-      budgetMs: 100,
+      budgetMs: BENCHMARK_THRESHOLDS.fastMs,
       percentiles: listEdgesP,
-      passed: listEdgesP.p95 < 100,
+      passed: listEdgesP.p95 < BENCHMARK_THRESHOLDS.fastMs,
     };
 
     const getFrontierSamples = await measureLatency(async () => {
@@ -201,9 +313,9 @@ export async function runBenchmark(
     metrics.getFrontier = {
       operation: "getFrontier",
       tier: "fast",
-      budgetMs: 100,
+      budgetMs: BENCHMARK_THRESHOLDS.fastMs,
       percentiles: getFrontierP,
-      passed: getFrontierP.p95 < 100,
+      passed: getFrontierP.p95 < BENCHMARK_THRESHOLDS.fastMs,
     };
 
     const getOpenUnknownsSamples = await measureLatency(async () => {
@@ -213,9 +325,9 @@ export async function runBenchmark(
     metrics.getOpenUnknowns = {
       operation: "getOpenUnknowns",
       tier: "fast",
-      budgetMs: 100,
+      budgetMs: BENCHMARK_THRESHOLDS.fastMs,
       percentiles: getOpenUnknownsP,
-      passed: getOpenUnknownsP.p95 < 100,
+      passed: getOpenUnknownsP.p95 < BENCHMARK_THRESHOLDS.fastMs,
     };
 
     // --- Standard Tier (< 1 s = 1000 ms) ---
@@ -227,9 +339,9 @@ export async function runBenchmark(
     metrics.open = {
       operation: "open",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: openP,
-      passed: openP.p95 < 1000,
+      passed: openP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     const sliceNodesCount = tier === "ceiling" ? 9990 : dataset.nodes.length;
@@ -257,9 +369,9 @@ export async function runBenchmark(
     metrics.addNode = {
       operation: "addNode",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: addNodeP,
-      passed: addNodeP.p95 < 1000,
+      passed: addNodeP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     const updateNodeSamples = await measureLatency(async () => {
@@ -272,9 +384,9 @@ export async function runBenchmark(
     metrics.updateNode = {
       operation: "updateNode",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: updateNodeP,
-      passed: updateNodeP.p95 < 1000,
+      passed: updateNodeP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     let addEdgeCounter = 0;
@@ -290,9 +402,9 @@ export async function runBenchmark(
     metrics.addEdge = {
       operation: "addEdge",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: addEdgeP,
-      passed: addEdgeP.p95 < 1000,
+      passed: addEdgeP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     const gateSamples = await measureLatency(async () => {
@@ -302,9 +414,9 @@ export async function runBenchmark(
     metrics.gate = {
       operation: "gate",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: gateP,
-      passed: gateP.p95 < 1000,
+      passed: gateP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     const verifySamples = await measureLatency(async () => {
@@ -316,9 +428,9 @@ export async function runBenchmark(
     metrics.verify = {
       operation: "verify",
       tier: "standard",
-      budgetMs: 1000,
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
       percentiles: verifyP,
-      passed: verifyP.p95 < 1000,
+      passed: verifyP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
     // --- Batch Tier (< 10 s = 10000 ms) ---
@@ -329,9 +441,9 @@ export async function runBenchmark(
     metrics.report = {
       operation: "report",
       tier: "batch",
-      budgetMs: 10000,
+      budgetMs: BENCHMARK_THRESHOLDS.batchMs,
       percentiles: reportP,
-      passed: reportP.p95 < 10000,
+      passed: reportP.p95 < BENCHMARK_THRESHOLDS.batchMs,
     };
 
     const storage = new GraphStorage(storageDir);
@@ -342,9 +454,9 @@ export async function runBenchmark(
     metrics.projectionRebuild = {
       operation: "projectionRebuild",
       tier: "batch",
-      budgetMs: 10000,
+      budgetMs: BENCHMARK_THRESHOLDS.batchMs,
       percentiles: rebuildP,
-      passed: rebuildP.p95 < 10000,
+      passed: rebuildP.p95 < BENCHMARK_THRESHOLDS.batchMs,
     };
 
     const migrationSamples = await measureLatency(async () => {
@@ -358,13 +470,63 @@ export async function runBenchmark(
     metrics.migrationDryRun = {
       operation: "migrationDryRun",
       tier: "batch",
-      budgetMs: 10000,
+      budgetMs: BENCHMARK_THRESHOLDS.batchMs,
       percentiles: migrationP,
-      passed: migrationP.p95 < 10000,
+      passed: migrationP.p95 < BENCHMARK_THRESHOLDS.batchMs,
     };
 
+    const concurrencyMeasurement = await measureConcurrentMaterialization(
+      storageDir,
+      dataset.capacities.processes,
+      standardIterations,
+    );
+    const concurrencyP = computePercentiles(concurrencyMeasurement.samples);
+    const concurrency = {
+      requested: dataset.capacities.processes,
+      observed: concurrencyMeasurement.peakConcurrency,
+      budget: BENCHMARK_THRESHOLDS.maxConcurrentProcesses,
+      p95Ms: concurrencyP.p95,
+      passed:
+        concurrencyMeasurement.peakConcurrency <= BENCHMARK_THRESHOLDS.maxConcurrentProcesses &&
+        concurrencyP.p95 < BENCHMARK_THRESHOLDS.standardMs,
+    } satisfies ConcurrencyEvidence;
+    metrics.concurrency = {
+      operation: "concurrentMaterialize",
+      tier: "standard",
+      budgetMs: BENCHMARK_THRESHOLDS.standardMs,
+      percentiles: concurrencyP,
+      passed: concurrency.passed,
+      details: {
+        requestedProcesses: concurrency.requested,
+        observedProcesses: concurrency.observed,
+        processBudget: concurrency.budget,
+      },
+    };
+
+    const cardEntries = await readdir(join(storageDir, "cards"), {
+      withFileTypes: true,
+    });
+    const cardCount = cardEntries.filter(
+      (entry) => entry.isFile() && entry.name.endsWith(".md"),
+    ).length;
+    const observedCapacities = {
+      nodes: dataset.nodes.length,
+      edges: dataset.edges.length,
+      events: dataset.events.length,
+      cards: cardCount,
+      reports: 1,
+      processes: concurrency.observed,
+    };
+    const capacityChecksPassed =
+      observedCapacities.nodes <= dataset.capacities.nodes &&
+      observedCapacities.edges <= dataset.capacities.edges &&
+      observedCapacities.events <= dataset.capacities.events &&
+      observedCapacities.cards <= dataset.capacities.cards &&
+      observedCapacities.reports <= dataset.capacities.reports &&
+      observedCapacities.processes <= dataset.capacities.processes;
+
     const allPassed =
-      memoryPassed && Object.values(metrics).every((m) => m.passed);
+      rssCheck.passed && capacityChecksPassed && Object.values(metrics).every((m) => m.passed);
 
     const report: BenchmarkReport = {
       timestamp: new Date().toISOString(),
@@ -373,14 +535,19 @@ export async function runBenchmark(
       edgeCount: dataset.edges.length,
       eventCount: dataset.events.length,
       seed,
+      capacities: dataset.capacities,
+      observedCapacities,
+      thresholds: BENCHMARK_THRESHOLDS,
       memory: {
         baselineRssBytes,
         peakRssBytes,
-        attributableRssBytes,
-        budgetBytes: CAPACITY_LIMITS.MAX_RSS_BYTES,
+        attributableRssBytes: rssCheck.attributableRssBytes,
+        budgetBytes: BENCHMARK_THRESHOLDS.rssBytes,
         peakRssMb: Number((peakRssBytes / (1024 * 1024)).toFixed(2)),
-        passed: memoryPassed,
+        passed: rssCheck.passed,
+        valid: rssCheck.valid,
       },
+      concurrency,
       metrics,
       allPassed,
     };

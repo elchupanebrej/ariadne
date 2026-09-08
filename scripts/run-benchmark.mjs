@@ -6,8 +6,8 @@
  * verifies 256 MB peak RSS ceiling, and outputs structured JSON report.
  *
  * Usage:
+ *   npm run benchmark -- [options]
  *   node --import tsx/esm scripts/run-benchmark.mjs [options]
- *   npx tsx scripts/run-benchmark.mjs [options]
  *
  * Options:
  *   --tier <smoke|mid|ceiling>   Benchmark tier to run (default: smoke)
@@ -47,7 +47,7 @@ function parseArgs(args) {
     } else if (arg.startsWith("--output=")) {
       output = arg.slice(9);
     } else if (arg === "-h" || arg === "--help") {
-      console.log(`Usage: npx tsx scripts/run-benchmark.mjs [options]
+      console.log(`Usage: npm run benchmark -- [options]
 
 Options:
   --tier <smoke|mid|ceiling>   Benchmark tier to run (default: smoke)
@@ -90,7 +90,7 @@ async function main() {
       const mod = await import(distPath);
       runBenchmark = mod.runBenchmark;
     } catch {
-      console.error(`Failed to load benchmark runner. Run with: npx tsx scripts/run-benchmark.mjs`);
+      console.error(`Failed to load benchmark runner. Run 'npm ci' and then 'npm run benchmark -- --tier ceiling'.`);
       console.error(`Or build first: npm run build`);
       console.error(`Original error:`, importErr.message);
       process.exit(1);
@@ -123,7 +123,9 @@ async function main() {
   console.log(`Peak Process RSS:     ${report.memory.peakRssMb} MB`);
   console.log(`Attributable RSS:     ${(report.memory.attributableRssBytes / (1024 * 1024)).toFixed(2)} MB`);
   console.log(`RSS Ceiling Budget:   ${(report.memory.budgetBytes / (1024 * 1024)).toFixed(2)} MB`);
-  console.log(`Memory Check:         ${report.memory.passed ? "PASS (<= 256 MB)" : "FAIL (> 256 MB)"}\n`);
+  console.log(
+    `Memory Check:         ${report.memory.passed ? "PASS (<= 256 MB)" : "FAIL (invalid or > 256 MB)"}\n`,
+  );
 
   // Build EVD-BENCH-PASS.json compatible structure
   const evdReport = {
@@ -134,7 +136,12 @@ async function main() {
       batch: buildTierSummary(report.metrics, "batch", 10000),
     },
     peak_rss_bytes: report.memory.peakRssBytes,
+    rss_valid: report.memory.valid,
     rss_passed: report.memory.passed,
+    capacities: report.capacities,
+    observed_capacities: report.observedCapacities,
+    thresholds: report.thresholds,
+    concurrency: report.concurrency,
     allPassed: report.allPassed,
   };
 

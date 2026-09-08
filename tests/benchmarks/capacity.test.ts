@@ -15,6 +15,7 @@ import {
   generateBenchmarkGraph,
   BENCHMARK_TIERS,
 } from "./generator.js";
+import { calculateAttributableRss } from "./runner.js";
 
 describe("benchmark generator", () => {
   it("produces correct node count for smoke tier", () => {
@@ -58,6 +59,46 @@ describe("benchmark generator", () => {
   it("generates all events including revision events for smoke tier", () => {
     const graph = generateBenchmarkGraph("smoke");
     expect(graph.events.length).toBe(BENCHMARK_TIERS.smoke.events);
+  });
+
+  it("records the declared capacity envelope for every tier", () => {
+    const graph = generateBenchmarkGraph("ceiling");
+    expect(graph.capacities).toEqual({
+      nodes: 10_000,
+      edges: 25_000,
+      events: 50_000,
+      cards: 10_000,
+      reports: 50,
+      processes: 2,
+    });
+  });
+});
+
+describe("calculateAttributableRss", () => {
+  it("fails closed when a baseline or peak sample is invalid", () => {
+    expect(calculateAttributableRss(Number.NaN, 10)).toEqual({
+      attributableRssBytes: 0,
+      passed: false,
+      valid: false,
+    });
+    expect(calculateAttributableRss(10, undefined)).toEqual({
+      attributableRssBytes: 0,
+      passed: false,
+      valid: false,
+    });
+  });
+
+  it("computes a bounded attributable delta from valid samples", () => {
+    expect(calculateAttributableRss(100, 150, 100)).toEqual({
+      attributableRssBytes: 50,
+      passed: true,
+      valid: true,
+    });
+    expect(calculateAttributableRss(150, 100, 0)).toEqual({
+      attributableRssBytes: 0,
+      passed: true,
+      valid: true,
+    });
   });
 });
 

@@ -102,7 +102,7 @@ jobs:
         run: npm ci
 
       - name: Run 10K ceiling benchmark
-        run: npm run benchmark
+        run: npm run benchmark -- --tier ceiling
 
       - name: Upload benchmark evidence
         uses: actions/upload-artifact@v4
