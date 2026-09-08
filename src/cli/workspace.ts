@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { detectGsd, type GsdEnvironment } from "../adapters/gsd/detector.js";
 import { GraphStorage } from "../graph/storage.js";
 import { EpistemicGraph } from "../graph/epistemic-graph.js";
+import { checkCompactionAdvisory } from "../graph/capacity.js";
 
 export type CliIO = {
   cwd: string;
@@ -16,6 +17,17 @@ export type CliWorkspace = {
   storage: GraphStorage;
   graph: EpistemicGraph;
 };
+
+const advisoryEmittedSet = new WeakSet<Writable>();
+
+export async function maybeEmitCompactionAdvisory(storageRoot: string, io: CliIO): Promise<void> {
+  if (advisoryEmittedSet.has(io.stderr)) return;
+  const advisory = await checkCompactionAdvisory(storageRoot);
+  if (advisory) {
+    advisoryEmittedSet.add(io.stderr);
+    io.stderr.write(`${advisory}\n`);
+  }
+}
 
 export const hasHelp = (
   args: readonly string[],
@@ -54,6 +66,7 @@ export function findCliWorkspaceRoot(cwd = process.cwd()): string {
 export async function resolveCliWorkspace(io: CliIO): Promise<CliWorkspace> {
   const root = findCliWorkspaceRoot(io.cwd);
   const environment = detectGsd(root);
+  await maybeEmitCompactionAdvisory(environment.storageRoot, io);
   return {
     environment,
     storage: new GraphStorage(environment.storageRoot),

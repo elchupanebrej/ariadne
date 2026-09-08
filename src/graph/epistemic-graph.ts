@@ -13,6 +13,7 @@ import {
 } from "../core/schemas/nodes.js";
 import type { ProvenanceType } from "../core/types/nodes.js";
 import { validateGraph } from "./integrity.js";
+import { assertWithinCapacity } from "./capacity.js";
 import {
   propagateInvalidation,
   type InvalidationTraceEntry,
@@ -34,7 +35,12 @@ import {
   type StorageDriver,
 } from "./storage-driver.js";
 
-
+export type { InvalidationTraceEntry } from "./invalidation.js";
+export type {
+  ReportOptions,
+  ReportOutput,
+  ReportSummary,
+} from "./report-engine.js";
 
 import {
   renderCard,
@@ -214,6 +220,13 @@ export class EpistemicGraph {
         );
       }
 
+      const existingEvents = await this.driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + 1,
+      });
+
       await this.driver.appendEvents([{ kind: "node", node: parsed }]);
       await this.driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
       await this.driver.writeIndex(renderIndex(next));
@@ -266,6 +279,13 @@ export class EpistemicGraph {
         );
       }
 
+      const existingEvents = await this.driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + 1,
+      });
+
       await this.driver.appendEvents([{ kind: "node", node: parsed }]);
       await this.driver.writeCards([{ id: parsed.id, content: renderCard(parsed) }]);
       await this.driver.writeIndex(renderIndex(next));
@@ -315,6 +335,13 @@ export class EpistemicGraph {
         );
       }
 
+      const existingEvents = await this.driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + 1,
+      });
+
       await this.driver.appendEvents([{ kind: "edge", edge }]);
       await this.driver.writeIndex(renderIndex(next));
 
@@ -346,6 +373,13 @@ export class EpistemicGraph {
           integrity.diagnostics.map((d) => `${d.code}: ${d.message}`).join("; "),
         );
       }
+
+      const existingEvents = await this.driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + 1,
+      });
 
       await this.driver.appendEvents([{ kind: "edge", edge, tombstone: true }]);
       await this.driver.writeIndex(renderIndex(next));
@@ -393,6 +427,13 @@ export class EpistemicGraph {
         .filter(({ status }) => status !== undefined)
         .map(({ node_id }) => node_id)
         .sort((left, right) => left.localeCompare(right));
+
+      const existingEvents = await this.driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: invalidation.graph.nodes.length,
+        edgeCount: invalidation.graph.edges.length,
+        eventCount: existingEvents.length + events.length,
+      });
 
       await this.driver.appendEvents(events);
       await this.driver.writeCards(
