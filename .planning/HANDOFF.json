@@ -1,0 +1,110 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-09-09T10:18:24.717Z",
+  "phase": "default",
+  "phase_name": "Production readiness — task 22 CLI contract and explicit measured limits",
+  "phase_dir": ".planning",
+  "plan": 22,
+  "task": 22,
+  "total_tasks": 25,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": 22,
+      "name": "Align CLI grammar and diagnostic exit semantics",
+      "status": "done",
+      "commit": "3cc54c7"
+    },
+    {
+      "id": 22.1,
+      "name": "Record the resolved task-22 tracker answer and map pointer",
+      "status": "done",
+      "commit": "36654e0"
+    },
+    {
+      "id": 23.1,
+      "name": "Record current supported-runtime capacity evidence",
+      "status": "done",
+      "commit": "6621c70"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": 23,
+      "name": "Enforce capacity and performance evidence in CI; decide whether measured limits should be rebaselined",
+      "status": "in_progress"
+    },
+    {
+      "id": 24,
+      "name": "Trustworthy packaging and release gates",
+      "status": "blocked"
+    },
+    {
+      "id": 25,
+      "name": "Verification and worktree curation",
+      "status": "blocked"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "The Node 24 ceiling run passes every recorded latency metric but measures 272.46 MiB attributable RSS against the approved 256 MiB ceiling; a repeat Node 22 run reports open p95 1043.671 ms against the 1000 ms standard budget.",
+      "type": "technical",
+      "workaround": "Repeat the same seeded ceiling benchmark multiple times on clean supported Linux Node 22 and Node 24 runners, then rebaseline only with an explicit evidence-backed decision."
+    },
+    {
+      "description": "The repository's npm command path resolves to the broken external shim /mnt/c/Users/bulky/node_modules/.bin/node, whose payload is the literal text 'This file intentionally left blank'.",
+      "type": "technical",
+      "workaround": "Use the installed absolute Node 22.23.0 or Node 24.17.0 binary and direct Vitest/benchmark entry points until the external shim is repaired. npm ci --ignore-scripts completed successfully."
+    }
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {
+      "action": "Approve a new capacity/performance baseline only after the repeat-run evidence is reviewed.",
+      "context": "Task 22 has no product latency budget of its own. The explicit budgets belong to tasks 09/14/23; changing them would reopen the resolved contract decision and alter the release gate.",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Treat task 22 as resolved and do not reopen its CLI implementation for the capacity discussion.",
+      "rationale": "The complete CLI suite passed under Node 24: 16 files and 202 tests, with merge tests 14/14 and merge-integration tests 16/16. Capacity limits are owned by the capacity/performance contract.",
+      "phase": "default"
+    },
+    {
+      "decision": "Keep the approved limits unchanged until reproducible supported-matrix evidence justifies a revision.",
+      "rationale": "The available evidence is mixed: Node 24 is over the RSS ceiling and Node 22 is slightly over the open standard budget, while single-run latency values are not sufficient to establish a new p95 contract.",
+      "phase": "default"
+    },
+    {
+      "decision": "Use direct absolute Node binaries for verification in this worktree.",
+      "rationale": "The external npm/node shim is invalid, but Node 22.23.0 and Node 24.17.0 are installed and usable directly.",
+      "phase": "default"
+    }
+  ],
+  "uncommitted_files": [
+    "package.json",
+    "package-lock.json",
+    "tests/e2e/mode-d.test.ts",
+    "EVD-BENCH-PASS.json",
+    "benchmark-results.json",
+    "scripts/.measure-tight.mjs",
+    "scripts/.optimize-orientations.mjs",
+    "scripts/.probe-after-build.mjs",
+    "scripts/.probe-culprits.mjs",
+    "scripts/.probe-layout.mjs",
+    "scripts/.probe-v1states.mjs",
+    "scripts/.probe12.mjs",
+    "scripts/.probe12b.mjs",
+    "scripts/.render-215.mjs",
+    "scripts/.render-all-pairs.mjs",
+    "scripts/.render-diagram-pairs.mjs",
+    "scripts/diagram-orientations_v2.json",
+    "docs/.diagram-check/ (untracked generated diagram evidence)",
+    "docs/nine_operations_software_en_v2.html",
+    "docs/nine_operations_software_en_v2.md",
+    "docs/nine_operations_software_en_v2.pdf"
+  ],
+  "next_action": "Resume by running a clean, repeated ceiling benchmark on Linux Node 22 and Node 24 with seed 42; compare p95 latency, attributable RSS, and exact capacities before proposing any limit increase.",
+  "context_notes": "No GSD phase directory or PLAN.md exists, so this is a default-context handoff centered on tracker task 22. Task 22 is complete; the open frontier is task 23. Do not confuse the 60,000 ms Vitest test timeout used for the CLI suite with a product performance limit. Preserve the user's uncommitted package, test, benchmark, and diagram artifacts."
+}
