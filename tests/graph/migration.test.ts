@@ -2,17 +2,20 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { Writable } from "node:stream";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
+  GraphStorage,
   migrateWorkspace,
   rollbackMigration,
   isLegacyWorkspace,
   readFramedRecords,
   computeFileDigest,
+  type MigrationManifest,
   type FramedRecord,
 } from "../../src/graph/index.js";
 import { AriadneError } from "../../src/core/errors.js";
 import { runCli } from "../../src/cli/index.js";
+import { FileSystemStorageDriver } from "../../src/graph/storage-driver.js";
 
 const capture = () => {
   let output = "";
@@ -291,9 +294,112 @@ describe("Persisted-Format Migration Engine", () => {
         expect.objectContaining({ code: "CORRUPT_PERSISTED_HISTORY" }),
       );
     });
+
+    it("resumes rollback from its durable marker after a live-file swap is interrupted", async () => {
+      createLegacyFixture();
+      const originalState = fs.readFileSync(path.join(ariadneDir, "STATE.yaml"), "utf8");
+      const migration = await migrateWorkspace(ariadneDir, { migrationId: "MIG-rollback-interrupted" });
+      const statePath = path.join(ariadneDir, "STATE.yaml");
+      const originalRename = fs.promises.rename;
+      const renameSpy = vi.spyOn(fs.promises, "rename").mockImplementation(async (from, to) => {
+        if (to === statePath) throw new Error("simulated rollback interruption");
+        return originalRename(from, to);
+      });
+
+      await expect(rollbackMigration(ariadneDir, migration.migrationId)).rejects.toThrow(
+        "simulated rollback interruption",
+      );
+      renameSpy.mockRestore();
+
+      const markerPath = path.join(ariadneDir, "migration-marker.json");
+      const marker = JSON.parse(fs.readFileSync(markerPath, "utf8"));
+      expect(marker.migrationId).toBe(migration.migrationId);
+      expect(marker.phase).toBe("ROLLING_BACK");
+      expect(marker.nextStep).toBeLessThan(marker.swapPlan.length);
+      await expect(new GraphStorage(ariadneDir).readEvents()).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+
+      const resumed = await rollbackMigration(ariadneDir, migration.migrationId);
+      expect(resumed.status).toBe("ROLLED_BACK");
+      expect(await isLegacyWorkspace(ariadneDir)).toBe(true);
+      expect(fs.existsSync(markerPath)).toBe(false);
+      expect(fs.readFileSync(path.join(ariadneDir, "STATE.yaml"), "utf8")).toBe(originalState);
+    });
+
+    it("rolls back a forward migration that was interrupted during its swap", async () => {
+      createLegacyFixture();
+      const migrationId = "MIG-forward-then-rollback";
+      const statePath = path.join(ariadneDir, "STATE.yaml");
+      const originalRename = fs.promises.rename;
+      const renameSpy = vi.spyOn(fs.promises, "rename").mockImplementation(async (from, to) => {
+        if (to === statePath) throw new Error("simulated migration interruption");
+        return originalRename(from, to);
+      });
+
+      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
+        "simulated migration interruption",
+      );
+      renameSpy.mockRestore();
+      expect(JSON.parse(fs.readFileSync(path.join(ariadneDir, "migration-marker.json"), "utf8")).phase).toBe(
+        "SWAPPING",
+      );
+
+      const rollback = await rollbackMigration(ariadneDir, migrationId);
+      expect(rollback.status).toBe("ROLLED_BACK");
+      expect(await isLegacyWorkspace(ariadneDir)).toBe(true);
+      expect(fs.existsSync(path.join(ariadneDir, "migration-marker.json"))).toBe(false);
+    });
+
+    it("rejects traversal in a rollback manifest before creating its durable marker", async () => {
+      createLegacyFixture();
+      const migration = await migrateWorkspace(ariadneDir, { migrationId: "MIG-rollback-traversal" });
+      const manifestPath = path.join(ariadneDir, "backups", migration.migrationId, "manifest.json");
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+      const originalGraph = fs.readFileSync(path.join(ariadneDir, "GRAPH.jsonl"), "utf8");
+      manifest.files["../outside.txt"] = { sha256: "0".repeat(64), sizeBytes: 0 };
+      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
+
+      await expect(rollbackMigration(ariadneDir, migration.migrationId)).rejects.toMatchObject({
+        code: "PATH_ESCAPE",
+      });
+      expect(fs.existsSync(path.join(ariadneDir, "migration-marker.json"))).toBe(false);
+      expect(fs.readFileSync(path.join(ariadneDir, "GRAPH.jsonl"), "utf8")).toBe(originalGraph);
+    });
   });
 
   describe("Interruption Recovery", () => {
+    it("repairs a staged manifest whose declared backup file was never copied", async () => {
+      createLegacyFixture();
+
+      const migrationId = "MIG-partial-backup-001";
+      const stagingDir = path.join(ariadneDir, "staging", migrationId);
+      const backupDir = path.join(ariadneDir, "backups", migrationId);
+      fs.mkdirSync(stagingDir, { recursive: true });
+      fs.mkdirSync(backupDir, { recursive: true });
+
+      const graphDigest = await computeFileDigest(path.join(ariadneDir, "GRAPH.jsonl"));
+      const manifest = {
+        migrationId,
+        createdAt: new Date().toISOString(),
+        sourceFormat: "v0",
+        targetFormat: "v1",
+        status: "STAGED",
+        files: { "GRAPH.jsonl": graphDigest },
+        entityCounts: { nodes: 2, edges: 1, notices: 1 },
+      } satisfies MigrationManifest;
+      const serializedManifest = JSON.stringify(manifest, null, 2);
+      fs.writeFileSync(path.join(stagingDir, "manifest.json"), serializedManifest, "utf8");
+      fs.writeFileSync(path.join(backupDir, "manifest.json"), serializedManifest, "utf8");
+
+      await migrateWorkspace(ariadneDir, { migrationId });
+
+      const backupGraph = path.join(backupDir, "GRAPH.jsonl");
+      expect(fs.existsSync(backupGraph)).toBe(true);
+      expect(await computeFileDigest(backupGraph)).toEqual(graphDigest);
+      expect(JSON.parse(fs.readFileSync(path.join(backupDir, "manifest.json"), "utf8")).status).toBe("COMPLETE");
+    });
+
     it("resumes safely when an interrupted staging directory exists and source files match manifest", async () => {
       createLegacyFixture();
 
@@ -375,6 +481,113 @@ describe("Persisted-Format Migration Engine", () => {
   });
 
   describe("Validation and Rejection Cases", () => {
+    it("rejects a source symlink before creating migration artifacts", async () => {
+      createLegacyFixture();
+      const outside = path.join(tempDir, "outside-state.yaml");
+      fs.writeFileSync(outside, JSON.stringify({ outside: true }) + "\n", "utf8");
+      fs.unlinkSync(path.join(ariadneDir, "STATE.yaml"));
+      fs.symlinkSync(outside, path.join(ariadneDir, "STATE.yaml"));
+
+      await expect(migrateWorkspace(ariadneDir)).rejects.toMatchObject({ code: "PATH_ESCAPE" });
+      expect(fs.existsSync(path.join(ariadneDir, "backups"))).toBe(false);
+      expect(fs.existsSync(path.join(ariadneDir, "staging"))).toBe(false);
+      expect(JSON.parse(fs.readFileSync(outside, "utf8"))).toEqual({ outside: true });
+    });
+
+    it("rejects a non-regular source before creating migration artifacts", async () => {
+      createLegacyFixture();
+      fs.rmSync(path.join(ariadneDir, "INDEX.md"));
+      fs.mkdirSync(path.join(ariadneDir, "INDEX.md"));
+
+      await expect(migrateWorkspace(ariadneDir)).rejects.toMatchObject({ code: "INVALID_INPUT" });
+      expect(fs.existsSync(path.join(ariadneDir, "backups"))).toBe(false);
+      expect(fs.existsSync(path.join(ariadneDir, "staging"))).toBe(false);
+    });
+
+    it("rejects traversal in an interrupted manifest before reading outside the workspace", async () => {
+      createLegacyFixture();
+      const migrationId = "MIG-malicious-manifest";
+      const stagingDir = path.join(ariadneDir, "staging", migrationId);
+      fs.mkdirSync(stagingDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(stagingDir, "manifest.json"),
+        JSON.stringify({
+          migrationId,
+          createdAt: new Date().toISOString(),
+          sourceFormat: "v0",
+          targetFormat: "v1",
+          status: "STAGED",
+          files: { "../outside.txt": { sha256: "0".repeat(64), sizeBytes: 0 } },
+          entityCounts: { nodes: 0, edges: 0, notices: 0 },
+        }),
+        "utf8",
+      );
+
+      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toMatchObject({
+        code: "PATH_ESCAPE",
+      });
+      expect(fs.existsSync(path.join(ariadneDir, "backups", migrationId))).toBe(false);
+    });
+
+    it("rejects a tampered interrupted manifest before mutation", async () => {
+      createLegacyFixture();
+      const migrationId = "MIG-tampered-manifest";
+      const stagingDir = path.join(ariadneDir, "staging", migrationId);
+      const backupDir = path.join(ariadneDir, "backups", migrationId);
+      fs.mkdirSync(stagingDir, { recursive: true });
+      fs.mkdirSync(backupDir, { recursive: true });
+      const graphDigest = await computeFileDigest(path.join(ariadneDir, "GRAPH.jsonl"));
+      const manifest = {
+        migrationId,
+        createdAt: new Date().toISOString(),
+        sourceFormat: "v0",
+        targetFormat: "v1",
+        status: "STAGED",
+        files: { "GRAPH.jsonl": { ...graphDigest, sha256: "f".repeat(64) } },
+        entityCounts: { nodes: 2, edges: 1, notices: 1 },
+      };
+      fs.writeFileSync(path.join(stagingDir, "manifest.json"), JSON.stringify(manifest), "utf8");
+      fs.writeFileSync(path.join(backupDir, "manifest.json"), JSON.stringify(manifest), "utf8");
+
+      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      expect(fs.existsSync(path.join(ariadneDir, "migration-marker.json"))).toBe(false);
+    });
+
+    it("recovers a simulated mid-swap interruption without leaving mixed authorities", async () => {
+      createLegacyFixture();
+      const migrationId = "MIG-mid-swap-recovery";
+      const statePath = path.join(ariadneDir, "STATE.yaml");
+      const originalRename = fs.promises.rename;
+      const renameSpy = vi.spyOn(fs.promises, "rename").mockImplementation(async (from, to) => {
+        if (to === statePath) throw new Error("simulated migration interruption");
+        return originalRename(from, to);
+      });
+
+      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
+        "simulated migration interruption",
+      );
+      renameSpy.mockRestore();
+
+      expect(fs.existsSync(path.join(ariadneDir, "migration-marker.json"))).toBe(true);
+      await expect(new GraphStorage(ariadneDir).readEvents()).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      await expect(new GraphStorage(ariadneDir).readState()).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      await expect(new FileSystemStorageDriver(ariadneDir).init()).rejects.toMatchObject({
+        code: "CORRUPT_PERSISTED_HISTORY",
+      });
+      const resumed = await migrateWorkspace(ariadneDir, { migrationId });
+      expect(resumed.migrationId).toBe(migrationId);
+      expect(await isLegacyWorkspace(ariadneDir)).toBe(false);
+
+      const reopened = new GraphStorage(ariadneDir);
+      expect((await reopened.readEvents()).length).toBe(3);
+    });
+
     it("fails closed with CORRUPT_PERSISTED_HISTORY on corrupt JSON in GRAPH.jsonl", async () => {
       fs.writeFileSync(path.join(ariadneDir, "GRAPH.jsonl"), '{"kind":"node", invalid json\n', "utf8");
 

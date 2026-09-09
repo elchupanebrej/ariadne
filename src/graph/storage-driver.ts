@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { lstat, mkdir, readFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { AriadneError } from "../core/errors.js";
@@ -18,6 +18,9 @@ import { assertWithinCapacity } from "./capacity.js";
 // The directory lock is the cross-process seam. This queue only prevents
 // callers in the same process from needlessly contending on that seam.
 const pathQueues = new Map<string, Promise<unknown>>();
+const MIGRATION_MARKER_FILE = "migration-marker.json";
+const ACTIVE_MIGRATION_PHASES = new Set(["STAGED", "SWAPPING", "ROLLING_BACK"]);
+const TERMINAL_MIGRATION_PHASES = new Set(["COMPLETE", "ROLLED_BACK"]);
 
 const enqueue = <T>(path: string, operation: () => Promise<T>): Promise<T> => {
   const previous = pathQueues.get(path) ?? Promise.resolve();
@@ -51,6 +54,88 @@ const isFramedLine = (value: unknown): boolean =>
 
 const graphEventIdempotencyKey = (event: GraphEvent): string =>
   `graph-event:${createHash("sha256").update(JSON.stringify(event), "utf8").digest("hex")}`;
+
+/**
+ * Prevents readers and writers from observing a partially swapped authority set.
+ * Migration uses the marker as a durable read barrier because portable Node.js
+ * filesystems cannot rename several canonical authority files as one operation.
+ */
+const assertStableWorkspace = async (root: string): Promise<void> => {
+  const markerPath = join(root, MIGRATION_MARKER_FILE);
+  let markerContent: string;
+  try {
+    const markerStats = await lstat(markerPath);
+    if (!markerStats.isFile()) {
+      throw new AriadneError({
+        code: "CORRUPT_PERSISTED_HISTORY",
+        message: "Migration marker is not a regular file.",
+        repair: "Inspect or restore migration-marker.json before reading the workspace.",
+        detail: { markerPath },
+      });
+    }
+    markerContent = await readFile(markerPath, "utf8");
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    if (error instanceof AriadneError) throw error;
+    throw new AriadneError({
+      code: "CORRUPT_PERSISTED_HISTORY",
+      message: `Migration marker could not be read: ${error instanceof Error ? error.message : String(error)}`,
+      repair: "Inspect or restore migration-marker.json before reading the workspace.",
+      detail: { markerPath },
+    });
+  }
+
+  let marker: unknown;
+  try {
+    marker = JSON.parse(markerContent) as unknown;
+  } catch (error) {
+    throw new AriadneError({
+      code: "CORRUPT_PERSISTED_HISTORY",
+      message: `Migration marker is invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      repair: "Inspect or restore migration-marker.json before reading the workspace.",
+      detail: { markerPath },
+    });
+  }
+
+  if (
+    !marker ||
+    typeof marker !== "object" ||
+    (marker as { schemaVersion?: unknown }).schemaVersion !== 1 ||
+    typeof (marker as { phase?: unknown }).phase !== "string"
+  ) {
+    throw new AriadneError({
+      code: "CORRUPT_PERSISTED_HISTORY",
+      message: "Migration marker has invalid metadata.",
+      repair: "Inspect or restore migration-marker.json before reading the workspace.",
+      detail: { markerPath },
+    });
+  }
+
+  const phase = (marker as { phase: string }).phase;
+  if (ACTIVE_MIGRATION_PHASES.has(phase)) {
+    throw new AriadneError({
+      code: "CORRUPT_PERSISTED_HISTORY",
+      message: `Workspace migration is in phase '${phase}'; resume or roll back migration before reading it.`,
+      repair: "Run 'ariadne migrate' to resume or 'ariadne migrate --rollback <migration-id>' to restore the workspace.",
+      detail: { markerPath, phase },
+    });
+  }
+
+  const markerRecord = marker as { nextStep?: unknown; swapPlan?: unknown };
+  if (
+    !TERMINAL_MIGRATION_PHASES.has(phase) ||
+    !Array.isArray(markerRecord.swapPlan) ||
+    !Number.isSafeInteger(markerRecord.nextStep) ||
+    markerRecord.nextStep !== markerRecord.swapPlan.length
+  ) {
+    throw new AriadneError({
+      code: "CORRUPT_PERSISTED_HISTORY",
+      message: `Migration marker has an invalid terminal checkpoint for phase '${phase}'.`,
+      repair: "Inspect or restore migration-marker.json before reading the workspace.",
+      detail: { markerPath, phase },
+    });
+  }
+};
 
 const parseLegacyEvents = async (graphPath: string, content: string): Promise<GraphEvent[]> => {
   const lines = content.split("\n");
@@ -124,6 +209,19 @@ export class FileSystemStorageDriver implements StorageDriver {
     return this.withLock(operation);
   }
 
+  private async withStableRead<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.lockDepth > 0) {
+      await assertStableWorkspace(this.root);
+      return operation();
+    }
+    return enqueue(this.root, async () =>
+      withRootLock(this.root, async () => {
+        await assertStableWorkspace(this.root);
+        return operation();
+      }),
+    );
+  }
+
   private projectionFailure(targetPath: string, error: unknown): AriadneError {
     return new AriadneError({
       code: "PROJECTION_RECOVERY_NEEDED",
@@ -134,15 +232,16 @@ export class FileSystemStorageDriver implements StorageDriver {
   }
 
   async init(): Promise<void> {
-    await assertNotLegacyWorkspace(this.root);
     await mkdir(this.root, { recursive: true });
-    await mkdir(this.cardsDir, { recursive: true });
-    await this.recoverAuthorities();
+    await this.withLock(async () => {
+      await mkdir(this.cardsDir, { recursive: true });
+    });
   }
 
   async withLock<T>(operation: () => Promise<T>): Promise<T> {
     return enqueue(this.root, async () =>
       withRootLock(this.root, async () => {
+        await assertStableWorkspace(this.root);
         await assertNotLegacyWorkspace(this.root);
         await this.recoverAuthorities();
         this.lockDepth += 1;
@@ -158,6 +257,7 @@ export class FileSystemStorageDriver implements StorageDriver {
   async withProjectionLock<T>(operation: () => Promise<T>): Promise<T> {
     return enqueue(this.root, async () =>
       withRootLock(this.root, async () => {
+        await assertStableWorkspace(this.root);
         this.lockDepth += 1;
         try {
           return await operation();
@@ -169,29 +269,31 @@ export class FileSystemStorageDriver implements StorageDriver {
   }
 
   async readEvents(): Promise<GraphEvent[]> {
-    let content: string;
-    try {
-      content = await readFile(this.graphPath, "utf8");
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
-      throw error;
-    }
+    return this.withStableRead(async () => {
+      let content: string;
+      try {
+        content = await readFile(this.graphPath, "utf8");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+        throw error;
+      }
 
-    const lines = content.split("\n").map((line) => line.trim()).filter(Boolean);
-    if (lines.length === 0) return [];
+      const lines = content.split("\n").map((line) => line.trim()).filter(Boolean);
+      if (lines.length === 0) return [];
 
-    let parsedFirst: unknown;
-    try {
-      parsedFirst = JSON.parse(lines[0]) as unknown;
-    } catch {
+      let parsedFirst: unknown;
+      try {
+        parsedFirst = JSON.parse(lines[0]) as unknown;
+      } catch {
+        return parseLegacyEvents(this.graphPath, content);
+      }
+      if (isFramedLine(parsedFirst)) {
+        const scan = await scanAndRecoverJournal(this.graphPath);
+        return scan.records.map((record) => record.payload as GraphEvent);
+      }
+
       return parseLegacyEvents(this.graphPath, content);
-    }
-    if (isFramedLine(parsedFirst)) {
-      const scan = await scanAndRecoverJournal(this.graphPath);
-      return scan.records.map((record) => record.payload as GraphEvent);
-    }
-
-    return parseLegacyEvents(this.graphPath, content);
+    });
   }
 
   async appendEvents(events: readonly GraphEvent[]): Promise<void> {
@@ -245,14 +347,16 @@ export class FileSystemStorageDriver implements StorageDriver {
   }
 
   async readState(): Promise<Record<string, unknown> | null> {
-    try {
-      const content = await readFile(this.statePath, "utf8");
-      const parsed = JSON.parse(content) as unknown;
-      return isObject(parsed) ? parsed : null;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-      return null;
-    }
+    return this.withStableRead(async () => {
+      try {
+        const content = await readFile(this.statePath, "utf8");
+        const parsed = JSON.parse(content) as unknown;
+        return isObject(parsed) ? parsed : null;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        return null;
+      }
+    });
   }
 
   async writeState(state: Record<string, unknown>): Promise<void> {

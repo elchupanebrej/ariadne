@@ -5,15 +5,21 @@ Make legacy workspace migration a safe end-to-end transition from discovery thro
 
 **Blocked by:** 18, 19
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Migration validates every source, staging, backup, and target path against the canonical workspace containment policy.
-- [ ] Manifest tampering, traversal segments, symlinks, and non-regular files are rejected before mutation.
-- [ ] The live workspace never exposes a mixed set of old and new authorities after an interrupted swap.
-- [ ] An interrupted migration can resume or roll back deterministically from its durable marker.
-- [ ] Rollback is atomic, containment-checked, and safe when the manifest or backup is damaged.
-- [ ] Successful migration preserves all supported legacy data and produces a workspace accepted by normal recovery.
-- [ ] Migration, interruption, rollback, and zero-loss scenarios are covered by tests.
+- [x] Migration validates every source, staging, backup, and target path against the canonical workspace containment policy.
+- [x] Manifest tampering, traversal segments, symlinks, and non-regular files are rejected before mutation.
+- [x] The live workspace never exposes a mixed set of old and new authorities after an interrupted swap.
+- [x] An interrupted migration can resume or roll back deterministically from its durable marker.
+- [x] Rollback is atomic, containment-checked, and safe when the manifest or backup is damaged.
+- [x] Successful migration preserves all supported legacy data and produces a workspace accepted by normal recovery.
+- [x] Migration, interruption, rollback, and zero-loss scenarios are covered by tests.
+
+## Answer
+
+Implemented and committed in the task-20 change set. Migration now validates canonical containment and regular-file invariants before mutation, persists a durable manifest and migration marker, uses marker-aware reader barriers during resumable swaps, and stages rollback card restoration before applying rollback checkpoints. Tampered manifests, traversal, symlinks, special files, missing backup payloads, and interrupted source changes fail closed.
+
+Verification completed with the focused migration suite (24/24), format/recovery scenarios (12/12), TypeScript typecheck, and production build. The full Vitest suite passed 76/77 files and 887/888 tests; the only failure is the pre-existing local `npm pack` environment shim at `/mnt/c/Users/bulky/node_modules/.bin/node`, whose payload is the text `This file intentionally left blank`.
 
 ## Comments
 
