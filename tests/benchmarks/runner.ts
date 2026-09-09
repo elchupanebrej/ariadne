@@ -65,6 +65,8 @@ export interface RssCheckResult {
   valid: boolean;
 }
 
+export type RssMeasurementSource = "process.resourceUsage.maxRSS" | "injected";
+
 export interface ConcurrencyEvidence {
   requested: number;
   observed: number;
@@ -91,13 +93,14 @@ export interface BenchmarkReport {
   };
   thresholds: typeof BENCHMARK_THRESHOLDS;
   memory: {
-    baselineRssBytes: number;
-    peakRssBytes: number;
+    baselineRssBytes: number | null;
+    peakRssBytes: number | null;
     attributableRssBytes: number;
     budgetBytes: number;
-    peakRssMb: number;
+    peakRssMb: number | null;
     passed: boolean;
     valid: boolean;
+    source: RssMeasurementSource;
   };
   concurrency: ConcurrencyEvidence;
   metrics: Record<string, MetricResult>;
@@ -112,7 +115,30 @@ export interface RunBenchmarkOptions {
   fastIterations?: number;
   standardIterations?: number;
   batchIterations?: number;
-  rssReader?: () => number;
+  rssReader?: () => number | null;
+}
+
+/**
+ * Reserves room for the warmup and measured node mutations in the ceiling
+ * fixture so the benchmark itself never crosses the declared node envelope.
+ */
+export function getMutationFixtureNodeCount(
+  nodeCapacity: number,
+  standardIterations: number,
+): number {
+  if (!Number.isSafeInteger(nodeCapacity) || nodeCapacity < 1) {
+    throw new RangeError("nodeCapacity must be a positive safe integer");
+  }
+  if (!Number.isSafeInteger(standardIterations) || standardIterations < 1) {
+    throw new RangeError("standardIterations must be a positive safe integer");
+  }
+
+  const reservedNodes = standardIterations + 1;
+  const fixtureNodeCount = nodeCapacity - reservedNodes;
+  if (fixtureNodeCount < 1) {
+    throw new RangeError("nodeCapacity must include room for benchmark mutations");
+  }
+  return fixtureNodeCount;
 }
 
 /**
@@ -138,6 +164,13 @@ export function calculateAttributableRss(
     return { attributableRssBytes: 0, passed: false, valid: false };
   }
 
+  // A kernel-backed high-water sample cannot fall below its baseline. Treat a
+  // decreasing injected sample as invalid instead of turning it into a zero
+  // delta that could pass the memory gate.
+  if (peakRssBytes < baselineRssBytes) {
+    return { attributableRssBytes: 0, passed: false, valid: false };
+  }
+
   const attributableRssBytes = Math.max(0, peakRssBytes - baselineRssBytes);
   return {
     attributableRssBytes,
@@ -146,10 +179,25 @@ export function calculateAttributableRss(
   };
 }
 
-function readRssBytes(reader: () => number): number | null {
+function readRssBytes(reader: () => number | null): number | null {
   try {
     const value = reader();
-    return Number.isFinite(value) && value >= 0 ? value : null;
+    return value !== null && Number.isFinite(value) && value >= 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads the kernel-backed high-water RSS for the current Node process.
+ * Node exposes maxRSS in kibibytes, while benchmark reports use bytes.
+ */
+export function readHighWaterRssBytes(): number | null {
+  try {
+    const maxRssKib = process.resourceUsage().maxRSS;
+    if (!Number.isFinite(maxRssKib) || maxRssKib <= 0) return null;
+    const maxRssBytes = maxRssKib * 1024;
+    return Number.isSafeInteger(maxRssBytes) ? maxRssBytes : null;
   } catch {
     return null;
   }
@@ -159,6 +207,9 @@ async function measureLatency(
   fn: () => Promise<void> | void,
   iterations: number,
 ): Promise<number[]> {
+  if (!Number.isSafeInteger(iterations) || iterations < 1) {
+    throw new RangeError("iterations must be a positive safe integer");
+  }
   const times: number[] = [];
   // Warmup
   await fn();
@@ -231,9 +282,9 @@ export async function runBenchmark(
 ): Promise<BenchmarkReport> {
   const tier = options.tier ?? "smoke";
   const seed = options.seed ?? 42;
-  const fastIterations = options.fastIterations ?? (tier === "ceiling" ? 15 : 10);
-  const standardIterations = options.standardIterations ?? (tier === "ceiling" ? 3 : 5);
-  const batchIterations = options.batchIterations ?? 1;
+  const fastIterations = options.fastIterations ?? (tier === "ceiling" ? 20 : 10);
+  const standardIterations = options.standardIterations ?? (tier === "ceiling" ? 10 : 5);
+  const batchIterations = options.batchIterations ?? (tier === "ceiling" ? 5 : 1);
 
   let createdTempDir = false;
   let baseDir: string | undefined;
@@ -256,9 +307,12 @@ export async function runBenchmark(
     const metrics: Record<string, MetricResult> = {};
 
     // 3. Memory Measurement Baseline
-    const rssReader = options.rssReader ?? (() => process.memoryUsage().rss);
+    const rssReader = options.rssReader ?? readHighWaterRssBytes;
+    const rssSource: RssMeasurementSource = options.rssReader
+      ? "injected"
+      : "process.resourceUsage.maxRSS";
     const baselineSample = readRssBytes(rssReader);
-    const baselineRssBytes = baselineSample ?? 0;
+    const baselineRssBytes = baselineSample;
 
     // 4. Materialize in-memory graph for Fast tier
     const coldGraph = EpistemicGraph.open(storageDir);
@@ -342,7 +396,10 @@ export async function runBenchmark(
       passed: openP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     };
 
-    const sliceNodesCount = tier === "ceiling" ? 9990 : dataset.nodes.length;
+    const sliceNodesCount =
+      tier === "ceiling"
+        ? getMutationFixtureNodeCount(dataset.capacities.nodes, standardIterations)
+        : dataset.nodes.length;
     const mutationNodes = dataset.nodes.slice(0, sliceNodesCount);
     const mutationNodeSet = new Set(mutationNodes.map((n) => n.id));
     const mutationEdges = dataset.edges.filter(
@@ -393,7 +450,7 @@ export async function runBenchmark(
       await mutationGraph.addEdge(
         `TASK-bench-add-${addNodeCounter}`,
         "references",
-        dataset.nodes[addEdgeCounter % 9990].id,
+        mutationNodes[addEdgeCounter % mutationNodes.length].id,
       );
     }, standardIterations);
     const addEdgeP = computePercentiles(addEdgeSamples);
@@ -486,7 +543,8 @@ export async function runBenchmark(
       budget: BENCHMARK_THRESHOLDS.maxConcurrentProcesses,
       p95Ms: concurrencyP.p95,
       passed:
-        concurrencyMeasurement.peakConcurrency <= BENCHMARK_THRESHOLDS.maxConcurrentProcesses,
+        concurrencyMeasurement.peakConcurrency <= BENCHMARK_THRESHOLDS.maxConcurrentProcesses &&
+        concurrencyP.p95 < BENCHMARK_THRESHOLDS.standardMs,
     } satisfies ConcurrencyEvidence;
     metrics.concurrency = {
       operation: "concurrentMaterialize",
@@ -538,7 +596,7 @@ export async function runBenchmark(
     // Sample after query, batch, report, and concurrency work so the
     // attributable measurement covers the whole benchmark session.
     const peakSample = readRssBytes(rssReader);
-    const peakRssBytes = peakSample ?? 0;
+    const peakRssBytes = peakSample;
     const rssCheck = calculateAttributableRss(
       baselineSample,
       peakSample,
@@ -563,9 +621,11 @@ export async function runBenchmark(
         peakRssBytes,
         attributableRssBytes: rssCheck.attributableRssBytes,
         budgetBytes: BENCHMARK_THRESHOLDS.rssBytes,
-        peakRssMb: Number((peakRssBytes / (1024 * 1024)).toFixed(2)),
+        peakRssMb:
+          peakRssBytes === null ? null : Number((peakRssBytes / (1024 * 1024)).toFixed(2)),
         passed: rssCheck.passed,
         valid: rssCheck.valid,
+        source: rssSource,
       },
       concurrency,
       metrics,

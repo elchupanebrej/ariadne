@@ -15,7 +15,11 @@ import {
   generateBenchmarkGraph,
   BENCHMARK_TIERS,
 } from "./generator.js";
-import { calculateAttributableRss } from "./runner.js";
+import {
+  calculateAttributableRss,
+  getMutationFixtureNodeCount,
+  readHighWaterRssBytes,
+} from "./runner.js";
 
 describe("benchmark generator", () => {
   it("produces correct node count for smoke tier", () => {
@@ -96,9 +100,25 @@ describe("calculateAttributableRss", () => {
     });
     expect(calculateAttributableRss(150, 100, 0)).toEqual({
       attributableRssBytes: 0,
-      passed: true,
-      valid: true,
+      passed: false,
+      valid: false,
     });
+  });
+});
+
+describe("ceiling mutation fixture", () => {
+  it("reserves the warmup and measured mutations inside the node envelope", () => {
+    expect(getMutationFixtureNodeCount(10_000, 10)).toBe(9_989);
+  });
+
+  it("rejects a fixture that cannot fit its mutation samples", () => {
+    expect(() => getMutationFixtureNodeCount(11, 10)).toThrow(RangeError);
+  });
+});
+
+describe("readHighWaterRssBytes", () => {
+  it("returns a positive byte value for the current Node process", () => {
+    expect(readHighWaterRssBytes()).toBeGreaterThan(0);
   });
 });
 

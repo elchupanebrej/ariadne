@@ -19,7 +19,6 @@
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
@@ -124,16 +123,32 @@ async function main() {
   console.log(`Attributable RSS:     ${(report.memory.attributableRssBytes / (1024 * 1024)).toFixed(2)} MB`);
   console.log(`RSS Ceiling Budget:   ${(report.memory.budgetBytes / (1024 * 1024)).toFixed(2)} MB`);
   console.log(
-    `Memory Check:         ${report.memory.passed ? "PASS (<= 256 MB)" : "FAIL (invalid or > 256 MB)"}\n`,
+    `Memory Check:         ${report.memory.passed ? "PASS" : "FAIL (invalid or over budget)"}\n`,
   );
 
   // Build EVD-BENCH-PASS.json compatible structure
   const evdReport = {
+    schemaVersion: 1,
+    kind: "capacity-performance-evidence",
+    authoritative: false,
     timestamp: report.timestamp,
+    runtime: {
+      nodeVersion: process.version,
+      nodeMajor: Number(process.versions.node.split(".")[0]),
+      platform: process.platform,
+      arch: process.arch,
+    },
+    tier: report.tier,
+    seed: report.seed,
+    samples: {
+      fast: report.metrics.getNode?.percentiles.samples ?? 0,
+      standard: report.metrics.open?.percentiles.samples ?? 0,
+      batch: report.metrics.report?.percentiles.samples ?? 0,
+    },
     tier_results: {
-      fast: buildTierSummary(report.metrics, "fast", 100),
-      standard: buildTierSummary(report.metrics, "standard", 1000),
-      batch: buildTierSummary(report.metrics, "batch", 10000),
+      fast: buildTierSummary(report.metrics, "fast", report.thresholds.fastMs),
+      standard: buildTierSummary(report.metrics, "standard", report.thresholds.standardMs),
+      batch: buildTierSummary(report.metrics, "batch", report.thresholds.batchMs),
     },
     peak_rss_bytes: report.memory.peakRssBytes,
     rss_valid: report.memory.valid,
@@ -142,6 +157,9 @@ async function main() {
     observed_capacities: report.observedCapacities,
     thresholds: report.thresholds,
     concurrency: report.concurrency,
+    metrics: report.metrics,
+    memory: report.memory,
+    passed: report.allPassed,
     allPassed: report.allPassed,
   };
 
