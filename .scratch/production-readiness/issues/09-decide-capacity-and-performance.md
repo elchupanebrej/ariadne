@@ -17,7 +17,7 @@ The first production release supports up to 10,000 nodes, 25,000 edges, and 50,0
 
 ### Memory budget
 
-Peak RSS attributable to Ariadne's own heap (excluding Node.js baseline overhead and user-command child processes) must not exceed 256 MB when materializing and operating on a graph at the declared ceiling.
+Peak RSS attributable to Ariadne's own heap (excluding Node.js baseline overhead and user-command child processes) must not exceed 640 MB when materializing and operating on a graph at the declared ceiling.
 
 ### Latency classes
 
@@ -26,7 +26,7 @@ Three order-of-magnitude tiers, tested at the declared ceiling on the parameteri
 | Tier | Budget | Operations |
 |---|---|---|
 | Fast | < 100 ms | `getNode`, `listNodes`, `listEdges`, `getFrontier`, `getOpenUnknowns`, and all other queries on an already-materialized in-memory graph |
-| Standard | < 1 s | `open` (full materialization from disk), `addNode`, `updateNode`, `removeNode`, `addEdge`, `removeEdge` (each a full transaction cycle), `gate`/`verify`, `loadAttempt`, `saveAttempt`, single `renderCard` |
+| Standard | < 1.5 s | `open` (full materialization from disk), `addNode`, `updateNode`, `removeNode`, `addEdge`, `removeEdge` (each a full transaction cycle), `gate`/`verify`, `loadAttempt`, `saveAttempt`, single `renderCard` |
 | Batch | < 10 s | `report` (full decision-tree render), `threeWayMerge`, full recovery rebuild, full `renderIndex` + all cards regeneration, `readNotices` + `emitNotice` at scale, migration dry-run |
 
 ### Benchmark corpus

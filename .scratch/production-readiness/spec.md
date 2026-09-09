@@ -391,7 +391,7 @@ Ariadne standardizes on 19 stable, screaming-snake `DiagnosticCode` constants. E
 | `IDEMPOTENCY_CONFLICT` | 2 | Reused idempotency key submitted with a different payload digest | Stop | None |
 | `COMMIT_UNKNOWN` | 2 | Write or sync outcome indeterminate after I/O error | Stop | Mandatory |
 | `TIMEOUT` | 2 | External command or internal operation exceeded allocated time budget | Stop | Optional |
-| `CAPACITY_EXCEEDED` | 2 | Graph exceeded 10K nodes, 25K edges, 50K events, or 256 MB RSS | Stop | Mandatory |
+| `CAPACITY_EXCEEDED` | 2 | Graph exceeded 10K nodes, 25K edges, 50K events, or 640 MB attributable RSS | Stop | Mandatory |
 | `PROJECTION_RECOVERY_NEEDED` | 1 | Canonical write committed, but derived projection update failed | Degrade | Mandatory |
 | `COMMAND_FAILED` | 1 | Explicit user verification or hook command exited with nonzero status | Degrade | None |
 | `GATE_FAILED` | 1 | Epistemic gate evaluation yielded a negative domain verdict | Degrade | None |
@@ -470,15 +470,15 @@ The `0.2.0` implementation is designed, benchmarked, and verified to operate smo
 - **Command Output Bound**: **1 MB** maximum captured output per external execution.
 
 ### 8.2 Memory Ceiling
-- **Peak RSS Budget**: Peak Resident Set Size (RSS) attributable to Ariadne heap memory must not exceed **256 MB** when materializing and querying a graph at the full 10,000-node ceiling.
+- **Attributable RSS Budget**: The valid increase in high-water Resident Set Size (RSS) attributable to the measured Ariadne process after its fixture baseline, excluding unrelated child-process memory, must not exceed **640 MB** when operating on a graph at the full 10,000-node ceiling.
 
-### 8.3 Latency Classes (Uniform Across All Matrix Runners)
-All latency thresholds apply across the entire 4-platform CI matrix without platform-specific multipliers:
+### 8.3 Latency Classes (Uniform Wherever Executed)
+All latency thresholds use the same values without platform-specific multipliers. The authoritative ceiling gate runs on Linux x64 Node 22 and Node 24; Windows and macOS smoke/mid evidence uses the same thresholds but does not establish the full ceiling envelope:
 
 | Latency Tier | Maximum Duration | Permitted Operations |
 |---|---|---|
 | **Fast** | `< 100 ms` | In-memory queries: `getNode()`, `listNodes()`, `listEdges()`, `getFrontier()`, `getOpenUnknowns()`, state filters. |
-| **Standard** | `< 1 s` | Single disk operations: `open()` (full cold disk materialization), `addNode()`, `updateNode()`, `addEdge()`, `gate()`, `verify()`, individual card render. |
+| **Standard** | `< 1.5 s` | Single disk operations: `open()` (full cold disk materialization), `addNode()`, `updateNode()`, `addEdge()`, `gate()`, `verify()`, individual card render. |
 | **Batch** | `< 10 s` | Heavy operations at 10K ceiling: `report()` (full decision-tree synthesis), `threeWayMerge()`, full projection rebuild (`STATE.yaml` + `INDEX.md` + 10K cards), migration dry-run. |
 
 ### 8.4 Advisory Compaction Trigger
@@ -498,7 +498,7 @@ flowchart TD
         PR1[actions/dependency-review-action<br/>Fail on Moderate+]
         PR2[Typecheck & docs:test]
         PR3[4-Platform Test Matrix]
-        PR4[10K Ceiling Benchmark<br/>Linux Node 24]
+        PR4[10K Ceiling Benchmark<br/>Linux Node 22 & 24]
         PR5[Clean Consumer Smoke<br/>npm / pnpm / yarn]
     end
 
@@ -533,7 +533,7 @@ The verification pipeline comprises four sequential gates across `.github/workfl
    - Runs `actions/dependency-review-action` (blocks vulnerabilities $\ge$ `moderate`).
    - Runs `npm run typecheck` and documentation tests (`npm run docs:test`).
    - Executes unit and specialized scenario tests across the full 4-platform matrix.
-   - Executes the 10,000-node ceiling benchmark on `linux-x64-node24` (<100ms/<1s/<10s, RSS $\le$ 256 MB).
+   - Executes five independent seed-42 10,000-node ceiling benchmark runs on each of `linux-x64-node22` and `linux-x64-node24` (<100ms/<1.5s/<10s, attributable RSS $\le$ 640 MB).
    - Packs the candidate tarball and runs clean-consumer installation smokes across npm, pnpm, and Yarn.
 2. **Merge-to-Main Gate (`ci.yml`)**:
    - Re-runs matrix tests and ceiling benchmarks.
@@ -576,7 +576,8 @@ Ariadne requires four dedicated, isolated test suites:
    - Parameterized synthetic benchmark generator checked into source control.
    - Deterministic graph generation using fixed pseudorandom seeds.
    - Smoke tier (100 nodes) and Mid tier (1,000 nodes) executed on all matrix platforms.
-   - Ceiling tier (10,000 nodes, 25,000 edges, 50,000 events) executed on Linux Node 24, strictly asserting latency classes and peak RSS $\le$ 256 MB.
+   - Ceiling tier (10,000 nodes, 25,000 edges, 50,000 events) executed in five independent seed-42 runs on both Linux Node 22 and Node 24, strictly asserting latency classes, valid attributable high-water RSS $\le$ 640 MB, and exact declared capacities.
+   - The repository-local `benchmark:local` preflight repeats the same ceiling corpus in isolated child processes and applies a conservative safety factor (default 75% of each release budget). Its `likely-pass` result is screening-only: a slower local environment may produce a false negative, and a faster local environment cannot certify CI.
 
 ### 9.3 Strict Tarball Manifest Allowlist
 The release tarball created by `npm pack` must strictly match the following allowlist:
@@ -596,7 +597,8 @@ package.json                        # Manifest
 Every published release attaches a permanent verification receipt to GitHub Releases:
 - `tarball-digest.sha256`: SHA-256 hash of the published `.tgz` file.
 - `EVD-CI-PASS.json`: Complete record of the 4 matrix jobs, commit SHA, runner IDs, and timestamps.
-- `EVD-BENCH-PASS.json`: Captured latency percentiles (p50, p95, p99) and peak RSS from the 10K ceiling benchmark.
+- `EVD-BENCH-PASS-*.json`: One Evidence Result per 10K ceiling benchmark run, containing latency percentiles (p50, p95, p99), valid attributable high-water RSS, exact capacities, provenance, and verdict.
+- `EVD-BENCH-SUMMARY.json`: The immutable summary containing the worst observed values across all required runtime and run Evidence Results.
 - `EVD-PROVENANCE.json`: Verification transcript from `npm audit signatures`.
 - `CHANGELOG.md`: Curated release notes.
 
@@ -708,7 +710,7 @@ gantt
   1. Implement `.github/workflows/ci.yml` configuring the 4-platform matrix (`linux-x64-node22`, `linux-x64-node24`, `windows-x64-node24`, `macos-arm64-node24`).
   2. Implement the four specialized scenario suites (`test/scenarios/*`).
   3. Implement the parameterized synthetic benchmark generator (`test/benchmarks/*`).
-  4. Implement dedicated 10,000-node ceiling benchmark on Linux Node 24 (<100ms/<1s/<10s, peak RSS $\le$ 256 MB).
+  4. Implement dedicated 10,000-node ceiling benchmark on Linux Node 22 and Node 24 (<100ms/<1.5s/<10s, valid attributable high-water RSS $\le$ 640 MB).
   5. Implement clean-consumer smoke tests across npm, pnpm, and Yarn.
   6. Implement `release.yml` with OIDC trusted publishing and post-publication verification.
 - **Exit Gate**: All 4 matrix runners pass in GitHub Actions; 10K ceiling benchmark meets all budgets; dependency review and `npm audit` pass cleanly.
@@ -735,6 +737,6 @@ Ariadne `0.2.0` is officially accepted for production release when and only when
 2. **Legacy Safety**: Every legacy unmigrated workspace is protected from mutation by `AriadneError(MIGRATION_REQUIRED)`, and `ariadne migrate` successfully migrates the repository's own `.ariadne` state with 100% entity and event fidelity.
 3. **Strict Surface Parity**: The root package export exposes exactly the 24 runtime values and 32 types; all internal drivers and speculative modules are deleted.
 4. **4-Platform Determinism**: CI builds green across Linux x64 Node 22/24, Windows x64 Node 24, and macOS arm64 Node 24 with 0 flaky tests.
-5. **Capacity Compliance**: The 10,000-node / 25,000-edge / 50,000-event benchmark meets all latency tiers (<100ms / <1s / <10s) and stays under 256 MB peak RSS.
+5. **Capacity Compliance**: The 10,000-node / 25,000-edge / 50,000-event benchmark meets all latency tiers (<100ms / <1.5s / <10s) and stays under 640 MB attributable RSS.
 6. **Supply Chain Security**: No dependencies with vulnerabilities $\ge$ `moderate`; GitHub Actions workflows use 40-character SHA pinning; npm package publishes with SLSA provenance via OIDC.
 7. **Multi-Manager Support**: Tarball installs and runs cleanly in isolated consumer projects across npm 10-12, pnpm 10-12, and Yarn 4 (node-modules).

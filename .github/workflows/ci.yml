@@ -82,34 +82,43 @@ jobs:
         run: npm run pack:smoke
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 10K ceiling benchmark — Linux Node 24 only, runs after CI matrix passes
+  # 10K ceiling benchmark — authoritative Linux Node 22 and 24 corpus,
+  # runs after the platform matrix passes
   # ──────────────────────────────────────────────────────────────────────────
   benchmark:
-    name: Benchmark / linux-x64-node24
+    name: Benchmark / ${{ matrix.name }}
     runs-on: ubuntu-latest
     needs: ci
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: '22'
+            name: linux-x64-node22
+          - node: '24'
+            name: linux-x64-node24
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 24
+      - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: ${{ matrix.node }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run 10K ceiling benchmark
-        run: npm run benchmark -- --tier ceiling
+      - name: Run authoritative 10K ceiling corpus
+        run: npm run benchmark:corpus
 
       - name: Upload benchmark evidence
         uses: actions/upload-artifact@v4
         with:
-          name: EVD-BENCH-PASS
-          path: EVD-BENCH-PASS.json
-          if-no-files-found: warn
+          name: EVD-BENCH-PASS-node${{ matrix.node }}
+          path: benchmark-evidence/**
+          if-no-files-found: error
 
       - name: Generate CI pass evidence
         shell: bash

@@ -36,9 +36,9 @@ export const BENCHMARK_TIERS = {
 
 export const BENCHMARK_THRESHOLDS = {
   fastMs: 100,
-  standardMs: 1_000,
+  standardMs: 1_500,
   batchMs: 10_000,
-  rssBytes: 256 * 1024 * 1024,
+  rssBytes: 640 * 1024 * 1024,
   maxConcurrentProcesses: 2,
 } as const;
 

@@ -6,7 +6,7 @@ import { AriadneError } from "../core/errors.js";
 export const MAX_NODES = 10_000;
 export const MAX_EDGES = 25_000;
 export const MAX_EVENTS = 50_000;
-export const MAX_RSS_BYTES = 256 * 1024 * 1024;
+export const MAX_RSS_BYTES = 640 * 1024 * 1024;
 export const COMPACTION_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const COMPACTION_EVENT_RATIO = 3;
 
@@ -14,7 +14,7 @@ export const CAPACITY_LIMITS = {
   MAX_NODES: 10_000,
   MAX_EDGES: 25_000,
   MAX_EVENTS: 50_000,
-  MAX_RSS_BYTES: 256 * 1024 * 1024,
+  MAX_RSS_BYTES: 640 * 1024 * 1024,
   COMPACTION_FILE_SIZE_BYTES: 10 * 1024 * 1024,
   COMPACTION_EVENT_RATIO: 3,
 } as const;

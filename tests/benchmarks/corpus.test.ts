@@ -21,7 +21,12 @@ function metric(name: string, tier: MetricResult["tier"], samples: number): Metr
   return {
     operation: name,
     tier,
-    budgetMs: tier === "fast" ? 100 : tier === "standard" ? 1_000 : 10_000,
+    budgetMs:
+      tier === "fast"
+        ? BENCHMARK_THRESHOLDS.fastMs
+        : tier === "standard"
+          ? BENCHMARK_THRESHOLDS.standardMs
+          : BENCHMARK_THRESHOLDS.batchMs,
     percentiles: { p50: 1, p95: 2, p99: 3, min: 1, max: 3, mean: 2, samples },
     passed: true,
   };
@@ -101,5 +106,20 @@ describe("authoritative benchmark corpus", () => {
 
     expect(summary.passed).toBe(false);
     expect(summary.worst.memory.passed).toBe(false);
+  });
+
+  it("gates concurrency by process count while retaining latency as evidence", () => {
+    const measured = report();
+    measured.concurrency.p95Ms = BENCHMARK_THRESHOLDS.standardMs + 100;
+    measured.metrics.concurrency.percentiles.p95 = measured.concurrency.p95Ms;
+    const results = Array.from({ length: CEILING_CORPUS.runs }, (_, index) =>
+      createEvidenceResult(measured, index + 1, runtime),
+    );
+
+    const summary = summarizeBenchmarkCorpus(results);
+
+    expect(summary.passed).toBe(true);
+    expect(summary.worst.concurrency.observed).toBe(2);
+    expect(summary.worst.concurrency.p95Ms).toBe(BENCHMARK_THRESHOLDS.standardMs + 100);
   });
 });

@@ -2,8 +2,8 @@
 /**
  * Ariadne Capacity & Performance Benchmark CLI Runner.
  * Executes configurable tier benchmarks (smoke, mid, ceiling),
- * measures latency classes (Fast <100ms, Standard <1s, Batch <10s),
- * verifies 256 MB peak RSS ceiling, and outputs structured JSON report.
+ * measures latency classes (Fast <100ms, Standard <1.5s, Batch <10s),
+ * verifies 640 MB attributable RSS ceiling, and outputs structured JSON report.
  *
  * Usage:
  *   npm run benchmark -- [options]
