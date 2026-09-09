@@ -27,3 +27,5 @@ declared Node.js 22/24 engine matrix. It correctly failed the latency gate for
 fast queries, full verification, migration dry-run, and concurrency while
 passing the RSS gate. The ticket remains `claimed` until the ceiling evidence
 passes on the supported Linux Node.js 24 runner.
+
+- 2026-09-09 — Follow-up verification on the installed Node.js 22.23.0 and 24.17.0 runtimes: semantic and epistemic association indexes, in-memory query caching, and the already-v1 migration fast path are implemented in commits `8e11c85`, `7bd6aad`, `e1769bb`, and `a8aa35e`. A Node 24 ceiling run completed in 65.43s with exact declared capacities and all latency metrics passing, but attributable RSS was 272.46 MB against the 256 MB limit. Node 22 passed memory and migration dry-run, but a repeat run reported `open` p95 at 1043.671 ms against the 1000 ms standard budget. The ticket remains `claimed` pending reproducible supported-matrix evidence.
