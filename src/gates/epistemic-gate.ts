@@ -175,56 +175,87 @@ const critiqueValue = (value: unknown): boolean => {
 const locked = (node: Node): boolean =>
   node.provenance_type === "DECIDED" || node.status?.toUpperCase() === "DECIDED";
 
-const linkedEvidenceIds = (
-  request: Node,
+type EvidenceIndex = {
+  byId: Map<string, Node>;
+  byRequestId: Map<string, Set<string>>;
+};
+
+const addEvidenceLink = (
+  byRequestId: Map<string, Set<string>>,
+  requestId: string,
+  evidenceId: string,
+): void => {
+  const evidenceIds = byRequestId.get(requestId) ?? new Set<string>();
+  evidenceIds.add(evidenceId);
+  byRequestId.set(requestId, evidenceIds);
+};
+
+const buildEvidenceIndex = (
   evidence: Node[],
   edges: MaterializedGraph["edges"],
-): string[] => {
-  const ids = new Set<string>();
+): EvidenceIndex => {
+  const byId = new Map(evidence.map((candidate) => [candidate.id, candidate]));
+  const byRequestId = new Map<string, Set<string>>();
+
   for (const edge of edges) {
     if (edge.type !== "answers") continue;
-    if (edge.target === request.id) ids.add(edge.source);
-    if (edge.source === request.id) ids.add(edge.target);
+    if (byId.has(edge.source)) addEvidenceLink(byRequestId, edge.target, edge.source);
+    if (byId.has(edge.target)) addEvidenceLink(byRequestId, edge.source, edge.target);
   }
 
   for (const candidate of evidence) {
-    const linked = [
+    for (const requestId of [
       candidate.evidence_request_id,
       candidate.evidenceRequestId,
       candidate.request_id,
       candidate.requestId,
-    ];
-    if (linked.includes(request.id)) ids.add(candidate.id);
+    ]) {
+      if (typeof requestId === "string") addEvidenceLink(byRequestId, requestId, candidate.id);
+    }
   }
-  return [...ids].filter((id) => evidence.some((candidate) => candidate.id === id)).sort();
+
+  return { byId, byRequestId };
+};
+
+const linkedEvidenceIds = (request: Node, index: EvidenceIndex): string[] =>
+  [...(index.byRequestId.get(request.id) ?? [])]
+    .filter((id) => index.byId.has(id))
+    .sort();
+
+type DependencyAdjacency = Map<string, string[]>;
+
+const buildDependencyAdjacency = (
+  nodes: Map<string, Node>,
+  edges: MaterializedGraph["edges"],
+): DependencyAdjacency => {
+  const adjacency = new Map<string, string[]>();
+  for (const edge of edges) {
+    if (
+      (edge.type !== "depends_on" && edge.type !== "derived_from") ||
+      !nodes.has(edge.source) ||
+      !nodes.has(edge.target)
+    ) {
+      continue;
+    }
+    const targets = adjacency.get(edge.source) ?? [];
+    targets.push(edge.target);
+    adjacency.set(edge.source, targets);
+  }
+  for (const targets of adjacency.values()) targets.sort((left, right) => left.localeCompare(right));
+  return adjacency;
 };
 
 const decisionDependencies = (
   decision: Node,
   nodes: Map<string, Node>,
-  edges: MaterializedGraph["edges"],
+  adjacency: DependencyAdjacency,
 ): Node[] => {
-  const adjacency = new Map<string, string[]>();
-  const add = (source: string, target: string): void => {
-    const targets = adjacency.get(source) ?? [];
-    targets.push(target);
-    adjacency.set(source, targets);
-  };
-
-  for (const edge of edges) {
-    if (
-      (edge.type === "depends_on" || edge.type === "derived_from") &&
-      nodes.has(edge.source) &&
-      nodes.has(edge.target)
-    ) {
-      add(edge.source, edge.target);
-    }
-  }
+  const directDependencies = [...(adjacency.get(decision.id) ?? [])];
   for (const dependency of Array.isArray(decision.dependencies) ? decision.dependencies : []) {
-    if (typeof dependency === "string" && nodes.has(dependency)) add(decision.id, dependency);
+    if (typeof dependency === "string" && nodes.has(dependency)) directDependencies.push(dependency);
   }
 
-  const queue = [...(adjacency.get(decision.id) ?? [])].sort();
+  const queue = directDependencies.sort();
   const visited = new Set<string>();
   const result: Node[] = [];
   while (queue.length > 0) {
@@ -233,7 +264,7 @@ const decisionDependencies = (
     visited.add(id);
     const dependency = nodes.get(id);
     if (dependency) result.push(dependency);
-    queue.push(...(adjacency.get(id) ?? []).sort());
+    queue.push(...(adjacency.get(id) ?? []));
   }
   return result;
 };
@@ -299,6 +330,8 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   const diagnostics: EpistemicDiagnostic[] = [];
   const evidence = graph.nodes.filter((node) => node.type === "EVD");
   const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
+  const evidenceIndex = buildEvidenceIndex(evidence, graph.edges);
+  const dependencyAdjacency = buildDependencyAdjacency(nodes, graph.edges);
 
   for (const request of graph.nodes.filter((node) => node.type === "EVDREQ")) {
     const rawClass = claimClassOf(request, nodes);
@@ -319,7 +352,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
       continue;
     }
 
-    const linkedIds = linkedEvidenceIds(request, evidence, graph.edges);
+    const linkedIds = linkedEvidenceIds(request, evidenceIndex);
     if (linkedIds.length === 0) {
       diagnostics.push({
         code: "MISSING_EVIDENCE_RESULT",
@@ -397,7 +430,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   for (const node of graph.nodes.filter((candidate) =>
     ["CLM", "CAN", "DEC", "TRANS"].includes(candidate.type),
   )) {
-    for (const dependency of decisionDependencies(node, nodes, graph.edges)) {
+    for (const dependency of decisionDependencies(node, nodes, dependencyAdjacency)) {
       if (typeof dependency.status !== "string") continue;
       const status = dependency.status.toUpperCase().replaceAll("-", "_");
       if (!invalidDependencyStatus.has(status)) continue;
@@ -411,7 +444,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   }
 
   for (const node of graph.nodes.filter((candidate) => candidate.provenance_type === "DERIVED")) {
-    const dependencies = decisionDependencies(node, nodes, graph.edges);
+    const dependencies = decisionDependencies(node, nodes, dependencyAdjacency);
     if (dependencies.length === 0) {
       diagnostics.push({
         code: "INVALID_DERIVED_PROVENANCE",
@@ -520,7 +553,7 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   }
 
   for (const decision of graph.nodes.filter((node) => node.type === "DEC" && locked(node))) {
-    for (const dependency of decisionDependencies(decision, nodes, graph.edges)) {
+    for (const dependency of decisionDependencies(decision, nodes, dependencyAdjacency)) {
       if (dependency.provenance_type === "ASSUMED" || dependency.provenance_type === "UNKNOWN") {
         diagnostics.push({
           code: "UNRESOLVED_DECISION_DEPENDENCY",
