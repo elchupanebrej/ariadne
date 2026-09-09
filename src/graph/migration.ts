@@ -324,6 +324,7 @@ async function collectRegularFiles(
  */
 export async function collectSourceFiles(
   canonicalRoot: string,
+  options: { skipCards?: boolean } = {},
 ): Promise<Record<string, MigrationFileEntry>> {
   await assertMigrationPath(canonicalRoot, canonicalRoot, "directory");
   for (const directory of [".lock", "backups", "staging"]) {
@@ -336,6 +337,9 @@ export async function collectSourceFiles(
   return collectRegularFiles(canonicalRoot, {
     skipDirectories: new Set([".lock", "backups", "staging"]),
     skipDirectory: (relativePath) => {
+      if (options.skipCards && (relativePath === "cards" || relativePath.startsWith("cards/"))) {
+        return true;
+      }
       const name = path.basename(relativePath);
       return name.startsWith(".migration-old-cards.") || name.startsWith(".migration-rollback-cards.");
     },
@@ -2022,9 +2026,10 @@ export async function migrateWorkspace(
     });
   }
 
-  // Validate the live workspace layout before any parser can follow a source
-  // symlink or any migration step can create an artifact.
-  await collectSourceFiles(canonicalRoot);
+  // Validate the root before inspecting persisted migration state. Full source
+  // hashing is deferred until we know this is a legacy migration; a clean V1
+  // workspace must not hash every derived card merely to report "up to date".
+  await assertMigrationPath(canonicalRoot, canonicalRoot, "directory");
 
   const marker = await readMigrationMarker(canonicalRoot);
   if (marker && options.migrationId !== undefined && marker.migrationId !== options.migrationId) {
@@ -2045,7 +2050,7 @@ export async function migrateWorkspace(
   // Check legacy status
   const legacy = await isLegacyWorkspace(canonicalRoot);
   if (!legacy && !interruptedManifest && !marker) {
-    const files = await collectSourceFiles(canonicalRoot);
+    const files = await collectSourceFiles(canonicalRoot, { skipCards: true });
     const graphPath = path.join(canonicalRoot, "GRAPH.jsonl");
     const noticesPath = path.join(canonicalRoot, "NOTICES.jsonl");
     const { nodes, edges } = await parseAndValidateLegacyGraph(graphPath);
