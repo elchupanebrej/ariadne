@@ -47,6 +47,8 @@ type SemanticEdge = {
   type?: string;
 };
 
+type AssociationIndex = ReadonlyMap<string, ReadonlySet<string>>;
+
 const CANONICAL_SEPARATION_PRINCIPLES = [
   "Time",
   "State/Data",
@@ -76,6 +78,22 @@ const asEdges = (value: unknown): SemanticEdge[] | undefined => {
       (edge.type === undefined || typeof edge.type === "string"),
   );
   return edges.length === value.edges.length ? edges : undefined;
+};
+
+const buildAssociationIndex = (edges: SemanticEdge[]): AssociationIndex => {
+  const associations = new Map<string, Set<string>>();
+
+  for (const edge of edges) {
+    const sourceAssociations = associations.get(edge.source) ?? new Set<string>();
+    sourceAssociations.add(edge.target);
+    associations.set(edge.source, sourceAssociations);
+
+    const targetAssociations = associations.get(edge.target) ?? new Set<string>();
+    targetAssociations.add(edge.source);
+    associations.set(edge.target, targetAssociations);
+  }
+
+  return associations;
 };
 
 const strings = (value: unknown): string[] => {
@@ -120,7 +138,7 @@ const isActive = (node: SemanticNode): boolean => {
 const linkedToContradiction = (
   candidate: SemanticNode,
   contradiction: SemanticNode,
-  edges: SemanticEdge[],
+  associations: AssociationIndex,
 ): boolean => {
   const candidateIds = new Set(
     ["candidate_ids", "candidates", "candidate_mechanisms"].flatMap((key) =>
@@ -129,30 +147,26 @@ const linkedToContradiction = (
   );
   if (candidateIds.has(candidate.id) || references(candidate, contradiction.id)) return true;
 
-  return edges.some(
-    (edge) =>
-      (edge.source === candidate.id && edge.target === contradiction.id) ||
-      (edge.source === contradiction.id && edge.target === candidate.id),
-  );
+  return associations.get(candidate.id)?.has(contradiction.id) ?? false;
 };
 
 const hasCandidateAssociation = (
   candidates: SemanticNode[],
   contradictions: SemanticNode[],
-  edges: SemanticEdge[],
+  associations: AssociationIndex,
 ): boolean =>
   contradictions.some((contradiction) =>
-    candidates.some((candidate) => linkedToContradiction(candidate, contradiction, edges)),
+    candidates.some((candidate) => linkedToContradiction(candidate, contradiction, associations)),
   );
 
 const relatedCandidatesFor = (
   candidates: SemanticNode[],
   contradictions: SemanticNode[],
   contradiction: SemanticNode,
-  edges: SemanticEdge[],
+  associations: AssociationIndex,
 ): SemanticNode[] =>
-  hasCandidateAssociation(candidates, contradictions, edges)
-    ? candidates.filter((candidate) => linkedToContradiction(candidate, contradiction, edges))
+  hasCandidateAssociation(candidates, contradictions, associations)
+    ? candidates.filter((candidate) => linkedToContradiction(candidate, contradiction, associations))
     : candidates;
 
 const separationPrinciples = (candidate: SemanticNode): string[] =>
@@ -280,13 +294,13 @@ const contradictionBreadthFor = (
   candidates: SemanticNode[],
   contradictions: SemanticNode[],
   contradiction: SemanticNode,
-  edges: SemanticEdge[],
+  associations: AssociationIndex,
 ) => {
   const relatedCandidates = relatedCandidatesFor(
     candidates,
     contradictions,
     contradiction,
-    edges,
+    associations,
   );
   const principles = [
     ...new Set(
@@ -306,13 +320,14 @@ export function runSemanticPreflight(input: unknown): SemanticDiagnostic[] {
   if (!nodes || !edges) return [];
 
   const { requiredCandidates, candidates, contradictions } = semanticContextFor(input, nodes);
+  const associations = buildAssociationIndex(edges);
 
   return contradictions.flatMap((contradiction) => {
     const { relatedCandidates, principles } = contradictionBreadthFor(
       candidates,
       contradictions,
       contradiction,
-      edges,
+      associations,
     );
     if (
       principles.length >= requiredCandidates &&
@@ -365,13 +380,14 @@ export function runSemanticGate(input: unknown): SemanticGateResult {
 
   const diagnostics: SemanticDiagnostic[] = [];
   const { requiredCandidates, candidates, contradictions } = semanticContextFor(input, nodes);
+  const associations = buildAssociationIndex(edges);
 
   for (const contradiction of contradictions) {
     const { relatedCandidates, principles } = contradictionBreadthFor(
       candidates,
       contradictions,
       contradiction,
-      edges,
+      associations,
     );
 
     if (relatedCandidates.length < requiredCandidates) {

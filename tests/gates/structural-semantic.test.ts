@@ -107,6 +107,52 @@ describe("runSemanticGate", () => {
     );
   });
 
+  it("falls back to all candidates when no candidate association exists", () => {
+    const result = runSemanticGate(
+      graph([
+        node("CTR-1", "CTR", { status: "ACTIVE" }),
+        node("CAN-1", "CAN", { separation_principle: "Space" }),
+        node("CAN-2", "CAN", { separation_principle: "Time" }),
+        node("CAN-3", "CAN", { separation_principle: "State" }),
+      ]),
+    );
+
+    expect(result).toEqual({ passed: true, diagnostics: [] });
+  });
+
+  it("keeps candidate diagnostics limited to associated candidates", () => {
+    const result = runSemanticGate(
+      graph(
+        [
+          node("CTR-1", "CTR", { status: "ACTIVE" }),
+          node("CAN-1", "CAN", { separation_principle: "Space" }),
+          node("CAN-2", "CAN", { separation_principle: "Time" }),
+          node("CAN-3", "CAN", { separation_principle: "State" }),
+        ],
+        [{ source: "CTR-1", target: "CAN-2", type: "supports" }],
+      ),
+    );
+
+    expect(result.diagnostics).toEqual([
+      {
+        code: "CTR_CANDIDATE_CARDINALITY",
+        message: "Active contradiction CTR-1 requires at least 3 structurally distinct candidate mechanisms",
+        nodeId: "CTR-1",
+        required: 3,
+        actual: 1,
+        candidates: ["CAN-2"],
+      },
+      {
+        code: "CTR_SEPARATION_DIVERSITY",
+        message: "Active contradiction CTR-1 requires at least 3 distinct separation principles",
+        nodeId: "CTR-1",
+        required: 3,
+        actual: 1,
+        candidates: ["CAN-2"],
+      },
+    ]);
+  });
+
   it("does not count invalidated candidates toward contradiction diversity", () => {
     const result = runSemanticGate(
       graph(
