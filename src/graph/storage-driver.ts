@@ -425,6 +425,7 @@ export class FileSystemStorageDriver implements StorageDriver {
 
 export class InMemoryStorageDriver implements StorageDriver {
   public events: GraphEvent[] = [];
+  public revision = 0;
   public state: Record<string, unknown> | null = null;
   public indexContent = "";
   public cards: Map<string, string> = new Map();
@@ -452,7 +453,9 @@ export class InMemoryStorageDriver implements StorageDriver {
 
   async appendEvents(newEvents: readonly GraphEvent[]): Promise<void> {
     assertWithinCapacity({ eventCount: this.events.length + newEvents.length });
+    if (newEvents.length === 0) return;
     this.events.push(...newEvents);
+    this.revision += 1;
   }
 
   async readState(): Promise<Record<string, unknown> | null> {

@@ -59,6 +59,24 @@ describe("EpistemicGraph deep domain module", () => {
     ).rejects.toThrow("Node CAN-1 already exists");
   });
 
+  it("invalidates in-memory query materialization after a mutation", async () => {
+    const graph = EpistemicGraph.inMemory();
+
+    await graph.addNode("UNK", "UNK-1", "Open question", {
+      provenance_type: "UNKNOWN",
+      statement: "Initial question",
+    });
+    expect(await graph.listNodes()).toHaveLength(1);
+
+    await graph.addNode("CAN", "CAN-1", "Candidate", {
+      provenance_type: "PROPOSED",
+      statement: "Candidate answer",
+    });
+
+    expect(await graph.getNode("CAN-1")).toMatchObject({ id: "CAN-1" });
+    expect((await graph.listNodes()).map(({ id }) => id)).toEqual(["CAN-1", "UNK-1"]);
+  });
+
   it("updates nodes and protects immutable fields (id and type)", async () => {
     const graph = EpistemicGraph.inMemory();
 

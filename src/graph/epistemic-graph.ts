@@ -107,6 +107,10 @@ export interface EdgeFilter {
 
 export class EpistemicGraph {
   #driver!: StorageDriver;
+  #inMemoryQueryCache?: {
+    revision: number;
+    graph: MaterializedGraph;
+  };
 
   private constructor() {
   }
@@ -145,28 +149,40 @@ export class EpistemicGraph {
     return applyEvents({ nodes: [], edges: [] }, events);
   }
 
+  private async materializeForQuery(): Promise<MaterializedGraph> {
+    if (!(this.#driver instanceof InMemoryStorageDriver)) return this.materialize();
+
+    if (this.#inMemoryQueryCache?.revision === this.#driver.revision) {
+      return this.#inMemoryQueryCache.graph;
+    }
+
+    const graph = await this.materialize();
+    this.#inMemoryQueryCache = { revision: this.#driver.revision, graph };
+    return graph;
+  }
+
   async getState(): Promise<AriadneState> {
     const raw = await this.#driver.readState();
     return (raw ?? {}) as AriadneState;
   }
 
   async getFrontier(): Promise<string[]> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return graph.nodes.filter(isFrontierNode).map((n) => n.id);
   }
 
   async getOpenUnknowns(): Promise<string[]> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return graph.nodes.filter((n) => isFrontierNode(n) && n.type === "UNK").map((n) => n.id);
   }
 
   async getNode(id: string): Promise<Node | undefined> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return graph.nodes.find((node) => node.id === id);
   }
 
   async listNodes(filter?: NodeFilter): Promise<Node[]> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return graph.nodes.filter((node) => {
       if (node.status === "REMOVED" || (node as any).tombstone) return false;
       if (filter?.type && node.type !== filter.type) return false;
@@ -178,7 +194,7 @@ export class EpistemicGraph {
   }
 
   async listEdges(filter?: EdgeFilter): Promise<EpistemicEdge[]> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return graph.edges.filter((edge) => {
       if (filter?.from && edge.source !== filter.from) return false;
       if (filter?.to && edge.target !== filter.to) return false;
@@ -188,7 +204,7 @@ export class EpistemicGraph {
   }
 
   async renderIndex(): Promise<string> {
-    const graph = await this.materialize();
+    const graph = await this.materializeForQuery();
     return renderIndex(graph);
   }
 
