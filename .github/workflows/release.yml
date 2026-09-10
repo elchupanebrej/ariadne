@@ -6,13 +6,11 @@ on:
       - 'v*'
 
 permissions:
-  contents: write   # create GitHub Release and upload assets
-  id-token: write   # OIDC trusted publishing (npm publish --provenance)
-  packages: read
+  contents: read
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
-  # verify — pre-flight checks before publishing
+  # verify — repository-wide pre-publication checks
   # ────────────────────────────────────────────────────────────────────────────
   verify:
     name: Verify
@@ -20,14 +18,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
@@ -45,118 +42,157 @@ jobs:
           fi
           echo "Version parity confirmed: $PKG_VERSION"
 
-      - name: CHANGELOG check
-        shell: bash
+      - name: Required release notes
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          if [ ! -f CHANGELOG.md ]; then
-            echo "::error::CHANGELOG.md not found. Please add release notes for v$VERSION before tagging."
-            exit 1
-          fi
-          if ! grep -qF "$VERSION" CHANGELOG.md; then
-            echo "::error::Version $VERSION not found in CHANGELOG.md. Please document release notes before tagging."
-            exit 1
-          fi
-          echo "CHANGELOG.md contains release notes for $VERSION"
+          mkdir -p release-evidence
+          npm run release:check-notes -- --output release-evidence/RELEASE-NOTES.md
+
+      - name: Build
+        run: npm run build
 
       - name: Type check
         run: npm run typecheck
 
-      - name: Pack smoke (tarball zero-leakage check)
-        run: npm run pack:smoke
+      - name: Security audit
+        run: npm audit --audit-level=high
 
       - name: Test
         run: npm test
+
+      - name: Tarball and clean-consumer gates
+        run: npm run pack:smoke
+
+  benchmark:
+    name: Benchmark / ${{ matrix.name }}
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: '22.23.0'
+            name: node22
+          - node: '24.17.0'
+            name: node24
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run authoritative benchmark corpus
+        run: npm run benchmark:corpus
+
+      - name: Shape benchmark evidence for the release bundle
+        run: |
+          mkdir -p "release-evidence/benchmark-${{ matrix.name }}"
+          cp benchmark-evidence/*.json "release-evidence/benchmark-${{ matrix.name }}/"
+          node scripts/write-benchmark-ci-evidence.mjs \
+            --output "release-evidence/benchmark-${{ matrix.name }}/EVD-CI-PASS-${{ matrix.name }}.json"
+
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-benchmark-${{ matrix.name }}
+          path: release-evidence
+          if-no-files-found: error
+
+  preflight:
+    name: Assemble pre-publication evidence
+    needs: [verify, benchmark]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download benchmark evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: release-benchmark-*
+          path: release-evidence
+          merge-multiple: true
+
+      - name: Re-check release notes and build the release tarball
+        shell: bash
+        run: |
+          npm run release:check-notes -- --output release-evidence/RELEASE-NOTES.md
+          cp CHANGELOG.md release-evidence/CHANGELOG.md
+          npm run build
+          TARBALL=$(npm pack --pack-destination release-evidence 2>/dev/null | tail -n 1)
+          echo "TARBALL=release-evidence/$TARBALL" >> "$GITHUB_ENV"
+
+      - name: Validate tarball allowlist and preflight evidence
+        run: |
+          npm run release:preflight-evidence -- \
+            --tarball "$TARBALL" \
+            --benchmark-summary release-evidence/benchmark-node22/EVD-BENCH-SUMMARY.json \
+            --benchmark-summary release-evidence/benchmark-node24/EVD-BENCH-SUMMARY.json \
+            --output release-evidence/EVD-RELEASE-PRE.json
+
+      - name: Upload preflight evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-preflight
+          path: release-evidence
+          if-no-files-found: error
 
   # ────────────────────────────────────────────────────────────────────────────
   # publish — build and publish to npm with OIDC provenance
   # ────────────────────────────────────────────────────────────────────────────
   publish:
     name: Publish
-    needs: verify
+    needs: preflight
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build dist
-        run: npm run build
-
-      - name: Publish to npm with provenance
+      - name: Publish to npm with OIDC provenance
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Poll npm registry until package is available
-        shell: bash
+      - name: Verify registry, dist-tag, CLI, and signatures
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Polling npm registry for ariadne-reasoning@$VERSION (up to 255s)..."
-          FOUND=false
-          for DELAY in 1 2 4 8 16 32 64 128; do
-            if npm view "ariadne-reasoning@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
-              echo "Package ariadne-reasoning@$VERSION is available on npm!"
-              FOUND=true
-              break
-            fi
-            echo "Not yet available. Waiting ${DELAY}s..."
-            sleep $DELAY
-          done
-          if [ "$FOUND" != "true" ]; then
-            echo "::error::Package ariadne-reasoning@$VERSION did not appear on npm within 255s."
-            exit 1
-          fi
+          mkdir -p release-evidence
+          npm run release:postcheck -- --output release-evidence/EVD-RELEASE-POST.json
 
-      - name: Verify dist-tag points to new version
-        shell: bash
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Checking dist-tags for ariadne-reasoning..."
-          npm dist-tag ls ariadne-reasoning
-          LATEST=$(npm dist-tag ls ariadne-reasoning | grep '^latest:' | awk '{print $2}')
-          echo "latest dist-tag: $LATEST"
-          if [ "$LATEST" != "$VERSION" ]; then
-            echo "::error::dist-tag 'latest' is '$LATEST', expected '$VERSION'"
-            exit 1
-          fi
-          echo "dist-tag 'latest' correctly points to $VERSION"
-
-      - name: CLI smoke test (npx ariadne-reasoning --version)
-        shell: bash
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Running: npx --yes ariadne-reasoning@$VERSION --version"
-          OUTPUT=$(npx --yes "ariadne-reasoning@$VERSION" --version 2>&1 || true)
-          echo "Output: $OUTPUT"
-          if ! echo "$OUTPUT" | grep -q "$VERSION"; then
-            echo "::error::CLI smoke test failed — output did not contain '$VERSION'. Got: $OUTPUT"
-            exit 1
-          fi
-          echo "CLI smoke test passed"
-
-      - name: Signature verification (npm audit signatures)
-        shell: bash
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          TMPDIR=$(mktemp -d)
-          echo "Installing ariadne-reasoning@$VERSION in ephemeral consumer dir: $TMPDIR"
-          cd "$TMPDIR"
-          npm init -y
-          npm install "ariadne-reasoning@$VERSION"
-          echo "Running npm audit signatures..."
-          npm audit signatures
-          echo "Signature verification passed"
+      - name: Upload post-publication evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-postpublication
+          path: release-evidence/EVD-RELEASE-POST.json
+          if-no-files-found: error
 
   # ────────────────────────────────────────────────────────────────────────────
   # evidence — assemble Release Evidence Bundle and create GitHub Release
@@ -165,83 +201,81 @@ jobs:
     name: Evidence
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '24'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download benchmark evidence (if available)
-        uses: actions/download-artifact@v4
+      - name: Download preflight and post-publication evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: EVD-BENCH-PASS
-          path: .
-        continue-on-error: true
+          pattern: release-*
+          path: release-evidence
+          merge-multiple: true
 
       - name: Generate EVD-PROVENANCE.json
-        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_COMMIT: ${{ github.sha }}
+          RELEASE_WORKFLOW: ${{ github.workflow }}
+          RELEASE_RUN_ID: ${{ github.run_id }}
         run: |
-          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          printf '{\n  "tag": "%s",\n  "commit": "%s",\n  "timestamp": "%s",\n  "workflow": "%s",\n  "run_id": "%s"\n}\n' \
-            "${{ github.ref_name }}" \
-            "${{ github.sha }}" \
-            "$TIMESTAMP" \
-            "${{ github.workflow }}" \
-            "${{ github.run_id }}" > EVD-PROVENANCE.json
-          echo "Generated EVD-PROVENANCE.json:"
-          cat EVD-PROVENANCE.json
+          node --input-type=module -e '
+            import { writeFile } from "node:fs/promises";
+            await writeFile("release-evidence/EVD-PROVENANCE.json", `${JSON.stringify({
+              schemaVersion: 1,
+              kind: "release-provenance",
+              tag: process.env.RELEASE_TAG,
+              commit: process.env.RELEASE_COMMIT,
+              workflow: process.env.RELEASE_WORKFLOW,
+              runId: process.env.RELEASE_RUN_ID,
+              timestamp: new Date().toISOString(),
+            }, null, 2)}\n`);
+          '
 
       - name: Generate tarball digest
-        shell: bash
         run: |
-          npm run build
-          TARBALL=$(npm pack 2>/dev/null | tail -1)
-          echo "Packed tarball: $TARBALL"
-          sha256sum "$TARBALL" > tarball-digest.sha256
-          echo "Digest:"
-          cat tarball-digest.sha256
+          sha256sum release-evidence/*.tgz > release-evidence/tarball-digest.sha256
 
-      - name: Generate EVD-CI-PASS.json
-        shell: bash
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          printf '{\n  "timestamp": "%s",\n  "tag": "v%s",\n  "all_passed": true\n}\n' \
-            "$TIMESTAMP" "$VERSION" > EVD-CI-PASS.json
-          echo "Generated EVD-CI-PASS.json:"
-          cat EVD-CI-PASS.json
+      - name: Assemble complete reproducible release evidence
+        run: npm run release:evidence -- --input release-evidence --output release-evidence/EVD-RELEASE.json
 
       - name: Upload release evidence artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-evidence-${{ github.ref_name }}
-          path: |
-            tarball-digest.sha256
-            EVD-CI-PASS.json
-            EVD-BENCH-PASS.json
-            EVD-PROVENANCE.json
-            CHANGELOG.md
-          if-no-files-found: warn
+          path: release-evidence
+          if-no-files-found: error
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
           name: ${{ github.ref_name }}
-          body: "Release ${{ github.ref_name }}. See CHANGELOG.md for details."
+          body_path: release-evidence/RELEASE-NOTES.md
           files: |
-            tarball-digest.sha256
-            EVD-CI-PASS.json
-            EVD-BENCH-PASS.json
-            EVD-PROVENANCE.json
-            CHANGELOG.md
-          fail_on_unmatched_files: false
+            release-evidence/EVD-RELEASE.json
+            release-evidence/EVD-RELEASE-PRE.json
+            release-evidence/EVD-RELEASE-POST.json
+            release-evidence/EVD-PROVENANCE.json
+            release-evidence/RELEASE-NOTES.md
+            release-evidence/CHANGELOG.md
+            release-evidence/tarball-digest.sha256
+            release-evidence/*.tgz
+            release-evidence/benchmark-node22/EVD-CI-PASS-node22.json
+            release-evidence/benchmark-node22/EVD-BENCH-PASS-*.json
+            release-evidence/benchmark-node22/EVD-BENCH-SUMMARY.json
+            release-evidence/benchmark-node24/EVD-CI-PASS-node24.json
+            release-evidence/benchmark-node24/EVD-BENCH-PASS-*.json
+            release-evidence/benchmark-node24/EVD-BENCH-SUMMARY.json
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

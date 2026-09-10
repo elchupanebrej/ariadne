@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { mkdirSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const CANONICAL_SKILLS = ["ariadne", "codebase-design", "grilling", "domain-modeling"];
@@ -16,6 +16,10 @@ function argument(name, fallback) {
 
 function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
+}
+
+function evidencePath(path) {
+  return relative(process.cwd(), resolve(path)).split(sep).join("/");
 }
 
 function tarEntries(tarball) {
@@ -62,7 +66,8 @@ export async function writePreflightEvidence({
 } = {}) {
   if (!tarball) throw new Error("--tarball is required for release preflight evidence");
   const packageJson = JSON.parse(readFileSync(resolve("package.json"), "utf8"));
-  const entries = tarEntries(resolve(tarball));
+  const tarballPath = resolve(tarball);
+  const entries = tarEntries(tarballPath);
   assertProductionTarball(entries, packageJson);
   if (benchmarkSummaries.length === 0) throw new Error("at least one benchmark summary is required");
   const summaries = benchmarkSummaries.map((path) => JSON.parse(readFileSync(resolve(path), "utf8")));
@@ -86,8 +91,8 @@ export async function writePreflightEvidence({
     },
     benchmark: summaries,
     tarball: {
-      file: resolve(tarball),
-      sha256: sha256(resolve(tarball)),
+      file: evidencePath(tarballPath),
+      sha256: sha256(tarballPath),
       entries,
       canonicalSkills: CANONICAL_SKILLS,
     },
