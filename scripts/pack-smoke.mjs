@@ -14,6 +14,9 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicConsumerFixture = join(repoRoot, "tests/fixtures/public-api-consumer");
+const packageJson = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8"));
+const packageName = packageJson.name;
+const packageVersion = packageJson.version;
 
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
 const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -103,7 +106,7 @@ try {
   // 1. Pack the project
   step("npm pack", () => {
     run(npmCmd, ["pack", "--pack-destination", tmpBase], repoRoot);
-    const tgz = join(tmpBase, "ariadne-reasoning-0.2.0.tgz");
+    const tgz = join(tmpBase, `${packageName.replace("/", "-")}-${packageVersion}.tgz`);
     if (!existsSync(tgz)) {
       throw new Error(`expected tarball not found: ${tgz}`);
     }
@@ -157,8 +160,8 @@ try {
 
     // CLI binary test
     const cliOutput = run(npxCmd, ["ariadne", "--version"], consumerNpm).toString().trim();
-    if (cliOutput !== "0.2.0") {
-      throw new Error(`npx ariadne --version returned "${cliOutput}", expected "0.2.0"`);
+    if (cliOutput !== packageVersion) {
+      throw new Error(`npx ariadne --version returned "${cliOutput}", expected "${packageVersion}"`);
     }
 
     // Runtime Node import test
@@ -172,7 +175,7 @@ try {
       const checker = join(
         consumerNpm,
         "node_modules",
-        "ariadne-reasoning",
+        ...packageName.split("/"),
         ".agents",
         "skills",
         skill,
@@ -237,8 +240,8 @@ try {
     run(pnpmRunner.cmd, [...pnpmRunner.prefixArgs, "add", tarball], consumerPnpm);
 
     const pnpmCliOutput = run(npxCmd, ["ariadne", "--version"], consumerPnpm).toString().trim();
-    if (pnpmCliOutput !== "0.2.0") {
-      throw new Error(`pnpm: npx ariadne --version returned "${pnpmCliOutput}", expected "0.2.0"`);
+    if (pnpmCliOutput !== packageVersion) {
+      throw new Error(`pnpm: npx ariadne --version returned "${pnpmCliOutput}", expected "${packageVersion}"`);
     }
   });
 
@@ -257,8 +260,8 @@ try {
     run(yarnRunner.cmd, [...yarnRunner.prefixArgs, "add", tarball, "--ignore-engines"], consumerYarn);
 
     const yarnCliOutput = run(npxCmd, ["ariadne", "--version"], consumerYarn).toString().trim();
-    if (yarnCliOutput !== "0.2.0") {
-      throw new Error(`yarn: npx ariadne --version returned "${yarnCliOutput}", expected "0.2.0"`);
+    if (yarnCliOutput !== packageVersion) {
+      throw new Error(`yarn: npx ariadne --version returned "${yarnCliOutput}", expected "${packageVersion}"`);
     }
   });
 

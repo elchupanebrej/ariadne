@@ -57,7 +57,11 @@
     "prepack": "npm run build",
     "benchmark": "tsx scripts/run-benchmark.mjs",
     "benchmark:corpus": "tsx scripts/run-benchmark-corpus.mjs",
-    "benchmark:local": "tsx scripts/run-local-preflight.mjs"
+    "benchmark:local": "tsx scripts/run-local-preflight.mjs",
+    "release:check-notes": "node scripts/check-release-notes.mjs",
+    "release:preflight-evidence": "node scripts/write-release-preflight-evidence.mjs",
+    "release:postcheck": "node scripts/verify-published-release.mjs",
+    "release:evidence": "node scripts/assemble-release-evidence.mjs"
   },
   "dependencies": {
     "zod": "^4.1.5"
