@@ -13,6 +13,12 @@ export const CEILING_CORPUS = {
   batchIterations: 5,
 } as const;
 
+/**
+ * Exact runtimes used by the authoritative ceiling gate. Keeping the patch
+ * versions fixed makes Evidence Results comparable across CI runs.
+ */
+export const AUTHORITATIVE_NODE_VERSIONS = ["v22.23.0", "v24.17.0"] as const;
+
 export const REQUIRED_BENCHMARK_METRICS = [
   "getNode",
   "listNodes",
@@ -36,6 +42,15 @@ export interface BenchmarkRuntime {
   nodeMajor: number;
   platform: string;
   arch: string;
+}
+
+export function isAuthoritativeCeilingRuntime(runtime: BenchmarkRuntime): boolean {
+  return (
+    runtime.platform === "linux" &&
+    runtime.arch === "x64" &&
+    ((runtime.nodeVersion === AUTHORITATIVE_NODE_VERSIONS[0] && runtime.nodeMajor === 22) ||
+      (runtime.nodeVersion === AUTHORITATIVE_NODE_VERSIONS[1] && runtime.nodeMajor === 24))
+  );
 }
 
 export interface BenchmarkEvidenceResult {
@@ -166,11 +181,19 @@ export function summarizeBenchmarkCorpus(
     failures.push("corpus must contain exactly five uniquely numbered runs");
   }
 
+  const runtimeKeys = new Set(
+    results.map((result) => `${result.runtime.platform}/${result.runtime.arch}/${result.runtime.nodeVersion}`),
+  );
+  if (runtimeKeys.size > 1) failures.push("corpus must use one authoritative runtime");
+
   const capacities = BENCHMARK_TIERS.ceiling;
   const completedReports = results.filter(
     (result) => result.measurements && result.observedCapacities,
   );
   for (const result of results) {
+    if (!isAuthoritativeCeilingRuntime(result.runtime)) {
+      failures.push(`run ${result.run}: runtime is not an authoritative Linux x64 Node 22/24 runtime`);
+    }
     if (!result.measurements || !result.observedCapacities) {
       failures.push(`run ${result.run}: benchmark process did not return a complete report`);
       continue;
@@ -178,8 +201,21 @@ export function summarizeBenchmarkCorpus(
     if (result.tier !== "ceiling" || result.seed !== CEILING_CORPUS.seed) {
       failures.push(`run ${result.run}: tier or seed does not match the authoritative corpus`);
     }
+    if (!hasExactCapacities(result.capacities, capacities)) {
+      failures.push(`run ${result.run}: declared capacities do not match the authoritative ceiling`);
+    }
     if (!hasExpectedSamples(result.measurements.metrics)) {
       failures.push(`run ${result.run}: sample counts do not match 20/10/5`);
+    }
+    if (
+      result.samples.fast !== CEILING_CORPUS.fastIterations ||
+      result.samples.standard !== CEILING_CORPUS.standardIterations ||
+      result.samples.batch !== CEILING_CORPUS.batchIterations
+    ) {
+      failures.push(`run ${result.run}: evidence sample counts do not match 20/10/5`);
+    }
+    if (!hasApprovedThresholds(result.thresholds)) {
+      failures.push(`run ${result.run}: thresholds do not match the approved release baseline`);
     }
     if (!hasExactCapacities(result.observedCapacities, capacities)) {
       failures.push(`run ${result.run}: observed capacities do not match the declared ceiling`);
@@ -292,5 +328,15 @@ function hasExactCapacities(
 ): boolean {
   return Object.keys(declared).every(
     (key) => observed[key as keyof BenchmarkCapacities] === declared[key as keyof BenchmarkCapacities],
+  );
+}
+
+function hasApprovedThresholds(thresholds: typeof BENCHMARK_THRESHOLDS): boolean {
+  return (
+    thresholds.fastMs === BENCHMARK_THRESHOLDS.fastMs &&
+    thresholds.standardMs === BENCHMARK_THRESHOLDS.standardMs &&
+    thresholds.batchMs === BENCHMARK_THRESHOLDS.batchMs &&
+    thresholds.rssBytes === BENCHMARK_THRESHOLDS.rssBytes &&
+    thresholds.maxConcurrentProcesses === BENCHMARK_THRESHOLDS.maxConcurrentProcesses
   );
 }

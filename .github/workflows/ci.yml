@@ -87,15 +87,16 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────────
   benchmark:
     name: Benchmark / ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: ci
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
-          - node: '22'
+          - node: '22.23.0'
             name: linux-x64-node22
-          - node: '24'
+          - node: '24.17.0'
             name: linux-x64-node24
     steps:
       - name: Checkout
@@ -121,17 +122,11 @@ jobs:
           if-no-files-found: error
 
       - name: Generate CI pass evidence
-        shell: bash
-        run: |
-          echo '{
-            "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",
-            "matrix_jobs": 4,
-            "all_passed": true
-          }' > EVD-CI-PASS.json
+        run: node scripts/write-benchmark-ci-evidence.mjs
 
       - name: Upload CI pass evidence
         uses: actions/upload-artifact@v4
         with:
-          name: EVD-CI-PASS
+          name: EVD-CI-PASS-node${{ matrix.node }}
           path: EVD-CI-PASS.json
           if-no-files-found: error

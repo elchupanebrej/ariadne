@@ -11,9 +11,11 @@ const workerPath = resolve(repoRoot, "scripts/run-benchmark-once.mjs");
 const runTimeoutMs = 180_000;
 
 const {
+  AUTHORITATIVE_NODE_VERSIONS,
   CEILING_CORPUS,
   createEvidenceResult,
   createFailedEvidenceResult,
+  isAuthoritativeCeilingRuntime,
   summarizeBenchmarkCorpus,
 } = await import(resolve(repoRoot, "tests/benchmarks/corpus.ts"));
 
@@ -28,9 +30,9 @@ function runtime() {
 
 function assertSupportedRuntime() {
   const current = runtime();
-  if (current.platform !== "linux" || current.arch !== "x64" || ![22, 24].includes(current.nodeMajor)) {
+  if (!isAuthoritativeCeilingRuntime(current)) {
     throw new Error(
-      `authoritative ceiling corpus requires Linux x64 Node 22/24; got ${current.platform}/${current.arch} ${current.nodeVersion}`,
+      `authoritative ceiling corpus requires Linux x64 Node ${AUTHORITATIVE_NODE_VERSIONS.join(" or ")}; got ${current.platform}/${current.arch} ${current.nodeVersion}`,
     );
   }
   return current;

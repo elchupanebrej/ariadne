@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { BENCHMARK_THRESHOLDS, BENCHMARK_TIERS } from "./generator.js";
 import {
+  AUTHORITATIVE_NODE_VERSIONS,
   CEILING_CORPUS,
   REQUIRED_BENCHMARK_METRICS,
   createEvidenceResult,
   createFailedEvidenceResult,
+  isAuthoritativeCeilingRuntime,
   summarizeBenchmarkCorpus,
   type BenchmarkRuntime,
 } from "./corpus.js";
@@ -69,6 +71,14 @@ function report(): BenchmarkReport {
 }
 
 describe("authoritative benchmark corpus", () => {
+  it("accepts only pinned Linux x64 Node runtimes for authoritative evidence", () => {
+    expect(AUTHORITATIVE_NODE_VERSIONS).toEqual(["v22.23.0", "v24.17.0"]);
+    expect(isAuthoritativeCeilingRuntime(runtime)).toBe(true);
+    expect(isAuthoritativeCeilingRuntime({ ...runtime, nodeVersion: "v26.3.1", nodeMajor: 26 })).toBe(false);
+    expect(isAuthoritativeCeilingRuntime({ ...runtime, platform: "win32" })).toBe(false);
+    expect(isAuthoritativeCeilingRuntime({ ...runtime, arch: "arm64" })).toBe(false);
+  });
+
   it("summarizes five complete ceiling Evidence Results by worst observed values", () => {
     const results = Array.from({ length: CEILING_CORPUS.runs }, (_, index) =>
       createEvidenceResult(report(), index + 1, runtime),
@@ -121,5 +131,32 @@ describe("authoritative benchmark corpus", () => {
     expect(summary.passed).toBe(true);
     expect(summary.worst.concurrency.observed).toBe(2);
     expect(summary.worst.concurrency.p95Ms).toBe(BENCHMARK_THRESHOLDS.standardMs + 100);
+  });
+
+  it("fails closed when evidence mixes authoritative runtimes", () => {
+    const results = Array.from({ length: CEILING_CORPUS.runs }, (_, index) =>
+      createEvidenceResult(report(), index + 1, index === 0 ? runtime : { ...runtime, nodeVersion: "v22.23.0", nodeMajor: 22 }),
+    );
+
+    const summary = summarizeBenchmarkCorpus(results);
+
+    expect(summary.passed).toBe(false);
+    expect(summary.failures).toContain("corpus must use one authoritative runtime");
+  });
+
+  it("fails closed when evidence declares a different release baseline", () => {
+    const invalid = createEvidenceResult(report(), 1, runtime);
+    invalid.thresholds = { ...invalid.thresholds, rssBytes: invalid.thresholds.rssBytes - 1 };
+    const results = [
+      invalid,
+      ...Array.from({ length: CEILING_CORPUS.runs - 1 }, (_, index) =>
+        createEvidenceResult(report(), index + 2, runtime),
+      ),
+    ];
+
+    const summary = summarizeBenchmarkCorpus(results);
+
+    expect(summary.passed).toBe(false);
+    expect(summary.failures).toContain("run 1: thresholds do not match the approved release baseline");
   });
 });
