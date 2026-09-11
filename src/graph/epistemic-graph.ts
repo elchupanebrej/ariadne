@@ -56,6 +56,7 @@ import {
   isFrontierNode,
   isTerminalNode,
   stateForGraph,
+  StateSchema,
   type AriadneState,
   type GraphEvent,
   type MaterializedGraph,
@@ -74,11 +75,41 @@ export interface EdgeFilter {
   relation?: string;
 }
 
+/**
+ * Transactional view of the graph, valid only inside a `batch` callback.
+ *
+ * - `graph` is the materialized snapshot taken at lock acquisition; events
+ *   queued with `appendEvents` are not visible inside the callback.
+ * - If the callback throws, nothing from the batch is committed.
+ * - After a successful callback, queued events are validated, folded, and
+ *   appended as canonical records; the index/cards/state projections are then
+ *   regenerated; finally the queued projection operations run in call order.
+ * - The all-or-nothing guarantee covers the canonical event append.
+ *   Projections are derived and rebuildable, consistent with the storage
+ *   driver's projection-recovery model: a projection failure after the append
+ *   surfaces as a recoverable projection error rather than rolling events back.
+ */
 export interface GraphBatch {
+  /** Materialized graph snapshot as of lock acquisition. */
   readonly graph: MaterializedGraph;
+  /**
+   * Raw workspace state as committed on disk, validated and with
+   * `schema_version` stripped, mirroring `GraphStorage.readState`.
+   */
+  readState(): Promise<Record<string, unknown> | null>;
+  /** Raw card content for `id`, or `undefined` when the card does not exist. */
+  readCard(id: string): Promise<string | undefined>;
+  /** Card ids currently present in the cards projection, sorted. */
+  listCards(): Promise<string[]>;
+  /** Queue canonical events; they become visible only after a successful callback. */
   appendEvents(events: readonly GraphEvent[]): void;
+  /** Queue card projection writes; executed in call order after commit. */
+  writeCards(cards: ReadonlyArray<{ id: string; content: string }>): void;
+  /** Queue a full index/card regeneration; executed in call order after commit. */
   regenerateIndex(): void;
+  /** Queue a raw state projection write; executed in call order after commit. */
   writeStateProjection(content: string): void;
+  /** Queue a card deletion; executed in call order after commit. */
   deleteCard(id: string): void;
 }
 
@@ -402,6 +433,18 @@ export class EpistemicGraph {
     });
   }
 
+  /**
+   * Run `operation` with the storage lock held and a transactional `GraphBatch`.
+   *
+   * `batch.graph` is a snapshot as of lock acquisition; events queued through
+   * `appendEvents` are not visible inside the callback. If the callback throws,
+   * nothing is committed. Otherwise the queued events are validated, folded,
+   * and appended as canonical records — this append is all-or-nothing — then
+   * the index/cards/state projections are regenerated, and the queued
+   * projection operations run in call order. Projections are derived and
+   * rebuildable; a projection failure after the append is reported through the
+   * storage driver's projection-recovery path, not by rolling events back.
+   */
   async batch<T>(operation: (batch: GraphBatch) => T | Promise<T>): Promise<T> {
     return await this.#driver.withLock(async () => {
       const current = await this.materialize();
@@ -409,8 +452,25 @@ export class EpistemicGraph {
       const projections: Array<() => Promise<void>> = [];
       const batch: GraphBatch = {
         graph: current,
+        readState: async () => {
+          const raw = await this.#driver.readState();
+          if (raw === null) return null;
+          const parsed = StateSchema.safeParse(raw);
+          if (!parsed.success) {
+            throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+          }
+          const state = { ...(parsed.data as Record<string, unknown>) };
+          delete state.schema_version;
+          return state;
+        },
+        readCard: (id) => this.#driver.readCard(id),
+        listCards: () => this.#driver.listCards(),
         appendEvents: (batchEvents) => {
           events.push(...batchEvents);
+        },
+        writeCards: (cards) => {
+          const queued = [...cards];
+          projections.push(() => this.#driver.writeCards(queued));
         },
         regenerateIndex: () => {
           projections.push(() => this.regenerateIndexUnlocked());

@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, rm } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { AriadneError } from "../core/errors.js";
@@ -36,6 +36,8 @@ export interface StorageDriver {
   readEvents(): Promise<GraphEvent[]>;
   appendEvents(events: readonly GraphEvent[]): Promise<void>;
   readState(): Promise<Record<string, unknown> | null>;
+  readCard(id: string): Promise<string | undefined>;
+  listCards(): Promise<string[]>;
   writeState(state: Record<string, unknown>): Promise<void>;
   writeStateProjection(content: string): Promise<void>;
   writeIndex(content: string): Promise<void>;
@@ -359,6 +361,32 @@ export class FileSystemStorageDriver implements StorageDriver {
     });
   }
 
+  async readCard(id: string): Promise<string | undefined> {
+    return this.withStableRead(async () => {
+      try {
+        return await readFile(join(this.cardsDir, `${id}.md`), "utf8");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+        throw error;
+      }
+    });
+  }
+
+  async listCards(): Promise<string[]> {
+    return this.withStableRead(async () => {
+      try {
+        const entries = await readdir(this.cardsDir, { withFileTypes: true });
+        return entries
+          .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+          .map((entry) => entry.name.slice(0, -3))
+          .sort();
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+        throw error;
+      }
+    });
+  }
+
   async writeState(state: Record<string, unknown>): Promise<void> {
     await this.inMutation(async () => {
       const toWrite = { schema_version: 1, ...state };
@@ -460,6 +488,14 @@ export class InMemoryStorageDriver implements StorageDriver {
 
   async readState(): Promise<Record<string, unknown> | null> {
     return this.state ? JSON.parse(JSON.stringify(this.state)) : null;
+  }
+
+  async readCard(id: string): Promise<string | undefined> {
+    return this.cards.get(id);
+  }
+
+  async listCards(): Promise<string[]> {
+    return [...this.cards.keys()].sort();
   }
 
   async writeState(state: Record<string, unknown>): Promise<void> {

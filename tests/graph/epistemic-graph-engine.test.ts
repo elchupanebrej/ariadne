@@ -1,7 +1,8 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { GraphEvent } from "../../src/graph/domain.js";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const node = (id: string) => ({
@@ -49,15 +50,13 @@ describe("EpistemicGraph engine surface", () => {
         statement: "The service can meet the target capacity",
       });
 
-      await writeFile(join(root, "INDEX.md"), "stale index\n", "utf8");
       await writeFile(join(root, "cards", "ASM-1.md"), "stale card\n", "utf8");
 
       await graph.regenerateIndex();
 
-      expect(await readFile(join(root, "INDEX.md"), "utf8")).toContain("ASM-1");
-      expect(await readFile(join(root, "cards", "ASM-1.md"), "utf8")).toContain(
-        "Check capacity",
-      );
+      expect(await graph.renderIndex()).toContain("ASM-1");
+      const card = await graph.batch((batch) => batch.readCard("ASM-1"));
+      expect(card).toContain("Check capacity");
     });
   });
 
@@ -85,7 +84,7 @@ describe("EpistemicGraph engine surface", () => {
         "TASK-001",
         "TASK-002",
       ]);
-      expect(await readFile(join(root, "INDEX.md"), "utf8")).toContain("TASK-002");
+      expect(await graph.renderIndex()).toContain("TASK-002");
     });
   });
 
@@ -118,16 +117,16 @@ describe("EpistemicGraph engine surface", () => {
       expect(await graph.readEvents()).toEqual(seedEvents);
       expect(await graph.getNode("TASK-001")).toBeUndefined();
 
-      const index = await readFile(join(root, "INDEX.md"), "utf8");
+      const index = await graph.renderIndex();
       expect(index).toContain("TASK-000");
       expect(index).not.toContain("TASK-001");
 
-      expect(await readFile(join(root, "cards", "TASK-000.md"), "utf8")).toContain(
-        "TASK-000",
-      );
+      const card = await graph.batch((batch) => batch.readCard("TASK-000"));
+      expect(card).toContain("TASK-000");
 
-      const state = await readFile(join(root, "STATE.yaml"), "utf8");
-      expect(state).not.toContain("TASK-001");
+      const state = (await graph.getState()) as Record<string, unknown>;
+      expect(state.frontier).toEqual(["TASK-000"]);
+      expect(JSON.stringify(state)).not.toContain("TASK-001");
     });
   });
 
@@ -148,6 +147,65 @@ describe("EpistemicGraph engine surface", () => {
       ).rejects.toThrow(/missing node/i);
 
       expect(await graph.readEvents()).toEqual([]);
+    });
+  });
+
+  it("applies queued events and projection operations from a successful batch", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await graph.addNode("TASK", "TASK-000", "Seed node", {
+        provenance_type: "FACT",
+        statement: "Seed node",
+      });
+
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-001") }]);
+        batch.writeCards([{ id: "TASK-001", content: "custom card body\n" }]);
+        batch.deleteCard("TASK-000");
+        batch.writeStateProjection('{"frontier":["TASK-001"]}\n');
+      });
+
+      expect(await graph.readEvents()).toHaveLength(2);
+
+      const state = (await graph.getState()) as Record<string, unknown>;
+      expect(state.frontier).toEqual(["TASK-001"]);
+
+      const projections = await graph.batch(async (batch) => ({
+        card: await batch.readCard("TASK-001"),
+        removed: await batch.readCard("TASK-000"),
+        ids: await batch.listCards(),
+        state: await batch.readState(),
+      }));
+      expect(projections.card).toBe("custom card body\n");
+      expect(projections.removed).toBeUndefined();
+      expect(projections.ids).toEqual(["TASK-001"]);
+      expect(projections.state).toEqual({ frontier: ["TASK-001"] });
+    });
+  });
+
+  it("commits no events when a batch contains an invalid event", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await graph.addNode("TASK", "TASK-000", "Seed node", {
+        provenance_type: "FACT",
+        statement: "Seed node",
+      });
+      const seedEvents = await graph.readEvents();
+      const seedState = await graph.getState();
+
+      await expect(
+        graph.batch((batch) => {
+          batch.appendEvents([
+            { kind: "node", node: node("TASK-001") },
+            { kind: "node", node: { id: "TASK-002" } } as unknown as GraphEvent,
+          ]);
+        }),
+      ).rejects.toThrow();
+
+      expect(await graph.readEvents()).toEqual(seedEvents);
+      expect(await graph.getState()).toEqual(seedState);
     });
   });
 
