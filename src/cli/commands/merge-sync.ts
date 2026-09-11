@@ -364,8 +364,7 @@ export async function runMergeSync(
   const json = output.format === "json" || legacyJson.length === 1;
   const shouldStageDerived = parsed.flags.has("stage-derived");
 
-  const { environment } = await resolveCliWorkspace(io);
-  const storage = new GraphStorage(environment.storageRoot);
+  const { environment, storage } = await resolveCliWorkspace(io);
   const graph = await storage.materialize();
   const validation = EpistemicGateEngine.verify(graph, {
     gate: "all",

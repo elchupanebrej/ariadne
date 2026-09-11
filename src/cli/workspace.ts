@@ -14,8 +14,13 @@ export type CliIO = {
 
 export type CliWorkspace = {
   environment: GsdEnvironment;
-  storage: GraphStorage;
+  /** Primary engine handle for workspace reads, mutations, and projections. */
   graph: EpistemicGraph;
+  /**
+   * Legacy compatibility handle over the same Storage Root.
+   * @deprecated Use `graph`; retained until every command ports to the engine (ticket 04).
+   */
+  storage: GraphStorage;
 };
 
 const advisoryEmittedSet = new WeakSet<Writable>();
@@ -69,7 +74,7 @@ export async function resolveCliWorkspace(io: CliIO): Promise<CliWorkspace> {
   await maybeEmitCompactionAdvisory(environment.storageRoot, io);
   return {
     environment,
-    storage: new GraphStorage(environment.storageRoot),
     graph: EpistemicGraph.open(environment.storageRoot),
+    storage: new GraphStorage(environment.storageRoot),
   };
 }
