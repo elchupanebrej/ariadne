@@ -6,6 +6,7 @@ import { runEdge } from "./commands/edge.js";
 import { runGate } from "./commands/gate.js";
 import { runInvalidation } from "./commands/invalidate.js";
 import { runWaive } from "./commands/waive.js";
+import { runSupersede } from "./commands/supersede.js";
 import { runIngest } from "./commands/ingest.js";
 import { runInit } from "./commands/init.js";
 import { runNode } from "./commands/node.js";
@@ -55,6 +56,8 @@ export async function runCli(
       return await runInvalidation(args.slice(1), io);
     if (command === "waive")
       return await runWaive(args.slice(1), io);
+    if (command === "supersede")
+      return await runSupersede(args.slice(1), io);
     if (command === "gate") return await runGate(args.slice(1), io);
     if (command === "verify") {
       if (hasHelp(args.slice(1))) {

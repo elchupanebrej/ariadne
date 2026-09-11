@@ -112,6 +112,7 @@ export const TERMINAL_NODE_STATUSES = new Set([
   "REMOVED",
   "DECIDED",
   "WAIVED",
+  "SUPERSEDED",
 ]);
 
 export const isTerminalNode = (

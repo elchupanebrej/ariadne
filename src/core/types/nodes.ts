@@ -115,6 +115,11 @@ export interface UnknownNode extends GenericCanonicalNode<"UNK"> {
   resolved_by?: string;
 }
 
+export interface DecisionNode extends GenericCanonicalNode<"DEC"> {
+  decision_scope?: string;
+  superseded_by?: string;
+}
+
 type CanonicalNodeByType = {
   [T in NodeType]:
     T extends "CLM" ? ClaimNode :
@@ -122,6 +127,7 @@ type CanonicalNodeByType = {
     T extends "EVD" ? EvidenceNode :
     T extends "TRANS" ? TransitionNode :
     T extends "UNK" ? UnknownNode :
+    T extends "DEC" ? DecisionNode :
     GenericCanonicalNode<T>;
 };
 
@@ -141,9 +147,6 @@ export type DependencyNode = NodeOfType<"DEP">;
 export type DynamicsNode = NodeOfType<"DYN">;
 export type ValueSelectionNode = NodeOfType<"VAL-SELECT">;
 export type ValidationNode = NodeOfType<"VAL">;
-export type DecisionNode = NodeOfType<"DEC"> & {
-  decision_scope?: string;
-};
 export type StateNode = NodeOfType<"STATE">;
 export type HandoffNode = NodeOfType<"HANDOFF">;
 export type LeanTaskNode = NodeOfType<"LEAN-TASK">;

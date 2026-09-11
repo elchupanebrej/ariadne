@@ -7,7 +7,9 @@ import {
 } from "../core/schemas/edges.js";
 import {
   NODE_TYPES,
+  NodeSchema,
   NodeSchemas,
+  type DecisionNode,
   type Node,
   type NodeType,
   type UnknownNode,
@@ -17,6 +19,7 @@ import { AriadneError } from "../core/errors.js";
 import { validateGraph } from "./integrity.js";
 import { assertWithinCapacity } from "./capacity.js";
 import {
+  buildInfluenceAdjacency,
   propagateInvalidation,
   type InvalidationTraceEntry,
 } from "./invalidation.js";
@@ -49,6 +52,7 @@ import {
   renderIndex,
   GraphEventSchema,
   isFrontierNode,
+  isTerminalNode,
   type AriadneState,
   type GraphEvent,
   type MaterializedGraph,
@@ -505,6 +509,152 @@ export class EpistemicGraph {
         waived_by: decisionId,
         status: "WAIVED",
         node: updatedNode,
+      };
+    });
+  }
+
+  /**
+   * High-level atomic supersession of an earlier decision by a later decision.
+   */
+  async supersede(
+    targetDecId: string,
+    byDecId: string,
+  ): Promise<{
+    node_id: string;
+    superseded_node_id: string;
+    superseded_by: string;
+    status: "SUPERSEDED";
+    node: DecisionNode;
+  }> {
+    return await this.#driver.withLock(async () => {
+      if (targetDecId === byDecId) {
+        throw new Error(
+          `Self-reference rejected: decision ${targetDecId} cannot be superseded by itself`,
+        );
+      }
+
+      const current = await this.materialize();
+      const target = current.nodes.find(({ id }) => id === targetDecId);
+      if (!target) {
+        throw new Error(`Node not found: ${targetDecId}`);
+      }
+      if (target.type !== "DEC") {
+        throw new Error(`Supersede target ${targetDecId} must be a DEC node (got ${target.type})`);
+      }
+
+      const closing = current.nodes.find(({ id }) => id === byDecId);
+      if (!closing) {
+        throw new Error(`Closing node not found: ${byDecId}`);
+      }
+      if (closing.type !== "DEC") {
+        throw new Error(`Closing node ${byDecId} must be a DEC node (got ${closing.type})`);
+      }
+      if (closing.status === "SUPERSEDED" || closing.status === "RE-OPENED") {
+        throw new Error(
+          `Closing decision ${byDecId} is not live (status: ${closing.status})`,
+        );
+      }
+
+      const targetScope = (target as DecisionNode).decision_scope;
+      const closingScope = (closing as DecisionNode).decision_scope;
+      if (
+        targetScope !== undefined &&
+        closingScope !== undefined &&
+        targetScope.trim() !== "" &&
+        closingScope.trim() !== "" &&
+        targetScope !== closingScope
+      ) {
+        throw new Error(
+          `Scope mismatch: cannot supersede decision ${targetDecId} (scope: "${targetScope}") with ${byDecId} (scope: "${closingScope}")`,
+        );
+      }
+
+      const existingSupersededBy = (target as DecisionNode).superseded_by;
+      if (target.status === "SUPERSEDED" || existingSupersededBy !== undefined) {
+        if (existingSupersededBy === byDecId && target.status === "SUPERSEDED") {
+          return {
+            node_id: targetDecId,
+            superseded_node_id: targetDecId,
+            superseded_by: byDecId,
+            status: "SUPERSEDED",
+            node: target as DecisionNode,
+          };
+        }
+        throw new AriadneError({
+          code: "IDEMPOTENCY_CONFLICT",
+          message: `Conflict: decision ${targetDecId} is already superseded by ${existingSupersededBy ?? "another decision"}`,
+        });
+      }
+
+      const updatedTarget = NodeSchemas.DEC.parse({
+        ...target,
+        status: "SUPERSEDED",
+        superseded_by: byDecId,
+      }) as DecisionNode;
+
+      const supersedesEdge: EpistemicEdge = EdgeSchema.parse({
+        source: byDecId,
+        target: targetDecId,
+        type: "supersedes",
+      });
+
+      const adjacency = buildInfluenceAdjacency(current, { includeDependencies: true });
+      const neighborIds = new Set(
+        (adjacency.get(targetDecId) ?? [])
+          .map((neighbor) => neighbor.id)
+          .filter((id) => id !== targetDecId && id !== byDecId),
+      );
+
+      const reviewNodes: Node[] = [];
+      const sortedNeighborIds = [...neighborIds].sort();
+      for (const id of sortedNeighborIds) {
+        const neighbor = current.nodes.find((n) => n.id === id);
+        if (neighbor && !isTerminalNode(neighbor) && neighbor.status !== "NEEDS_REVIEW") {
+          const updatedNeighbor = NodeSchema.parse({
+            ...neighbor,
+            status: "NEEDS_REVIEW",
+          });
+          reviewNodes.push(updatedNeighbor);
+        }
+      }
+
+      const events: GraphEvent[] = [
+        { kind: "node", node: updatedTarget },
+        { kind: "edge", edge: supersedesEdge },
+        ...reviewNodes.map((node) => ({ kind: "node" as const, node })),
+      ];
+
+      const next = applyEvents(current, events);
+      const integrity = validateGraph(next);
+      if (!integrity.valid) {
+        throw new Error(
+          integrity.diagnostics.map((d) => `${d.code}: ${d.message}`).join("; "),
+        );
+      }
+
+      const existingEvents = await this.#driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + events.length,
+      });
+
+      await this.#driver.appendEvents(events);
+      await this.#driver.writeCards([
+        { id: updatedTarget.id, content: renderCard(updatedTarget) },
+        ...reviewNodes.map((node) => ({ id: node.id, content: renderCard(node) })),
+      ]);
+      await this.#driver.writeIndex(renderIndex(next));
+
+      const prevState = (await this.#driver.readState()) ?? {};
+      await this.#driver.writeState(updateStateForGraph(prevState, next));
+
+      return {
+        node_id: targetDecId,
+        superseded_node_id: targetDecId,
+        superseded_by: byDecId,
+        status: "SUPERSEDED",
+        node: updatedTarget,
       };
     });
   }

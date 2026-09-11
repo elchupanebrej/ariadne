@@ -17,6 +17,7 @@ export type {
   TransitionLifecycle,
   NodeId,
   UnknownNode,
+  DecisionNode,
 } from "../types/nodes.js";
 
 const NODE_ID_SUFFIX = "[0-9A-Za-z_-]+";
@@ -144,6 +145,7 @@ export const TransitionNodeSchema = createNodeSchema("TRANS")
   });
 export const DecisionNodeSchema = createNodeSchema("DEC").extend({
   decision_scope: z.string().min(1).optional(),
+  superseded_by: z.string().min(1).optional(),
 });
 export const StateNodeSchema = createNodeSchema("STATE");
 export const HandoffNodeSchema = createNodeSchema("HANDOFF");
