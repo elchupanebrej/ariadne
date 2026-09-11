@@ -1,5 +1,6 @@
 import { type EdgeType, type EpistemicEdge } from "../core/schemas/edges.js";
 import type { Node } from "../core/schemas/nodes.js";
+import { AriadneError } from "../core/errors.js";
 import {
   validateGraph,
   type GraphDiagnostic,
@@ -145,7 +146,25 @@ export function propagateInvalidation(
   }
 
   const falsifiedNode = graph.nodes.find(({ id }) => id === falsifiedNodeId);
-  if (!falsifiedNode || !["ASM", "HYP"].includes(nodeKind(falsifiedNode))) {
+  if (!falsifiedNode) {
+    throw new Error(`Node not found: ${falsifiedNodeId}`);
+  }
+  const kind = nodeKind(falsifiedNode);
+  if (kind === "UNK" || falsifiedNode.type === "UNK") {
+    throw new AriadneError({
+      code: "INVALID_INPUT",
+      message: `Cannot invalidate UNK node ${falsifiedNodeId}; unknowns are closed by decision via 'ariadne waive <UNK> --by <DEC>'. Use: ariadne waive ${falsifiedNodeId} --by <decision-id>`,
+      repair: `ariadne waive ${falsifiedNodeId} --by <decision-id>`,
+    });
+  }
+  if (kind === "DEC" || falsifiedNode.type === "DEC") {
+    throw new AriadneError({
+      code: "INVALID_INPUT",
+      message: `Cannot invalidate DEC node ${falsifiedNodeId}; decisions are superseded by replacement decisions via 'ariadne supersede <DEC> --by <DEC>'. Use: ariadne supersede ${falsifiedNodeId} --by <decision-id>`,
+      repair: `ariadne supersede ${falsifiedNodeId} --by <decision-id>`,
+    });
+  }
+  if (!["ASM", "HYP"].includes(kind)) {
     throw new Error("Only ASM or HYP nodes can be falsified");
   }
 

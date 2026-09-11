@@ -679,6 +679,20 @@ export class EpistemicGraph {
       const current = await this.materialize();
       const target = current.nodes.find(({ id }) => id === nodeId);
       if (!target) throw new Error(`Node not found: ${nodeId}`);
+      if (target.type === "UNK") {
+        throw new AriadneError({
+          code: "INVALID_INPUT",
+          message: `Cannot invalidate UNK node ${nodeId}; unknowns are closed by decision via 'ariadne waive <UNK> --by <DEC>'. Use: ariadne waive ${nodeId} --by <decision-id>`,
+          repair: `ariadne waive ${nodeId} --by <decision-id>`,
+        });
+      }
+      if (target.type === "DEC") {
+        throw new AriadneError({
+          code: "INVALID_INPUT",
+          message: `Cannot invalidate DEC node ${nodeId}; decisions are superseded by replacement decisions via 'ariadne supersede <DEC> --by <DEC>'. Use: ariadne supersede ${nodeId} --by <decision-id>`,
+          repair: `ariadne supersede ${nodeId} --by <decision-id>`,
+        });
+      }
       if (target.type !== "ASM" && target.type !== "HYP") {
         throw new Error(`Invalidation target ${nodeId} must be ASM or HYP`);
       }

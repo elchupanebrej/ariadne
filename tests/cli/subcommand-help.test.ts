@@ -106,8 +106,12 @@ describe("subcommand and option help", () => {
       [["gate", "-h"], "Usage: ariadne gate <name> [--format json]"],
       [["verify", "--help"], "Usage: ariadne verify [--format json]"],
       [["verify", "-h"], "Usage: ariadne verify [--format json]"],
-      [["invalidate", "--help"], "Usage: ariadne invalidate <node-id> [--reason <text>]"],
-      [["invalidate", "-h"], "Usage: ariadne invalidate <node-id> [--reason <text>]"],
+      [["waive", "--help"], "Usage: ariadne waive <node-id> --by <decision-id>"],
+      [["waive", "-h"], "Usage: ariadne waive <node-id> --by <decision-id>"],
+      [["supersede", "--help"], "Usage: ariadne supersede <node-id> --by <decision-id>"],
+      [["supersede", "-h"], "Usage: ariadne supersede <node-id> --by <decision-id>"],
+      [["invalidate", "--help"], "Usage: ariadne invalidate <node-id> --by <evidence-id>"],
+      [["invalidate", "-h"], "Usage: ariadne invalidate <node-id> --by <evidence-id>"],
       [["ingest", "--help"], "Usage: ariadne ingest <file> [--type <type>]"],
       [["ingest", "-h"], "Usage: ariadne ingest <file> [--type <type>]"],
       [["init", "--help"], "Usage: ariadne init [--root <path>]"],
@@ -135,6 +139,9 @@ describe("subcommand and option help", () => {
       expect(result.code).toBe(0);
       expect(result.stdout).toContain("Usage:");
       expect(result.stdout).toContain("ariadne node (add|update|get|list|remove) [options]");
+      expect(result.stdout).toContain("ariadne waive <node-id> --by <decision-id>");
+      expect(result.stdout).toContain("ariadne supersede <node-id> --by <decision-id>");
+      expect(result.stdout).toContain("ariadne invalidate <node-id> --by <evidence-id>");
       expect(result.stderr).toBe("");
       expect(readdirSync(result.cwd)).toEqual([]);
     });

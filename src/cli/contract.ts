@@ -13,7 +13,9 @@ Usage:
   ariadne status [--format json]
   ariadne node (add|update|get|list|remove) [options]
   ariadne edge (add|remove|list) [options]
-  ariadne invalidate <node-id> [--reason <text>]
+  ariadne waive <node-id> --by <decision-id>
+  ariadne supersede <node-id> --by <decision-id>
+  ariadne invalidate <node-id> --by <evidence-id>
   ariadne gate <name> [--format json]
   ariadne verify [--format json]
   ariadne ingest <file> [--type <type>]

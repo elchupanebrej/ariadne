@@ -3,7 +3,7 @@ import { resolveCliWorkspace, maybeEmitCompactionAdvisory } from "../workspace.j
 import type { CliIO } from "../workspace.js";
 import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 
-const INVALIDATE_USAGE = "Usage: ariadne invalidate <node-id> [--reason <text>]\n";
+const INVALIDATE_USAGE = "Usage: ariadne invalidate <node-id> --by <evidence-id>\n";
 
 const parseArgs = (args: readonly string[]): { nodeId: string; evidenceId: string } => {
   const parsed = parseOptions(
@@ -22,18 +22,18 @@ const parseArgs = (args: readonly string[]): { nodeId: string; evidenceId: strin
   if (reason !== undefined && evidenceId !== undefined) {
     throw syntaxError("Specify only one invalidation explanation.");
   }
-  const explanation = reason ?? evidenceId;
+  const explanation = evidenceId ?? reason;
   if (explanation === undefined || explanation.trim() === "") {
-    throw syntaxError("Invalidation requires --reason <text>.");
+    throw syntaxError("Invalidation requires --by <evidence-id>.");
   }
-  return { nodeId: parsed.positionals[0]!, evidenceId: explanation };
+  return { nodeId: parsed.positionals[0]!, evidenceId: explanation.trim() };
 };
 
 export async function runInvalidation(
   args: readonly string[],
   io: CliIO,
 ): Promise<number> {
-  if (hasHelp(args)) {
+  if (hasHelp(args, ["--by", "--reason"])) {
     io.stdout.write(INVALIDATE_USAGE);
     return 0;
   }
