@@ -470,6 +470,7 @@ const classifyInsufficientInformation = ({
   const insufficient = nodes
     .filter(
       (node) =>
+        isFrontierNode(node) &&
         (node.provenance_type === "UNKNOWN" || node.provenance_type === "ASSUMED") &&
         !testedOrFalsified.has(node.id) &&
         !requested.has(node.id),

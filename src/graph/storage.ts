@@ -116,7 +116,14 @@ export const TERMINAL_NODE_STATUSES = new Set([
 ]);
 
 export const isTerminalNode = (
-  node: { provenance_type: ProvenanceType; status?: string; tombstone?: boolean },
+  node: {
+    provenance_type: ProvenanceType;
+    status?: string;
+    tombstone?: boolean;
+    resolved_by?: string;
+    waived_by?: string;
+    superseded_by?: string;
+  },
 ): boolean => {
   if (node.tombstone) return true;
   const normalizedStatus =
@@ -128,6 +135,13 @@ export const isTerminalNode = (
   if (
     normalizedStatus !== undefined &&
     TERMINAL_NODE_STATUSES.has(normalizedStatus)
+  ) {
+    return true;
+  }
+  if (
+    node.resolved_by !== undefined ||
+    node.waived_by !== undefined ||
+    node.superseded_by !== undefined
   ) {
     return true;
   }

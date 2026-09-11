@@ -26,13 +26,21 @@ const firstSentence = (value: string | undefined): string =>
 
 type ExtraFields = {
   resolved_by?: string;
+  waived_by?: string;
+  superseded_by?: string;
   verdict?: string;
 };
 
 export const answerText = (node: Node): string => {
   const fields = node as unknown as ExtraFields;
   if (node.type === "UNK") {
-    return fields.resolved_by ? `resolved by ${fields.resolved_by}` : "UNRESOLVED";
+    if (fields.waived_by) return `waived by ${fields.waived_by}`;
+    if (fields.resolved_by) return `resolved by ${fields.resolved_by}`;
+    return "UNRESOLVED";
+  }
+  if (node.type === "DEC") {
+    if (fields.superseded_by) return `superseded by ${fields.superseded_by}`;
+    return firstSentence(node.statement);
   }
   if (node.type === "EVD") {
     return fields.verdict ? `verdict: ${trunc(fields.verdict, 40)}` : firstSentence(node.statement);

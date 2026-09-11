@@ -172,8 +172,21 @@ const critiqueValue = (value: unknown): boolean => {
   return isRecord(value) && Object.values(value).some((entry) => critiqueValue(entry));
 };
 
-const locked = (node: Node): boolean =>
-  node.provenance_type === "DECIDED" || node.status?.toUpperCase() === "DECIDED";
+const normalizedStatus = (value: unknown): string | undefined =>
+  typeof value === "string" ? value.toUpperCase().replaceAll("-", "_") : undefined;
+
+const locked = (node: Node): boolean => {
+  const status = normalizedStatus(node.status);
+  if (
+    status === "SUPERSEDED" ||
+    status === "RE_OPENED" ||
+    status === "INVALIDATED" ||
+    status === "REMOVED"
+  ) {
+    return false;
+  }
+  return node.provenance_type === "DECIDED" || status === "DECIDED";
+};
 
 type EvidenceIndex = {
   byId: Map<string, Node>;
@@ -277,6 +290,7 @@ const invalidDependencyStatus = new Set([
   "RE_OPENED",
   "STALE",
   "REQUIRES_REVALUATION",
+  "SUPERSEDED",
 ]);
 
 const isDerivedPremise = (provenance: unknown): boolean =>
@@ -300,9 +314,6 @@ const HARD_TRANSITION_STATUSES = new Set([
   "BLOCKED",
   "NEEDS_REVIEW",
 ]);
-
-const normalizedStatus = (value: unknown): string | undefined =>
-  typeof value === "string" ? value.toUpperCase().replaceAll("-", "_") : undefined;
 
 const transitionState = (node: Node): string | undefined =>
   text(
@@ -428,7 +439,8 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   }
 
   for (const node of graph.nodes.filter((candidate) =>
-    ["CLM", "CAN", "DEC", "TRANS"].includes(candidate.type),
+    ["CLM", "CAN", "DEC", "TRANS"].includes(candidate.type) &&
+    normalizedStatus(candidate.status) !== "SUPERSEDED",
   )) {
     for (const dependency of decisionDependencies(node, nodes, dependencyAdjacency)) {
       if (typeof dependency.status !== "string") continue;
@@ -555,6 +567,17 @@ export function runEpistemicGate(input: unknown): EpistemicGateResult {
   for (const decision of graph.nodes.filter((node) => node.type === "DEC" && locked(node))) {
     for (const dependency of decisionDependencies(decision, nodes, dependencyAdjacency)) {
       if (dependency.provenance_type === "ASSUMED" || dependency.provenance_type === "UNKNOWN") {
+        const depStatus = normalizedStatus(dependency.status);
+        const extra = dependency as unknown as { waived_by?: string; resolved_by?: string };
+        if (
+          dependency.type === "UNK" &&
+          (depStatus === "WAIVED" ||
+            depStatus === "RESOLVED" ||
+            extra.waived_by !== undefined ||
+            extra.resolved_by !== undefined)
+        ) {
+          continue;
+        }
         diagnostics.push({
           code: "UNRESOLVED_DECISION_DEPENDENCY",
           message: `${decision.id} depends on ${dependency.id} with ${dependency.provenance_type} provenance`,

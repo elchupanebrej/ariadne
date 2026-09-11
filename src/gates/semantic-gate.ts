@@ -132,6 +132,8 @@ const isActive = (node: SemanticNode): boolean => {
     "STALE",
     "REQUIRES_REVALUATION",
     "BLOCKED",
+    "WAIVED",
+    "SUPERSEDED",
   ].includes(status);
 };
 

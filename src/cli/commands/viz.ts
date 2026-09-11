@@ -22,7 +22,15 @@ import {
 } from "../../graph/report-engine.js";
 
 
-const TERMINAL_STATUSES = new Set(["RESOLVED", "REJECTED", "INVALIDATED", "REMOVED", "DECIDED"]);
+const TERMINAL_STATUSES = new Set([
+  "RESOLVED",
+  "REJECTED",
+  "INVALIDATED",
+  "REMOVED",
+  "DECIDED",
+  "WAIVED",
+  "SUPERSEDED",
+]);
 
 const TYPE_GROUPS: Record<string, string> = {
   FRAME: "structure",
@@ -93,7 +101,8 @@ const trunc = (value: unknown, max: number): string => {
 
 const isClosedUnknown = (node: Node): boolean => {
   if (TERMINAL_STATUSES.has(String(node.status))) return true;
-  return (node as unknown as { resolved_by?: string }).resolved_by !== undefined;
+  const extra = node as unknown as { resolved_by?: string; waived_by?: string };
+  return extra.resolved_by !== undefined || extra.waived_by !== undefined;
 };
 
 const CSS = `
@@ -130,6 +139,8 @@ summary { list-style-position: inside; }
 .prov-FACT { background: #14532d; color: #86efac; }
 .prov-DECIDED { background: #4c1d95; color: #c4b5fd; }
 .status-badge { font-size: .72rem; color: #94a3b8; border: 1px dashed #475569; border-radius: 4px; padding: 1px 6px; margin-right: .4rem; }
+.status-waived { color: #94a3b8; border-color: #64748b; }
+.status-superseded { color: #94a3b8; border-color: #64748b; text-decoration: line-through; }
 .title { font-size: .9rem; }
 .help-link { display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem; margin-left: .4rem; border: 1px solid #475569; border-radius: 50%; font-size: .75rem; font-weight: 700; text-decoration: none; }
 .edge-label { color: #f472b6; font-family: ui-monospace, monospace; font-size: .72rem; margin-right: .4rem; }
@@ -267,7 +278,7 @@ export function buildViz(
       `<summary>${edge}<span class="id-badge">${esc(node.id)}</span>` +
         `<span class="type-badge">${esc(node.type)}</span>` +
         `<span class="prov-chip prov-${esc(node.provenance_type)}">${esc(node.provenance_type)}</span>` +
-        `<span class="status-badge">${esc(status)}</span>` +
+        `<span class="status-badge status-${esc(status.toLowerCase().replaceAll("_", "-"))}">${esc(status)}</span>` +
         `<span class="title">${esc(node.title)}</span>` +
         `<a class="help-link" href="${esc(helpHref)}" target="_blank" rel="noreferrer" ` +
         `aria-label="Open methodology help for ${esc(node.type)}" title="Open the book at the relevant diagram">?</a></summary>`,
