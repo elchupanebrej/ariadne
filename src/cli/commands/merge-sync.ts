@@ -1,10 +1,11 @@
 import { execFile } from "node:child_process";
-import { access, readdir, readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
 import { EpistemicGateEngine } from "../../gates/gate-engine.js";
-import { isFrontierNode, GraphStorage } from "../../graph/storage.js";
+import { isFrontierNode, renderCard } from "../../graph/domain.js";
+import type { GraphBatch } from "../../graph/epistemic-graph.js";
 import { buildMergeCheckReceipt } from "./merge-check.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import type { CliIO } from "../workspace.js";
@@ -31,40 +32,27 @@ const relativePath = (root: string, path: string): string =>
   relative(root, path).replaceAll("\\", "/");
 
 const removeStaleCards = async (
-  storage: GraphStorage,
+  batch: GraphBatch,
   ids: Set<string>,
+  cardsDirectory: string,
 ): Promise<string[]> => {
-  if (!(await exists(storage.cardsDirectory))) return [];
   const removed: string[] = [];
-  for (const entry of await readdir(storage.cardsDirectory, {
-    withFileTypes: true,
-  })) {
-    if (
-      entry.isFile() &&
-      entry.name.endsWith(".md") &&
-      !ids.has(entry.name.slice(0, -3))
-    ) {
-      const id = entry.name.slice(0, -3);
-      await storage.deleteCard(id);
-      removed.push(join(storage.cardsDirectory, entry.name));
-    }
+  for (const id of await batch.listCards()) {
+    if (ids.has(id)) continue;
+    batch.deleteCard(id);
+    removed.push(join(cardsDirectory, `${id}.md`));
   }
   return removed;
 };
 
 const existingCards = async (
-  storage: GraphStorage,
+  batch: GraphBatch,
   ids: readonly string[],
 ): Promise<Map<string, string>> => {
   const entries = await Promise.all(
     ids.map(async (id) => {
-      const path = join(storage.cardsDirectory, `${id}.md`);
-      try {
-        return [path, await readFile(path, "utf8")] as const;
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
-        throw error;
-      }
+      const content = await batch.readCard(id);
+      return content === undefined ? undefined : ([id, content] as const);
     }),
   );
   return new Map(entries.filter((entry): entry is readonly [string, string] => entry !== undefined));
@@ -73,22 +61,23 @@ const existingCards = async (
 const withoutRevisionDate = (content: string): string =>
   content.replace(/^- Revised: \d{4}-\d{2}-\d{2}$/mu, "- Revised: <derived>");
 
-const preserveStableCards = async (
-  storage: GraphStorage,
+const preserveStableCards = (
+  batch: GraphBatch,
   previous: ReadonlyMap<string, string>,
   ids: readonly string[],
-): Promise<void> => {
-  await Promise.all(
-    ids.map(async (id) => {
-      const path = join(storage.cardsDirectory, `${id}.md`);
-      const before = previous.get(path);
-      if (before === undefined) return;
-      const after = await readFile(path, "utf8");
-      if (after !== before && withoutRevisionDate(after) === withoutRevisionDate(before)) {
-        await storage.writeCards([{ id, content: before }]);
-      }
-    }),
-  );
+): void => {
+  const nodes = new Map(batch.graph.nodes.map((node) => [node.id, node]));
+  const restores = ids.flatMap((id) => {
+    const before = previous.get(id);
+    const node = nodes.get(id);
+    if (before === undefined || node === undefined) return [];
+    const regenerated = renderCard(node);
+    if (regenerated === before) return [];
+    return withoutRevisionDate(regenerated) === withoutRevisionDate(before)
+      ? [{ id, content: before }]
+      : [];
+  });
+  if (restores.length > 0) batch.writeCards(restores);
 };
 
 type JsonProperty = {
@@ -259,10 +248,11 @@ const patchStateJson = (
 };
 
 const syncState = async (
-  storage: GraphStorage,
-  graph: Awaited<ReturnType<GraphStorage["materialize"]>>,
+  batch: GraphBatch,
+  storageRoot: string,
 ): Promise<{ path: string; changed: boolean }> => {
-  const state = (await storage.readState<Record<string, unknown>>()) ?? {};
+  const state = (await batch.readState()) ?? {};
+  const graph = batch.graph;
   const frontier = graph.nodes.filter(isFrontierNode).map(({ id }) => id);
   const openUnknowns = graph.nodes
     .filter((node) => isFrontierNode(node) && node.type === "UNK")
@@ -274,9 +264,10 @@ const syncState = async (
   if ("active_frontier" in state) projections.active_frontier = frontier;
   if ("openUnknowns" in state) projections.openUnknowns = openUnknowns;
   if ("unknowns" in state) projections.unknowns = openUnknowns;
+  const statePath = join(storageRoot, "STATE.yaml");
   let previous: string | undefined;
   try {
-    previous = await readFile(storage.statePath, "utf8");
+    previous = await readFile(statePath, "utf8");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
@@ -286,17 +277,20 @@ const syncState = async (
     : `${JSON.stringify(next, null, 2)}\n`;
   const changed = previous !== serialized;
   if (changed) {
-    await storage.writeStateProjection(serialized);
+    batch.writeStateProjection(serialized);
   }
-  return { path: storage.statePath, changed };
+  return { path: statePath, changed };
 };
 
 const stageDerived = async (
   root: string,
-  storage: GraphStorage,
+  storageRoot: string,
   cardPaths: readonly string[],
 ): Promise<string[]> => {
-  const relativeIndexPath = relativePath(root, storage.indexPath);
+  const indexPath = join(storageRoot, "INDEX.md");
+  const statePath = join(storageRoot, "STATE.yaml");
+  const cardsDirectory = join(storageRoot, "cards");
+  const relativeIndexPath = relativePath(root, indexPath);
   const relativeCardPaths = (
     await Promise.all(
       [...new Set(cardPaths)].map(async (path) => {
@@ -321,21 +315,21 @@ const stageDerived = async (
     relativeIndexPath,
     ...relativeCardPaths,
   ]);
-  const statePath = relativePath(root, storage.statePath);
+  const relativeStatePath = relativePath(root, statePath);
   const stagedState = (
     await runFile(
       "git",
-      ["-C", root, "diff", "--cached", "--name-only", "--", statePath],
+      ["-C", root, "diff", "--cached", "--name-only", "--", relativeStatePath],
       {
         encoding: "utf8",
       },
     )
   ).stdout.trim();
-  if (stagedState) await runFile("git", ["-C", root, "reset", "--", statePath]);
+  if (stagedState) await runFile("git", ["-C", root, "reset", "--", relativeStatePath]);
   return [
     relativeIndexPath,
-    ...((await exists(storage.cardsDirectory))
-      ? [relativePath(root, storage.cardsDirectory)]
+    ...((await exists(cardsDirectory))
+      ? [relativePath(root, cardsDirectory)]
       : []),
   ];
 };
@@ -364,8 +358,8 @@ export async function runMergeSync(
   const json = output.format === "json" || legacyJson.length === 1;
   const shouldStageDerived = parsed.flags.has("stage-derived");
 
-  const { environment, storage } = await resolveCliWorkspace(io);
-  const graph = await storage.materialize();
+  const { environment, graph: engine } = await resolveCliWorkspace(io);
+  const graph = await engine.materialize();
   const validation = EpistemicGateEngine.verify(graph, {
     gate: "all",
     strict: true,
@@ -375,45 +369,43 @@ export async function runMergeSync(
     environment.storageRoot,
     graph,
   );
+  const cardsDirectory = join(environment.storageRoot, "cards");
+  const ids = graph.nodes.map(({ id }) => id);
   let removedCards: string[] = [];
   let state: { path: string; changed: boolean } = {
-    path: storage.statePath,
+    path: join(environment.storageRoot, "STATE.yaml"),
     changed: false,
   };
-  await storage.withLock(async () => {
-    const previousCards = await existingCards(
-      storage,
-      graph.nodes.map(({ id }) => id),
-    );
-    removedCards = await removeStaleCards(
-      storage,
-      new Set(graph.nodes.map(({ id }) => id)),
-    );
-    await storage.regenerateIndexUnlocked();
-    await preserveStableCards(
-      storage,
-      previousCards,
-      graph.nodes.map(({ id }) => id),
-    );
-    state = await syncState(storage, graph);
+  await engine.batch(async (batch) => {
+    const previousCards = await existingCards(batch, ids);
+    removedCards = await removeStaleCards(batch, new Set(ids), cardsDirectory);
+    batch.regenerateIndex();
+    preserveStableCards(batch, previousCards, ids);
+    state = await syncState(batch, environment.storageRoot);
   });
   const staged = shouldStageDerived
     ? await stageDerived(
         environment.rootPath,
-        storage,
+        environment.storageRoot,
         [
           ...removedCards,
-          ...graph.nodes.map(({ id }) => join(storage.cardsDirectory, `${id}.md`)),
+          ...ids.map((id) => join(cardsDirectory, `${id}.md`)),
         ],
       )
     : [];
   const receipt = {
     command: "merge-sync" as const,
     passed: validation.passed,
-    graph_path: relativePath(environment.rootPath, storage.graphPath),
+    graph_path: relativePath(
+      environment.rootPath,
+      join(environment.storageRoot, "GRAPH.jsonl"),
+    ),
     generated: {
-      index: relativePath(environment.rootPath, storage.indexPath),
-      cards: relativePath(environment.rootPath, storage.cardsDirectory),
+      index: relativePath(
+        environment.rootPath,
+        join(environment.storageRoot, "INDEX.md"),
+      ),
+      cards: relativePath(environment.rootPath, cardsDirectory),
       state: relativePath(environment.rootPath, state.path),
     },
     state_changed: state.changed,

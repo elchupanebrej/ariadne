@@ -3,7 +3,7 @@ import type { Node } from "../../core/schemas/nodes.js";
 import {
   isFrontierNode,
   type MaterializedGraph,
-} from "../../graph/storage.js";
+} from "../../graph/domain.js";
 import {
   isUnresolvedMergeContradiction,
   mergeContradictionGuidance,
@@ -598,9 +598,9 @@ export async function runStatus(args: readonly string[], io: CliIO): Promise<num
   }
   const frameId = rest[0];
 
-  const { storage } = await resolveCliWorkspace(io);
-  const graph = await storage.materialize();
-  const report = buildStatusReport(await storage.readState<State>(), graph);
+  const { graph: engine } = await resolveCliWorkspace(io);
+  const graph = await engine.materialize();
+  const report = buildStatusReport((await engine.getState()) as State, graph);
   let continuation: Continuation | null = null;
   if (frameId !== undefined) {
     if (!graph.nodes.some((node) => node.id === frameId)) {

@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import type { Node } from "../../core/schemas/nodes.js";
 import { toRootRelative } from "../../core/root-relative.js";
-import type { GraphEvent } from "../../graph/storage.js";
+import type { GraphEvent } from "../../graph/domain.js";
 import {
   childEdges,
   computeForest,
@@ -447,8 +447,8 @@ export async function runViz(args: readonly string[], io: CliIO): Promise<number
   }
   const frameArg = rest[0];
 
-  const { environment, storage } = await resolveCliWorkspace(io);
-  const events = await storage.readEvents();
+  const { environment, graph } = await resolveCliWorkspace(io);
+  const events = await graph.readEvents();
   if (!legacyJson && output.format === "dot") {
     io.stdout.write(buildDot(events));
     return 0;
@@ -461,18 +461,22 @@ export async function runViz(args: readonly string[], io: CliIO): Promise<number
     io.stdout.write(buildMermaid(events));
     return 0;
   }
-  const reportsDirectory = join(storage.rootDirectory, "reports");
+  const reportsDirectory = join(environment.storageRoot, "reports");
   await mkdir(reportsDirectory, { recursive: true });
   // Hrefs resolve from the report's own directory, so card links are
   // relative to it (../cards) rather than project-relative.
-  const cardsHref = relative(reportsDirectory, storage.cardsDirectory).replaceAll("\\", "/") || ".";
-  const viz = buildViz(await storage.readEvents(), {
+  const cardsDirectory = join(environment.storageRoot, "cards");
+  const cardsHref = relative(reportsDirectory, cardsDirectory).replaceAll("\\", "/") || ".";
+  const viz = buildViz(events, {
     cardsPrefix: cardsHref,
     bookHref: relative(
       reportsDirectory,
       join(environment.rootPath, "docs", "nine_operations_software_en.html"),
     ).replaceAll("\\", "/"),
-    graphPath: toRootRelative(environment.rootPath, storage.graphPath),
+    graphPath: toRootRelative(
+      environment.rootPath,
+      join(environment.storageRoot, "GRAPH.jsonl"),
+    ),
     rootId: frameArg,
   });
   const ordinal = await nextReportOrdinal(reportsDirectory);

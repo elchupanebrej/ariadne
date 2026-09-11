@@ -129,8 +129,10 @@ export async function runIngest(args: readonly string[], io: CliIO): Promise<num
     throw syntaxError(error instanceof Error ? error.message : String(error));
   }
   const node = typedNode(raw, parsed.values.get("type"));
-  const { storage } = await resolveCliWorkspace(io);
-  await storage.appendNode(node);
+  const { graph } = await resolveCliWorkspace(io);
+  await graph.batch((batch) => {
+    batch.appendEvents([{ kind: "node", node }]);
+  });
   io.stdout.write(`${JSON.stringify(node)}\n`);
   return 0;
 }

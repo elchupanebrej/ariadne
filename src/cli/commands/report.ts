@@ -46,13 +46,13 @@ export async function runReport(args: readonly string[], io: CliIO): Promise<num
   const format = legacyJson ? "json" : output.format;
   const outPath = parsed.values.get("out");
 
-  const { environment, storage, graph } = await resolveCliWorkspace(io);
+  const { environment, graph } = await resolveCliWorkspace(io);
   const report = await graph.report({
-    cardsPrefix: toRootRelative(environment.rootPath, storage.cardsDirectory),
+    cardsPrefix: toRootRelative(environment.rootPath, join(environment.storageRoot, "cards")),
     rootId: frameArg,
   });
 
-  const reportsDirectory = join(storage.rootDirectory, "reports");
+  const reportsDirectory = join(environment.storageRoot, "reports");
   await mkdir(reportsDirectory, { recursive: true });
   const defaultPath = join(
     reportsDirectory,
@@ -65,7 +65,7 @@ export async function runReport(args: readonly string[], io: CliIO): Promise<num
 
   if (format === "json") {
     const continuation = frameArg
-      ? buildContinuation(await storage.materialize(), frameArg)
+      ? buildContinuation(await graph.materialize(), frameArg)
       : null;
     const receipt = {
       file: toRootRelative(environment.rootPath, targetPath),

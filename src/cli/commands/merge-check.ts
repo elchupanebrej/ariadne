@@ -4,7 +4,7 @@ import {
   isUnresolvedMergeContradiction,
   mergeContradictionGuidance,
 } from "../../merge/three-way.js";
-import { GraphEventSchema, type GraphEvent } from "../../graph/storage.js";
+import { GraphEventSchema, type GraphEvent } from "../../graph/domain.js";
 import { hasHelp, resolveCliWorkspace } from "../workspace.js";
 import {
   parseOptions,
@@ -13,7 +13,7 @@ import {
   writeDomainDiagnostic,
 } from "../contract.js";
 import type { CliIO } from "../workspace.js";
-import type { MaterializedGraph } from "../../graph/storage.js";
+import type { MaterializedGraph } from "../../graph/domain.js";
 
 export type MergeCheckDiagnostic = {
   code: "UNRESOLVED_MERGE_CONTRADICTION";
