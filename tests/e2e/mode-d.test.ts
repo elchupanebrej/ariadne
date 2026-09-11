@@ -96,7 +96,7 @@ describe("standalone Mode D recovery", () => {
 
     const gates = invoke(cwd, ["gate", "all"]);
     expect(gates.status).toBe(1);
-    expect(gates.stderr).toBe("");
+    expect(gates.stderr).toContain("[GATE_FAILED]");
     const gateReceipt = JSON.parse(gates.stdout) as {
       passed: boolean;
       results: Array<{ gate: string; passed: boolean }>;

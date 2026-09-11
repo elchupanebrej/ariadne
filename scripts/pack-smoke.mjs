@@ -21,6 +21,8 @@ const packageVersion = packageJson.version;
 const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
 const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
 const tarCmd = process.platform === "win32" ? "tar.exe" : "tar";
+const buildConfig = join(repoRoot, "tsconfig.build.json");
+const typeScriptCompiler = join(repoRoot, "node_modules", "typescript", "bin", "tsc");
 
 function step(name, fn) {
   console.log(`pack-smoke: ${name}`);
@@ -105,7 +107,11 @@ let tarball = "";
 try {
   // 1. Pack the project
   step("npm pack", () => {
-    run(npmCmd, ["pack", "--pack-destination", tmpBase], repoRoot);
+    // Build through the current Node executable, then skip npm's lifecycle
+    // hooks so a broken parent-directory `node` shim cannot change the pack
+    // result or hide the actual packaging verification.
+    run(process.execPath, [typeScriptCompiler, "-p", buildConfig], repoRoot);
+    run(npmCmd, ["pack", "--ignore-scripts", "--pack-destination", tmpBase], repoRoot);
     const tgz = join(tmpBase, `${packageName.replace("/", "-")}-${packageVersion}.tgz`);
     if (!existsSync(tgz)) {
       throw new Error(`expected tarball not found: ${tgz}`);

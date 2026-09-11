@@ -7,12 +7,26 @@ import { describe, expect, it } from "vitest";
 const repoRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const packageJson = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8")) as {
   version: string;
+  engines?: { node?: string };
   scripts?: Record<string, string>;
 };
 const releaseWorkflow = readFileSync(join(repoRoot, ".github/workflows/release.yml"), "utf8");
 const ciWorkflow = readFileSync(join(repoRoot, ".github/workflows/ci.yml"), "utf8");
 
 describe("production release gates", () => {
+  it("keeps Node 26 as non-blocking early-warning coverage", () => {
+    expect(packageJson.engines?.node).toBe("^22.0.0 || ^24.0.0");
+    expect(ciWorkflow).toContain("name: linux-x64-node26-early-warning");
+    expect(ciWorkflow).toContain("node: '26'");
+    expect(ciWorkflow).toContain("experimental: true");
+    expect(ciWorkflow).toContain("continue-on-error: ${{ matrix.experimental == true }}");
+
+    const benchmarkWorkflow = ciWorkflow.slice(ciWorkflow.indexOf("  benchmark:"));
+    expect(benchmarkWorkflow).toContain("node: '22.23.0'");
+    expect(benchmarkWorkflow).toContain("node: '24.17.0'");
+    expect(benchmarkWorkflow).not.toContain("node: '26'");
+  });
+
   it("exposes a release-note checker and evidence commands", () => {
     expect(packageJson.scripts?.["release:check-notes"]).toBe("node scripts/check-release-notes.mjs");
     expect(packageJson.scripts?.["release:preflight-evidence"]).toBe(

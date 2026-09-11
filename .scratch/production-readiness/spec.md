@@ -46,7 +46,12 @@ Ariadne targets active and maintenance Node.js Long-Term Support (LTS) releases.
   }
 }
 ```
-Odd-numbered versions (e.g., Node 23, Node 25) and End-of-Life (EOL) lines (Node 18, Node 20) are unsupported in production. The engine boundary advances strictly in synchronization with official Node.js LTS transitions.
+Node 26 is currently exercised by a non-blocking Linux early-warning CI lane,
+but it is not promised by the package engine range or production support
+contract until its LTS transition is explicitly adopted. Odd-numbered versions
+(e.g., Node 23, Node 25) and End-of-Life (EOL) lines (Node 18, Node 20) are
+unsupported in production. The engine boundary advances strictly in
+synchronization with official Node.js LTS transitions.
 
 ### 2.2 Operating Systems and CPU Architectures
 Production support covers standard operating systems within Node.js Tier-1/Tier-2 support definitions:
@@ -66,6 +71,12 @@ To guarantee platform parity without redundant runner overhead, release-blocking
 2. `linux-x64-node24`: Ubuntu Latest, Node.js 24 LTS (Full test suite, 10K ceiling benchmark, clean-consumer multi-manager verification).
 3. `windows-x64-node24`: Windows Latest, Node.js 24 LTS (Platform path containment, NTFS case sensitivity, and file locking semantics).
 4. `macos-arm64-node24`: macOS Latest (M-series runner), Node.js 24 LTS (APFS filesystem semantics and architecture validation).
+
+The CI workflow also runs `linux-x64-node26-early-warning` with
+`continue-on-error`. This observation lane detects upcoming compatibility
+regressions without expanding the `engines` declaration or the release-blocking
+matrix. Node 26 is therefore not included in authoritative ceiling benchmark
+evidence until the support contract is rebaselined at its LTS transition.
 
 ---
 
@@ -532,7 +543,7 @@ The verification pipeline comprises four sequential gates across `.github/workfl
 1. **Pull Request Gate (`ci.yml`)**:
    - Runs `actions/dependency-review-action` (blocks vulnerabilities $\ge$ `moderate`).
    - Runs `npm run typecheck` and documentation tests (`npm run docs:test`).
-   - Executes unit and specialized scenario tests across the full 4-platform matrix.
+   - Executes unit and specialized scenario tests across the full 4-platform release-blocking matrix and the non-blocking Node 26 early-warning lane.
    - Executes five independent seed-42 10,000-node ceiling benchmark runs on each of `linux-x64-node22` and `linux-x64-node24` (<100ms/<1.5s/<10s, attributable RSS $\le$ 640 MB).
    - Packs the candidate tarball and runs clean-consumer installation smokes across npm, pnpm, and Yarn.
 2. **Merge-to-Main Gate (`ci.yml`)**:
