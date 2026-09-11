@@ -3,7 +3,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import type { EpistemicEdge } from "../../core/schemas/edges.js";
 import type { Node } from "../../core/schemas/nodes.js";
 import { toRootRelative } from "../../core/root-relative.js";
-import type { MaterializedGraph } from "../../graph/storage.js";
+import type { MaterializedGraph } from "../../graph/domain.js";
 import { detectGsd } from "../gsd/detector.js";
 
 export type HandoffRecommendation = "/to-spec" | "/to-tickets";

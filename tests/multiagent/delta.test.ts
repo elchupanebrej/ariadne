@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import {
   extractDeltaBlocks,
   mergeDelta,
@@ -240,6 +241,21 @@ describe("mergeDelta", () => {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+
+  it("applies a delta through the EpistemicGraph batch handle", async () => {
+    const graph = EpistemicGraph.inMemory();
+    const response = block("ariadne-delta", {
+      nodes: [node("TASK-ENGINE")],
+      edges: [],
+    });
+
+    await expect(mergeDelta(graph, response)).resolves.toMatchObject({
+      applied: { nodes: ["TASK-ENGINE"] },
+    });
+    expect((await graph.materialize()).nodes.map(({ id }) => id)).toEqual([
+      "TASK-ENGINE",
+    ]);
   });
 
   it("rejects DEC status transitions without authorization", async () => {

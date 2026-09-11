@@ -2,10 +2,8 @@ import { z } from "zod";
 import { EdgeSchema } from "../core/schemas/edges.js";
 import { NodeIdSchema, NodeSchema, type Node } from "../core/schemas/nodes.js";
 import { validateGraph } from "../graph/integrity.js";
-import {
-  GraphStorage,
-  type MaterializedGraph,
-} from "../graph/storage.js";
+import type { EpistemicGraph } from "../graph/epistemic-graph.js";
+import type { MaterializedGraph } from "../graph/domain.js";
 
 const ExistingNodeMutationSchema = z
   .object({
@@ -121,11 +119,12 @@ const graphError = (graph: MaterializedGraph): Error => {
 };
 
 export async function mergeDelta(
-  storage: GraphStorage,
+  graph: Pick<EpistemicGraph, "batch">,
   response: string,
 ): Promise<DeltaMergeReceipt> {
   const deltas = extractDeltaBlocks(response);
-  return storage.transaction((current) => {
+  return graph.batch((batch) => {
+    const current = batch.graph;
     const currentValidation = validateGraph(current);
     if (!currentValidation.valid) throw graphError(current);
 
@@ -209,6 +208,7 @@ export async function mergeDelta(
     };
     if (!validateGraph(merged).valid) throw graphError(merged);
 
-    return { result: receipt, events };
+    if (events.length > 0) batch.appendEvents(events);
+    return receipt;
   });
 }

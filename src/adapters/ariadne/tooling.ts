@@ -1,6 +1,6 @@
 import type { Node } from "../../core/schemas/nodes.js";
 import { ObservationNodeSchema } from "../../core/schemas/nodes.js";
-import { GraphStorage } from "../../graph/storage.js";
+import { EpistemicGraph } from "../../graph/epistemic-graph.js";
 
 export interface ToolingFailure {
   command: string;
@@ -44,7 +44,9 @@ export async function appendToolingFailure(
   failure: ToolingFailure,
 ): Promise<Node> {
   const node = toolingFailureNode(failure);
-  const storage = new GraphStorage(rootDirectory);
-  await storage.appendNode(node);
+  const graph = EpistemicGraph.open(rootDirectory);
+  await graph.batch((batch) => {
+    batch.appendEvents([{ kind: "node", node }]);
+  });
   return node;
 }

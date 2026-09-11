@@ -11,7 +11,9 @@ import {
   type ProjectGsdOptions,
 } from "../adapters/gsd/projector.js";
 import type { Node } from "../core/schemas/nodes.js";
-import { GraphStorage, type MaterializedGraph } from "../graph/storage.js";
+import { NodeSchema } from "../core/schemas/nodes.js";
+import { EpistemicGraph } from "../graph/epistemic-graph.js";
+import type { MaterializedGraph } from "../graph/domain.js";
 import { detectGsd, type GsdDetectionOptions } from "../adapters/gsd/detector.js";
 
 export type AriadneHarnessControllerOptions = {
@@ -40,19 +42,19 @@ const isBlockingDecision = (node: Node): boolean =>
 
 export class AriadneHarnessController {
   readonly rootDirectory: string;
-  readonly storage: GraphStorage;
+  readonly graph: EpistemicGraph;
   readonly storageRoot: string;
 
   constructor(options: AriadneHarnessControllerOptions = {}) {
     this.rootDirectory = resolve(options.rootDirectory ?? process.cwd());
     const gsd = detectGsd(this.rootDirectory, options.gsd);
     this.storageRoot = options.storageRoot ?? gsd.storageRoot;
-    this.storage = new GraphStorage(this.storageRoot);
+    this.graph = EpistemicGraph.open(this.storageRoot);
   }
 
   async projectGsd(options: Omit<ProjectGsdOptions, "rootDirectory"> = {}): Promise<GsdProjection> {
     const projection = await projectGsd(this.rootDirectory, options);
-    const graph = await this.storage.readGraph();
+    const graph = await this.graph.materialize();
     const current = new Map(graph.nodes.map((node) => [node.id, node]));
     const preserveBlockingDecisions = !canReopenDecision(options);
     const projectedNodes = projection.nodes.map((node) => {
@@ -70,9 +72,11 @@ export class AriadneHarnessController {
     const events = persistedProjection.nodes
       .filter((node) => !sameJson(current.get(node.id), node))
       .map((node) => ({ kind: "node" as const, node }));
-    if (events.length > 0) await this.storage.appendEvents(events);
+    if (events.length > 0) {
+      await this.graph.batch((batch) => batch.appendEvents(events));
+    }
 
-    const previous = await this.storage.readState<Record<string, unknown>>();
+    const previous = await this.graph.getState();
     const previousFrontier = isRecord(previous) && Array.isArray(previous.frontier)
       ? previous.frontier
       : [];
@@ -99,29 +103,34 @@ export class AriadneHarnessController {
         active_phase: persistedProjection.activePhase,
       },
     };
-    if (!sameJson(previous, nextState)) await this.storage.writeState(nextState);
+    if (!sameJson(previous, nextState)) {
+      await this.graph.batch((batch) =>
+        batch.writeStateProjection(`${JSON.stringify(nextState, null, 2)}\n`),
+      );
+    }
     return persistedProjection;
   }
 
   async ingestMattArtifact(skill: MattSkill | string, artifact: unknown): Promise<Node> {
     const node = normalizeMattArtifact(skill, artifact);
-    await this.storage.appendNode(node);
+    await this.graph.batch((batch) => batch.appendEvents([{ kind: "node", node }]));
     return node;
   }
 
   async ingestMattFile(skill: MattSkill | string, path: string): Promise<Node> {
     const node = await ingestMattFile(skill, path);
-    await this.storage.appendNode(node);
+    await this.graph.batch((batch) => batch.appendEvents([{ kind: "node", node }]));
     return node;
   }
 
   async persistNode(node: unknown): Promise<Node> {
-    await this.storage.appendNode(node);
+    const parsed = NodeSchema.parse(node);
+    await this.graph.batch((batch) => batch.appendEvents([{ kind: "node", node: parsed }]));
     return node as Node;
   }
 
   async readGraph(): Promise<MaterializedGraph> {
-    return this.storage.readGraph();
+    return this.graph.materialize();
   }
 }
 

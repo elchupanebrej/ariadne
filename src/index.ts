@@ -27,7 +27,7 @@ export {
 
 export {
   StateSchema,
-} from "./graph/storage.js";
+} from "./graph/domain.js";
 
 export {
   EpistemicGraph,
@@ -74,7 +74,7 @@ export type {
 export type {
   AriadneState,
   MaterializedGraph,
-} from "./graph/storage.js";
+} from "./graph/domain.js";
 
 export type {
   NodeFilter,

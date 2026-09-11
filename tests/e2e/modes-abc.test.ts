@@ -46,7 +46,7 @@ describe("ecosystem modes A, B, and C", () => {
         (node) => node.id === "DEC-D-001",
       );
       expect(projectedDecision).toBeDefined();
-      await controller.storage.appendNode({
+      await controller.persistNode({
         ...projectedDecision,
         status: "RE-OPENED",
         invalidation: {
@@ -56,7 +56,7 @@ describe("ecosystem modes A, B, and C", () => {
           needs_review: true,
         },
       });
-      const beforeReprojection = await controller.storage.readEvents();
+      const beforeReprojection = await controller.graph.readEvents();
       const reprojected = await controller.projectGsd();
       const persistedDecision = (await controller.readGraph()).nodes.find(
         (node) => node.id === "DEC-D-001",
@@ -71,8 +71,8 @@ describe("ecosystem modes A, B, and C", () => {
         status: "RE-OPENED",
         invalidation: expect.objectContaining({ needs_review: true }),
       });
-      expect(await controller.storage.readEvents()).toHaveLength(beforeReprojection.length);
-      const firstEvents = await controller.storage.readEvents();
+      expect(await controller.graph.readEvents()).toHaveLength(beforeReprojection.length);
+      const firstEvents = await controller.graph.readEvents();
       expect(await controller.readGraph()).toEqual(
         expect.objectContaining({
           nodes: expect.arrayContaining([
@@ -82,8 +82,8 @@ describe("ecosystem modes A, B, and C", () => {
         }),
       );
       await controller.projectGsd();
-      expect(await controller.storage.readEvents()).toHaveLength(firstEvents.length);
-      expect(await controller.storage.readState()).toEqual(
+      expect(await controller.graph.readEvents()).toHaveLength(firstEvents.length);
+      expect(await controller.graph.getState()).toEqual(
         expect.objectContaining({ mode: "gsd", gsd_projection: expect.any(Object) }),
       );
 

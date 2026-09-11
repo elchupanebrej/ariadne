@@ -1,4 +1,4 @@
-import type { MaterializedGraph } from "../graph/storage.js";
+import type { MaterializedGraph } from "../graph/domain.js";
 import type { Node } from "../core/schemas/nodes.js";
 
 export type TeachingPhase =

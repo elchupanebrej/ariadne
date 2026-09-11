@@ -7,11 +7,13 @@ import {
   extractDeltaBlocks,
   type EpistemicDelta,
 } from "../multiagent/delta.js";
+import type { EpistemicGraph } from "../graph/epistemic-graph.js";
 import {
-  GraphStorage,
+  applyEvents,
+  edgeKey,
   type GraphEvent,
   type MaterializedGraph,
-} from "../graph/storage.js";
+} from "../graph/domain.js";
 import { validateGraph } from "../graph/integrity.js";
 import { canonicalJson, isUnresolvedMergeContradiction } from "./three-way.js";
 
@@ -75,10 +77,6 @@ const digest = (value: string): string =>
 const nodeFields = (node: Node): Record<string, unknown> =>
   node as unknown as Record<string, unknown>;
 
-const edgeKey = (
-  edge: Pick<EpistemicEdge, "source" | "type" | "target">,
-): string => `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
-
 const edgeSubject = (
   edge: Pick<EpistemicEdge, "source" | "type" | "target">,
 ): string => `${edge.source}:${edge.type}:${edge.target}`;
@@ -97,27 +95,6 @@ const activeGraph = (graph: MaterializedGraph): MaterializedGraph => ({
   nodes: graph.nodes.filter((node) => !isRemoved(node)),
   edges: graph.edges,
 });
-
-const applyEvents = (
-  graph: MaterializedGraph,
-  events: readonly GraphEvent[],
-): MaterializedGraph => {
-  const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
-  const edges = new Map(graph.edges.map((edge) => [edgeKey(edge), edge]));
-  for (const event of events) {
-    if (event.kind === "node") nodes.set(event.node.id, event.node);
-    else if (event.tombstone) edges.delete(edgeKey(event.edge));
-    else edges.set(edgeKey(event.edge), event.edge);
-  }
-  return {
-    nodes: [...nodes.values()].sort((left, right) =>
-      left.id.localeCompare(right.id),
-    ),
-    edges: [...edges.values()].sort((left, right) =>
-      edgeKey(left).localeCompare(edgeKey(right)),
-    ),
-  };
-};
 
 const storedVariants = (conflict: Node): StoredVariant[] => {
   const variants = nodeFields(conflict).variants;
@@ -760,7 +737,7 @@ const resolvedConflict = (
   });
 
 export async function reconcileMergeContradiction(
-  storage: GraphStorage,
+  graph: Pick<EpistemicGraph, "batch">,
   request: MergeReconciliationRequest,
 ): Promise<MergeReconciliationReceipt> {
   const requestDiagnostics = validateRequest(request);
@@ -768,51 +745,43 @@ export async function reconcileMergeContradiction(
     return invalidRequestReceipt(request, requestDiagnostics);
   }
 
-  return storage.transaction((current) => {
+  return graph.batch((batch) => {
+    const current = batch.graph;
     const conflict = current.nodes.find(
       (node) => node.id === request.conflictId,
     );
     if (!conflict) {
-      return {
-        result: reject(
-          request,
-          errorDiagnostics(
-            "CONFLICT_NOT_FOUND",
-            `Merge contradiction not found: ${request.conflictId}`,
-          ),
+      return reject(
+        request,
+        errorDiagnostics(
+          "CONFLICT_NOT_FOUND",
+          `Merge contradiction not found: ${request.conflictId}`,
         ),
-        events: [],
-      };
+      );
     }
     if (
       conflict.type !== "CTR" ||
       nodeFields(conflict).conflict_kind !== "branch_merge"
     ) {
-      return {
-        result: reject(
-          request,
-          errorDiagnostics(
-            "INVALID_CONFLICT_ID",
-            `Node ${request.conflictId} is not a merge contradiction`,
-          ),
-          conflict,
+      return reject(
+        request,
+        errorDiagnostics(
+          "INVALID_CONFLICT_ID",
+          `Node ${request.conflictId} is not a merge contradiction`,
         ),
-        events: [],
-      };
+        conflict,
+      );
     }
     if (!isUnresolvedMergeContradiction(conflict)) {
-      return {
-        result: reject(
-          request,
-          errorDiagnostics(
-            "CONFLICT_ALREADY_RESOLVED",
-            `Merge contradiction ${request.conflictId} is already resolved`,
-          ),
-          conflict,
-          "ALREADY_RESOLVED",
+      return reject(
+        request,
+        errorDiagnostics(
+          "CONFLICT_ALREADY_RESOLVED",
+          `Merge contradiction ${request.conflictId} is already resolved`,
         ),
-        events: [],
-      };
+        conflict,
+        "ALREADY_RESOLVED",
+      );
     }
 
     const actualDigest = nodeFields(conflict).conflict_digest;
@@ -820,34 +789,28 @@ export async function reconcileMergeContradiction(
       typeof actualDigest !== "string" ||
       actualDigest !== request.expectedConflictDigest
     ) {
-      return {
-        result: reject(
-          request,
-          errorDiagnostics(
-            "STALE_EXPECTED_CONFLICT_DIGEST",
-            "Expected conflict digest does not match the current contradiction",
-          ),
-          conflict,
-          "STALE",
+      return reject(
+        request,
+        errorDiagnostics(
+          "STALE_EXPECTED_CONFLICT_DIGEST",
+          "Expected conflict digest does not match the current contradiction",
         ),
-        events: [],
-      };
+        conflict,
+        "STALE",
+      );
     }
 
     const hasSelection = request.selectDigest !== undefined;
     const hasDelta = request.delta !== undefined;
     if (hasSelection === hasDelta) {
-      return {
-        result: reject(
-          request,
-          errorDiagnostics(
-            "INVALID_RECONCILIATION_MODE",
-            "Exactly one of stored content digest selection or ariadne-delta is required",
-          ),
-          conflict,
+      return reject(
+        request,
+        errorDiagnostics(
+          "INVALID_RECONCILIATION_MODE",
+          "Exactly one of stored content digest selection or ariadne-delta is required",
         ),
-        events: [],
-      };
+        conflict,
+      );
     }
 
     const stored = storedVariants(conflict);
@@ -861,17 +824,14 @@ export async function reconcileMergeContradiction(
           typeof baseDigest !== "string" ||
           baseDigest !== digest(canonicalJson(nodeFields(conflict).base_value ?? null))
         ) {
-          return {
-            result: reject(
-              request,
-              errorDiagnostics(
-                "INVALID_BASE_DIGEST",
-                "Stored base digest does not match the stored base content",
-              ),
-              conflict,
+          return reject(
+            request,
+            errorDiagnostics(
+              "INVALID_BASE_DIGEST",
+              "Stored base digest does not match the stored base content",
             ),
-            events: [],
-          };
+            conflict,
+          );
         }
         mode = "base";
       } else {
@@ -879,19 +839,16 @@ export async function reconcileMergeContradiction(
           (variant) => variant.variant_digest === request.selectDigest,
         );
         if (matches.length !== 1) {
-          return {
-            result: reject(
-              request,
-              errorDiagnostics(
-                matches.length > 1
-                  ? "AMBIGUOUS_VARIANT_DIGEST"
-                  : "UNKNOWN_VARIANT_DIGEST",
-                "Selection must match the stored base or exactly one stored variant content digest",
-              ),
-              conflict,
+          return reject(
+            request,
+            errorDiagnostics(
+              matches.length > 1
+                ? "AMBIGUOUS_VARIANT_DIGEST"
+                : "UNKNOWN_VARIANT_DIGEST",
+              "Selection must match the stored base or exactly one stored variant content digest",
             ),
-            events: [],
-          };
+            conflict,
+          );
         }
         selected = matches[0];
         const kind =
@@ -899,34 +856,28 @@ export async function reconcileMergeContradiction(
             ? subjectKind(nodeFields(conflict).subject_key as string)
             : "other";
         if (storedVariantDigest(selected, kind) !== request.selectDigest) {
-          return {
-            result: reject(
-              request,
-              errorDiagnostics(
-                "INVALID_VARIANT_DIGEST",
-                "Stored variant digest does not match the stored variant content",
-              ),
-              conflict,
+          return reject(
+            request,
+            errorDiagnostics(
+              "INVALID_VARIANT_DIGEST",
+              "Stored variant digest does not match the stored variant content",
             ),
-            events: [],
-          };
+            conflict,
+          );
         }
         mode = "variant";
       }
     } else {
       const parsed = parseDelta(request.delta);
       if (!parsed.delta) {
-        return {
-          result: reject(
-            request,
-            errorDiagnostics(
-              "INVALID_DELTA",
-              parsed.error ?? "Invalid ariadne-delta",
-            ),
-            conflict,
+        return reject(
+          request,
+          errorDiagnostics(
+            "INVALID_DELTA",
+            parsed.error ?? "Invalid ariadne-delta",
           ),
-          events: [],
-        };
+          conflict,
+        );
       }
       delta = parsed.delta;
       mode = "delta";
@@ -952,18 +903,15 @@ export async function reconcileMergeContradiction(
             nodeFields(parsedNode.data).decision_scope ===
               (subject as string).slice("decision_scope:".length));
         if (!matchesSubject) {
-          return {
-            result: reject(
-              request,
-              errorDiagnostics(
-                "INVALID_STORED_VALUE",
-                "Stored resolution value does not match the contradiction subject",
-                typeof subject === "string" ? subject : undefined,
-              ),
-              conflict,
+          return reject(
+            request,
+            errorDiagnostics(
+              "INVALID_STORED_VALUE",
+              "Stored resolution value does not match the contradiction subject",
+              typeof subject === "string" ? subject : undefined,
             ),
-            events: [],
-          };
+            conflict,
+          );
         }
         const currentNode = current.nodes.find(
           (node) => node.id === parsedNode.data.id,
@@ -995,18 +943,15 @@ export async function reconcileMergeContradiction(
         }
       } else if (parsedEdge.success && kind === "edge") {
         if (edgeSubject(parsedEdge.data) !== subject) {
-          return {
-            result: reject(
-              request,
-              errorDiagnostics(
-                "INVALID_STORED_VALUE",
-                "Stored resolution value does not match the contradiction subject",
-                typeof subject === "string" ? subject : undefined,
-              ),
-              conflict,
+          return reject(
+            request,
+            errorDiagnostics(
+              "INVALID_STORED_VALUE",
+              "Stored resolution value does not match the contradiction subject",
+              typeof subject === "string" ? subject : undefined,
             ),
-            events: [],
-          };
+            conflict,
+          );
         }
         const operation = mode === "variant" ? selected?.operation : "present";
         const key = edgeKey(parsedEdge.data);
@@ -1024,45 +969,36 @@ export async function reconcileMergeContradiction(
           appliedSubjects.push(edgeSubject(parsedEdge.data));
         }
       } else if (value !== null && value !== undefined) {
-        return {
-          result: reject(
-            request,
-            errorDiagnostics(
-              "INVALID_STORED_VALUE",
-              "Stored resolution value is not a valid node or edge",
-              typeof subject === "string" ? subject : undefined,
-            ),
-            conflict,
+        return reject(
+          request,
+          errorDiagnostics(
+            "INVALID_STORED_VALUE",
+            "Stored resolution value is not a valid node or edge",
+            typeof subject === "string" ? subject : undefined,
           ),
-          events: [],
-        };
+          conflict,
+        );
       }
     } else if (delta) {
       if (!deltaTouchesConflict(conflict, delta, entries)) {
-        return {
-          result: reject(
-            request,
-            errorDiagnostics(
-              "DELTA_DOES_NOT_RESOLVE_CONFLICT",
-              "The ariadne-delta does not change the contradiction subject",
-              typeof subject === "string" ? subject : undefined,
-            ),
-            conflict,
+        return reject(
+          request,
+          errorDiagnostics(
+            "DELTA_DOES_NOT_RESOLVE_CONFLICT",
+            "The ariadne-delta does not change the contradiction subject",
+            typeof subject === "string" ? subject : undefined,
           ),
-          events: [],
-        };
+          conflict,
+        );
       }
       const applied = applyDelta(current, conflict, delta);
       if (!applied.events) {
-        return {
-          result: reject(
-            request,
-            applied.diagnostics ??
-              errorDiagnostics("INVALID_DELTA", "Invalid ariadne-delta"),
-            conflict,
-          ),
-          events: [],
-        };
+        return reject(
+          request,
+          applied.diagnostics ??
+            errorDiagnostics("INVALID_DELTA", "Invalid ariadne-delta"),
+          conflict,
+        );
       }
       events.push(...applied.events);
       for (const event of applied.events) {
@@ -1108,10 +1044,7 @@ export async function reconcileMergeContradiction(
     };
     const released = releaseQuarantine(current, events, releasedEntries);
     if (released.diagnostics) {
-      return {
-        result: reject(request, released.diagnostics, conflict),
-        events: [],
-      };
+      return reject(request, released.diagnostics, conflict);
     }
 
     const changedDecisionById = new Map(
@@ -1129,7 +1062,7 @@ export async function reconcileMergeContradiction(
       request.decisionOwnerAuthorization,
     );
     if (authority.length > 0) {
-      return { result: reject(request, authority, conflict), events: [] };
+      return reject(request, authority, conflict);
     }
 
     const resolved = resolvedConflict(conflict, request, mode);
@@ -1145,30 +1078,28 @@ export async function reconcileMergeContradiction(
         code: "INVALID_PROSPECTIVE_GRAPH",
         message,
       }));
-      return { result: reject(request, diagnostics, conflict), events: [] };
+      return reject(request, diagnostics, conflict);
     }
 
     const evidence = evidenceDiagnostics(current, prospective);
     if (evidence.length > 0) {
-      return { result: reject(request, evidence, conflict), events: [] };
+      return reject(request, evidence, conflict);
     }
 
+    if (events.length > 0) batch.appendEvents(events);
     return {
-      result: {
-        outcome: "RESOLVED",
-        conflict_id: conflict.id,
-        expected_conflict_digest: request.expectedConflictDigest,
-        actual_conflict_digest: String(actualDigest),
-        resolution_mode: mode,
-        applied_subjects: [...new Set(appliedSubjects)].sort((left, right) =>
-          left.localeCompare(right),
-        ),
-        released_subjects: [...new Set(released.released)].sort((left, right) =>
-          left.localeCompare(right),
-        ),
-        diagnostics: [],
-      },
-      events,
+      outcome: "RESOLVED",
+      conflict_id: conflict.id,
+      expected_conflict_digest: request.expectedConflictDigest,
+      actual_conflict_digest: String(actualDigest),
+      resolution_mode: mode,
+      applied_subjects: [...new Set(appliedSubjects)].sort((left, right) =>
+        left.localeCompare(right),
+      ),
+      released_subjects: [...new Set(released.released)].sort((left, right) =>
+        left.localeCompare(right),
+      ),
+      diagnostics: [],
     };
   });
 }

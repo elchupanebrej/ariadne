@@ -4,6 +4,7 @@ import { NodeSchema } from "../core/schemas/nodes.js";
 import { validateGraph } from "./integrity.js";
 import { assertWithinCapacity } from "./capacity.js";
 import { FileSystemStorageDriver } from "./storage-driver.js";
+import { EpistemicGraph, type GraphBatch } from "./epistemic-graph.js";
 import {
   applyEvents,
   GraphEventSchema,
@@ -115,6 +116,10 @@ export class GraphStorage {
       }
       return mutation.result;
     });
+  }
+
+  async batch<T>(operation: (batch: GraphBatch) => T | Promise<T>): Promise<T> {
+    return EpistemicGraph.open(this.rootDirectory).batch(operation);
   }
 
   async appendEvent(event: unknown): Promise<void> {

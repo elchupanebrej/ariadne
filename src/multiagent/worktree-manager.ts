@@ -1,14 +1,14 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { mkdir, realpath } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { EpistemicEdge } from "../core/schemas/edges.js";
 import { EdgeSchema } from "../core/schemas/edges.js";
 import type { Node } from "../core/schemas/nodes.js";
 import { NodeSchema } from "../core/schemas/nodes.js";
 import { toRootRelative } from "../core/root-relative.js";
-import type { GraphStorage } from "../graph/storage.js";
+import type { EpistemicGraph } from "../graph/epistemic-graph.js";
 
 const CANDIDATE_ID = /^CAN-[0-9A-Za-z_-]+$/;
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -21,7 +21,7 @@ export type WorktreeManagerOptions = {
   depthMode?: string;
   depth?: string;
   mode?: string;
-  storage?: GraphStorage;
+  storage?: Pick<EpistemicGraph, "materialize">;
   timeoutMs?: number;
 };
 
@@ -362,7 +362,7 @@ let evidenceSequence = 0;
 export class WorktreeManager {
   readonly repoRoot: string;
   readonly worktreeRoot: string;
-  readonly storage?: GraphStorage;
+  readonly storage?: Pick<EpistemicGraph, "materialize">;
   readonly timeoutMs: number;
 
   constructor(options: WorktreeManagerOptions) {
@@ -374,10 +374,20 @@ export class WorktreeManager {
       throw new Error("Candidate worktrees require Deep depth mode");
     }
 
-    this.repoRoot = resolve(repoRoot);
-    this.worktreeRoot = resolve(
-      options.worktreeRoot ?? join(this.repoRoot, ".ariadne", "worktrees"),
+    const suppliedRepoRoot = resolve(repoRoot);
+    this.repoRoot = realpathSync.native(suppliedRepoRoot);
+    const suppliedWorktreeRoot = resolve(
+      options.worktreeRoot ?? join(suppliedRepoRoot, ".ariadne", "worktrees"),
     );
+    const worktreeRelativePath = relative(suppliedRepoRoot, suppliedWorktreeRoot);
+    // Accept aliases at the caller's repository boundary, while leaving child
+    // symlinks unresolved so assertRegisteredWorktree can reject redirects.
+    this.worktreeRoot =
+      !isAbsolute(worktreeRelativePath) &&
+      worktreeRelativePath !== ".." &&
+      !worktreeRelativePath.startsWith(`..${sep}`)
+        ? resolve(this.repoRoot, worktreeRelativePath)
+        : suppliedWorktreeRoot;
     this.storage = options.storage;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     if (!Number.isFinite(this.timeoutMs) || this.timeoutMs <= 0) {

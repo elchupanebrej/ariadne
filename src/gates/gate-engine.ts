@@ -10,7 +10,7 @@ import {
   runEpistemicGate,
   type EpistemicDiagnostic,
 } from "./epistemic-gate.js";
-import type { MaterializedGraph } from "../graph/storage.js";
+import type { MaterializedGraph } from "../graph/domain.js";
 
 export type GateName = "structural" | "semantic" | "epistemic" | "decision-scope";
 export type GateCommand = GateName | "all";

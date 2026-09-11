@@ -1,6 +1,6 @@
 import type { Node } from "../core/schemas/nodes.js";
 import { validateGraph } from "../graph/integrity.js";
-import type { MaterializedGraph } from "../graph/storage.js";
+import type { MaterializedGraph } from "../graph/domain.js";
 
 export const MINIMUM_EVIDENTIARY_RUNG = {
   "Syntactic structure": 2,

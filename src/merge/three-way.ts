@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import { createFramedRecord } from "../graph/journal.js";
 import {
+  applyEvents,
   GraphEventSchema,
   type GraphEvent,
   type MaterializedGraph,
-} from "../graph/storage.js";
+} from "../graph/domain.js";
 import { validateGraph, type GraphDiagnostic } from "../graph/integrity.js";
 import { buildInfluenceAdjacency } from "../graph/invalidation.js";
 import type { EpistemicEdge } from "../core/schemas/edges.js";
@@ -183,23 +184,8 @@ export const mergeContradictionGuidance = (node: Node): string => {
 const digest = (value: string): string =>
   createHash("sha256").update(value, "utf8").digest("hex");
 
-const materialize = (events: readonly GraphEvent[]): MaterializedGraph => {
-  const nodes = new Map<string, Node>();
-  const edges = new Map<string, EpistemicEdge>();
-  const edgeKey = (edge: EpistemicEdge): string =>
-    `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
-
-  for (const event of events) {
-    if (event.kind === "node") nodes.set(event.node.id, event.node);
-    else if (event.tombstone) edges.delete(edgeKey(event.edge));
-    else edges.set(edgeKey(event.edge), event.edge);
-  }
-
-  return {
-    nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
-    edges: [...edges.values()].sort((left, right) => edgeKey(left).localeCompare(edgeKey(right))),
-  };
-};
+const materialize = (events: readonly GraphEvent[]): MaterializedGraph =>
+  applyEvents({ nodes: [], edges: [] }, events);
 
 const edgeStatesFor = (events: readonly GraphEvent[]): Map<string, EdgeState> => {
   const states = new Map<string, EdgeState>();
