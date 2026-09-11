@@ -119,10 +119,15 @@ export const isTerminalNode = (
   node: { provenance_type: ProvenanceType; status?: string; tombstone?: boolean },
 ): boolean => {
   if (node.tombstone) return true;
+  const normalizedStatus =
+    typeof node.status === "string"
+      ? node.status.toUpperCase().replaceAll("-", "_")
+      : undefined;
+  if (normalizedStatus === "RE_OPENED") return false;
   if (node.provenance_type === "DECIDED") return true;
   if (
-    typeof node.status === "string" &&
-    TERMINAL_NODE_STATUSES.has(node.status.toUpperCase().replaceAll("-", "_"))
+    normalizedStatus !== undefined &&
+    TERMINAL_NODE_STATUSES.has(normalizedStatus)
   ) {
     return true;
   }

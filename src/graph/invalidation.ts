@@ -14,7 +14,7 @@ export type InvalidationTraceEntry = {
   node_id: string;
   status?: string;
   previous_status?: string;
-  relation?: EdgeType;
+  relation?: EdgeType | "waived_by" | "superseded_by" | string;
 };
 
 export type InvalidationResult = {
@@ -218,6 +218,82 @@ export function propagateInvalidation(
 
     for (const neighbor of adjacency.get(current.id) ?? []) {
       if (!visited.has(neighbor.id)) queue.push(neighbor);
+    }
+  }
+
+  const reopenedDecQueue: string[] = [];
+  for (const entry of trace) {
+    const node = nodeById.get(entry.node_id);
+    if (
+      node &&
+      (nodeKind(node) === "DEC" || node.type === "DEC") &&
+      node.status === "RE-OPENED"
+    ) {
+      reopenedDecQueue.push(node.id);
+    }
+  }
+
+  const processedDecIds = new Set<string>();
+  let decQueueIndex = 0;
+  while (decQueueIndex < reopenedDecQueue.length) {
+    const decId = reopenedDecQueue[decQueueIndex];
+    decQueueIndex += 1;
+    if (processedDecIds.has(decId)) continue;
+    processedDecIds.add(decId);
+
+    const dependents = nodes
+      .filter(
+        (node) =>
+          (node as unknown as { waived_by?: string }).waived_by === decId ||
+          (node as unknown as { superseded_by?: string }).superseded_by === decId,
+      )
+      .sort((left, right) => left.id.localeCompare(right.id));
+
+    for (const candidate of dependents) {
+      if (visited.has(candidate.id)) continue;
+      visited.add(candidate.id);
+
+      const relation: InvalidationTraceEntry["relation"] =
+        (candidate as unknown as { waived_by?: string }).waived_by === decId
+          ? "waived_by"
+          : "superseded_by";
+
+      const existing = isRecord(candidate.invalidation)
+        ? candidate.invalidation
+        : undefined;
+
+      let previousStatus = candidate.status;
+      if (existing?.evidence_id === evidenceId) {
+        previousStatus =
+          typeof existing.previous_status === "string"
+            ? existing.previous_status
+            : undefined;
+      } else {
+        candidate.invalidation = {
+          evidence_id: evidenceId,
+          previous_status: candidate.status,
+          status: "RE-OPENED",
+          reopened_by_decision: decId,
+          ...(nodeKind(candidate) === "DEC" || candidate.type === "DEC"
+            ? { reopened: true, needs_review: true }
+            : {}),
+        };
+        candidate.status = "RE-OPENED";
+      }
+
+      trace.push({
+        node_id: candidate.id,
+        status: candidate.status,
+        previous_status: previousStatus,
+        relation,
+      });
+
+      if (
+        (nodeKind(candidate) === "DEC" || candidate.type === "DEC") &&
+        !processedDecIds.has(candidate.id)
+      ) {
+        reopenedDecQueue.push(candidate.id);
+      }
     }
   }
 

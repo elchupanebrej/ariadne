@@ -106,4 +106,80 @@ describe("propagateInvalidation", () => {
     expect(second.trace).toEqual(first.trace);
     expect(second.graph).toEqual(first.graph);
   });
+
+  it("cascades evidentiary re-open to waived unknowns and superseded decisions", () => {
+    const graph = baseGraph();
+    // Add UNK-1 waived by DEC-1, and DEC-2 superseded by DEC-1
+    graph.nodes.push(
+      NodeSchema.parse({
+        ...node("UNK-1", "UNK", "UNKNOWN"),
+        status: "WAIVED",
+        waived_by: "DEC-1",
+      }),
+      NodeSchema.parse({
+        ...node("DEC-2", "DEC", "DECIDED"),
+        status: "SUPERSEDED",
+        superseded_by: "DEC-1",
+      }),
+      NodeSchema.parse({
+        ...node("UNK-OTHER", "UNK", "UNKNOWN"),
+        status: "WAIVED",
+        waived_by: "DEC-UNRELATED",
+      }),
+    );
+    graph.edges.push({
+      source: "DEC-1",
+      target: "DEC-2",
+      type: "supersedes",
+    });
+
+    const result = propagateInvalidation(graph, "ASM-1", "EVD-1");
+
+    expect(result.graph.nodes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "DEC-1", status: "RE-OPENED" }),
+        expect.objectContaining({
+          id: "UNK-1",
+          status: "RE-OPENED",
+          invalidation: expect.objectContaining({
+            evidence_id: "EVD-1",
+            previous_status: "WAIVED",
+            reopened_by_decision: "DEC-1",
+          }),
+        }),
+        expect.objectContaining({
+          id: "DEC-2",
+          status: "RE-OPENED",
+          invalidation: expect.objectContaining({
+            evidence_id: "EVD-1",
+            previous_status: "SUPERSEDED",
+            reopened_by_decision: "DEC-1",
+          }),
+        }),
+        expect.objectContaining({ id: "UNK-OTHER", status: "WAIVED" }),
+      ]),
+    );
+
+    expect(result.trace).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          node_id: "UNK-1",
+          status: "RE-OPENED",
+          previous_status: "WAIVED",
+          relation: "waived_by",
+        }),
+        expect.objectContaining({
+          node_id: "DEC-2",
+          status: "RE-OPENED",
+          previous_status: "SUPERSEDED",
+          relation: "superseded_by",
+        }),
+      ]),
+    );
+
+    // Idempotent re-run with waived/superseded nodes
+    const repeat = propagateInvalidation(result.graph, "ASM-1", "EVD-1");
+    expect(repeat.trace).toEqual(result.trace);
+    expect(repeat.graph).toEqual(result.graph);
+  });
 });
