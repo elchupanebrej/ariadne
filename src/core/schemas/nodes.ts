@@ -16,6 +16,7 @@ export type {
   ProvenanceType,
   TransitionLifecycle,
   NodeId,
+  UnknownNode,
 } from "../types/nodes.js";
 
 const NODE_ID_SUFFIX = "[0-9A-Za-z_-]+";
@@ -55,7 +56,10 @@ export const ContradictionNodeSchema = createNodeSchema("CTR");
 export const TransformationNodeSchema = createNodeSchema("TRF");
 export const SolutionSpaceNodeSchema = createNodeSchema("SPACE");
 export const CandidateNodeSchema = createNodeSchema("CAN");
-export const UnknownNodeSchema = createNodeSchema("UNK");
+export const UnknownNodeSchema = createNodeSchema("UNK").extend({
+  waived_by: z.string().min(1).optional(),
+  resolved_by: z.string().min(1).optional(),
+});
 export const AssumptionNodeSchema = createNodeSchema("ASM");
 export const DependencyNodeSchema = createNodeSchema("DEP");
 export const DynamicsNodeSchema = createNodeSchema("DYN");

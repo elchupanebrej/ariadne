@@ -10,8 +10,10 @@ import {
   NodeSchemas,
   type Node,
   type NodeType,
+  type UnknownNode,
 } from "../core/schemas/nodes.js";
 import type { ProvenanceType } from "../core/types/nodes.js";
+import { AriadneError } from "../core/errors.js";
 import { validateGraph } from "./integrity.js";
 import { assertWithinCapacity } from "./capacity.js";
 import {
@@ -405,6 +407,105 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       return edge;
+    });
+  }
+
+  /**
+   * High-level atomic waiver of a decision-significant unknown by a decision.
+   */
+  async waive(
+    unknownId: string,
+    decisionId: string,
+  ): Promise<{
+    node_id: string;
+    waived_node_id: string;
+    waived_by: string;
+    status: "WAIVED";
+    node: UnknownNode;
+  }> {
+    return await this.#driver.withLock(async () => {
+      if (unknownId === decisionId) {
+        throw new Error(
+          `Self-reference rejected: node ${unknownId} cannot be waived by itself`,
+        );
+      }
+
+      const current = await this.materialize();
+      const target = current.nodes.find(({ id }) => id === unknownId);
+      if (!target) {
+        throw new Error(`Node not found: ${unknownId}`);
+      }
+      if (target.type !== "UNK") {
+        throw new Error(`Waive target ${unknownId} must be an UNK node (got ${target.type})`);
+      }
+
+      const decision = current.nodes.find(({ id }) => id === decisionId);
+      if (!decision) {
+        throw new Error(`Closing node not found: ${decisionId}`);
+      }
+      if (decision.type !== "DEC") {
+        throw new Error(`Closing node ${decisionId} must be a DEC node (got ${decision.type})`);
+      }
+      if (decision.status === "SUPERSEDED" || decision.status === "RE-OPENED") {
+        throw new Error(
+          `Closing decision ${decisionId} is not live (status: ${decision.status})`,
+        );
+      }
+
+      const existingWaivedBy = (target as UnknownNode).waived_by;
+      if (target.status === "WAIVED" || existingWaivedBy !== undefined) {
+        if (existingWaivedBy === decisionId && target.status === "WAIVED") {
+          return {
+            node_id: unknownId,
+            waived_node_id: unknownId,
+            waived_by: decisionId,
+            status: "WAIVED",
+            node: target as UnknownNode,
+          };
+        }
+        throw new AriadneError({
+          code: "IDEMPOTENCY_CONFLICT",
+          message: `Conflict: node ${unknownId} is already waived by ${existingWaivedBy ?? "another decision"}`,
+        });
+      }
+
+      const updatedNode = NodeSchemas.UNK.parse({
+        ...target,
+        status: "WAIVED",
+        waived_by: decisionId,
+      }) as UnknownNode;
+
+      const next = applyEvents(current, [{ kind: "node", node: updatedNode }]);
+      const integrity = validateGraph(next);
+      if (!integrity.valid) {
+        throw new Error(
+          integrity.diagnostics.map((d) => `${d.code}: ${d.message}`).join("; "),
+        );
+      }
+
+      const existingEvents = await this.#driver.readEvents();
+      assertWithinCapacity({
+        nodeCount: next.nodes.length,
+        edgeCount: next.edges.length,
+        eventCount: existingEvents.length + 1,
+      });
+
+      await this.#driver.appendEvents([{ kind: "node", node: updatedNode }]);
+      await this.#driver.writeCards([
+        { id: updatedNode.id, content: renderCard(updatedNode) },
+      ]);
+      await this.#driver.writeIndex(renderIndex(next));
+
+      const prevState = (await this.#driver.readState()) ?? {};
+      await this.#driver.writeState(updateStateForGraph(prevState, next));
+
+      return {
+        node_id: unknownId,
+        waived_node_id: unknownId,
+        waived_by: decisionId,
+        status: "WAIVED",
+        node: updatedNode,
+      };
     });
   }
 

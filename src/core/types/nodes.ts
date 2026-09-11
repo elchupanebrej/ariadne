@@ -110,12 +110,18 @@ export interface TransitionNode extends GenericCanonicalNode<"TRANS"> {
   verified?: boolean;
 }
 
+export interface UnknownNode extends GenericCanonicalNode<"UNK"> {
+  waived_by?: string;
+  resolved_by?: string;
+}
+
 type CanonicalNodeByType = {
   [T in NodeType]:
     T extends "CLM" ? ClaimNode :
     T extends "EVDREQ" ? EvidenceRequestNode :
     T extends "EVD" ? EvidenceNode :
     T extends "TRANS" ? TransitionNode :
+    T extends "UNK" ? UnknownNode :
     GenericCanonicalNode<T>;
 };
 
@@ -130,7 +136,6 @@ export type ContradictionNode = NodeOfType<"CTR">;
 export type TransformationNode = NodeOfType<"TRF">;
 export type SolutionSpaceNode = NodeOfType<"SPACE">;
 export type CandidateNode = NodeOfType<"CAN">;
-export type UnknownNode = NodeOfType<"UNK">;
 export type AssumptionNode = NodeOfType<"ASM">;
 export type DependencyNode = NodeOfType<"DEP">;
 export type DynamicsNode = NodeOfType<"DYN">;

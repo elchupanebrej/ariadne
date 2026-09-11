@@ -111,6 +111,7 @@ export const TERMINAL_NODE_STATUSES = new Set([
   "INVALIDATED",
   "REMOVED",
   "DECIDED",
+  "WAIVED",
 ]);
 
 export const isTerminalNode = (
