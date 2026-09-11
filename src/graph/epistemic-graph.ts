@@ -74,6 +74,14 @@ export interface EdgeFilter {
   relation?: string;
 }
 
+export interface GraphBatch {
+  readonly graph: MaterializedGraph;
+  appendEvents(events: readonly GraphEvent[]): void;
+  regenerateIndex(): void;
+  writeStateProjection(content: string): void;
+  deleteCard(id: string): void;
+}
+
 export class EpistemicGraph {
   #driver!: StorageDriver;
   #inMemoryQueryCache?: {
@@ -113,9 +121,12 @@ export class EpistemicGraph {
     await this.#driver.init();
   }
 
+  async readEvents(): Promise<GraphEvent[]> {
+    return (await this.#driver.readEvents()).map((event) => GraphEventSchema.parse(event));
+  }
+
   async materialize(): Promise<MaterializedGraph> {
-    const events = (await this.#driver.readEvents()).map((event) => GraphEventSchema.parse(event));
-    return applyEvents({ nodes: [], edges: [] }, events);
+    return applyEvents({ nodes: [], edges: [] }, await this.readEvents());
   }
 
   private async materializeForQuery(): Promise<MaterializedGraph> {
@@ -175,6 +186,20 @@ export class EpistemicGraph {
   async renderIndex(): Promise<string> {
     const graph = await this.materializeForQuery();
     return renderIndex(graph);
+  }
+
+  async regenerateIndex(): Promise<void> {
+    await this.#driver.withProjectionLock(async () => {
+      await this.regenerateIndexUnlocked();
+    });
+  }
+
+  private async regenerateIndexUnlocked(): Promise<void> {
+    const graph = await this.materialize();
+    await this.#driver.writeIndex(renderIndex(graph));
+    await this.#driver.writeCards(
+      graph.nodes.map((node) => ({ id: node.id, content: renderCard(node) })),
+    );
   }
 
   /**
@@ -374,6 +399,70 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       return edge;
+    });
+  }
+
+  async batch<T>(operation: (batch: GraphBatch) => T | Promise<T>): Promise<T> {
+    return await this.#driver.withLock(async () => {
+      const current = await this.materialize();
+      const events: GraphEvent[] = [];
+      const projections: Array<() => Promise<void>> = [];
+      const batch: GraphBatch = {
+        graph: current,
+        appendEvents: (batchEvents) => {
+          events.push(...batchEvents);
+        },
+        regenerateIndex: () => {
+          projections.push(() => this.regenerateIndexUnlocked());
+        },
+        writeStateProjection: (content) => {
+          projections.push(() => this.#driver.writeStateProjection(content));
+        },
+        deleteCard: (id) => {
+          projections.push(() => this.#driver.deleteCard(id));
+        },
+      };
+
+      const result = await operation(batch);
+
+      if (events.length > 0) {
+        const parsed = events.map((event) => GraphEventSchema.parse(event));
+        const prospective = applyEvents(current, parsed);
+        const validation = validateGraph(prospective);
+        if (!validation.valid) {
+          throw new Error(
+            `Invalid graph after append: ${validation.diagnostics
+              .map(({ code, message }) =>
+                code === "MISSING_NODE" ? `Missing node reference: ${message}` : message,
+              )
+              .join("; ")}`,
+          );
+        }
+
+        const existingEvents = await this.#driver.readEvents();
+        assertWithinCapacity({
+          nodeCount: prospective.nodes.length,
+          edgeCount: prospective.edges.length,
+          eventCount: existingEvents.length + parsed.length,
+        });
+
+        await this.#driver.appendEvents(parsed);
+        await this.#driver.writeIndex(renderIndex(prospective));
+        await this.#driver.writeCards(
+          parsed.flatMap((event) =>
+            event.kind === "node"
+              ? [{ id: event.node.id, content: renderCard(event.node) }]
+              : [],
+          ),
+        );
+        if (parsed.some((event) => event.kind === "node")) {
+          const previous = (await this.#driver.readState()) ?? {};
+          await this.#driver.writeState(stateForGraph(previous, prospective));
+        }
+      }
+
+      for (const projection of projections) await projection();
+      return result;
     });
   }
 
