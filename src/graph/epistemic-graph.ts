@@ -172,9 +172,27 @@ export class EpistemicGraph {
     return graph;
   }
 
+  /**
+   * Read the workspace state projection. Content is validated through
+   * `StateSchema` — malformed state throws `Invalid STATE.yaml: ...`, matching
+   * `GraphStorage.readState`. The returned object has `schema_version`
+   * stripped; a missing state file resolves to an empty object.
+   */
   async getState(): Promise<AriadneState> {
+    const state = await this.#readWorkspaceState();
+    return (state ?? {}) as AriadneState;
+  }
+
+  async #readWorkspaceState(): Promise<Record<string, unknown> | null> {
     const raw = await this.#driver.readState();
-    return (raw ?? {}) as AriadneState;
+    if (raw === null) return null;
+    const parsed = StateSchema.safeParse(raw);
+    if (!parsed.success) {
+      throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
+    }
+    const state = { ...(parsed.data as Record<string, unknown>) };
+    delete state.schema_version;
+    return state;
   }
 
   async getFrontier(): Promise<string[]> {
@@ -452,17 +470,7 @@ export class EpistemicGraph {
       const projections: Array<() => Promise<void>> = [];
       const batch: GraphBatch = {
         graph: current,
-        readState: async () => {
-          const raw = await this.#driver.readState();
-          if (raw === null) return null;
-          const parsed = StateSchema.safeParse(raw);
-          if (!parsed.success) {
-            throw new Error(`Invalid STATE.yaml: ${parsed.error.message}`);
-          }
-          const state = { ...(parsed.data as Record<string, unknown>) };
-          delete state.schema_version;
-          return state;
-        },
+        readState: () => this.#readWorkspaceState(),
         readCard: (id) => this.#driver.readCard(id),
         listCards: () => this.#driver.listCards(),
         appendEvents: (batchEvents) => {

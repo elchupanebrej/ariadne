@@ -88,8 +88,8 @@ export async function runMergeResolve(
   }
   const parsed = parseArgs(args);
   if (parsed.auto) {
-    const { storage } = await resolveCliWorkspace(io);
-    const conflicts = (await storage.materialize()).nodes
+    const { graph } = await resolveCliWorkspace(io);
+    const conflicts = (await graph.materialize()).nodes
       .filter((node) => node.type === "CTR" && node.status === "MERGE_CONFLICT")
       .map(({ id }) => id)
       .sort();
@@ -116,7 +116,7 @@ export async function runMergeResolve(
     parsed.deltaPath === undefined
       ? undefined
       : await readFile(resolve(io.cwd, parsed.deltaPath), "utf8");
-  const { storage } = await resolveCliWorkspace(io);
+  const { graph } = await resolveCliWorkspace(io);
   const authorization =
     parsed.decisionOwner === undefined
       ? {}
@@ -135,7 +135,7 @@ export async function runMergeResolve(
           delta: delta as string,
           ...authorization,
         };
-  const receipt = await reconcileMergeContradiction(storage, request);
+  const receipt = await reconcileMergeContradiction(graph, request);
   if (parsed.json) io.stdout.write(`${JSON.stringify(receipt)}\n`);
   if (receipt.outcome !== "RESOLVED" && receipt.outcome !== "ALREADY_RESOLVED") {
     writeDomainDiagnostic(

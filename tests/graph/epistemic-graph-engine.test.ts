@@ -41,6 +41,31 @@ describe("EpistemicGraph engine surface", () => {
     });
   });
 
+  it("rejects malformed workspace state read through the engine handle", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await writeFile(join(root, "STATE.yaml"), '{"frontier":"not-an-array"}\n', "utf8");
+
+      await expect(graph.getState()).rejects.toThrow(/Invalid STATE\.yaml/);
+    });
+  });
+
+  it("strips schema_version from state read through the engine handle", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await writeFile(
+        join(root, "STATE.yaml"),
+        '{"schema_version":1,"depth_mode":"Deep"}\n',
+        "utf8",
+      );
+
+      const state = (await graph.getState()) as Record<string, unknown>;
+      expect(state).toEqual({ depth_mode: "Deep" });
+    });
+  });
+
   it("regenerates index and card projections on demand", async () => {
     await withTempRoot(async (root) => {
       const graph = EpistemicGraph.open(root);
