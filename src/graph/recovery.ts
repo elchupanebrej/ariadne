@@ -22,7 +22,7 @@ import {
   stateForGraph,
   type MaterializedGraph,
   type GraphEvent,
-} from "./storage.js";
+} from "./domain.js";
 
 export type { JournalScanDiagnostic, JournalScanResult } from "./journal.js";
 

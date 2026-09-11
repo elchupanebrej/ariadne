@@ -48,55 +48,18 @@ export type {
 } from "./report-engine.js";
 
 import {
+  applyEvents,
+  edgeKey,
   renderCard,
   renderIndex,
   GraphEventSchema,
   isFrontierNode,
   isTerminalNode,
+  stateForGraph,
   type AriadneState,
   type GraphEvent,
   type MaterializedGraph,
-} from "./storage.js";
-
-const edgeKey = (edge: Pick<EpistemicEdge, "source" | "type" | "target">): string =>
-  `${edge.source}\u0000${edge.type}\u0000${edge.target}`;
-
-const applyEvents = (
-  graph: MaterializedGraph,
-  events: readonly GraphEvent[],
-): MaterializedGraph => {
-  const nodes = new Map(graph.nodes.map((node) => [node.id, node]));
-  const edges = new Map(graph.edges.map((edge) => [edgeKey(edge), edge]));
-
-  for (const event of events) {
-    if (event.kind === "node") nodes.set(event.node.id, event.node);
-    else if (event.tombstone) edges.delete(edgeKey(event.edge));
-    else edges.set(edgeKey(event.edge), event.edge);
-  }
-
-  return {
-    nodes: [...nodes.values()].sort((left, right) => left.id.localeCompare(right.id)),
-    edges: [...edges.values()].sort((left, right) =>
-      edgeKey(left).localeCompare(edgeKey(right)),
-    ),
-  };
-};
-
-const updateStateForGraph = (
-  state: Record<string, unknown>,
-  graph: MaterializedGraph,
-): Record<string, unknown> => {
-  const frontierNodes = graph.nodes.filter(isFrontierNode);
-  const frontier = frontierNodes.map((node) => node.id);
-  const openUnknowns = frontierNodes
-    .filter((node) => node.type === "UNK")
-    .map((node) => node.id);
-  const next: Record<string, unknown> = { ...state, frontier, open_unknowns: openUnknowns };
-  if ("active_frontier" in state) next.active_frontier = frontier;
-  if ("openUnknowns" in state) next.openUnknowns = openUnknowns;
-  if ("unknowns" in state) next.unknowns = openUnknowns;
-  return next;
-};
+} from "./domain.js";
 
 export interface NodeFilter {
   type?: NodeType;
@@ -140,7 +103,7 @@ export class EpistemicGraph {
       for (const node of initialGraph.nodes) {
         driver.cards.set(node.id, renderCard(node));
       }
-      driver.state = updateStateForGraph({}, initialGraph);
+      driver.state = stateForGraph({}, initialGraph);
     }
     graph.#driver = driver;
     return graph;
@@ -258,7 +221,7 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       const prevState = (await this.#driver.readState()) ?? {};
-      await this.#driver.writeState(updateStateForGraph(prevState, next));
+      await this.#driver.writeState(stateForGraph(prevState, next));
 
       return parsed;
     });
@@ -317,7 +280,7 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       const prevState = (await this.#driver.readState()) ?? {};
-      await this.#driver.writeState(updateStateForGraph(prevState, next));
+      await this.#driver.writeState(stateForGraph(prevState, next));
 
       return parsed;
     });
@@ -501,7 +464,7 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       const prevState = (await this.#driver.readState()) ?? {};
-      await this.#driver.writeState(updateStateForGraph(prevState, next));
+      await this.#driver.writeState(stateForGraph(prevState, next));
 
       return {
         node_id: unknownId,
@@ -647,7 +610,7 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(next));
 
       const prevState = (await this.#driver.readState()) ?? {};
-      await this.#driver.writeState(updateStateForGraph(prevState, next));
+      await this.#driver.writeState(stateForGraph(prevState, next));
 
       return {
         node_id: targetDecId,
@@ -727,7 +690,7 @@ export class EpistemicGraph {
       await this.#driver.writeIndex(renderIndex(invalidation.graph));
 
       const priorState = (await this.#driver.readState()) ?? {};
-      const nextState = updateStateForGraph(priorState, invalidation.graph);
+      const nextState = stateForGraph(priorState, invalidation.graph);
       nextState.last_invalidation = {
         node_id: nodeId,
         evidence_id: evidenceId,

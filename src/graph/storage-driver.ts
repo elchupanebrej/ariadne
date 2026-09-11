@@ -2,7 +2,7 @@ import { lstat, mkdir, readFile, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { AriadneError } from "../core/errors.js";
-import type { GraphEvent } from "./storage.js";
+import type { GraphEvent } from "./domain.js";
 import {
   appendCanonicalRecords,
   createFramedRecord,
