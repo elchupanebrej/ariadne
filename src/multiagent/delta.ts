@@ -58,7 +58,7 @@ const stableJson = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
-const edgeKey = (edge: { source: string; type: string; target: string }): string =>
+const edgeReceiptKey = (edge: { source: string; type: string; target: string }): string =>
   `${edge.source}:${edge.type}:${edge.target}`;
 
 const nodeMutationId = (mutation: z.infer<typeof ExistingNodeMutationSchema>): string =>
@@ -130,7 +130,7 @@ export async function mergeDelta(
 
     const nodes = new Map(current.nodes.map((node) => [node.id, node]));
     const existingNodeIds = new Set(nodes.keys());
-    const edges = new Map(current.edges.map((edge) => [edgeKey(edge), edge]));
+    const edges = new Map(current.edges.map((edge) => [edgeReceiptKey(edge), edge]));
     const events: Array<
       | { kind: "node"; node: (typeof current.nodes)[number] }
       | { kind: "edge"; edge: (typeof current.edges)[number] }
@@ -191,7 +191,7 @@ export async function mergeDelta(
       }
 
       for (const edge of delta.edges) {
-        const key = edgeKey(edge);
+        const key = edgeReceiptKey(edge);
         if (edges.has(key)) {
           addUnique(receipt.skipped.edges, key);
           continue;
