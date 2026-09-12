@@ -303,13 +303,14 @@ describe("WorktreeManager", () => {
       const manager = managerFor(repoRoot);
       const first = await manager.create("CAN-01-raft");
       const second = await manager.create("CAN-02-crdt");
+      const secondReadme = await readFile(join(second.path, "README.md"));
 
       await manager.cleanup(first);
       await expect(readFile(first.path, "utf8")).rejects.toMatchObject({
         code: "ENOENT",
       });
-      await expect(readFile(join(second.path, "README.md"), "utf8")).resolves.toBe(
-        "seed\n",
+      await expect(readFile(join(second.path, "README.md"))).resolves.toEqual(
+        secondReadme,
       );
       expect((await git(repoRoot, "branch", "--list", first.branch)).stdout).toContain(
         first.branch,
