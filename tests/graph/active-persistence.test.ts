@@ -3,7 +3,6 @@ import path from "node:path";
 import os from "node:os";
 import { describe, expect, it } from "vitest";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
-import { GraphStorage } from "../../src/graph/storage.js";
 import {
   appendAttemptEvent,
   createFramedRecord,
@@ -112,16 +111,23 @@ describe("hardened persistence active path", () => {
     }
   });
 
-  it("uses framed canonical records for GraphStorage mutations as well", async () => {
+  it("uses framed canonical records for engine batch mutations as well", async () => {
     const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-storage-active-"));
 
     try {
-      const storage = new GraphStorage(storageRoot);
-      await storage.appendNode({
-        id: "TASK-active",
-        type: "TASK",
-        provenance_type: "FACT",
-        statement: "GraphStorage shares the hardened path",
+      const graph = EpistemicGraph.open(storageRoot);
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-active",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "GraphStorage shares the hardened path",
+            },
+          },
+        ]);
       });
 
       const records = await readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"));
@@ -129,32 +135,41 @@ describe("hardened persistence active path", () => {
       expect(records[0].idempotencyKey).toMatch(/^graph-event:/u);
       expect(records[0].payload).toMatchObject({ kind: "node", node: { id: "TASK-active" } });
 
-      await storage.appendNode({
-        id: "TASK-active",
-        type: "TASK",
-        provenance_type: "FACT",
-        statement: "GraphStorage shares the hardened path",
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-active",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "GraphStorage shares the hardened path",
+            },
+          },
+        ]);
       });
-      await storage.appendEvents([
-        {
-          kind: "node",
-          node: {
-            id: "TASK-active",
-            type: "TASK",
-            provenance_type: "FACT",
-            statement: "GraphStorage shares the hardened path",
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-active",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "GraphStorage shares the hardened path",
+            },
           },
-        },
-        {
-          kind: "node",
-          node: {
-            id: "TASK-active",
-            type: "TASK",
-            provenance_type: "FACT",
-            statement: "GraphStorage shares the hardened path",
+          {
+            kind: "node",
+            node: {
+              id: "TASK-active",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "GraphStorage shares the hardened path",
+            },
           },
-        },
-      ]);
+        ]);
+      });
       await expect(readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"))).resolves.toHaveLength(1);
     } finally {
       fs.rmSync(storageRoot, { recursive: true, force: true });
@@ -180,11 +195,18 @@ describe("hardened persistence active path", () => {
       });
       fs.writeFileSync(path.join(storageRoot, "GRAPH.jsonl"), JSON.stringify(first), "utf8");
 
-      await new GraphStorage(storageRoot).appendNode({
-        id: "TASK-next",
-        type: "TASK",
-        provenance_type: "FACT",
-        statement: "Appended after a valid unterminated frame",
+      await EpistemicGraph.open(storageRoot).batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-next",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "Appended after a valid unterminated frame",
+            },
+          },
+        ]);
       });
 
       const records = await readFramedRecords(path.join(storageRoot, "GRAPH.jsonl"));

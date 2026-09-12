@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -297,5 +297,274 @@ describe("EpistemicGraph engine surface", () => {
 
     expect(await graph.readEvents()).toEqual([]);
     expect(await graph.listNodes()).toEqual([]);
+  });
+});
+
+describe("EpistemicGraph persistence and validation parity", () => {
+  it("appends a validated batch and regenerates the index once", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-batch-"));
+
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-001") },
+          { kind: "node", node: node("TASK-002") },
+          {
+            kind: "edge",
+            edge: {
+              source: "TASK-002",
+              type: "depends_on",
+              target: "TASK-001",
+            },
+          },
+        ]);
+      });
+
+      expect(await graph.readEvents()).toHaveLength(3);
+      expect(await readFile(join(directory, "INDEX.md"), "utf8")).toContain(
+        "TASK-002",
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("recovers state and materialized graph after a restart", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-"));
+
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) =>
+        batch.writeStateProjection(
+          `${JSON.stringify(
+            { schema_version: 1, depth_mode: "Standard", frontier: ["TASK-001"] },
+            null,
+            2,
+          )}\n`,
+        ),
+      );
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-001") },
+          { kind: "node", node: node("TASK-002") },
+          {
+            kind: "edge",
+            edge: { source: "TASK-002", type: "depends_on", target: "TASK-001" },
+          },
+        ]);
+      });
+
+      const restarted = EpistemicGraph.open(directory);
+      expect(await restarted.getState()).toEqual({
+        depth_mode: "Standard",
+        frontier: ["TASK-001", "TASK-002"],
+        open_unknowns: [],
+      });
+      expect(await restarted.materialize()).toEqual({
+        nodes: [node("TASK-001"), node("TASK-002")],
+        edges: [
+          {
+            source: "TASK-002",
+            type: "depends_on",
+            target: "TASK-001",
+          },
+        ],
+      });
+      expect(await readFile(join(directory, "INDEX.md"), "utf8")).toContain(
+        "TASK-001",
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes concurrent appends without losing events", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-"));
+
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await Promise.all(
+        Array.from({ length: 20 }, (_, index) =>
+          graph.batch((batch) => {
+            batch.appendEvents([
+              { kind: "node", node: node(`TASK-${String(index).padStart(3, "0")}`) },
+            ]);
+          }),
+        ),
+      );
+
+      const events = await graph.readEvents();
+      expect(events).toHaveLength(20);
+      expect((await graph.materialize()).nodes.map(({ id }) => id)).toEqual(
+        Array.from({ length: 20 }, (_, index) =>
+          `TASK-${String(index).padStart(3, "0")}`,
+        ),
+      );
+      expect((await readFile(join(directory, "GRAPH.jsonl"), "utf8"))
+        .trim()
+        .split("\n")).toHaveLength(20);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("serializes read-check-append batches across engine handles", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-transaction-"));
+
+    try {
+      const first = EpistemicGraph.open(directory);
+      const second = EpistemicGraph.open(directory);
+      const results = await Promise.all([
+        first.batch(async (batch) => {
+          expect(batch.graph.nodes).toHaveLength(0);
+          await delay(20);
+          batch.appendEvents([{ kind: "node", node: node("TASK-001") }]);
+          return "first";
+        }),
+        second.batch((batch) => {
+          const ids = batch.graph.nodes.map(({ id }) => id);
+          batch.appendEvents([{ kind: "node", node: node("TASK-002") }]);
+          return ids;
+        }),
+      ]);
+
+      expect(results).toEqual(["first", ["TASK-001"]]);
+      expect((await second.materialize()).nodes.map(({ id }) => id)).toEqual([
+        "TASK-001",
+        "TASK-002",
+      ]);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("recovers an incomplete final JSONL record", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-recovery-"));
+
+    try {
+      const event = { kind: "node", node: node("TASK-001") };
+      await writeFile(
+        join(directory, "GRAPH.jsonl"),
+        `${JSON.stringify(event)}\n{"kind":"node","node":{"id":"TASK-002"`,
+        "utf8",
+      );
+      const graph = EpistemicGraph.open(directory);
+
+      expect(await graph.materialize()).toEqual({ nodes: [node("TASK-001")], edges: [] });
+      expect(await readFile(join(directory, "GRAPH.jsonl"), "utf8")).toBe(
+        `${JSON.stringify(event)}\n`,
+      );
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("validates prospective references and deductive cycles before writing", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-integrity-"));
+
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await expect(
+        graph.batch((batch) => {
+          batch.appendEvents([
+            { kind: "edge", edge: { source: "TASK-1", type: "depends_on", target: "TASK-2" } },
+          ]);
+        }),
+      ).rejects.toThrow(/missing node/i);
+      expect(await graph.readEvents()).toEqual([]);
+
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "edge", edge: { source: "TASK-1", type: "depends_on", target: "TASK-2" } },
+          { kind: "node", node: node("TASK-1") },
+          { kind: "node", node: node("TASK-2") },
+        ]);
+      });
+      const beforeCycle = await graph.readEvents();
+      await expect(
+        graph.batch((batch) => {
+          batch.appendEvents([
+            {
+              kind: "edge",
+              edge: { source: "TASK-2", type: "depends_on", target: "TASK-1" },
+            },
+          ]);
+        }),
+      ).rejects.toThrow(/cycle/i);
+      expect(await graph.readEvents()).toEqual(beforeCycle);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it("excludes terminal nodes and decided decisions from state frontier and index", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-storage-terminal-"));
+
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) =>
+        batch.writeStateProjection(
+          `${JSON.stringify({ schema_version: 1, depth_mode: "Standard", frontier: [] }, null, 2)}\n`,
+        ),
+      );
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-open",
+              type: "TASK" as const,
+              provenance_type: "FACT" as const,
+              statement: "Open unresolved task",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "UNK-resolved",
+              type: "UNK" as const,
+              provenance_type: "UNKNOWN" as const,
+              status: "RESOLVED",
+              statement: "Resolved unknown",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "CAN-rejected",
+              type: "CAN" as const,
+              provenance_type: "PROPOSED" as const,
+              status: "REJECTED",
+              statement: "Rejected candidate",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "DEC-decided",
+              type: "DEC" as const,
+              provenance_type: "DECIDED" as const,
+              statement: "Decided decision",
+            },
+          },
+        ]);
+      });
+
+      const state = (await graph.getState()) as {
+        frontier: string[];
+        open_unknowns: string[];
+      };
+      expect(state.frontier).toEqual(["TASK-open"]);
+      expect(state.open_unknowns).toEqual([]);
+
+      const indexContent = await readFile(join(directory, "INDEX.md"), "utf8");
+      expect(indexContent).toContain("TASK-open");
+      expect(indexContent).not.toContain("UNK-resolved");
+      expect(indexContent).not.toContain("CAN-rejected");
+      expect(indexContent).not.toContain("DEC-decided");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });

@@ -4,7 +4,7 @@ import {
   validateGraph,
   type GraphValidationResult,
 } from "../../src/graph/integrity.js";
-import type { MaterializedGraph } from "../../src/graph/storage.js";
+import type { MaterializedGraph } from "../../src/graph/domain.js";
 
 const node = (id: string, type: Node["type"] = "TASK"): Node =>
   NodeSchema.parse({

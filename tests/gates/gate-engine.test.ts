@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EpistemicGateEngine } from "../../src/gates/gate-engine.js";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
-import type { MaterializedGraph } from "../../src/graph/storage.js";
+import type { MaterializedGraph } from "../../src/graph/domain.js";
 
 const node = (
   id: string,

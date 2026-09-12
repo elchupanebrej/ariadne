@@ -2,7 +2,7 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const node = (id: string, overrides: Record<string, unknown> = {}) => ({
   id,
@@ -21,8 +21,12 @@ describe("GraphStorage card files", () => {
     const directory = await mkdtemp(join(tmpdir(), "ariadne-cards-create-"));
 
     try {
-      const storage = new GraphStorage(directory);
-      await storage.appendNode(node("TASK-001", { confidence_level: 0.9 }));
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-001", { confidence_level: 0.9 }) },
+        ]);
+      });
 
       const card = await readFile(cardPath(directory, "TASK-001"), "utf8");
       expect(card).toContain("# TASK-001: Title of TASK-001");
@@ -42,14 +46,21 @@ describe("GraphStorage card files", () => {
     const directory = await mkdtemp(join(tmpdir(), "ariadne-cards-update-"));
 
     try {
-      const storage = new GraphStorage(directory);
-      await storage.appendNode(node("TASK-001"));
-      await storage.appendNode(
-        node("TASK-001", {
-          statement: "Updated statement",
-          status: "RESOLVED",
-        }),
-      );
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-001") }]);
+      });
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: node("TASK-001", {
+              statement: "Updated statement",
+              status: "RESOLVED",
+            }),
+          },
+        ]);
+      });
 
       const card = await readFile(cardPath(directory, "TASK-001"), "utf8");
       expect(card).toContain("Updated statement");
@@ -64,33 +75,52 @@ describe("GraphStorage card files", () => {
     const directory = await mkdtemp(join(tmpdir(), "ariadne-cards-tombstone-"));
 
     try {
-      const storage = new GraphStorage(directory);
-      await storage.appendNode(node("TASK-001"));
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-001") }]);
+      });
       const before = await readFile(cardPath(directory, "TASK-001"), "utf8");
 
-      await storage.appendNode({ ...node("TASK-001"), status: "REMOVED", tombstone: true });
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: { ...node("TASK-001"), status: "REMOVED", tombstone: true } },
+        ]);
+      });
 
       const after = await readFile(cardPath(directory, "TASK-001"), "utf8");
       expect(after).toContain("- Status: REMOVED");
       expect(after).toContain("Statement of TASK-001");
       expect(after).not.toBe(before);
 
-      await storage.appendNode({
-        ...node("HYP-002"),
-        type: "HYP" as const,
-        provenance_type: "ASSUMED" as const,
-      });
-      await storage.appendNode({
-        ...node("EVD-003"),
-        type: "EVD" as const,
-        provenance_type: "MEASURED" as const,
-      });
-      await storage.appendNode({
-        ...node("HYP-002"),
-        type: "HYP" as const,
-        provenance_type: "ASSUMED" as const,
-        status: "INVALIDATED",
-        tombstone: true,
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              ...node("HYP-002"),
+              type: "HYP" as const,
+              provenance_type: "ASSUMED" as const,
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              ...node("EVD-003"),
+              type: "EVD" as const,
+              provenance_type: "MEASURED" as const,
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              ...node("HYP-002"),
+              type: "HYP" as const,
+              provenance_type: "ASSUMED" as const,
+              status: "INVALIDATED",
+              tombstone: true,
+            },
+          },
+        ]);
       });
       expect(await readFile(cardPath(directory, "HYP-002"), "utf8")).toContain(
         "- Status: INVALIDATED",
@@ -110,8 +140,10 @@ describe("GraphStorage card files", () => {
     const directory = join(root, ".planning", "ariadne");
 
     try {
-      const storage = new GraphStorage(directory);
-      await storage.appendNode(node("TASK-001"));
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-001") }]);
+      });
 
       const card = await readFile(cardPath(directory, "TASK-001"), "utf8");
       expect(card).toContain("# TASK-001: Title of TASK-001");
@@ -132,8 +164,8 @@ describe("GraphStorage card files", () => {
         `${event("TASK-001")}\n${event("TASK-002")}\n`,
         "utf8",
       );
-      const storage = new GraphStorage(directory);
-      await storage.regenerateIndex();
+      const graph = EpistemicGraph.open(directory);
+      await graph.regenerateIndex();
 
       for (const id of ["TASK-001", "TASK-002"]) {
         expect(await readFile(cardPath(directory, id), "utf8")).toContain(

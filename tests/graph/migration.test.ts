@@ -4,7 +4,6 @@ import os from "node:os";
 import { Writable } from "node:stream";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
-  GraphStorage,
   migrateWorkspace,
   rollbackMigration,
   isLegacyWorkspace,
@@ -15,7 +14,7 @@ import {
 } from "../../src/graph/index.js";
 import { AriadneError } from "../../src/core/errors.js";
 import { runCli } from "../../src/cli/index.js";
-import { FileSystemStorageDriver } from "../../src/graph/storage-driver.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -34,7 +33,7 @@ describe("Persisted-Format Migration Engine", () => {
   let rootGitignore: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-migrate-test-"));
+    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-migrate-test-")));
     ariadneDir = path.join(tempDir, ".ariadne");
     fs.mkdirSync(ariadneDir, { recursive: true });
 
@@ -306,17 +305,20 @@ describe("Persisted-Format Migration Engine", () => {
         return originalRename(from, to);
       });
 
-      await expect(rollbackMigration(ariadneDir, migration.migrationId)).rejects.toThrow(
-        "simulated rollback interruption",
-      );
-      renameSpy.mockRestore();
+      try {
+        await expect(rollbackMigration(ariadneDir, migration.migrationId)).rejects.toThrow(
+          "simulated rollback interruption",
+        );
+      } finally {
+        renameSpy.mockRestore();
+      }
 
       const markerPath = path.join(ariadneDir, "migration-marker.json");
       const marker = JSON.parse(fs.readFileSync(markerPath, "utf8"));
       expect(marker.migrationId).toBe(migration.migrationId);
       expect(marker.phase).toBe("ROLLING_BACK");
       expect(marker.nextStep).toBeLessThan(marker.swapPlan.length);
-      await expect(new GraphStorage(ariadneDir).readEvents()).rejects.toMatchObject({
+      await expect(EpistemicGraph.open(ariadneDir).readEvents()).rejects.toMatchObject({
         code: "CORRUPT_PERSISTED_HISTORY",
       });
 
@@ -337,10 +339,13 @@ describe("Persisted-Format Migration Engine", () => {
         return originalRename(from, to);
       });
 
-      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
-        "simulated migration interruption",
-      );
-      renameSpy.mockRestore();
+      try {
+        await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
+          "simulated migration interruption",
+        );
+      } finally {
+        renameSpy.mockRestore();
+      }
       expect(JSON.parse(fs.readFileSync(path.join(ariadneDir, "migration-marker.json"), "utf8")).phase).toBe(
         "SWAPPING",
       );
@@ -565,26 +570,29 @@ describe("Persisted-Format Migration Engine", () => {
         return originalRename(from, to);
       });
 
-      await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
-        "simulated migration interruption",
-      );
-      renameSpy.mockRestore();
+      try {
+        await expect(migrateWorkspace(ariadneDir, { migrationId })).rejects.toThrow(
+          "simulated migration interruption",
+        );
+      } finally {
+        renameSpy.mockRestore();
+      }
 
       expect(fs.existsSync(path.join(ariadneDir, "migration-marker.json"))).toBe(true);
-      await expect(new GraphStorage(ariadneDir).readEvents()).rejects.toMatchObject({
+      await expect(EpistemicGraph.open(ariadneDir).readEvents()).rejects.toMatchObject({
         code: "CORRUPT_PERSISTED_HISTORY",
       });
-      await expect(new GraphStorage(ariadneDir).readState()).rejects.toMatchObject({
+      await expect(EpistemicGraph.open(ariadneDir).getState()).rejects.toMatchObject({
         code: "CORRUPT_PERSISTED_HISTORY",
       });
-      await expect(new FileSystemStorageDriver(ariadneDir).init()).rejects.toMatchObject({
+      await expect(EpistemicGraph.open(ariadneDir).init()).rejects.toMatchObject({
         code: "CORRUPT_PERSISTED_HISTORY",
       });
       const resumed = await migrateWorkspace(ariadneDir, { migrationId });
       expect(resumed.migrationId).toBe(migrationId);
       expect(await isLegacyWorkspace(ariadneDir)).toBe(false);
 
-      const reopened = new GraphStorage(ariadneDir);
+      const reopened = EpistemicGraph.open(ariadneDir);
       expect((await reopened.readEvents()).length).toBe(3);
     });
 
