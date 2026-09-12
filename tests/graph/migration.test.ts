@@ -6,12 +6,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   migrateWorkspace,
   rollbackMigration,
-  isLegacyWorkspace,
-  readFramedRecords,
   computeFileDigest,
   type MigrationManifest,
-  type FramedRecord,
-} from "../../src/graph/index.js";
+} from "../../src/graph/migration.js";
+import { isLegacyWorkspace } from "../../src/graph/legacy.js";
+import { readFramedRecords, type FramedRecord } from "../../src/graph/journal.js";
 import { AriadneError } from "../../src/core/errors.js";
 import { runCli } from "../../src/cli/index.js";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";

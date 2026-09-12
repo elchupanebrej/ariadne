@@ -3,15 +3,13 @@ import path from "node:path";
 import os from "node:os";
 import { Writable } from "node:stream";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { scanAndRecoverJournal, rebuildProjections } from "../../src/graph/recovery.js";
+import { isLegacyWorkspace, assertNotLegacyWorkspace } from "../../src/graph/legacy.js";
 import {
-  scanAndRecoverJournal,
-  rebuildProjections,
-  isLegacyWorkspace,
-  assertNotLegacyWorkspace,
   createFrame,
   appendCanonicalRecord,
   type FramedRecord,
-} from "../../src/graph/index.js";
+} from "../../src/graph/journal.js";
 import { AriadneError } from "../../src/core/errors.js";
 import { runCli } from "../../src/cli/index.js";
 

@@ -3,19 +3,15 @@ import path from "node:path";
 import os from "node:os";
 import { spawn } from "node:child_process";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { acquireRootLock, releaseLock, withRootLock, probeProcess } from "../../src/graph/lock.js";
+import { scanAndRecoverJournal, rebuildProjections } from "../../src/graph/recovery.js";
 import {
-  acquireRootLock,
-  releaseLock,
-  withRootLock,
-  probeProcess,
-  scanAndRecoverJournal,
-  rebuildProjections,
   createFrame,
   appendCanonicalRecord,
   appendGraphRecord,
   readFramedRecords,
   type FramedRecord,
-} from "../../src/graph/index.js";
+} from "../../src/graph/journal.js";
 import { AriadneError } from "../../src/core/errors.js";
 
 describe("Scenario Suite 1: Persistence & Crash Recovery", () => {
