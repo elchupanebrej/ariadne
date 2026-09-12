@@ -16,7 +16,13 @@ if (summary.kind !== "capacity-performance-summary" || summary.passed !== true) 
   throw new Error("cannot create a CI pass receipt from a missing or failed benchmark summary");
 }
 
-const runtime = summary.runtimes.length === 1 ? summary.runtimes[0] : null;
+const runtimes = new Map(
+  summary.runtimes.map((runtime) => [
+    JSON.stringify([runtime.platform, runtime.arch, runtime.nodeVersion, runtime.nodeMajor]),
+    runtime,
+  ]),
+);
+const runtime = runtimes.size === 1 ? runtimes.values().next().value : null;
 if (!runtime) throw new Error("benchmark summary must identify exactly one runtime");
 
 const receipt = {
