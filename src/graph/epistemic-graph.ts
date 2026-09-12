@@ -524,12 +524,15 @@ export class EpistemicGraph {
 
         await this.#driver.appendEvents(parsed);
         await this.#driver.writeIndex(renderIndex(prospective));
+        const changedNodeIds = new Set(
+          parsed.flatMap((event) => event.kind === "node" ? [event.node.id] : []),
+        );
+        // Project each node's final state once. Concurrent writes of earlier
+        // events for the same card can otherwise overwrite its latest state.
         await this.#driver.writeCards(
-          parsed.flatMap((event) =>
-            event.kind === "node"
-              ? [{ id: event.node.id, content: renderCard(event.node) }]
-              : [],
-          ),
+          prospective.nodes
+            .filter((node) => changedNodeIds.has(node.id))
+            .map((node) => ({ id: node.id, content: renderCard(node) })),
         );
         if (parsed.some((event) => event.kind === "node")) {
           const previous = (await this.#driver.readState()) ?? {};

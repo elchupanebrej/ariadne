@@ -1,8 +1,9 @@
 import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
+import * as journal from "../../src/graph/journal.js";
 
 const node = (id: string, overrides: Record<string, unknown> = {}) => ({
   id,
@@ -17,6 +18,28 @@ const cardPath = (directory: string, id: string) =>
   join(directory, "cards", `${id}.md`);
 
 describe("GraphStorage card files", () => {
+  it("projects a node only once using its last event in a batch", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "ariadne-cards-order-"));
+    const swap = vi.spyOn(journal, "stageAndSwapProjection");
+    try {
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-001") },
+          { kind: "node", node: node("TASK-001", { status: "REMOVED", tombstone: true }) },
+        ]);
+      });
+      expect(await graph.readEvents()).toHaveLength(2);
+      const cardWrites = swap.mock.calls.filter((args) => args[1] === cardPath(directory, "TASK-001"));
+      expect(cardWrites).toHaveLength(1);
+      expect(cardWrites[0][2]).toContain("- Status: REMOVED");
+      expect(await readFile(cardPath(directory, "TASK-001"), "utf8")).toContain("- Status: REMOVED");
+    } finally {
+      swap.mockRestore();
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("writes a card file in the same transaction as INDEX.md", async () => {
     const directory = await mkdtemp(join(tmpdir(), "ariadne-cards-create-"));
 
