@@ -2,7 +2,6 @@ import type { Writable } from "node:stream";
 import { statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { detectGsd, type GsdEnvironment } from "../adapters/gsd/detector.js";
-import { GraphStorage } from "../graph/storage.js";
 import { EpistemicGraph } from "../graph/epistemic-graph.js";
 import { checkCompactionAdvisory } from "../graph/capacity.js";
 
@@ -14,13 +13,8 @@ export type CliIO = {
 
 export type CliWorkspace = {
   environment: GsdEnvironment;
-  /** Primary engine handle for workspace reads, mutations, and projections. */
+  /** Engine handle for workspace reads, mutations, and projections. */
   graph: EpistemicGraph;
-  /**
-   * Legacy compatibility handle over the same Storage Root.
-   * @deprecated Use `graph`; retained until every command ports to the engine (ticket 04).
-   */
-  storage: GraphStorage;
 };
 
 const advisoryEmittedSet = new WeakSet<Writable>();
@@ -75,6 +69,5 @@ export async function resolveCliWorkspace(io: CliIO): Promise<CliWorkspace> {
   return {
     environment,
     graph: EpistemicGraph.open(environment.storageRoot),
-    storage: new GraphStorage(environment.storageRoot),
   };
 }

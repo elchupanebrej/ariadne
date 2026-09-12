@@ -27,33 +27,25 @@ const withWorkspace = async <T>(run: (cwd: string) => Promise<T>): Promise<T> =>
 };
 
 describe("resolveCliWorkspace", () => {
-  it("returns the environment, engine handle, and legacy storage handle over one root", async () => {
+  it("returns the environment and a single engine handle over one root", async () => {
     await withWorkspace(async (cwd) => {
       const stdout = capture();
       const stderr = capture();
 
-      const { environment, graph, storage } = await resolveCliWorkspace({
+      const workspace = await resolveCliWorkspace({
         cwd,
         stdout: stdout.stream,
         stderr: stderr.stream,
       });
 
-      expect(environment.storageRoot).toBe(join(cwd, ".ariadne"));
-      expect(storage.rootDirectory).toBe(environment.storageRoot);
+      expect(Object.keys(workspace).sort()).toEqual(["environment", "graph"]);
+      expect(workspace.environment.storageRoot).toBe(join(cwd, ".ariadne"));
 
-      await graph.addNode("TASK", "TASK-1", "Engine write", {
+      await workspace.graph.addNode("TASK", "TASK-1", "Engine write", {
         provenance_type: "FACT",
         statement: "Engine write",
       });
-      expect((await storage.materialize()).nodes.map(({ id }) => id)).toEqual(["TASK-1"]);
-
-      await storage.appendNode({
-        type: "TASK",
-        id: "TASK-2",
-        provenance_type: "FACT",
-        statement: "Legacy write",
-      });
-      expect((await graph.listNodes()).map(({ id }) => id)).toEqual(["TASK-1", "TASK-2"]);
+      expect((await workspace.graph.listNodes()).map(({ id }) => id)).toEqual(["TASK-1"]);
     });
   });
 });
