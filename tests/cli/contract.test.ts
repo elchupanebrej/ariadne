@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -210,12 +210,19 @@ describe("canonical CLI contract", () => {
   it("returns exit 1 with a canonical domain diagnostic and exit 2 for fatal JSON syntax", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "ariadne-cli-contract-exits-"));
     expect((await invoke(cwd, ["init"])).code).toBe(0);
-    await new GraphStorage(join(cwd, ".ariadne")).appendNode({
-      id: "CTR-contract",
-      type: "CTR",
-      provenance_type: "PROPOSED",
-      statement: "The contract fixture is intentionally unresolved.",
-      status: "ACTIVE",
+    await EpistemicGraph.open(join(cwd, ".ariadne")).batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "CTR-contract",
+            type: "CTR",
+            provenance_type: "PROPOSED",
+            statement: "The contract fixture is intentionally unresolved.",
+            status: "ACTIVE",
+          },
+        },
+      ]);
     });
 
     const negative = await invoke(cwd, ["gate", "semantic", "--format", "json"]);

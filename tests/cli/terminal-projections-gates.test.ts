@@ -8,7 +8,7 @@ import {
 import { EpistemicGateEngine } from "../../src/gates/gate-engine.js";
 import { runEpistemicGate } from "../../src/gates/epistemic-gate.js";
 import { runSemanticGate } from "../../src/gates/semantic-gate.js";
-import { renderCard, type GraphEvent, type MaterializedGraph } from "../../src/graph/storage.js";
+import { renderCard, type GraphEvent, type MaterializedGraph } from "../../src/graph/domain.js";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
 
 const node = (

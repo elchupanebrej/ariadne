@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage, type GraphEvent } from "../../src/graph/storage.js";
+import { type GraphEvent } from "../../src/graph/domain.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import { buildViz } from "../../src/cli/commands/viz.js";
 
 const capture = () => {
@@ -138,25 +139,38 @@ describe("buildViz (pure HTML renderer)", () => {
 
 describe("ariadne viz command", () => {
   const seed = async (cwd: string) => {
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      type: "FRAME",
-      id: "FRAME-viz-work",
-      provenance_type: "FACT",
-      title: "Viz effort",
-      statement: "Visualization framed.",
-    });
-    await storage.appendNode({
-      type: "DEC",
-      id: "DEC-viz-choice",
-      provenance_type: "DECIDED",
-      title: "Viz choice",
-      statement: "Decided on static HTML.",
-    });
-    await storage.appendEdge({
-      source: "DEC-viz-choice",
-      type: "derived_from",
-      target: "FRAME-viz-work",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            type: "FRAME",
+            id: "FRAME-viz-work",
+            provenance_type: "FACT",
+            title: "Viz effort",
+            statement: "Visualization framed.",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "DEC",
+            id: "DEC-viz-choice",
+            provenance_type: "DECIDED",
+            title: "Viz choice",
+            statement: "Decided on static HTML.",
+          },
+        },
+        {
+          kind: "edge",
+          edge: {
+            source: "DEC-viz-choice",
+            type: "derived_from",
+            target: "FRAME-viz-work",
+          },
+        },
+      ]);
     });
   };
 
@@ -220,26 +234,39 @@ describe("ariadne viz command", () => {
 
   it("mirrors viz output under .planning/ariadne in gsd mode", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-viz-gsd-"));
-    const storage = new GraphStorage(join(cwd, ".planning", "ariadne"));
-    await storage.writeState({ mode: "gsd" });
-    await storage.appendNode({
-      type: "FRAME",
-      id: "FRAME-gsd-viz",
-      provenance_type: "FACT",
-      title: "Gsd viz",
-      statement: "Visualization in gsd overlay.",
-    });
-    await storage.appendNode({
-      type: "DEC",
-      id: "DEC-gsd-viz",
-      provenance_type: "DECIDED",
-      title: "Gsd viz choice",
-      statement: "Decided in gsd overlay.",
-    });
-    await storage.appendEdge({
-      source: "DEC-gsd-viz",
-      type: "derived_from",
-      target: "FRAME-gsd-viz",
+    const graph = EpistemicGraph.open(join(cwd, ".planning", "ariadne"));
+    await graph.batch((batch) => batch.writeStateProjection('{"schema_version":1,"mode":"gsd"}\n'));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            type: "FRAME",
+            id: "FRAME-gsd-viz",
+            provenance_type: "FACT",
+            title: "Gsd viz",
+            statement: "Visualization in gsd overlay.",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "DEC",
+            id: "DEC-gsd-viz",
+            provenance_type: "DECIDED",
+            title: "Gsd viz choice",
+            statement: "Decided in gsd overlay.",
+          },
+        },
+        {
+          kind: "edge",
+          edge: {
+            source: "DEC-gsd-viz",
+            type: "derived_from",
+            target: "FRAME-gsd-viz",
+          },
+        },
+      ]);
     });
     const stdout = capture();
     const stderr = capture();

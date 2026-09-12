@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -51,15 +51,22 @@ describe("ariadne gate", () => {
 
   it("reports unresolved decision-scope merge contradictions separately", async () => {
     const cwd = await workspace();
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      id: "CTR-MERGE-SCOPE",
-      type: "CTR",
-      provenance_type: "FACT",
-      statement: "Two branches disagree about one decision scope",
-      status: "MERGE_CONFLICT",
-      conflict_kind: "branch_merge",
-      decision_scope: "release-policy",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "CTR-MERGE-SCOPE",
+            type: "CTR",
+            provenance_type: "FACT",
+            statement: "Two branches disagree about one decision scope",
+            status: "MERGE_CONFLICT",
+            conflict_kind: "branch_merge",
+            decision_scope: "release-policy",
+          },
+        },
+      ]);
     });
 
     const result = await invoke(cwd, ["gate", "decision-scope"]);
@@ -79,12 +86,19 @@ describe("ariadne gate", () => {
 
   it("accepts --strict and reports remediation for violations", async () => {
     const cwd = await workspace();
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      id: "HYP-1",
-      type: "HYP",
-      provenance_type: "PROPOSED",
-      statement: "A hypothesis without a falsification condition",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "HYP-1",
+            type: "HYP",
+            provenance_type: "PROPOSED",
+            statement: "A hypothesis without a falsification condition",
+          },
+        },
+      ]);
     });
 
     const result = await invoke(cwd, ["gate", "semantic", "--strict"]);
@@ -109,16 +123,23 @@ describe("ariadne gate", () => {
 
   it("preflights candidate breadth without mutating the partial graph", async () => {
     const cwd = await workspace();
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      id: "CTR-1",
-      type: "CTR",
-      provenance_type: "PROPOSED",
-      statement: "An active contradiction",
-      status: "ACTIVE",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "CTR-1",
+            type: "CTR",
+            provenance_type: "PROPOSED",
+            statement: "An active contradiction",
+            status: "ACTIVE",
+          },
+        },
+      ]);
     });
 
-    const partial = await storage.materialize();
+    const partial = await graph.materialize();
     const incomplete = await invoke(cwd, ["gate", "semantic"]);
     const incompleteReceipt = JSON.parse(incomplete.stdout.text()) as {
       diagnostics: Array<{
@@ -150,15 +171,22 @@ describe("ariadne gate", () => {
         }),
       ]),
     );
-    expect(await storage.materialize()).toEqual(partial);
+    expect(await graph.materialize()).toEqual(partial);
 
-    await storage.appendNode({
-      id: "CAN-1",
-      type: "CAN",
-      provenance_type: "PROPOSED",
-      statement: "CAN-1",
-      contradiction_ref: "CTR-1",
-      separation_principle: ["operating condition", "time", "system boundary"],
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "CAN-1",
+            type: "CAN",
+            provenance_type: "PROPOSED",
+            statement: "CAN-1",
+            contradiction_ref: "CTR-1",
+            separation_principle: ["operating condition", "time", "system boundary"],
+          },
+        },
+      ]);
     });
 
     const oneCandidate = await invoke(cwd, ["gate", "semantic"]);
@@ -195,13 +223,20 @@ describe("ariadne gate", () => {
       ["CAN-2", "state/data"],
       ["CAN-3", "system boundary"],
     ]) {
-      await storage.appendNode({
-        id,
-        type: "CAN",
-        provenance_type: "PROPOSED",
-        statement: id,
-        contradiction_ref: "CTR-1",
-        separation_principle: separationPrinciple,
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id,
+              type: "CAN",
+              provenance_type: "PROPOSED",
+              statement: id,
+              contradiction_ref: "CTR-1",
+              separation_principle: separationPrinciple,
+            },
+          },
+        ]);
       });
     }
 
@@ -216,12 +251,19 @@ describe("ariadne gate", () => {
 
   it("runs all gates in deterministic order and rejects an invalid command", async () => {
     const cwd = await workspace();
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      id: "HYP-1",
-      type: "HYP",
-      provenance_type: "PROPOSED",
-      statement: "A hypothesis without a falsification condition",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            id: "HYP-1",
+            type: "HYP",
+            provenance_type: "PROPOSED",
+            statement: "A hypothesis without a falsification condition",
+          },
+        },
+      ]);
     });
 
     const all = await invoke(cwd, ["gate", "all"]);

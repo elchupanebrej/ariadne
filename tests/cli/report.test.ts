@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage, type GraphEvent } from "../../src/graph/storage.js";
+import { type GraphEvent } from "../../src/graph/domain.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import { buildReport } from "../../src/cli/commands/report.js";
 
 const capture = () => {
@@ -178,25 +179,38 @@ describe("buildReport (pure renderer)", () => {
 
 const createWorkspace = async () => {
   const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-report-"));
-  const storage = new GraphStorage(join(cwd, ".ariadne"));
-  await storage.appendNode({
-    type: "FRAME",
-    id: "FRAME-login-retry",
-    provenance_type: "FACT",
-    title: "Login retry research",
-    statement: "How should login retry behave.",
-  });
-  await storage.appendNode({
-    type: "DEC",
-    id: "DEC-login-backoff",
-    provenance_type: "DECIDED",
-    title: "Exponential backoff",
-    statement: "Use exponential backoff. Jitter added later.",
-  });
-  await storage.appendEdge({
-    source: "DEC-login-backoff",
-    type: "derived_from",
-    target: "FRAME-login-retry",
+  const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+  await graph.batch((batch) => {
+    batch.appendEvents([
+      {
+        kind: "node",
+        node: {
+          type: "FRAME",
+          id: "FRAME-login-retry",
+          provenance_type: "FACT",
+          title: "Login retry research",
+          statement: "How should login retry behave.",
+        },
+      },
+      {
+        kind: "node",
+        node: {
+          type: "DEC",
+          id: "DEC-login-backoff",
+          provenance_type: "DECIDED",
+          title: "Exponential backoff",
+          statement: "Use exponential backoff. Jitter added later.",
+        },
+      },
+      {
+        kind: "edge",
+        edge: {
+          source: "DEC-login-backoff",
+          type: "derived_from",
+          target: "FRAME-login-retry",
+        },
+      },
+    ]);
   });
   return cwd;
 };
@@ -253,12 +267,19 @@ describe("ariadne report command", () => {
 
   it("renders a single tree for an explicit frame argument", async () => {
     const cwd = await createWorkspace();
-    await new GraphStorage(join(cwd, ".ariadne")).appendNode({
-      type: "FRAME",
-      id: "FRAME-other-effort",
-      provenance_type: "FACT",
-      title: "Other effort",
-      statement: "Unrelated effort.",
+    await EpistemicGraph.open(join(cwd, ".ariadne")).batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            type: "FRAME",
+            id: "FRAME-other-effort",
+            provenance_type: "FACT",
+            title: "Other effort",
+            statement: "Unrelated effort.",
+          },
+        },
+      ]);
     });
     const stdout = capture();
 
@@ -289,26 +310,39 @@ describe("ariadne report command", () => {
 
   it("mirrors reports under .planning/ariadne in gsd mode", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-report-gsd-"));
-    const storage = new GraphStorage(join(cwd, ".planning", "ariadne"));
-    await storage.writeState({ mode: "gsd" });
-    await storage.appendNode({
-      type: "FRAME",
-      id: "FRAME-gsd-work",
-      provenance_type: "FACT",
-      title: "Gsd effort",
-      statement: "Work framed in gsd mode.",
-    });
-    await storage.appendNode({
-      type: "DEC",
-      id: "DEC-gsd-choice",
-      provenance_type: "DECIDED",
-      title: "Gsd choice",
-      statement: "Decided in gsd overlay.",
-    });
-    await storage.appendEdge({
-      source: "DEC-gsd-choice",
-      type: "derived_from",
-      target: "FRAME-gsd-work",
+    const graph = EpistemicGraph.open(join(cwd, ".planning", "ariadne"));
+    await graph.batch((batch) => batch.writeStateProjection('{"schema_version":1,"mode":"gsd"}\n'));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            type: "FRAME",
+            id: "FRAME-gsd-work",
+            provenance_type: "FACT",
+            title: "Gsd effort",
+            statement: "Work framed in gsd mode.",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "DEC",
+            id: "DEC-gsd-choice",
+            provenance_type: "DECIDED",
+            title: "Gsd choice",
+            statement: "Decided in gsd overlay.",
+          },
+        },
+        {
+          kind: "edge",
+          edge: {
+            source: "DEC-gsd-choice",
+            type: "derived_from",
+            target: "FRAME-gsd-work",
+          },
+        },
+      ]);
     });
     const stdout = capture();
     const stderr = capture();

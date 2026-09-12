@@ -6,7 +6,7 @@ import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -21,23 +21,38 @@ const capture = () => {
 
 const createWorkspace = async () => {
   const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-status-"));
-  const storage = new GraphStorage(join(cwd, ".ariadne"));
-  await storage.writeState({
-    depth_mode: "Deep",
-    frontier: ["CAN-1"],
-    open_unknowns: ["UNK-1"],
+  const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+  await graph.batch((batch) => {
+    batch.writeStateProjection(
+      JSON.stringify({
+        schema_version: 1,
+        depth_mode: "Deep",
+        frontier: ["CAN-1"],
+        open_unknowns: ["UNK-1"],
+      }),
+    );
   });
-  await storage.appendNode({
-    type: "CAN",
-    id: "CAN-1",
-    provenance_type: "PROPOSED",
-    statement: "Use the candidate mechanism",
-  });
-  await storage.appendNode({
-    type: "UNK",
-    id: "UNK-1",
-    provenance_type: "UNKNOWN",
-    statement: "Required capacity is unknown",
+  await graph.batch((batch) => {
+    batch.appendEvents([
+      {
+        kind: "node",
+        node: {
+          type: "CAN",
+          id: "CAN-1",
+          provenance_type: "PROPOSED",
+          statement: "Use the candidate mechanism",
+        },
+      },
+      {
+        kind: "node",
+        node: {
+          type: "UNK",
+          id: "UNK-1",
+          provenance_type: "UNKNOWN",
+          statement: "Required capacity is unknown",
+        },
+      },
+    ]);
   });
   return cwd;
 };
@@ -89,32 +104,48 @@ describe("ariadne status", () => {
 
   it("excludes terminal nodes and decided nodes from status fallback computation", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-status-terminal-"));
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    await storage.appendNode({
-      type: "TASK",
-      id: "TASK-open",
-      provenance_type: "FACT",
-      statement: "An open task",
-    });
-    await storage.appendNode({
-      type: "UNK",
-      id: "UNK-resolved",
-      provenance_type: "UNKNOWN",
-      status: "RESOLVED",
-      statement: "Resolved unknown",
-    });
-    await storage.appendNode({
-      type: "CAN",
-      id: "CAN-rejected",
-      provenance_type: "PROPOSED",
-      status: "REJECTED",
-      statement: "Rejected candidate",
-    });
-    await storage.appendNode({
-      type: "DEC",
-      id: "DEC-decided",
-      provenance_type: "DECIDED",
-      statement: "Decided decision",
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    await graph.batch((batch) => {
+      batch.appendEvents([
+        {
+          kind: "node",
+          node: {
+            type: "TASK",
+            id: "TASK-open",
+            provenance_type: "FACT",
+            statement: "An open task",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "UNK",
+            id: "UNK-resolved",
+            provenance_type: "UNKNOWN",
+            status: "RESOLVED",
+            statement: "Resolved unknown",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "CAN",
+            id: "CAN-rejected",
+            provenance_type: "PROPOSED",
+            status: "REJECTED",
+            statement: "Rejected candidate",
+          },
+        },
+        {
+          kind: "node",
+          node: {
+            type: "DEC",
+            id: "DEC-decided",
+            provenance_type: "DECIDED",
+            statement: "Decided decision",
+          },
+        },
+      ]);
     });
 
     const stdout = capture();

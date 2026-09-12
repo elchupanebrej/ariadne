@@ -6,7 +6,7 @@ import { Writable } from "node:stream";
 import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const exec = promisify(execFile);
 
@@ -35,10 +35,10 @@ const invoke = async (cwd: string, args: string[]) => {
   return { code, stdout: stdout.text(), stderr: stderr.text() };
 };
 
-const node = (id: string, type = "TASK") => ({
+const node = (id: string, type: "TASK" | "UNK" = "TASK") => ({
   id,
   type,
-  provenance_type: type === "UNK" ? "UNKNOWN" : "FACT",
+  provenance_type: type === "UNK" ? ("UNKNOWN" as const) : ("FACT" as const),
   statement: id,
 });
 
@@ -47,11 +47,13 @@ describe("ariadne merge-sync", () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-"));
     try {
       await git(root, "init", "-q");
-      const storage = new GraphStorage(join(root, ".ariadne"));
-      await storage.appendEvents([
-        { kind: "node", node: node("TASK-OPEN") },
-        { kind: "node", node: node("UNK-OPEN", "UNK") },
-      ]);
+      const graph = EpistemicGraph.open(join(root, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-OPEN") },
+          { kind: "node", node: node("UNK-OPEN", "UNK") },
+        ]);
+      });
       await writeFile(join(root, ".ariadne", "INDEX.md"), "stale index\n");
       await writeFile(
         join(root, ".ariadne", "cards", "TASK-STALE.md"),
@@ -61,9 +63,18 @@ describe("ariadne merge-sync", () => {
         join(root, ".ariadne", "cards", "HOST-NOTE.txt"),
         "host-owned note\n",
       );
-      await storage.writeState({
-        host_owned: { keep: true },
-        frontier: ["TASK-STALE"],
+      await graph.batch((batch) => {
+        batch.writeStateProjection(
+          `${JSON.stringify(
+            {
+              schema_version: 1,
+              host_owned: { keep: true },
+              frontier: ["TASK-STALE"],
+            },
+            null,
+            2,
+          )}\n`,
+        );
       });
       await git(root, "add", ".ariadne/STATE.yaml");
 
@@ -130,11 +141,13 @@ describe("ariadne merge-sync", () => {
   it("preserves host-owned STATE.yaml bytes while refreshing projections", async () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-state-bytes-"));
     try {
-      const storage = new GraphStorage(join(root, ".ariadne"));
-      await storage.appendEvents([
-        { kind: "node", node: node("TASK-OPEN") },
-        { kind: "node", node: node("UNK-OPEN", "UNK") },
-      ]);
+      const graph = EpistemicGraph.open(join(root, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          { kind: "node", node: node("TASK-OPEN") },
+          { kind: "node", node: node("UNK-OPEN", "UNK") },
+        ]);
+      });
       await writeFile(
         join(root, ".ariadne", "STATE.yaml"),
         `{
@@ -181,8 +194,10 @@ describe("ariadne merge-sync", () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-gsd-"));
     try {
       await mkdir(join(root, ".planning", "ariadne"), { recursive: true });
-      const storage = new GraphStorage(join(root, ".planning", "ariadne"));
-      await storage.appendNode(node("TASK-GSD"));
+      const graph = EpistemicGraph.open(join(root, ".planning", "ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-GSD") }]);
+      });
 
       const result = await invoke(root, ["merge-sync", "--json"]);
       expect(result.code).toBe(0);
@@ -204,15 +219,22 @@ describe("ariadne merge-sync", () => {
   it("prints a usable conflict-card link and reconciliation guidance", async () => {
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-conflict-"));
     try {
-      const storage = new GraphStorage(join(root, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-MERGE-LINK",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Branches diverged",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
-        reconciliation_guidance: "Select a stored variant after review.",
+      const graph = EpistemicGraph.open(join(root, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-LINK",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Branches diverged",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+              reconciliation_guidance: "Select a stored variant after review.",
+            },
+          },
+        ]);
       });
 
       const result = await invoke(root, ["merge-sync"]);
@@ -232,8 +254,10 @@ describe("ariadne merge-sync", () => {
     vi.setSystemTime(new Date("2026-09-03T09:00:00.000Z"));
     const root = await mkdtemp(join(tmpdir(), "ariadne-merge-sync-idempotent-"));
     try {
-      const storage = new GraphStorage(join(root, ".ariadne"));
-      await storage.appendNode(node("TASK-STABLE"));
+      const graph = EpistemicGraph.open(join(root, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: node("TASK-STABLE") }]);
+      });
       await invoke(root, ["merge-sync"]);
       const before = await readFile(
         join(root, ".ariadne", "cards", "TASK-STABLE.md"),

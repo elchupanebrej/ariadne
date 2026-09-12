@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { reconcileMergeContradiction } from "../../src/merge/reconcile.js";
 import { mergeBranchModels } from "../../src/merge/three-way.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import { validateGraph } from "../../src/graph/integrity.js";
 
 const capture = () => {
@@ -43,18 +43,21 @@ const conflictWorkspace = async () => {
   const incoming = `${base}${nodeEvent("TASK-SHARED", "incoming")}\n`;
   const merged = mergeBranchModels({ base, current, incoming });
   if (!merged.output) throw new Error("Expected a merge output");
-  const storage = new GraphStorage(directory);
-  await storage.appendEvents(
-    merged.output
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line)),
-  );
-  const conflict = (await storage.materialize()).nodes.find(
+  const output = merged.output;
+  const graph = EpistemicGraph.open(directory);
+  await graph.batch((batch) => {
+    batch.appendEvents(
+      output
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+    );
+  });
+  const conflict = (await graph.materialize()).nodes.find(
     (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
   );
   if (!conflict) throw new Error("Expected a merge contradiction");
-  return { directory, storage, conflict };
+  return { directory, graph, conflict };
 };
 
 const topologyConflictWorkspace = async () => {
@@ -74,18 +77,21 @@ const topologyConflictWorkspace = async () => {
     incoming: `${base}${edge("TASK-B", "TASK-A")}\n`,
   });
   if (!merged.output) throw new Error("Expected a merge output");
-  const storage = new GraphStorage(directory);
-  await storage.appendEvents(
-    merged.output
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line)),
-  );
-  const conflict = (await storage.materialize()).nodes.find(
+  const output = merged.output;
+  const graph = EpistemicGraph.open(directory);
+  await graph.batch((batch) => {
+    batch.appendEvents(
+      output
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+    );
+  });
+  const conflict = (await graph.materialize()).nodes.find(
     (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
   );
   if (!conflict) throw new Error("Expected a topology contradiction");
-  return { directory, storage, conflict };
+  return { directory, graph, conflict };
 };
 
 const topologyConflictWithChangedNodeWorkspace = async () => {
@@ -105,18 +111,21 @@ ${edge("TASK-A", "TASK-B")}\n`,
     incoming: `${base}${edge("TASK-B", "TASK-A")}\n`,
   });
   if (!merged.output) throw new Error("Expected a merge output");
-  const storage = new GraphStorage(directory);
-  await storage.appendEvents(
-    merged.output
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line)),
-  );
-  const conflict = (await storage.materialize()).nodes.find(
+  const output = merged.output;
+  const graph = EpistemicGraph.open(directory);
+  await graph.batch((batch) => {
+    batch.appendEvents(
+      output
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+    );
+  });
+  const conflict = (await graph.materialize()).nodes.find(
     (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
   );
   if (!conflict) throw new Error("Expected a topology contradiction");
-  return { directory, storage, conflict };
+  return { directory, graph, conflict };
 };
 
 const topologyConflictWithLockedDecisionWorkspace = async () => {
@@ -157,18 +166,21 @@ const topologyConflictWithLockedDecisionWorkspace = async () => {
     incoming: `${base}${edge("TASK-TARGET", "DEC-ROOT")}\n`,
   });
   if (!merged.output) throw new Error("Expected a merge output");
-  const storage = new GraphStorage(directory);
-  await storage.appendEvents(
-    merged.output
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line)),
-  );
-  const conflict = (await storage.materialize()).nodes.find(
+  const output = merged.output;
+  const graph = EpistemicGraph.open(directory);
+  await graph.batch((batch) => {
+    batch.appendEvents(
+      output
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+    );
+  });
+  const conflict = (await graph.materialize()).nodes.find(
     (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
   );
   if (!conflict) throw new Error("Expected a topology contradiction");
-  return { directory, storage, conflict };
+  return { directory, graph, conflict };
 };
 
 const cli = (cwd: string, args: string[]) => {
@@ -187,19 +199,19 @@ const cli = (cwd: string, args: string[]) => {
 
 describe("merge contradiction reconciliation", () => {
   it("resolves a stored variant with an atomic compare-and-swap", async () => {
-    const { directory, storage, conflict } = await conflictWorkspace();
+    const { directory, graph, conflict } = await conflictWorkspace();
     try {
       const variant = (
         conflict.variants as Array<{ variant_digest: string }>
       )[0];
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
       });
 
       expect(result.outcome).toBe("RESOLVED");
-      expect((await storage.materialize()).nodes).toEqual(
+      expect((await graph.materialize()).nodes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             id: "TASK-SHARED",
@@ -209,7 +221,7 @@ describe("merge contradiction reconciliation", () => {
         ]),
       );
       expect(
-        (await storage.materialize()).nodes.find(
+        (await graph.materialize()).nodes.find(
           ({ id }) => id === "TASK-SHARED",
         )?.statement,
       ).toBe(
@@ -228,7 +240,7 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("rejects a stored digest whose content was changed and rejects replacement graphs", async () => {
-    const { directory, storage, conflict } = await conflictWorkspace();
+    const { directory, graph, conflict } = await conflictWorkspace();
     try {
       const variant = (
         conflict.variants as Array<{
@@ -251,10 +263,12 @@ describe("merge contradiction reconciliation", () => {
               : candidate,
         ),
       };
-      await storage.appendNode(forgedConflict);
+      await graph.batch((batch) => {
+        batch.appendEvents([{ kind: "node", node: forgedConflict }]);
+      });
       const before = await readFile(join(directory, "GRAPH.jsonl"), "utf8");
 
-      const tampered = await reconcileMergeContradiction(storage, {
+      const tampered = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -267,7 +281,7 @@ describe("merge contradiction reconciliation", () => {
         before,
       );
 
-      const replacement = await reconcileMergeContradiction(storage, {
+      const replacement = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -290,16 +304,23 @@ describe("merge contradiction reconciliation", () => {
       join(tmpdir(), "ariadne-merge-resolve-invalid-id-"),
     );
     try {
-      const storage = new GraphStorage(directory);
-      await storage.appendNode({
-        id: "TASK-NOT-A-CONFLICT",
-        type: "TASK",
-        provenance_type: "FACT",
-        statement: "ordinary task",
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "TASK-NOT-A-CONFLICT",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "ordinary task",
+            },
+          },
+        ]);
       });
       const before = await readFile(join(directory, "GRAPH.jsonl"), "utf8");
 
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: "TASK-NOT-A-CONFLICT",
         expectedConflictDigest: "digest",
         selectDigest: "digest",
@@ -318,14 +339,14 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("rejects a stale digest and invalid delta without changing projections", async () => {
-    const { directory, storage, conflict } = await conflictWorkspace();
+    const { directory, graph, conflict } = await conflictWorkspace();
     try {
       const graphBefore = await readFile(
         join(directory, "GRAPH.jsonl"),
         "utf8",
       );
       const indexBefore = await readFile(join(directory, "INDEX.md"), "utf8");
-      const stale = await reconcileMergeContradiction(storage, {
+      const stale = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: "stale",
         selectDigest: String(conflict.base_digest),
@@ -338,7 +359,7 @@ describe("merge contradiction reconciliation", () => {
         indexBefore,
       );
 
-      const invalid = await reconcileMergeContradiction(storage, {
+      const invalid = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         delta: { nodes: [], edges: [], unexpected: true } as never,
@@ -376,14 +397,17 @@ describe("merge contradiction reconciliation", () => {
       const incoming = `${base}${base.replace("ancestor", "incoming")}\n`;
       const merged = mergeBranchModels({ base, current, incoming });
       if (!merged.output) throw new Error("Expected a merge output");
-      const storage = new GraphStorage(directory);
-      await storage.appendEvents(
-        merged.output
-          .split("\n")
-          .filter(Boolean)
-          .map((line) => JSON.parse(line)),
-      );
-      const conflict = (await storage.materialize()).nodes.find(
+      const output = merged.output;
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents(
+          output
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => JSON.parse(line)),
+        );
+      });
+      const conflict = (await graph.materialize()).nodes.find(
         (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
       );
       if (!conflict) throw new Error("Expected a merge contradiction");
@@ -391,7 +415,7 @@ describe("merge contradiction reconciliation", () => {
         conflict.variants as Array<{ variant_digest: string }>
       )[0];
 
-      const denied = await reconcileMergeContradiction(storage, {
+      const denied = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -401,7 +425,7 @@ describe("merge contradiction reconciliation", () => {
         "MISSING_DECISION_OWNER_AUTHORIZATION",
       );
 
-      const booleanAuthorization = await reconcileMergeContradiction(storage, {
+      const booleanAuthorization = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -412,7 +436,7 @@ describe("merge contradiction reconciliation", () => {
         booleanAuthorization.diagnostics.map(({ code }) => code),
       ).toContain("MISSING_DECISION_OWNER_AUTHORIZATION");
 
-      const allowed = await reconcileMergeContradiction(storage, {
+      const allowed = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -425,9 +449,9 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("restores only structurally valid quarantined topology after base selection", async () => {
-    const { directory, storage, conflict } = await topologyConflictWorkspace();
+    const { directory, graph, conflict } = await topologyConflictWorkspace();
     try {
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: String(conflict.base_digest),
@@ -435,10 +459,10 @@ describe("merge contradiction reconciliation", () => {
 
       expect(result.outcome).toBe("RESOLVED");
       expect(result.released_subjects).toHaveLength(1);
-      const graph = await storage.materialize();
-      expect(validateGraph(graph).valid).toBe(true);
-      expect(graph.edges).toHaveLength(1);
-      expect(graph.nodes.find(({ id }) => id === conflict.id)?.status).toBe(
+      const materialized = await graph.materialize();
+      expect(validateGraph(materialized).valid).toBe(true);
+      expect(materialized.edges).toHaveLength(1);
+      expect(materialized.nodes.find(({ id }) => id === conflict.id)?.status).toBe(
         "RESOLVED",
       );
     } finally {
@@ -447,10 +471,10 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("restores a changed quarantined node when its topology is released", async () => {
-    const { directory, storage, conflict } =
+    const { directory, graph, conflict } =
       await topologyConflictWithChangedNodeWorkspace();
     try {
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: String(conflict.base_digest),
@@ -458,7 +482,7 @@ describe("merge contradiction reconciliation", () => {
 
       expect(result.outcome).toBe("RESOLVED");
       expect(result.released_subjects).toContain("TASK-A");
-      expect((await storage.materialize()).nodes).toEqual(
+      expect((await graph.materialize()).nodes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: "TASK-A", statement: "changed" }),
         ]),
@@ -469,33 +493,40 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("rejects malformed quarantine without changing graph history", async () => {
-    const { directory, storage, conflict } =
+    const { directory, graph, conflict } =
       await topologyConflictWithChangedNodeWorkspace();
     try {
       const quarantined = conflict.quarantined as {
         nodes: Array<Record<string, unknown>>;
         edges: Array<Record<string, unknown>>;
       };
-      await storage.appendNode({
-        ...conflict,
-        quarantined: {
-          ...quarantined,
-          nodes: quarantined.nodes.map((entry, index) =>
-            index === 0
-              ? {
-                  ...entry,
-                  value: {
-                    ...(entry.value as Record<string, unknown>),
-                    id: "not-a-valid-node-id",
-                  },
-                }
-              : entry,
-          ),
-        },
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              ...conflict,
+              quarantined: {
+                ...quarantined,
+                nodes: quarantined.nodes.map((entry, index) =>
+                  index === 0
+                    ? {
+                        ...entry,
+                        value: {
+                          ...(entry.value as Record<string, unknown>),
+                          id: "not-a-valid-node-id",
+                        },
+                      }
+                    : entry,
+                ),
+              },
+            },
+          },
+        ]);
       });
       const before = await readFile(join(directory, "GRAPH.jsonl"), "utf8");
 
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: String(conflict.base_digest),
@@ -514,7 +545,7 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("requires authorization before restoring a quarantined locked decision", async () => {
-    const { directory, storage, conflict } =
+    const { directory, graph, conflict } =
       await topologyConflictWithLockedDecisionWorkspace();
     try {
       const request = {
@@ -522,18 +553,18 @@ describe("merge contradiction reconciliation", () => {
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: String(conflict.base_digest),
       };
-      const denied = await reconcileMergeContradiction(storage, request);
+      const denied = await reconcileMergeContradiction(graph, request);
       expect(denied.outcome).toBe("REJECTED");
       expect(denied.diagnostics.map(({ code }) => code)).toContain(
         "MISSING_DECISION_OWNER_AUTHORIZATION",
       );
 
-      const allowed = await reconcileMergeContradiction(storage, {
+      const allowed = await reconcileMergeContradiction(graph, {
         ...request,
         decisionOwnerAuthorization: "owner-1",
       });
       expect(allowed.outcome).toBe("RESOLVED");
-      expect((await storage.materialize()).nodes).toEqual(
+      expect((await graph.materialize()).nodes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: "DEC-ROOT", statement: "current" }),
         ]),
@@ -544,9 +575,9 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("accepts a delta mutation that resolves a quarantined topology subject", async () => {
-    const { directory, storage, conflict } = await topologyConflictWorkspace();
+    const { directory, graph, conflict } = await topologyConflictWorkspace();
     try {
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         delta: {
@@ -560,7 +591,7 @@ describe("merge contradiction reconciliation", () => {
 
       expect(result.outcome).toBe("RESOLVED");
       expect(result.applied_subjects).toContain("TASK-A");
-      expect((await storage.materialize()).nodes).toEqual(
+      expect((await graph.materialize()).nodes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: "TASK-A", status: "ACTIVE" }),
         ]),
@@ -595,14 +626,17 @@ describe("merge contradiction reconciliation", () => {
       const incoming = `${base}${nodeEvent("ASM-ROOT", "incoming", { type: "ASM", status: "INVALIDATED" })}\n`;
       const merged = mergeBranchModels({ base, current, incoming });
       if (!merged.output) throw new Error("Expected a merge output");
-      const storage = new GraphStorage(directory);
-      await storage.appendEvents(
-        merged.output
-          .split("\n")
-          .filter(Boolean)
-          .map((line) => JSON.parse(line)),
-      );
-      const conflict = (await storage.materialize()).nodes.find(
+      const output = merged.output;
+      const graph = EpistemicGraph.open(directory);
+      await graph.batch((batch) => {
+        batch.appendEvents(
+          output
+            .split("\n")
+            .filter(Boolean)
+            .map((line) => JSON.parse(line)),
+        );
+      });
+      const conflict = (await graph.materialize()).nodes.find(
         (node) => node.type === "CTR" && node.status === "MERGE_CONFLICT",
       );
       if (!conflict) throw new Error("Expected a merge contradiction");
@@ -611,7 +645,7 @@ describe("merge contradiction reconciliation", () => {
       )[0];
       const before = await readFile(join(directory, "GRAPH.jsonl"), "utf8");
 
-      const result = await reconcileMergeContradiction(storage, {
+      const result = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         selectDigest: variant.variant_digest,
@@ -630,7 +664,7 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("accepts one ariadne-delta mode and gives a structured repeated outcome", async () => {
-    const { directory, storage, conflict } = await conflictWorkspace();
+    const { directory, graph, conflict } = await conflictWorkspace();
     try {
       const canonical = {
         id: "TASK-SHARED",
@@ -638,13 +672,13 @@ describe("merge contradiction reconciliation", () => {
         provenance_type: "FACT",
         statement: "synthesized",
       };
-      const first = await reconcileMergeContradiction(storage, {
+      const first = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         delta: { nodes: [canonical], edges: [] } as never,
       });
       expect(first.outcome).toBe("RESOLVED");
-      const second = await reconcileMergeContradiction(storage, {
+      const second = await reconcileMergeContradiction(graph, {
         conflictId: conflict.id,
         expectedConflictDigest: String(conflict.conflict_digest),
         delta: { nodes: [canonical], edges: [] } as never,
@@ -695,7 +729,7 @@ describe("merge contradiction reconciliation", () => {
   });
 
   it("serializes concurrent attempts so the retry is explicit", async () => {
-    const { directory, storage, conflict } = await conflictWorkspace();
+    const { directory, graph, conflict } = await conflictWorkspace();
     try {
       const variant = (
         conflict.variants as Array<{ variant_digest: string }>
@@ -706,8 +740,8 @@ describe("merge contradiction reconciliation", () => {
         selectDigest: variant.variant_digest,
       };
       const results = await Promise.all([
-        reconcileMergeContradiction(storage, request),
-        reconcileMergeContradiction(storage, request),
+        reconcileMergeContradiction(graph, request),
+        reconcileMergeContradiction(graph, request),
       ]);
       expect(results.map(({ outcome }) => outcome).sort()).toEqual([
         "ALREADY_RESOLVED",

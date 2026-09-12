@@ -6,7 +6,7 @@ import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { NODE_TYPES } from "../../src/core/schemas/nodes.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -56,8 +56,8 @@ describe("ariadne node", () => {
       provenance_type: "ASSUMED",
     });
 
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    const events = await storage.readEvents();
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    const events = await graph.readEvents();
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({ kind: "node", node: { id: "ASM-1" } });
     await expect(readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8")).resolves.toContain(
@@ -112,8 +112,8 @@ describe("ariadne node", () => {
     expect(await runCli(["node", "remove", "ASM-1"], { cwd, stdout: stdout.stream, stderr: stderr.stream })).toBe(0);
     expect(JSON.parse(stdout.text())).toMatchObject({ id: "ASM-1", status: "REMOVED" });
 
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    const events = await storage.readEvents();
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    const events = await graph.readEvents();
     expect(events).toHaveLength(2);
     expect(events[1]).toMatchObject({ kind: "node", node: { id: "ASM-1", status: "REMOVED" } });
 
@@ -195,8 +195,8 @@ describe("ariadne node", () => {
       provenance_type: "ASSUMED",
     });
 
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    const events = await storage.readEvents();
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    const events = await graph.readEvents();
     expect(events).toHaveLength(2);
     expect(events[0]).toMatchObject({ kind: "node", node: { id: "ASM-1", title: "Check capacity" } });
     expect(events[1]).toMatchObject({ kind: "node", node: { id: "ASM-1", title: "Updated capacity" } });
@@ -219,8 +219,8 @@ describe("ariadne node", () => {
     const cwd = workspace();
     await addAssumption(cwd, "ASM-1");
 
-    const storage = new GraphStorage(join(cwd, ".ariadne"));
-    const initialEvents = await storage.readEvents();
+    const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+    const initialEvents = await graph.readEvents();
     const initialIndex = await readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8");
 
     // 1. Non-existent node
@@ -274,7 +274,7 @@ describe("ariadne node", () => {
     expect(typeChangeErr.text()).toContain("Cannot change node type");
 
     // Verify storage remained completely unmodified
-    const eventsAfter = await storage.readEvents();
+    const eventsAfter = await graph.readEvents();
     expect(eventsAfter).toEqual(initialEvents);
     const indexAfter = await readFile(join(cwd, ".ariadne", "INDEX.md"), "utf8");
     expect(indexAfter).toBe(initialIndex);

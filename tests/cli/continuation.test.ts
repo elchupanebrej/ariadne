@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage, type GraphEvent } from "../../src/graph/storage.js";
+import { type GraphEvent } from "../../src/graph/domain.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const capture = () => {
   let output = "";
@@ -35,11 +36,9 @@ const edge = (source: string, type: string, target: string): GraphEvent => ({
 
 const seedWorkspace = async (events: GraphEvent[]) => {
   const cwd = mkdtempSync(join(tmpdir(), "ariadne-cli-continuation-"));
-  const storage = new GraphStorage(join(cwd, ".ariadne"));
-  for (const event of events) {
-    if (event.kind === "node") await storage.appendNode(event.node);
-    else await storage.appendEdge(event.edge);
-  }
+  await EpistemicGraph.open(join(cwd, ".ariadne")).batch((batch) => {
+    batch.appendEvents(events);
+  });
   return cwd;
 };
 

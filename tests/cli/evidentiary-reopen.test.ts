@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
+import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
 import type { NodeType, ProvenanceType } from "../../src/core/types/nodes.js";
 
 const capture = () => {
@@ -23,43 +24,44 @@ const node = (
   type: NodeType,
   provenance_type: ProvenanceType,
   extra: Record<string, unknown> = {},
-) => ({
-  id,
-  type,
-  provenance_type,
-  statement: `Statement for ${id}`,
-  ...(type === "EVD"
-    ? {
-        verdict: "FALSIFIED" as const,
-        method: "evidentiary reopen test",
-        rung: 3,
-        receipt: "sha256:cli-evidentiary-reopen",
-        stdout_digest: "sha256:cli-evidentiary-reopen-stdout",
-        reproducible_environment: "node-22/linux-x64",
-      }
-    : {}),
-  ...extra,
-});
+): Node =>
+  NodeSchema.parse({
+    id,
+    type,
+    provenance_type,
+    statement: `Statement for ${id}`,
+    ...(type === "EVD"
+      ? {
+          verdict: "FALSIFIED" as const,
+          method: "evidentiary reopen test",
+          rung: 3,
+          receipt: "sha256:cli-evidentiary-reopen",
+          stdout_digest: "sha256:cli-evidentiary-reopen-stdout",
+          reproducible_environment: "node-22/linux-x64",
+        }
+      : {}),
+    ...extra,
+  });
 
 const workspace = async () => {
   const cwd = await mkdtemp(join(tmpdir(), "ariadne-cli-evidentiary-reopen-"));
-  const storage = new GraphStorage(join(cwd, ".ariadne"));
-  for (const item of [
-    node("EVD-1", "EVD", "FACT"),
-    node("ASM-1", "ASM", "ASSUMED"),
-    node("TASK-1", "TASK", "DERIVED"),
-    node("CAN-1", "CAN", "PROPOSED"),
-    node("DEC-1", "DEC", "DECIDED"),
-    node("UNK-1", "UNK", "UNKNOWN"),
-    node("DEC-2", "DEC", "DECIDED"),
-  ]) {
-    await storage.appendNode(item);
-  }
-  await storage.appendEdge({ source: "EVD-1", target: "ASM-1", type: "falsifies" });
-  await storage.appendEdge({ source: "TASK-1", target: "ASM-1", type: "depends_on" });
-  await storage.appendEdge({ source: "CAN-1", target: "TASK-1", type: "derived_from" });
-  await storage.appendEdge({ source: "DEC-1", target: "CAN-1", type: "depends_on" });
-  return { cwd, storage };
+  const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+  await graph.batch((batch) => {
+    batch.appendEvents([
+      { kind: "node", node: node("EVD-1", "EVD", "FACT") },
+      { kind: "node", node: node("ASM-1", "ASM", "ASSUMED") },
+      { kind: "node", node: node("TASK-1", "TASK", "DERIVED") },
+      { kind: "node", node: node("CAN-1", "CAN", "PROPOSED") },
+      { kind: "node", node: node("DEC-1", "DEC", "DECIDED") },
+      { kind: "node", node: node("UNK-1", "UNK", "UNKNOWN") },
+      { kind: "node", node: node("DEC-2", "DEC", "DECIDED") },
+      { kind: "edge", edge: { source: "EVD-1", target: "ASM-1", type: "falsifies" } },
+      { kind: "edge", edge: { source: "TASK-1", target: "ASM-1", type: "depends_on" } },
+      { kind: "edge", edge: { source: "CAN-1", target: "TASK-1", type: "derived_from" } },
+      { kind: "edge", edge: { source: "DEC-1", target: "CAN-1", type: "depends_on" } },
+    ]);
+  });
+  return { cwd, graph };
 };
 
 const invoke = (cwd: string, args: string[]) => {
@@ -87,7 +89,7 @@ const parseReceipt = (output: string) =>
 
 describe("evidentiary re-open cascade", () => {
   it("re-opens waived unknowns and superseded decisions in the same transaction upon falsification", async () => {
-    const { cwd, storage } = await workspace();
+    const { cwd, graph } = await workspace();
 
     // 1. Waive UNK-1 by DEC-1
     const waiveResult = await invoke(cwd, ["waive", "UNK-1", "--by", "DEC-1"]);
@@ -98,7 +100,7 @@ describe("evidentiary re-open cascade", () => {
     expect(supersedeResult.code).toBe(0);
 
     // Verify both are terminal and not on the frontier
-    const stateBefore = (await storage.readState<Record<string, unknown>>()) ?? {};
+    const stateBefore = (await graph.getState()) as Record<string, unknown>;
     const frontierBefore = (stateBefore.frontier as string[]) ?? [];
     const openUnknownsBefore = (stateBefore.open_unknowns as string[]) ?? [];
     expect(frontierBefore).not.toContain("UNK-1");
@@ -109,7 +111,7 @@ describe("evidentiary re-open cascade", () => {
     expect(indexBefore).not.toMatch(/\|\s*UNK-1\s*\|/);
     expect(indexBefore).not.toMatch(/\|\s*DEC-2\s*\|/);
 
-    const eventsBefore = await storage.readEvents();
+    const eventsBefore = await graph.readEvents();
 
     // 3. Falsify ASM-1 by EVD-1
     const invalidateResult = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
@@ -149,10 +151,10 @@ describe("evidentiary re-open cascade", () => {
     );
 
     // Graph materialized nodes check
-    const graph = await storage.materialize();
-    const dec1 = graph.nodes.find((n) => n.id === "DEC-1");
-    const unk1 = graph.nodes.find((n) => n.id === "UNK-1");
-    const dec2 = graph.nodes.find((n) => n.id === "DEC-2");
+    const materialized = await graph.materialize();
+    const dec1 = materialized.nodes.find((n) => n.id === "DEC-1");
+    const unk1 = materialized.nodes.find((n) => n.id === "UNK-1");
+    const dec2 = materialized.nodes.find((n) => n.id === "DEC-2");
 
     expect(dec1?.status).toBe("RE-OPENED");
     expect(unk1?.status).toBe("RE-OPENED");
@@ -172,7 +174,7 @@ describe("evidentiary re-open cascade", () => {
     });
 
     // STATE.yaml has UNK-1 and DEC-2 on active frontier, and UNK-1 in open_unknowns
-    const stateAfter = (await storage.readState<Record<string, unknown>>()) ?? {};
+    const stateAfter = (await graph.getState()) as Record<string, unknown>;
     const frontierAfter = (stateAfter.frontier as string[]) ?? [];
     const openUnknownsAfter = (stateAfter.open_unknowns as string[]) ?? [];
     expect(frontierAfter).toContain("DEC-1");
@@ -197,7 +199,7 @@ describe("evidentiary re-open cascade", () => {
     expect(dec2Card).toContain("DEC-1");
 
     // Events were appended atomically
-    const eventsAfter = await storage.readEvents();
+    const eventsAfter = await graph.readEvents();
     expect(eventsAfter.length).toBeGreaterThan(eventsBefore.length);
     expect(
       eventsAfter.some((e) => e.kind === "node" && e.node.id === "UNK-1" && e.node.status === "RE-OPENED"),
@@ -209,14 +211,14 @@ describe("evidentiary re-open cascade", () => {
     // Idempotent re-run
     const repeatResult = await invoke(cwd, ["invalidate", "ASM-1", "--by", "EVD-1"]);
     expect(repeatResult.code).toBe(0);
-    expect(await storage.readEvents()).toEqual(eventsAfter);
+    expect(await graph.readEvents()).toEqual(eventsAfter);
   });
 
   it("routine supersession by a live decision does NOT unwind closed nodes", async () => {
-    const { cwd, storage } = await workspace();
+    const { cwd, graph } = await workspace();
 
     // Setup: DEC-3 live decision
-    await storage.appendNode(node("DEC-3", "DEC", "DECIDED"));
+    await graph.batch((batch) => batch.appendEvents([{ kind: "node", node: node("DEC-3", "DEC", "DECIDED") }]));
 
     // DEC-1 waives UNK-1 and supersedes DEC-2
     await invoke(cwd, ["waive", "UNK-1", "--by", "DEC-1"]);
@@ -227,16 +229,16 @@ describe("evidentiary re-open cascade", () => {
     expect(supersedeResult.code).toBe(0);
 
     // Verify DEC-1 is SUPERSEDED, but UNK-1 stays WAIVED and DEC-2 stays SUPERSEDED
-    const graph = await storage.materialize();
-    const dec1 = graph.nodes.find((n) => n.id === "DEC-1");
-    const unk1 = graph.nodes.find((n) => n.id === "UNK-1");
-    const dec2 = graph.nodes.find((n) => n.id === "DEC-2");
+    const materialized = await graph.materialize();
+    const dec1 = materialized.nodes.find((n) => n.id === "DEC-1");
+    const unk1 = materialized.nodes.find((n) => n.id === "UNK-1");
+    const dec2 = materialized.nodes.find((n) => n.id === "DEC-2");
 
     expect(dec1?.status).toBe("SUPERSEDED");
     expect(unk1?.status).toBe("WAIVED");
     expect(dec2?.status).toBe("SUPERSEDED");
 
-    const state = (await storage.readState<Record<string, unknown>>()) ?? {};
+    const state = (await graph.getState()) as Record<string, unknown>;
     const frontier = (state.frontier as string[]) ?? [];
     expect(frontier).not.toContain("UNK-1");
     expect(frontier).not.toContain("DEC-2");
@@ -244,16 +246,16 @@ describe("evidentiary re-open cascade", () => {
   });
 
   it("handles transitive evidentiary re-open chains", async () => {
-    const { cwd, storage } = await workspace();
+    const { cwd, graph } = await workspace();
 
     // Setup transitive chain:
     // DEC-1 supersedes DEC-2
     // DEC-2 supersedes DEC-3
     // DEC-3 waives UNK-2
     // DEC-2 waives UNK-1 (re-waived or separate UNK-3)
-    await storage.appendNode(node("DEC-3", "DEC", "DECIDED"));
-    await storage.appendNode(node("UNK-2", "UNK", "UNKNOWN"));
-    await storage.appendNode(node("UNK-3", "UNK", "UNKNOWN"));
+    await graph.batch((batch) => batch.appendEvents([{ kind: "node", node: node("DEC-3", "DEC", "DECIDED") }]));
+    await graph.batch((batch) => batch.appendEvents([{ kind: "node", node: node("UNK-2", "UNK", "UNKNOWN") }]));
+    await graph.batch((batch) => batch.appendEvents([{ kind: "node", node: node("UNK-3", "UNK", "UNKNOWN") }]));
 
     await invoke(cwd, ["waive", "UNK-3", "--by", "DEC-3"]);
     await invoke(cwd, ["waive", "UNK-2", "--by", "DEC-2"]);
@@ -269,14 +271,14 @@ describe("evidentiary re-open cascade", () => {
       expect.arrayContaining(["DEC-1", "DEC-2", "DEC-3", "UNK-2", "UNK-3"]),
     );
 
-    const graph = await storage.materialize();
-    expect(graph.nodes.find((n) => n.id === "DEC-1")?.status).toBe("RE-OPENED");
-    expect(graph.nodes.find((n) => n.id === "DEC-2")?.status).toBe("RE-OPENED");
-    expect(graph.nodes.find((n) => n.id === "DEC-3")?.status).toBe("RE-OPENED");
-    expect(graph.nodes.find((n) => n.id === "UNK-2")?.status).toBe("RE-OPENED");
-    expect(graph.nodes.find((n) => n.id === "UNK-3")?.status).toBe("RE-OPENED");
+    const materialized = await graph.materialize();
+    expect(materialized.nodes.find((n) => n.id === "DEC-1")?.status).toBe("RE-OPENED");
+    expect(materialized.nodes.find((n) => n.id === "DEC-2")?.status).toBe("RE-OPENED");
+    expect(materialized.nodes.find((n) => n.id === "DEC-3")?.status).toBe("RE-OPENED");
+    expect(materialized.nodes.find((n) => n.id === "UNK-2")?.status).toBe("RE-OPENED");
+    expect(materialized.nodes.find((n) => n.id === "UNK-3")?.status).toBe("RE-OPENED");
 
-    const state = (await storage.readState<Record<string, unknown>>()) ?? {};
+    const state = (await graph.getState()) as Record<string, unknown>;
     const frontier = (state.frontier as string[]) ?? [];
     const openUnknowns = (state.open_unknowns as string[]) ?? [];
 

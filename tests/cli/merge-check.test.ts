@@ -16,7 +16,7 @@ import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
 import { createFramedRecord } from "../../src/graph/journal.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const exec = promisify(execFile);
 
@@ -77,14 +77,21 @@ describe("ariadne merge-check", () => {
   it("blocks publication with stable conflict-card links and does not mutate", async () => {
     const cwd = await workspace();
     try {
-      const storage = new GraphStorage(join(cwd, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-MERGE-1",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Branches disagree",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
+      const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-1",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Branches disagree",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+        ]);
       });
       const before = await Promise.all([
         readFile(join(cwd, ".ariadne", "GRAPH.jsonl"), "utf8"),
@@ -128,32 +135,49 @@ describe("ariadne merge-check", () => {
   it("passes after resolution and ignores unrelated contradiction kinds", async () => {
     const cwd = await workspace();
     try {
-      const storage = new GraphStorage(join(cwd, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-OTHER-1",
-        type: "CTR",
-        provenance_type: "PROPOSED",
-        statement: "An unrelated contradiction",
-        status: "ACTIVE",
-        conflict_kind: "evidence",
-      });
-      await storage.appendNode({
-        id: "CTR-MERGE-2",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Branches disagree",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
+      const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-OTHER-1",
+              type: "CTR",
+              provenance_type: "PROPOSED",
+              statement: "An unrelated contradiction",
+              status: "ACTIVE",
+              conflict_kind: "evidence",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-2",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Branches disagree",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+        ]);
       });
       expect((await invoke(cwd, ["merge-check"])).code).toBe(1);
 
-      await storage.appendNode({
-        id: "CTR-MERGE-2",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Branches disagree",
-        status: "RESOLVED",
-        conflict_kind: "branch_merge",
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-2",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Branches disagree",
+              status: "RESOLVED",
+              conflict_kind: "branch_merge",
+            },
+          },
+        ]);
       });
       const result = await invoke(cwd, ["merge-check", "--json"]);
       expect(result.code).toBe(0);
@@ -171,46 +195,65 @@ describe("ariadne merge-check", () => {
   it("emits deterministic structured output and filters only unresolved branch merges", async () => {
     const cwd = await workspace();
     try {
-      const storage = new GraphStorage(join(cwd, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-MERGE-Z",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Later branch disagreement",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
-      });
-      await storage.appendNode({
-        id: "CTR-MERGE-A",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Earlier branch disagreement",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
-      });
-      await storage.appendNode({
-        id: "CTR-MERGE-RESOLVED",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Resolved branch disagreement",
-        status: "RESOLVED",
-        conflict_kind: "branch_merge",
-      });
-      await storage.appendNode({
-        id: "CTR-OTHER-MERGE",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "Non-merge contradiction",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "evidence",
-      });
-      await storage.appendNode({
-        id: "TASK-MERGE-FALSE",
-        type: "TASK",
-        provenance_type: "FACT",
-        statement: "A non-contradiction with merge fields",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
+      const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-Z",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Later branch disagreement",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-A",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Earlier branch disagreement",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-RESOLVED",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Resolved branch disagreement",
+              status: "RESOLVED",
+              conflict_kind: "branch_merge",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "CTR-OTHER-MERGE",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "Non-merge contradiction",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "evidence",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "TASK-MERGE-FALSE",
+              type: "TASK",
+              provenance_type: "FACT",
+              statement: "A non-contradiction with merge fields",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+        ]);
       });
 
       const first = await invoke(cwd, ["merge-check", "--json"]);
@@ -241,14 +284,21 @@ describe("ariadne merge-check", () => {
     try {
       await git(cwd, "init", "-q");
       await git(cwd, "config", "merge.ariadne.sentinel", "unchanged");
-      const storage = new GraphStorage(join(cwd, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-MERGE-READONLY",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "A publication-only conflict",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
+      const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-READONLY",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "A publication-only conflict",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+        ]);
       });
       const noticesPath = join(cwd, ".ariadne", "NOTICES.jsonl");
       await writeFile(noticesPath, "existing notice state\n", "utf8");
@@ -282,21 +332,31 @@ describe("ariadne merge-check", () => {
   it("keeps publication, structural, semantic, and epistemic gates independent", async () => {
     const cwd = await workspace();
     try {
-      const storage = new GraphStorage(join(cwd, ".ariadne"));
-      await storage.appendNode({
-        id: "CTR-MERGE-INDEPENDENT",
-        type: "CTR",
-        provenance_type: "FACT",
-        statement: "A valid unresolved branch merge",
-        status: "MERGE_CONFLICT",
-        conflict_kind: "branch_merge",
-      });
-      await storage.appendNode({
-        id: "EVDREQ-INDEPENDENT",
-        type: "EVDREQ",
-        provenance_type: "PROPOSED",
-        statement: "An evidence request without a result",
-        claim_class: "Algorithmic logic",
+      const graph = EpistemicGraph.open(join(cwd, ".ariadne"));
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
+              id: "CTR-MERGE-INDEPENDENT",
+              type: "CTR",
+              provenance_type: "FACT",
+              statement: "A valid unresolved branch merge",
+              status: "MERGE_CONFLICT",
+              conflict_kind: "branch_merge",
+            },
+          },
+          {
+            kind: "node",
+            node: {
+              id: "EVDREQ-INDEPENDENT",
+              type: "EVDREQ",
+              provenance_type: "PROPOSED",
+              statement: "An evidence request without a result",
+              claim_class: "Algorithmic logic",
+            },
+          },
+        ]);
       });
 
       const publication = await invoke(cwd, ["merge-check", "--json"]);
@@ -383,8 +443,8 @@ describe("ariadne merge-check", () => {
       await git(repo, "checkout", "current");
       await git(repo, "merge", "incoming", "--no-edit");
 
-      const storage = new GraphStorage(join(repo, ".ariadne"));
-      await storage.regenerateIndex();
+      const graph = EpistemicGraph.open(join(repo, ".ariadne"));
+      await graph.regenerateIndex();
       await git(repo, "add", ".ariadne");
       await git(repo, "commit", "-qm", "merge divergent graph");
       const status = await git(repo, "status", "--short");
