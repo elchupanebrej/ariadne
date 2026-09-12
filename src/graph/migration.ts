@@ -31,7 +31,7 @@ import {
   stateForGraph,
   type GraphEvent,
   type MaterializedGraph,
-} from "./storage.js";
+} from "./domain.js";
 import {
   OperationalNoticeSchema,
   type OperationalNotice,

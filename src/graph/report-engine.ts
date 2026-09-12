@@ -2,7 +2,7 @@ import { readdir } from "node:fs/promises";
 import type { EpistemicEdge } from "../core/schemas/edges.js";
 import type { Node } from "../core/schemas/nodes.js";
 import { toRootRelative } from "../core/root-relative.js";
-import type { GraphEvent } from "./storage.js";
+import type { GraphEvent } from "./domain.js";
 import {
   childEdges,
   computeForest,

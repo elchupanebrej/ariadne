@@ -9,7 +9,7 @@ import { GraphStorage } from "../../graph/storage.js";
 import { assertNotLegacyWorkspace } from "../../graph/legacy.js";
 import { resetCanonicalAuthority, stageAndSwapProjection } from "../../graph/journal.js";
 import { withRootLock } from "../../graph/lock.js";
-import { renderIndex } from "../../graph/storage.js";
+import { renderIndex } from "../../graph/domain.js";
 import { toRootRelative } from "../../core/root-relative.js";
 import { hasHelp, parseOptions, syntaxError } from "../contract.js";
 import type { CliIO } from "./status.js";

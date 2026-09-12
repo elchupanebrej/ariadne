@@ -5,7 +5,7 @@ import {
   validateGraph,
   type GraphDiagnostic,
 } from "./integrity.js";
-import type { MaterializedGraph } from "./storage.js";
+import type { MaterializedGraph } from "./domain.js";
 import { validateFalsifyingEvidence } from "../gates/epistemic-gate.js";
 
 export type InvalidationGraph = MaterializedGraph;
