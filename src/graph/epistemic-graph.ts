@@ -97,6 +97,13 @@ export interface GraphBatch {
    * `schema_version` stripped, mirroring `GraphStorage.readState`.
    */
   readState(): Promise<Record<string, unknown> | null>;
+  /**
+   * Byte-level content of the state projection as committed on disk, or
+   * `null` when no state file exists. Unlike `readState`, the bytes are
+   * neither parsed nor validated, so callers can patch host-owned fields
+   * without losing their original formatting.
+   */
+  readRawState(): Promise<string | null>;
   /** Raw card content for `id`, or `undefined` when the card does not exist. */
   readCard(id: string): Promise<string | undefined>;
   /** Card ids currently present in the cards projection, sorted. */
@@ -471,6 +478,7 @@ export class EpistemicGraph {
       const batch: GraphBatch = {
         graph: current,
         readState: () => this.#readWorkspaceState(),
+        readRawState: () => this.#driver.readRawState(),
         readCard: (id) => this.#driver.readCard(id),
         listCards: () => this.#driver.listCards(),
         appendEvents: (batchEvents) => {

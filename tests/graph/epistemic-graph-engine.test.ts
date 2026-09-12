@@ -175,6 +175,36 @@ describe("EpistemicGraph engine surface", () => {
     });
   });
 
+  it("reads the state projection at byte level inside a batch", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await graph.addNode("TASK", "TASK-STALE", "Seed node", {
+        provenance_type: "FACT",
+        statement: "Seed node",
+      });
+
+      const raw = '{\n  "host_owned" : {"keep": true},\n  "frontier": ["TASK-STALE"]\n}\n';
+      await writeFile(join(root, "STATE.yaml"), raw, "utf8");
+
+      expect(await graph.batch((batch) => batch.readRawState())).toBe(raw);
+    });
+  });
+
+  it("resolves the state projection read to null when no state file exists", async () => {
+    await withTempRoot(async (root) => {
+      const graph = EpistemicGraph.open(root);
+      await graph.init();
+      await graph.addNode("TASK", "TASK-1", "Seed node", {
+        provenance_type: "FACT",
+        statement: "Seed node",
+      });
+      await rm(join(root, "STATE.yaml"));
+
+      expect(await graph.batch((batch) => batch.readRawState())).toBeNull();
+    });
+  });
+
   it("applies queued events and projection operations from a successful batch", async () => {
     await withTempRoot(async (root) => {
       const graph = EpistemicGraph.open(root);

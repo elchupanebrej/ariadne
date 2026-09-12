@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, readFile } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
@@ -265,12 +265,7 @@ const syncState = async (
   if ("openUnknowns" in state) projections.openUnknowns = openUnknowns;
   if ("unknowns" in state) projections.unknowns = openUnknowns;
   const statePath = join(storageRoot, "STATE.yaml");
-  let previous: string | undefined;
-  try {
-    previous = await readFile(statePath, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-  }
+  const previous = (await batch.readRawState()) ?? undefined;
   const next = { ...state, ...projections };
   const serialized = previous
     ? patchStateJson(previous, state, projections)

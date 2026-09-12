@@ -36,6 +36,7 @@ export interface StorageDriver {
   readEvents(): Promise<GraphEvent[]>;
   appendEvents(events: readonly GraphEvent[]): Promise<void>;
   readState(): Promise<Record<string, unknown> | null>;
+  readRawState(): Promise<string | null>;
   readCard(id: string): Promise<string | undefined>;
   listCards(): Promise<string[]>;
   writeState(state: Record<string, unknown>): Promise<void>;
@@ -361,6 +362,17 @@ export class FileSystemStorageDriver implements StorageDriver {
     });
   }
 
+  async readRawState(): Promise<string | null> {
+    return this.withStableRead(async () => {
+      try {
+        return await readFile(this.statePath, "utf8");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+        throw error;
+      }
+    });
+  }
+
   async readCard(id: string): Promise<string | undefined> {
     return this.withStableRead(async () => {
       try {
@@ -488,6 +500,10 @@ export class InMemoryStorageDriver implements StorageDriver {
 
   async readState(): Promise<Record<string, unknown> | null> {
     return this.state ? JSON.parse(JSON.stringify(this.state)) : null;
+  }
+
+  async readRawState(): Promise<string | null> {
+    return this.state ? JSON.stringify(this.state) : null;
   }
 
   async readCard(id: string): Promise<string | undefined> {
