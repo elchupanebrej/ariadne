@@ -20,7 +20,7 @@ describe("Root Locking Protocol (src/graph/lock.ts)", () => {
   let storageRoot: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-lock-test-"));
+    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "ariadne-lock-test-")));
     storageRoot = path.join(tempDir, ".ariadne");
   });
 

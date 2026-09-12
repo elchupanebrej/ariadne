@@ -329,15 +329,17 @@ describe("Path Containment and Security (src/core/containment.ts)", () => {
       });
 
       it("rejects UNIX domain sockets with INVALID_INPUT", async () => {
-        const sockPath = path.join(storageRoot, "test.sock");
+        // macOS TMPDIR paths can exceed the UNIX socket address limit.
+        const socketDir = fs.mkdtempSync("/tmp/ariadne-sock-");
+        const sockPath = path.join(socketDir, "test.sock");
         const server = net.createServer();
 
-        await new Promise<void>((resolve, reject) => {
-          server.listen(sockPath, () => resolve());
-          server.on("error", reject);
-        });
-
         try {
+          await new Promise<void>((resolve, reject) => {
+            server.once("error", reject);
+            server.listen(sockPath, () => resolve());
+          });
+
           expect(() => assertRegularFileOrDirectory(sockPath)).toThrow(AriadneError);
 
           try {
@@ -350,6 +352,7 @@ describe("Path Containment and Security (src/core/containment.ts)", () => {
           }
         } finally {
           await new Promise<void>((resolve) => server.close(() => resolve()));
+          fs.rmSync(socketDir, { recursive: true, force: true });
         }
       });
 

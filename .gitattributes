@@ -1,0 +1,2 @@
+# Keep packaged text and byte-digested golden fixtures stable on every host.
+* text=auto eol=lf

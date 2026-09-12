@@ -11,6 +11,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { npmRunner } from "./lib/npm-runner.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicConsumerFixture = join(repoRoot, "tests/fixtures/public-api-consumer");
@@ -18,8 +19,9 @@ const packageJson = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf
 const packageName = packageJson.name;
 const packageVersion = packageJson.version;
 
-const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-const npxCmd = process.platform === "win32" ? "npx.cmd" : "npx";
+const npm = npmRunner();
+const runNpm = (args, cwd) => run(npm.cmd, [...npm.prefixArgs, ...args], cwd);
+const runNpx = (args, cwd) => runNpm(["exec", "--", ...args], cwd);
 const tarCmd = process.platform === "win32" ? "tar.exe" : "tar";
 const buildConfig = join(repoRoot, "tsconfig.build.json");
 const typeScriptCompiler = join(repoRoot, "node_modules", "typescript", "bin", "tsc");
@@ -52,12 +54,14 @@ function run(cmd, args, cwd) {
 }
 
 function getPmRunner(name) {
-  const bin = process.platform === "win32" ? `${name}.cmd` : name;
+  const fallback = { cmd: npm.cmd, prefixArgs: [...npm.prefixArgs, "exec", "--yes", `--package=${name}`, "--", name] };
+  if (process.platform === "win32") return fallback;
+  const bin = name;
   try {
     execFileSync(bin, ["--version"], { stdio: "ignore" });
     return { cmd: bin, prefixArgs: [] };
   } catch {
-    return { cmd: npxCmd, prefixArgs: ["--yes", name] };
+    return fallback;
   }
 }
 
@@ -111,7 +115,7 @@ try {
     // hooks so a broken parent-directory `node` shim cannot change the pack
     // result or hide the actual packaging verification.
     run(process.execPath, [typeScriptCompiler, "-p", buildConfig], repoRoot);
-    run(npmCmd, ["pack", "--ignore-scripts", "--pack-destination", tmpBase], repoRoot);
+    runNpm(["pack", "--ignore-scripts", "--pack-destination", tmpBase], repoRoot);
     const tgz = join(tmpBase, `${packageName.replace("/", "-")}-${packageVersion}.tgz`);
     if (!existsSync(tgz)) {
       throw new Error(`expected tarball not found: ${tgz}`);
@@ -162,10 +166,10 @@ try {
     );
 
     // Install tarball
-    run(npmCmd, ["install", tarball, "--no-audit", "--no-fund", "--prefer-offline"], consumerNpm);
+    runNpm(["install", tarball, "--no-audit", "--no-fund", "--prefer-offline"], consumerNpm);
 
     // CLI binary test
-    const cliOutput = run(npxCmd, ["ariadne", "--version"], consumerNpm).toString().trim();
+    const cliOutput = runNpx(["ariadne", "--version"], consumerNpm).toString().trim();
     if (cliOutput !== packageVersion) {
       throw new Error(`npx ariadne --version returned "${cliOutput}", expected "${packageVersion}"`);
     }
@@ -245,7 +249,7 @@ try {
     const pnpmRunner = getPmRunner("pnpm");
     run(pnpmRunner.cmd, [...pnpmRunner.prefixArgs, "add", tarball], consumerPnpm);
 
-    const pnpmCliOutput = run(npxCmd, ["ariadne", "--version"], consumerPnpm).toString().trim();
+    const pnpmCliOutput = runNpx(["ariadne", "--version"], consumerPnpm).toString().trim();
     if (pnpmCliOutput !== packageVersion) {
       throw new Error(`pnpm: npx ariadne --version returned "${pnpmCliOutput}", expected "${packageVersion}"`);
     }
@@ -265,7 +269,7 @@ try {
     const yarnRunner = getPmRunner("yarn");
     run(yarnRunner.cmd, [...yarnRunner.prefixArgs, "add", tarball, "--ignore-engines"], consumerYarn);
 
-    const yarnCliOutput = run(npxCmd, ["ariadne", "--version"], consumerYarn).toString().trim();
+    const yarnCliOutput = runNpx(["ariadne", "--version"], consumerYarn).toString().trim();
     if (yarnCliOutput !== packageVersion) {
       throw new Error(`yarn: npx ariadne --version returned "${yarnCliOutput}", expected "${packageVersion}"`);
     }

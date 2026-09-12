@@ -118,7 +118,7 @@ describe("Scenario Suite 1: Persistence & Crash Recovery", () => {
       const childCode = `
         import fs from "node:fs";
         import path from "node:path";
-        import { acquireRootLock } from "${path.resolve(process.cwd(), "dist/graph/lock.js")}";
+        import { acquireRootLock } from ${JSON.stringify(new URL("../../dist/graph/lock.js", import.meta.url).href)};
 
         async function run() {
           const handle = await acquireRootLock(${JSON.stringify(storageRoot)});
@@ -154,7 +154,7 @@ describe("Scenario Suite 1: Persistence & Crash Recovery", () => {
         while (!fs.existsSync(readySignalFile) && Date.now() - startWait < 5000) {
           await new Promise((r) => setTimeout(r, 25));
         }
-        expect(fs.existsSync(readySignalFile)).toBe(true);
+        expect(fs.existsSync(readySignalFile), childErrorOutput).toBe(true);
         expect(fs.existsSync(lockPath)).toBe(true);
 
         // Schedule release signal in 200ms

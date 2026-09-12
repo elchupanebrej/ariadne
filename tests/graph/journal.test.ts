@@ -30,7 +30,9 @@ describe("Journal persistence and atomic write cycle", () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "ariadne-journal-test-"));
+    tempDir = await fs.promises.realpath(
+      await fs.promises.mkdtemp(path.join(os.tmpdir(), "ariadne-journal-test-")),
+    );
   });
 
   afterEach(async () => {

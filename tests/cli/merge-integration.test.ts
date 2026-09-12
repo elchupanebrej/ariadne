@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { runCli } from "../../src/cli/index.js";
@@ -23,7 +24,7 @@ const capture = () => {
 };
 
 const repository = async (): Promise<string> => {
-  const repo = await mkdtemp(join("/tmp", "ariadne-merge-integration-"));
+  const repo = await mkdtemp(join(tmpdir(), "ariadne-merge-integration-"));
   await git(repo, "init", "-q");
   await git(repo, "config", "user.email", "test@example.com");
   await git(repo, "config", "user.name", "Ariadne Test");
@@ -233,7 +234,7 @@ describe("Ariadne Git merge integration", () => {
 
   it("fails closed with an actionable diagnosis in a fresh clone", async () => {
     const source = await repository();
-    const clone = await mkdtemp(join("/tmp", "ariadne-merge-clone-"));
+    const clone = await mkdtemp(join(tmpdir(), "ariadne-merge-clone-"));
     try {
       expect((await run(source, ["merge-setup"])).code).toBe(0);
       await git(source, "add", ".ariadne/GRAPH.jsonl", ".gitattributes", ".githooks");
@@ -352,7 +353,8 @@ describe("Ariadne Git merge integration", () => {
     }
   });
 
-  it("reports a non-executable existing hook without overwriting repository policy", async () => {
+  // Windows does not implement POSIX executable permission bits.
+  it.skipIf(process.platform === "win32")("reports a non-executable existing hook without overwriting repository policy", async () => {
     const repo = await repository();
     try {
       await mkdir(join(repo, ".githooks"), { recursive: true });
@@ -409,12 +411,17 @@ describe("Ariadne Git merge integration", () => {
 
   it("diagnoses missing Ariadne on PATH without blocking the hook", async () => {
     const repo = await repository();
-    const emptyPath = await mkdtemp(join("/tmp", "ariadne-empty-path-"));
+    const emptyPath = await mkdtemp(join(tmpdir(), "ariadne-empty-path-"));
     try {
       expect((await run(repo, ["merge-setup"])).code).toBe(0);
+      // Git runs hooks through its POSIX shell, including on Windows. Resolve
+      // that shell before clearing PATH to exercise the missing-CLI diagnosis.
+      const shell = process.platform === "win32"
+        ? (await exec("where.exe", ["sh.exe"])).stdout.trim().split(/\r?\n/u)[0]
+        : "/bin/sh";
       const result = await exec(
-        join(repo, ".githooks", "pre-commit"),
-        [],
+        shell,
+        [join(repo, ".githooks", "pre-commit")],
         { cwd: repo, env: { ...process.env, PATH: emptyPath } },
       );
 

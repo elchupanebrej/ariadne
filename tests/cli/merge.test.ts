@@ -80,7 +80,7 @@ describe("ariadne merge-driver", () => {
       await git(repo, "init", "-q");
       await git(repo, "config", "user.email", "test@example.com");
       await git(repo, "config", "user.name", "Ariadne Test");
-      await writeFile(join(repo, ".gitattributes"), "GRAPH.jsonl merge=ariadne\n");
+      await writeFile(join(repo, ".gitattributes"), "GRAPH.jsonl merge=ariadne text eol=lf\n");
       await writeFile(
         join(repo, "GRAPH.jsonl"),
         `${nodeEvent("TASK-BASE")}\n${nodeEvent("TASK-TARGET")}\n`,
@@ -93,7 +93,7 @@ describe("ariadne merge-driver", () => {
         repo,
         "config",
         "merge.ariadne.driver",
-        `${gitPath(process.execPath)} ${cliPath} merge-driver %O %A %B`,
+        `"${gitPath(process.execPath)}" "${cliPath}" merge-driver %O %A %B`,
       );
 
       await git(repo, "checkout", "-qb", "current");
