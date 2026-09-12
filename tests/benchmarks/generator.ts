@@ -19,7 +19,7 @@ import {
   stateForGraph,
   type GraphEvent,
   type MaterializedGraph,
-} from "../../src/graph/storage.js";
+} from "../../src/graph/domain.js";
 
 export const BENCHMARK_TIERS = {
   smoke: { nodes: 100, edges: 250, events: 500, cards: 100, reports: 50, processes: 2 },

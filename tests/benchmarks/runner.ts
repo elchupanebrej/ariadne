@@ -5,7 +5,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Writable } from "node:stream";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
-import { GraphStorage } from "../../src/graph/storage.js";
 import { EpistemicGateEngine } from "../../src/gates/gate-engine.js";
 import { runMigrate } from "../../src/cli/commands/migrate.js";
 import { CAPACITY_LIMITS } from "../../src/graph/capacity.js";
@@ -502,9 +501,8 @@ export async function runBenchmark(
       passed: reportP.p95 < BENCHMARK_THRESHOLDS.batchMs,
     };
 
-    const storage = new GraphStorage(storageDir);
     const rebuildSamples = await measureLatency(async () => {
-      await storage.regenerateIndex();
+      await coldGraph.regenerateIndex();
     }, batchIterations);
     const rebuildP = computePercentiles(rebuildSamples);
     metrics.projectionRebuild = {

@@ -1,12 +1,12 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EdgeSchema } from "../../src/core/schemas/edges.js";
 import { NodeSchema } from "../../src/core/schemas/nodes.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import {
   WorktreeManager,
 } from "../../src/multiagent/worktree-manager.js";
@@ -35,6 +35,41 @@ const managerFor = (repoRoot: string) =>
   });
 
 describe("WorktreeManager", () => {
+  it.each([false, true])(
+    "runs and cleans up through an aliased repository parent (explicit root: %s)",
+    async (explicitRoot) => {
+      const repoRoot = await repository();
+      const aliasRoot = await mkdtemp(join(tmpdir(), "ariadne-worktree-alias-"));
+      try {
+        const parentAlias = join(aliasRoot, "parent");
+        await symlink(dirname(repoRoot), parentAlias, "junction");
+        const alias = join(parentAlias, basename(repoRoot));
+        const manager = new WorktreeManager({
+          repoRoot: alias,
+          depthMode: "Deep",
+          ...(explicitRoot
+            ? { worktreeRoot: join(alias, ".ariadne", "worktrees") }
+            : {}),
+        });
+        const candidate = await manager.create("CAN-alias");
+        const result = await manager.run(candidate, process.execPath, [
+          "-e", "process.stdout.write(process.cwd())",
+        ]);
+
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toBe(await realpath(candidate.path));
+        expect(result.evidence).toMatchObject({
+          worktree_path: ".ariadne/worktrees/CAN-alias",
+        });
+        await manager.cleanup(candidate);
+        await expect(realpath(candidate.path)).rejects.toMatchObject({ code: "ENOENT" });
+      } finally {
+        await rm(aliasRoot, { recursive: true, force: true });
+        await rm(repoRoot, { recursive: true, force: true });
+      }
+    },
+  );
+
   it(
     "isolates candidates, runs the same command, and returns linked evidence",
     { timeout: 10_000 },
@@ -145,33 +180,79 @@ describe("WorktreeManager", () => {
     }
   });
 
+  it("rejects a registered candidate replaced with a symlink", async () => {
+    const repoRoot = await repository();
+    try {
+      const manager = managerFor(repoRoot);
+      const candidate = await manager.create("CAN-replaced");
+      const movedPath = join(manager.worktreeRoot, "moved-candidate");
+      await rename(candidate.path, movedPath);
+      await symlink(movedPath, candidate.path, "junction");
+
+      await expect(
+        manager.run(candidate, process.execPath, ["-e", "process.exit(0)"]),
+      ).rejects.toThrow(/resolves outside its configured candidate path/i);
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a registered worktree checked out to another candidate branch", async () => {
+    const repoRoot = await repository();
+    try {
+      const manager = managerFor(repoRoot);
+      const candidate = await manager.create("CAN-owner");
+      await git(candidate.path, "checkout", "-qb", "ariadne/CAN-other");
+
+      await expect(
+        manager.run(candidate, process.execPath, ["-e", "process.exit(0)"]),
+      ).rejects.toThrow(/registered worktree/i);
+    } finally {
+      await rm(repoRoot, { recursive: true, force: true });
+    }
+  });
+
   it("does not start or continue an invalidated candidate", async () => {
     const repoRoot = await repository();
     try {
-      const storage = new GraphStorage(join(repoRoot, ".ariadne"));
+      const graph = EpistemicGraph.open(join(repoRoot, ".ariadne"));
       const manager = new WorktreeManager({
         repoRoot,
         worktreeRoot: join(repoRoot, ".ariadne", "worktrees"),
         depthMode: "Deep",
-        storage,
+        storage: graph,
       });
       const candidate = await manager.create("CAN-01-abort");
-      await storage.appendNode({
-        id: candidate.candidateId,
-        type: "CAN",
-        provenance_type: "PROPOSED",
-        statement: "candidate",
-        status: "ACTIVE",
-      });
-      const invalidation = new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          void storage
-            .appendNode({
+      await graph.batch((batch) => {
+        batch.appendEvents([
+          {
+            kind: "node",
+            node: {
               id: candidate.candidateId,
               type: "CAN",
               provenance_type: "PROPOSED",
               statement: "candidate",
-              status: "INVALIDATED",
+              status: "ACTIVE",
+            },
+          },
+        ]);
+      });
+      const invalidation = new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          void graph
+            .batch((batch) => {
+              batch.appendEvents([
+                {
+                  kind: "node",
+                  node: {
+                    id: candidate.candidateId,
+                    type: "CAN",
+                    provenance_type: "PROPOSED",
+                    statement: "candidate",
+                    status: "INVALIDATED",
+                  },
+                },
+              ]);
             })
             .then(() => resolve())
             .catch(reject);

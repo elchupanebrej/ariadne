@@ -2,7 +2,6 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GraphStorage } from "../../src/graph/storage.js";
 import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import {
   extractDeltaBlocks,
@@ -27,12 +26,12 @@ const edge = (source: string, target: string) => ({
 
 const workspace = async () => {
   const directory = await mkdtemp(join(tmpdir(), "ariadne-delta-"));
-  return { directory, storage: new GraphStorage(directory) };
+  return { directory, graph: EpistemicGraph.open(directory) };
 };
 
 describe("mergeDelta", () => {
   it("extracts multiple supported fences and applies one atomic batch", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       const response = [
         block("json ariadne-delta", { nodes: [node("TASK-1")], edges: [] }),
@@ -43,14 +42,14 @@ describe("mergeDelta", () => {
       ].join("\n");
 
       expect(extractDeltaBlocks(response)).toHaveLength(2);
-      await expect(mergeDelta(storage, response)).resolves.toEqual({
+      await expect(mergeDelta(graph, response)).resolves.toEqual({
         applied: {
           nodes: ["TASK-1", "TASK-2"],
           edges: ["TASK-2:depends_on:TASK-1"],
         },
         skipped: { nodes: [], edges: [] },
       });
-      expect((await storage.materialize()).nodes.map(({ id }) => id)).toEqual([
+      expect((await graph.materialize()).nodes.map(({ id }) => id)).toEqual([
         "TASK-1",
         "TASK-2",
       ]);
@@ -63,36 +62,36 @@ describe("mergeDelta", () => {
   });
 
   it("skips identical nodes and edges on repeat without new events", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       const response = block("json ariadne-delta", {
         nodes: [node("TASK-1")],
         edges: [],
       });
-      await mergeDelta(storage, response);
-      const before = await storage.readEvents();
+      await mergeDelta(graph, response);
+      const before = await graph.readEvents();
 
-      await expect(mergeDelta(storage, response)).resolves.toEqual({
+      await expect(mergeDelta(graph, response)).resolves.toEqual({
         applied: { nodes: [], edges: [] },
         skipped: { nodes: ["TASK-1"], edges: [] },
       });
-      expect(await storage.readEvents()).toEqual(before);
+      expect(await graph.readEvents()).toEqual(before);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   });
 
   it("rejects concurrent conflicting merges and keeps identical merges idempotent", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       const response = block("ariadne-delta", {
         nodes: [node("TASK-1")],
         edges: [],
       });
-      const otherStorage = new GraphStorage(directory);
+      const otherGraph = EpistemicGraph.open(directory);
       const receipts = await Promise.all([
-        mergeDelta(storage, response),
-        mergeDelta(otherStorage, response),
+        mergeDelta(graph, response),
+        mergeDelta(otherGraph, response),
       ]);
 
       expect(receipts.map(({ applied }) => applied.nodes)).toEqual([
@@ -100,17 +99,17 @@ describe("mergeDelta", () => {
         [],
       ]);
       expect(receipts[1].skipped.nodes).toEqual(["TASK-1"]);
-      expect(await otherStorage.readEvents()).toHaveLength(1);
+      expect(await otherGraph.readEvents()).toHaveLength(1);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   });
 
   it("rejects conflicting IDs and invalid graphs without changing files", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       await mergeDelta(
-        storage,
+        graph,
         block("ariadne-delta", { nodes: [node("TASK-1")], edges: [] }),
       );
       const graphBefore = await readFile(join(directory, "GRAPH.jsonl"), "utf8");
@@ -118,7 +117,7 @@ describe("mergeDelta", () => {
 
       await expect(
         mergeDelta(
-          storage,
+          graph,
           block("json ariadne-delta", {
             nodes: [{ ...node("TASK-1"), statement: "conflict" }],
             edges: [],
@@ -127,7 +126,7 @@ describe("mergeDelta", () => {
       ).rejects.toThrow(/conflicting node ID/i);
       await expect(
         mergeDelta(
-          storage,
+          graph,
           block("json ariadne-delta", {
             nodes: [node("TASK-2")],
             edges: [edge("TASK-1", "TASK-2"), edge("TASK-2", "TASK-1")],
@@ -147,14 +146,14 @@ describe("mergeDelta", () => {
   });
 
   it("rejects malformed or non-strict delta blocks before writing", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
-      await expect(mergeDelta(storage, "```json ariadne-delta\n{broken\n```")).rejects.toThrow(
+      await expect(mergeDelta(graph, "```json ariadne-delta\n{broken\n```")).rejects.toThrow(
         /invalid JSON/i,
       );
       await expect(
         mergeDelta(
-          storage,
+          graph,
           block("json ariadne-delta", {
             nodes: [],
             edges: [],
@@ -162,20 +161,20 @@ describe("mergeDelta", () => {
           }),
         ),
       ).rejects.toThrow(/delta/i);
-      await expect(mergeDelta(storage, "```json\n{}\n```")).rejects.toThrow(
+      await expect(mergeDelta(graph, "```json\n{}\n```")).rejects.toThrow(
         /ariadne-delta/i,
       );
-      expect(await storage.readEvents()).toEqual([]);
+      expect(await graph.readEvents()).toEqual([]);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   });
 
   it("applies schema-validated status and invalidation mutations idempotently", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       await mergeDelta(
-        storage,
+        graph,
         block("ariadne-delta", { nodes: [node("TASK-1")], edges: [] }),
       );
       const response = block("ariadne-delta", {
@@ -191,15 +190,15 @@ describe("mergeDelta", () => {
         ],
       });
 
-      await expect(mergeDelta(storage, response)).resolves.toMatchObject({
+      await expect(mergeDelta(graph, response)).resolves.toMatchObject({
         applied: { nodes: ["TASK-1"] },
       });
-      const before = await storage.readEvents();
-      await expect(mergeDelta(storage, response)).resolves.toMatchObject({
+      const before = await graph.readEvents();
+      await expect(mergeDelta(graph, response)).resolves.toMatchObject({
         skipped: { nodes: ["TASK-1"] },
       });
-      expect(await storage.readEvents()).toEqual(before);
-      expect((await storage.materialize()).nodes[0]).toMatchObject({
+      expect(await graph.readEvents()).toEqual(before);
+      expect((await graph.materialize()).nodes[0]).toMatchObject({
         id: "TASK-1",
         status: "INVALIDATED",
         invalidation: { evidence_id: "EVD-1" },
@@ -210,20 +209,20 @@ describe("mergeDelta", () => {
   });
 
   it("rejects a stale status precondition without changing the graph", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       await mergeDelta(
-        storage,
+        graph,
         block("ariadne-delta", {
           nodes: [{ ...node("TASK-1"), status: "READY" }],
           edges: [],
         }),
       );
-      const before = await storage.readEvents();
+      const before = await graph.readEvents();
 
       await expect(
         mergeDelta(
-          storage,
+          graph,
           block("ariadne-delta", {
             nodes: [],
             edges: [],
@@ -237,7 +236,7 @@ describe("mergeDelta", () => {
           }),
         ),
       ).rejects.toThrow(/mutation conflict|expected status/i);
-      expect(await storage.readEvents()).toEqual(before);
+      expect(await graph.readEvents()).toEqual(before);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
@@ -259,10 +258,10 @@ describe("mergeDelta", () => {
   });
 
   it("rejects DEC status transitions without authorization", async () => {
-    const { directory, storage } = await workspace();
+    const { directory, graph } = await workspace();
     try {
       await mergeDelta(
-        storage,
+        graph,
         block("ariadne-delta", {
           nodes: [
             {
@@ -279,7 +278,7 @@ describe("mergeDelta", () => {
 
       await expect(
         mergeDelta(
-          storage,
+          graph,
           block("ariadne-delta", {
             nodes: [],
             edges: [],

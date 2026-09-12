@@ -21,7 +21,7 @@ import { generateHandoff } from "../../src/adapters/handoff/generator.js";
 import { AriadneHarnessController } from "../../src/harness/controller.js";
 import { NodeSchema } from "../../src/core/schemas/nodes.js";
 import { propagateInvalidation } from "../../src/graph/invalidation.js";
-import type { MaterializedGraph } from "../../src/graph/storage.js";
+import type { MaterializedGraph } from "../../src/graph/domain.js";
 import { runInit } from "../../src/cli/commands/init.js";
 import { migrateStandaloneToGsd } from "../../src/adapters/gsd/migrate.js";
 

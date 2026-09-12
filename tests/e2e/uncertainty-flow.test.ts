@@ -9,7 +9,7 @@ import {
 } from "../../src/adapters/ariadne/preflight.js";
 import { generateGrillSubstrate } from "../../src/adapters/handoff/generator.js";
 import { substrateCardsAsNodes } from "../../src/adapters/ariadne/preflight.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 
 const newRoot = async (): Promise<string> => await mkdtemp(join(tmpdir(), "ariadne-e2e-uncertainty-"));
 
@@ -35,11 +35,13 @@ describe("end-to-end uncertainty workflow", () => {
 
     // Persist the substrate cards, then the grill handoff can only summarize
     // what already exists: preflight strictly precedes grilling.
-    const storage = new GraphStorage(root);
-    for (const node of substrateCardsAsNodes(substrate.cards)) {
-      await storage.appendNode(node);
-    }
-    const graph = await storage.materialize();
+    const engine = EpistemicGraph.open(root);
+    await engine.batch((batch) => {
+      batch.appendEvents(
+        substrateCardsAsNodes(substrate.cards).map((node) => ({ kind: "node" as const, node })),
+      );
+    });
+    const graph = await engine.materialize();
     const grill = await generateGrillSubstrate(graph, { rootDirectory: root });
     expect(grill.content).toContain("pre-decision epistemic substrate");
     expect(graph.nodes.some((node) => node.type === "FRAME")).toBe(true);
@@ -65,8 +67,8 @@ describe("end-to-end uncertainty workflow", () => {
     expect(isRoutineKnownAnswer(routine)).toBe(true);
     expect(detectUncertaintySignals(routine)).toEqual([]);
 
-    const storage = new GraphStorage(root);
-    const graph = await storage.materialize();
+    const engine = EpistemicGraph.open(root);
+    const graph = await engine.materialize();
     // No preflight artifacts were created for the routine request.
     expect(graph.nodes.length).toBe(0);
     const grill = await generateGrillSubstrate(graph, { rootDirectory: root });
@@ -78,11 +80,13 @@ describe("end-to-end uncertainty workflow", () => {
     // Align storage root with the generator's default artifact directory.
     const root = join(tmp, ".ariadne");
     const substrate = buildSubstrate(EXPLICIT_BRANCHES[0][0]);
-    const storage = new GraphStorage(root);
-    for (const node of substrateCardsAsNodes(substrate.cards)) {
-      await storage.appendNode(node);
-    }
-    const graph = await storage.materialize();
+    const engine = EpistemicGraph.open(root);
+    await engine.batch((batch) => {
+      batch.appendEvents(
+        substrateCardsAsNodes(substrate.cards).map((node) => ({ kind: "node" as const, node })),
+      );
+    });
+    const graph = await engine.materialize();
     const grill = await generateGrillSubstrate(graph, { rootDirectory: tmp });
 
     // Every inline link targets an existing persisted document.

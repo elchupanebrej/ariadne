@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { NodeSchema, type Node } from "../../src/core/schemas/nodes.js";
-import type { MaterializedGraph } from "../../src/graph/storage.js";
+import type { MaterializedGraph } from "../../src/graph/domain.js";
 import { generateGrillSubstrate, generateHandoff } from "../../src/adapters/handoff/generator.js";
 
 const node = (

@@ -13,7 +13,7 @@ import {
   appendToolingFailure,
   toolingFailureNode,
 } from "../../src/adapters/ariadne/tooling.js";
-import { GraphStorage } from "../../src/graph/storage.js";
+import { EpistemicGraph } from "../../src/graph/epistemic-graph.js";
 import { EdgeSchema, canonicalEdgeRelation } from "../../src/core/schemas/edges.js";
 
 const newRoot = async (): Promise<string> =>
@@ -102,8 +102,7 @@ describe("grill substrate card links and tooling consistency", () => {
     expect(node.statement).toContain("semantic-gate");
     expect(node.tooling_failure).toMatchObject({ component: "semantic-gate" });
 
-    const storage = new GraphStorage(root);
-    const graph = await storage.materialize();
+    const graph = await EpistemicGraph.open(root).materialize();
     expect(graph.nodes.some((candidate) => candidate.id === node.id)).toBe(true);
 
     const deterministic = toolingFailureNode({
